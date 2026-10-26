@@ -45,22 +45,26 @@ jobs:
           if-no-files-found: error
 
       - name: Upload release assets
-        if: hashFiles('.github/workflows/release-upload.flag') != ''
+        if: ${{ hashFiles('.github/workflows/release-upload.flag') != '' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = (Get-Content .github/workflows/release-upload.flag -Raw).Trim()
           gh release view $tag
-          gh release upload $tag `
-            dotnet/artifacts/Roptimer-Windows-x64.zip `
-            dotnet/artifacts/Roptimer-DotNet-Source.zip `
-            dotnet/artifacts/SHA256SUMS.txt `
-            dotnet/artifacts/publish/Roptimer.exe `
-            dotnet/artifacts/publish/RoptimerBoost.exe `
-            dotnet/artifacts/publish/RoptimerBoost.bat `
-            dotnet/artifacts/publish/Run Roptimer.bat `
-            dotnet/artifacts/publish/Install-DotNet8-DesktopRuntime.bat `
-            dotnet/artifacts/publish/Roptimer Boost Commands.txt `
-            dotnet/artifacts/publish/feature-status.json `
-            --clobber
+          $files = @(
+            'dotnet/artifacts/Roptimer-Windows-x64.zip',
+            'dotnet/artifacts/Roptimer-DotNet-Source.zip',
+            'dotnet/artifacts/SHA256SUMS.txt',
+            'dotnet/artifacts/publish/Roptimer.exe',
+            'dotnet/artifacts/publish/RoptimerBoost.exe',
+            'dotnet/artifacts/publish/RoptimerBoost.bat',
+            'dotnet/artifacts/publish/Run Roptimer.bat',
+            'dotnet/artifacts/publish/Install-DotNet8-DesktopRuntime.bat',
+            'dotnet/artifacts/publish/Roptimer Boost Commands.txt',
+            'dotnet/artifacts/publish/feature-status.json'
+          )
+          foreach ($file in $files) {
+            if (-not (Test-Path $file)) { throw "Missing release asset: $file" }
+          }
+          gh release upload $tag $files --clobber
