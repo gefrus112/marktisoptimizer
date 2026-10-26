@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.mypy_cache/
+.pyflakes_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# PyInstaller / packaging
+build/
+dist/
+*.spec
+*.manifest
+
+# Local app state and backups (should never be committed)
+state.json
+ClientAppSettings.json.bak-*
+roblox-optimizer-log.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

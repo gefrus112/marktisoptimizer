@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Offline web companion for the Roblox FPS &amp; Performance Optimizer. Generate safe, reversible performance-only ClientAppSettings.json profiles." />
+  <title>Roblox FPS &amp; Performance Optimizer — Web Companion</title>
+  <style>
+    :root {
+      --bg: #111117;
+      --sidebar: #0d0d12;
+      --panel: #1e1e24;
+      --card: #24242e;
+      --card-2: #2b2b38;
+      --field: #15151d;
+      --border: #383849;
+      --text: #f4f5fb;
+      --muted: #9ba1b8;
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+      --success: #43e6a0;
+      --warning: #ffbf5e;
+      --danger: #ff6482;
+      --radius: 18px;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .35);
+      font-family: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body { min-height: 100vh; }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 232px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #101017 0%, #0a0a0f 100%);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 0 8px; }
+    .brand-mark {
+      width: 46px; height: 46px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      font-size: 20px; font-weight: 900; letter-spacing: -.04em;
+      box-shadow: 0 8px 26px rgba(139, 92, 246, .35);
+    }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .02em; }
+    .brand span { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .nav-label { font-size: 10px; color: #666c82; letter-spacing: .16em; font-weight: 800; padding: 0 12px; margin: 10px 0 6px; }
+    .nav-btn {
+      appearance: none; border: 0; background: transparent; color: var(--muted);
+      text-align: left; padding: 12px 14px; border-radius: 12px;
+      font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 10px;
+      transition: .18s ease;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,.04); color: var(--text); }
+    .nav-btn.active { background: linear-gradient(90deg, rgba(139,92,246,.24), rgba(34,211,238,.08)); color: var(--text); box-shadow: inset 3px 0 0 var(--accent); }
+    .nav-icon { width: 20px; text-align: center; color: var(--accent-2); }
+    .safe-badge {
+      margin-top: auto; border: 1px solid rgba(67,230,160,.25);
+      background: rgba(67,230,160,.06); border-radius: 14px; padding: 14px;
+    }
+    .safe-badge strong { color: var(--success); font-size: 11px; letter-spacing: .12em; }
+    .safe-badge p { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      height: 76px; border-bottom: 1px solid var(--border);
+      background: rgba(24,24,32,.92); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 30px; position: sticky; top: 0; z-index: 10;
+    }
+    .topbar h1 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .topbar p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill { border: 1px solid var(--border); background: var(--field); color: var(--muted); border-radius: 999px; padding: 7px 11px; font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+    .pill.live { color: var(--success); border-color: rgba(67,230,160,.3); }
+
+    .content { padding: 30px; max-width: 1240px; width: 100%; margin: 0 auto; }
+    .page { display: none; animation: fade .22s ease; }
+    .page.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .page-head { margin-bottom: 22px; }
+    .page-head h2 { margin: 0 0 6px; font-size: 28px; letter-spacing: -.035em; }
+    .page-head p { margin: 0; color: var(--muted); font-size: 13px; max-width: 760px; line-height: 1.6; }
+
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), #202029);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 6px; font-size: 15px; }
+    .card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .eyebrow { color: var(--accent-2); font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .stat { font-size: 28px; font-weight: 900; color: var(--accent-2); margin-top: 8px; letter-spacing: -.04em; }
+    .hero {
+      position: relative; overflow: hidden; padding: 30px;
+      background: radial-gradient(circle at 85% 20%, rgba(139,92,246,.35), transparent 38%),
+                  radial-gradient(circle at 10% 90%, rgba(34,211,238,.16), transparent 40%),
+                  linear-gradient(135deg, #242432, #1b1b25);
+    }
+    .hero h2 { margin: 10px 0 10px; font-size: clamp(26px, 4vw, 42px); letter-spacing: -.05em; max-width: 760px; }
+    .hero p { color: #c7cadc; max-width: 720px; line-height: 1.7; font-size: 14px; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+    .btn {
+      appearance: none; border: 1px solid var(--border); border-radius: 12px;
+      background: var(--card-2); color: var(--text); padding: 11px 15px;
+      font-weight: 800; font-size: 12px; transition: .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), #6d5cf6); border-color: transparent; color: white; box-shadow: 0 10px 30px rgba(139,92,246,.3); }
+    .btn.cyan { background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(139,92,246,.12)); border-color: rgba(34,211,238,.35); color: var(--accent-2); }
+    .btn.danger { background: rgba(255,100,130,.1); border-color: rgba(255,100,130,.3); color: #ffafc0; }
+    .btn.small { padding: 8px 11px; font-size: 11px; border-radius: 10px; }
+
+    .field { margin: 0 0 16px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+    .field-label label { font-size: 12px; font-weight: 800; }
+    .field-label span { color: var(--muted); font-size: 11px; }
+    input[type="number"], select {
+      width: 100%; background: var(--field); color: var(--text);
+      border: 1px solid var(--border); border-radius: 11px; padding: 11px 12px; outline: none;
+    }
+    input[type="number"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.18); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .fps-value { font-size: 36px; font-weight: 900; color: var(--accent-2); letter-spacing: -.05em; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .chip { border: 1px solid var(--border); background: var(--field); color: var(--muted); border-radius: 999px; padding: 7px 11px; font-size: 11px; font-weight: 800; }
+    .chip:hover, .chip.active { color: white; border-color: var(--accent); background: rgba(139,92,246,.22); }
+    .note { border-left: 3px solid var(--warning); background: rgba(255,191,94,.07); color: #ffd89c; padding: 11px 13px; border-radius: 0 10px 10px 0; font-size: 12px; line-height: 1.55; margin-top: 12px; white-space: pre-line; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.055); }
+    .toggle-row:last-child { border-bottom: 0; }
+    .toggle-copy strong { display: block; font-size: 13px; }
+    .toggle-copy small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.45; }
+    .switch { position: relative; width: 48px; height: 27px; flex: 0 0 auto; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #454557; border-radius: 999px; transition: .2s; }
+    .slider::before { content: ""; position: absolute; width: 21px; height: 21px; left: 3px; top: 3px; background: #d8daea; border-radius: 50%; transition: .2s; }
+    .switch input:checked + .slider { background: var(--accent); }
+    .switch input:checked + .slider::before { transform: translateX(21px); background: white; }
+    .switch input:focus-visible + .slider { outline: 3px solid rgba(34,211,238,.4); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+    pre {
+      margin: 0; background: #0e0e15; border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px; overflow: auto; min-height: 320px; max-height: 520px;
+      color: #dfe2f2; font: 12px/1.65 "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .json-key { color: var(--accent-2); }
+    .json-value { color: var(--success); }
+    .json-legacy { color: var(--warning); }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .toolbar .spacer { flex: 1; }
+    .flag-count { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .steps { counter-reset: step; display: grid; gap: 12px; }
+    .step { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; }
+    .step-num { counter-increment: step; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgba(139,92,246,.2); color: var(--accent-2); font-weight: 900; }
+    .step-num::before { content: counter(step); }
+    .step strong { display: block; font-size: 13px; }
+    .step p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    code { background: #0e0e15; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; color: var(--accent-2); font-size: 11px; }
+    .toast {
+      position: fixed; right: 24px; bottom: 24px; z-index: 50;
+      background: #171722; border: 1px solid var(--border); border-left: 4px solid var(--success);
+      color: var(--text); padding: 13px 16px; border-radius: 12px; box-shadow: var(--shadow);
+      font-size: 12px; font-weight: 700; transform: translateY(20px); opacity: 0; pointer-events: none; transition: .22s ease;
+    }
+    .toast.show { transform: none; opacity: 1; }
+    footer { color: #666c82; font-size: 11px; text-align: center; padding: 0 30px 26px; }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { flex-direction: row; overflow-x: auto; align-items: center; padding: 12px; }
+      .brand { margin: 0 12px 0 0; }
+      .brand span, .nav-label, .safe-badge { display: none; }
+      .nav-btn { white-space: nowrap; padding: 9px 12px; }
+      .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .topbar { padding: 0 18px; }
+      .topbar p, .pills .pill:not(.live) { display: none; }
+      .content { padding: 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .grid-4, .grid-3 { grid-template-columns: 1fr; }
+      .topbar h1 { font-size: 15px; }
+      .hero { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div><strong>RFO Web</strong><span>Performance companion</span></div>
+      </div>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">◆</span> Dashboard</button>
+      <button class="nav-btn" data-page="optimizer"><span class="nav-icon">⚡</span> Optimizer</button>
+      <button class="nav-btn" data-page="json"><span class="nav-icon">{ }</span> JSON Profile</button>
+      <button class="nav-btn" data-page="guide"><span class="nav-icon">?</span> Safe Guide</button>
+      <div class="safe-badge">
+        <strong>● SAFE MODE</strong>
+        <p>Generates local settings JSON only. No injection, no memory edits, no exploits.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Roblox FPS &amp; Performance Optimizer</h1>
+          <p>Safe, reversible rendering settings for Windows Roblox clients.</p>
+        </div>
+        <div class="pills">
+          <span class="pill live">OFFLINE WEB COMPANION</span>
+          <span class="pill">ALLOWLIST AWARE</span>
+          <span class="pill">NO HACKS</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <section class="page active" id="page-dashboard">
+          <div class="card hero">
+            <div class="eyebrow">Performance, not cheats</div>
+            <h2>Build a cleaner Roblox client profile in your browser.</h2>
+            <p>
+              This offline companion generates a performance-only <code>ClientAppSettings.json</code>.
+              The Python desktop app detects your Windows Roblox version folders, backs up existing files,
+              writes the profile to one or every version, and can restore it later.
+            </p>
+            <div class="hero-actions">
+              <button class="btn primary" data-go="optimizer">Open Optimizer</button>
+              <a class="btn cyan" href="../roblox_fps_optimizer.py" download>Download Python app</a>
+              <button class="btn" data-go="guide">Read safety guide</button>
+            </div>
+          </div>
+
+          <div class="grid grid-4" style="margin-top:16px">
+            <div class="card"><p>Frame target</p><div class="stat">60–9999</div></div>
+            <div class="card"><p>Client versions</p><div class="stat">Auto</div></div>
+            <div class="card"><p>Writes used</p><div class="stat">JSON only</div></div>
+            <div class="card"><p>Restore</p><div class="stat">1 click</div></div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:16px">
+            <div class="card">
+              <div class="eyebrow">What the desktop app does</div>
+              <h3 style="margin-top:10px">Finds any Windows version folder</h3>
+              <p>
+                It scans <code>%LOCALAPPDATA%\Roblox\Versions\version-*</code>, common Program Files
+                installs, the registered client path, optional running processes, and a custom folder.
+                It can also write the persistent shared Roblox <code>ClientSettings</code> profile.
+              </p>
+            </div>
+            <div class="card">
+              <div class="eyebrow">Important 2026 note</div>
+              <h3 style="margin-top:10px">The FPS flag is legacy</h3>
+              <p>
+                Roblox’s local FastFlag allowlist currently omits
+                <code>DFIntTaskSchedulerTargetFps</code>. The app can still write it for older builds,
+                but current clients normally ignore it. Use in-experience
+                <strong>Settings → Maximum Framerate</strong> (up to 240 FPS) for the supported cap.
+              </p>
+              <div class="note">Rendering options below use flags from Roblox’s published allowlist whenever possible.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Optimizer -->
+        <section class="page" id="page-optimizer">
+          <div class="page-head">
+            <h2>Optimizer</h2>
+            <p>Choose your target and rendering trade-offs. The JSON preview updates instantly. Use the desktop app to write it to Roblox safely.</p>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="eyebrow">Frame rate</div>
+              <div class="fps-value" id="fpsDisplay" style="margin-top:12px">144 FPS</div>
+              <div class="field" style="margin-top:18px">
+                <div class="field-label"><label for="fpsRange">FPS target slider</label><span>60–9999</span></div>
+                <input id="fpsRange" type="range" min="60" max="9999" value="144" />
+              </div>
+              <div class="field">
+                <div class="field-label"><label for="fpsNumber">Exact value</label><span>9999 = uncapped ceiling</span></div>
+                <input id="fpsNumber" type="number" min="60" max="9999" value="144" />
+              </div>
+              <div class="chips" id="fpsChips">
+                <button class="chip" data-fps="60">60</button>
+                <button class="chip" data-fps="120">120</button>
+                <button class="chip active" data-fps="144">144</button>
+                <button class="chip" data-fps="165">165</button>
+                <button class="chip" data-fps="240">240</button>
+                <button class="chip" data-fps="9999">MAX</button>
+              </div>
+              <div class="note" id="fpsNote">Tip: also set Roblox Settings → Maximum Framerate to 144 FPS when available.</div>
+              <div class="toggle-row" style="margin-top:14px">
+                <div class="toggle-copy"><strong>Write legacy DFIntTaskSchedulerTargetFps</strong><small>For older clients. Current allowlisted clients may ignore this key.</small></div>
+                <label class="switch"><input type="checkbox" id="legacyFps" checked /><span class="slider"></span></label>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="eyebrow">Graphics tweaks</div>
+              <div class="toggle-row" style="margin-top:8px">
+                <div class="toggle-copy"><strong>Optimize Rendering Paths</strong><small>Allowlisted geometry LOD and voxel-lighting flags.</small></div>
+                <label class="switch"><input type="checkbox" id="renderPaths" checked /><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-copy"><strong>Lower Hidden Textures</strong><small>Limits texture resolution to reduce GPU memory pressure.</small></div>
+                <label class="switch"><input type="checkbox" id="hiddenTextures" checked /><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-copy"><strong>Reduce Grass Motion</strong><small>Uses the allowlisted reduced-motion grass factor.</small></div>
+                <label class="switch"><input type="checkbox" id="grassMotion" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="field" style="margin-top:16px">
+                <div class="field-label"><label for="preset">Preset</label><span>Choosing a preset fills the options below</span></div>
+                <select id="preset">
+                  <option value="Performance">Performance</option>
+                  <option value="Balanced">Balanced</option>
+                  <option value="Visual">Visual</option>
+                  <option value="Custom">Custom</option>
+                </select>
+              </div>
+              <div class="form-grid">
+                <div class="field"><div class="field-label"><label for="renderer">Renderer</label></div><select id="renderer"><option>Automatic (recommended)</option><option>Direct3D 11 (stable)</option><option>Vulkan (modern GPU)</option><option>OpenGL (legacy)</option></select></div>
+                <div class="field"><div class="field-label"><label for="quality">Graphics quality</label></div><select id="quality"><option>Automatic</option><option>Ultra low</option><option>Low</option><option>Medium</option><option>High</option><option>Ultra</option></select></div>
+                <div class="field"><div class="field-label"><label for="texture">Texture quality</label></div><select id="texture"><option>Automatic</option><option>Low (best performance)</option><option>Medium</option><option>High</option></select></div>
+                <div class="field"><div class="field-label"><label for="msaa">Anti-aliasing</label></div><select id="msaa"><option>Default</option><option>1x / off</option><option>2x</option><option>4x</option><option>8x</option></select></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- JSON -->
+        <section class="page" id="page-json">
+          <div class="page-head">
+            <h2>JSON Profile</h2>
+            <p>This is the exact managed key set for <code>ClientSettings/ClientAppSettings.json</code>. The desktop app merges these keys while preserving unrelated ones.</p>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <button class="btn primary small" id="copyJson">Copy JSON</button>
+              <button class="btn cyan small" id="downloadJson">Download JSON</button>
+              <button class="btn small" id="goDesktop">Open desktop app instructions</button>
+              <span class="spacer"></span>
+              <span class="flag-count" id="flagCount">0 managed flags</span>
+            </div>
+            <pre id="jsonPreview" aria-label="Generated ClientAppSettings JSON"></pre>
+            <div class="note" id="jsonNotes"></div>
+          </div>
+        </section>
+
+        <!-- Guide -->
+        <section class="page" id="page-guide">
+          <div class="page-head">
+            <h2>Safe Guide</h2>
+            <p>Use official Roblox settings first. This companion generates configuration only — it never injects code into Roblox.</p>
+          </div>
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="eyebrow">Recommended workflow</div>
+              <div class="steps" style="margin-top:18px">
+                <div class="step"><div class="step-num"></div><div><strong>Generate your profile</strong><p>Use the Optimizer tab, then copy or download the JSON.</p></div></div>
+                <div class="step"><div class="step-num"></div><div><strong>Run the Python desktop app on Windows</strong><p>It finds every installed Roblox version and can write the profile to all of them with backups.</p></div></div>
+                <div class="step"><div class="step-num"></div><div><strong>Set the supported FPS cap in Roblox</strong><p>Open the in-experience menu → Settings → Maximum Framerate. Choose up to 240 FPS if available.</p></div></div>
+                <div class="step"><div class="step-num"></div><div><strong>Restart Roblox</strong><p>ClientAppSettings.json is read when the client starts, not while a game is already running.</p></div></div>
+                <div class="step"><div class="step-num"></div><div><strong>Restore if needed</strong><p>Use the desktop app’s Restore button. It removes only the flags it manages and keeps backups.</p></div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="eyebrow">Manual placement</div>
+              <h3 style="margin-top:10px">Where the JSON goes</h3>
+              <p style="margin-top:8px"><code>%LOCALAPPDATA%\Roblox\Versions\version-*\ClientSettings\ClientAppSettings.json</code></p>
+              <p style="margin-top:12px">Some client builds also read a persistent shared profile at:</p>
+              <p style="margin-top:8px"><code>%LOCALAPPDATA%\Roblox\ClientSettings\ClientAppSettings.json</code></p>
+              <div class="note" style="margin-top:16px">Roblox updates often create a new <code>version-*</code> folder. The desktop app’s auto-sync handles that; manual users must copy the file again after an update.</div>
+              <h3 style="margin-top:22px">Official references</h3>
+              <p style="margin-top:8px">
+                • <a href="https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality" target="_blank" rel="noreferrer">Roblox Graphics Quality help</a><br />
+                • <a href="https://en.help.roblox.com/hc/en-us/articles/203314150-How-to-Reduce-Lag-and-Speed-Up-Play" target="_blank" rel="noreferrer">Roblox lag reduction help</a><br />
+                • <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noreferrer">Roblox FastFlag allowlist announcement</a>
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer>RFO Web Companion • Static, offline, dependency-free • Performance settings only.</footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    "use strict";
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      fpsRange: $("fpsRange"), fpsNumber: $("fpsNumber"), fpsDisplay: $("fpsDisplay"),
+      fpsNote: $("fpsNote"), fpsChips: $("fpsChips"), legacyFps: $("legacyFps"),
+      renderPaths: $("renderPaths"), hiddenTextures: $("hiddenTextures"), grassMotion: $("grassMotion"),
+      preset: $("preset"), renderer: $("renderer"), quality: $("quality"),
+      texture: $("texture"), msaa: $("msaa"),
+      jsonPreview: $("jsonPreview"), jsonNotes: $("jsonNotes"), flagCount: $("flagCount"),
+      toast: $("toast")
+    };
+
+    const GEOMETRY = {
+      Performance: ["100", "75", "100", "150"],
+      Balanced: ["2000", "1000", "1500", "2500"],
+      Visual: ["10000", "10000", "10000", "10000"],
+      Custom: ["1000", "600", "800", "1200"]
+    };
+    const QUALITY = { "Automatic": null, "Ultra low": "1", "Low": "2", "Medium": "3", "High": "6", "Ultra": "10" };
+    const TEXTURE = { "Automatic": null, "Low (best performance)": "1", "Medium": "2", "High": "3" };
+    const MSAA = { "Default": null, "1x / off": "1", "2x": "2", "4x": "4", "8x": "8" };
+    const RENDERERS = {
+      "Automatic (recommended)": null,
+      "Direct3D 11 (stable)": "FFlagDebugGraphicsPreferD3D11",
+      "Vulkan (modern GPU)": "FFlagDebugGraphicsPreferVulkan",
+      "OpenGL (legacy)": "FFlagDebugGraphicsPreferOpenGL"
+    };
+    const PRESETS = {
+      Performance: { fps: 144, renderPaths: true, hiddenTextures: true, grassMotion: true, renderer: "Automatic (recommended)", quality: "Ultra low", texture: "Low (best performance)", msaa: "1x / off" },
+      Balanced: { fps: 144, renderPaths: true, hiddenTextures: true, grassMotion: true, renderer: "Automatic (recommended)", quality: "Low", texture: "Medium", msaa: "2x" },
+      Visual: { fps: 240, renderPaths: false, hiddenTextures: false, grassMotion: false, renderer: "Automatic (recommended)", quality: "High", texture: "High", msaa: "4x" }
+    };
+
+    function clampFps(value) {
+      const n = Number.parseInt(String(value || "144"), 10);
+      return Math.max(60, Math.min(9999, Number.isFinite(n) ? n : 144));
+    }
+
+    function setFps(value, markCustom = true) {
+      const fps = clampFps(value);
+      els.fpsRange.value = String(fps);
+      els.fpsNumber.value = String(fps);
+      els.fpsDisplay.textContent = fps === 9999 ? "UNLIMITED*" : `${fps.toLocaleString()} FPS`;
+      if (fps === 9999) {
+        els.fpsNote.textContent = "* 9999 is an uncapped ceiling, not 9999 real FPS. Very high targets can cause heat, stutter or physics instability.";
+      } else if (fps > 240) {
+        els.fpsNote.textContent = "Roblox's supported Maximum Framerate setting currently tops out at 240 FPS. Values above that rely on legacy/unsupported behavior.";
+      } else {
+        els.fpsNote.textContent = `Tip: also set Roblox Settings → Maximum Framerate to ${fps} FPS when available.`;
+      }
+      [...els.fpsChips.querySelectorAll(".chip")].forEach((chip) => {
+        chip.classList.toggle("active", Number(chip.dataset.fps) === fps);
+      });
+      if (markCustom) setCustom();
+      renderJson();
+    }
+
+    function setCustom() {
+      if (els.preset.value !== "Custom") els.preset.value = "Custom";
+    }
+
+    function applyPreset(name) {
+      const p = PRESETS[name];
+      if (!p) return;
+      setFps(p.fps, false);
+      els.renderPaths.checked = p.renderPaths;
+      els.hiddenTextures.checked = p.hiddenTextures;
+      els.grassMotion.checked = p.grassMotion;
+      els.renderer.value = p.renderer;
+      els.quality.value = p.quality;
+      els.texture.value = p.texture;
+      els.msaa.value = p.msaa;
+      renderJson();
+    }
+
+    function buildFlags() {
+      const fps = clampFps(els.fpsNumber.value);
+      const preset = els.preset.value in GEOMETRY ? els.preset.value : "Custom";
+      const flags = {};
+      if (els.legacyFps.checked) flags["DFIntTaskSchedulerTargetFps"] = String(fps);
+
+      if (els.renderPaths.checked) {
+        const lod = GEOMETRY[preset];
+        flags["DFIntCSGLevelOfDetailSwitchingDistance"] = lod[0];
+        flags["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = lod[1];
+        flags["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = lod[2];
+        flags["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = lod[3];
+        flags["DFFlagDebugPauseVoxelizer"] = "True";
+        flags["FFlagHandleAltEnterFullscreenManually"] = "True";
+      }
+
+      const quality = QUALITY[els.quality.value];
+      if (quality) flags["DFIntDebugFRMQualityLevelOverride"] = quality;
+
+      let texture = TEXTURE[els.texture.value];
+      if (els.hiddenTextures.checked && !texture) texture = "1";
+      if (texture) {
+        flags["DFFlagTextureQualityOverrideEnabled"] = "True";
+        flags["DFIntTextureQualityOverride"] = texture;
+      }
+
+      const msaa = MSAA[els.msaa.value];
+      if (msaa) flags["FIntDebugForceMSAASamples"] = msaa;
+
+      const renderer = RENDERERS[els.renderer.value];
+      if (renderer) flags[renderer] = "True";
+
+      if (els.grassMotion.checked) flags["FIntGrassMovementReducedMotionFactor"] = "0";
+      return Object.fromEntries(Object.entries(flags).sort(([a], [b]) => a.localeCompare(b)));
+    }
+
+    function renderJson() {
+      const flags = buildFlags();
+      const text = JSON.stringify(flags, null, 2);
+      const lines = text.split("\n").map((line) => {
+        const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        if (escaped.includes("DFIntTaskSchedulerTargetFps")) return `<span class="json-legacy">${escaped}</span>`;
+        if (escaped.includes('":')) {
+          const cut = escaped.indexOf('":') + 1;
+          return `<span class="json-key">${escaped.slice(0, cut)}</span><span class="json-value">${escaped.slice(cut)}</span>`;
+        }
+        return escaped;
+      });
+      els.jsonPreview.innerHTML = lines.join("\n");
+      els.flagCount.textContent = `${Object.keys(flags).length} managed flags`;
+
+      const notes = [];
+      if (els.legacyFps.checked) notes.push("Legacy FPS flag may be ignored by current allowlisted clients. Use Roblox Settings → Maximum Framerate.");
+      if (clampFps(els.fpsNumber.value) > 240) notes.push("The supported Maximum Framerate setting tops out at 240 FPS. Higher values are ceilings, not guaranteed FPS.");
+      if (els.renderer.value === "Vulkan (modern GPU)") notes.push("Vulkan is experimental on some GPUs; switch to Automatic if Roblox crashes.");
+      els.jsonNotes.textContent = notes.length ? "• " + notes.join("\n• ") : "• No compatibility warnings for the current selection.";
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 1800);
+    }
+
+    function currentJson() {
+      return JSON.stringify(buildFlags(), null, 2) + "\n";
+    }
+
+    function showPage(name) {
+      document.querySelectorAll(".page").forEach((page) => page.classList.toggle("active", page.id === `page-${name}`));
+      document.querySelectorAll(".nav-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.page === name));
+      if (name === "json") renderJson();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+    document.querySelectorAll("[data-go]").forEach((btn) => btn.addEventListener("click", () => showPage(btn.dataset.go)));
+    $("goDesktop").addEventListener("click", () => showPage("guide"));
+
+    els.fpsRange.addEventListener("input", (e) => setFps(e.target.value));
+    els.fpsNumber.addEventListener("input", (e) => setFps(e.target.value));
+    els.fpsChips.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip");
+      if (chip) setFps(chip.dataset.fps);
+    });
+    els.preset.addEventListener("change", (e) => { if (PRESETS[e.target.value]) applyPreset(e.target.value); });
+    ["legacyFps", "renderPaths", "hiddenTextures", "grassMotion", "renderer", "quality", "texture", "msaa"].forEach((id) => {
+      els[id].addEventListener("change", () => { if (id !== "preset") { setCustom(); renderJson(); } });
+    });
+
+    $("copyJson").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(currentJson());
+        showToast("JSON copied to clipboard");
+      } catch (_) {
+        const area = document.createElement("textarea");
+        area.value = currentJson();
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        showToast("JSON copied to clipboard");
+      }
+    });
+
+    $("downloadJson").addEventListener("click", () => {
+      const blob = new Blob([currentJson()], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ClientAppSettings.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("ClientAppSettings.json downloaded");
+    });
+
+    applyPreset("Performance");
+    renderJson();
+  </script>
+</body>
+</html>
