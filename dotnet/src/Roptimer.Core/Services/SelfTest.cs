@@ -34,7 +34,7 @@ public static class SelfTest
         settings.Normalize();
 
         var flags = fastFlags.BuildFlags(settings);
-        Assert(flags[LegacyFpsFlag] == "144", "legacy FPS flag missing");
+        Assert(flags[FastFlagService.LegacyFpsFlag] == "144", "legacy FPS flag missing");
         Assert(flags["DFIntDebugFRMQualityLevelOverride"] == "21", "extended graphics tier 21 missing");
         Assert(flags["DFIntTextureQualityOverride"] == "0" || flags["DFIntTextureQualityOverride"] == "1", "texture tier missing");
         Assert(flags["FIntFRMMaxGrassDistance"] == "0", "building-lag grass distance missing");
@@ -48,7 +48,7 @@ public static class SelfTest
         Assert(applied.Backups.Count >= 1, "expected a timestamped backup");
         var merged = JsonNode.Parse(File.ReadAllText(existing, Encoding.UTF8)) as JsonObject;
         Assert(merged is not null && merged["UserCustomFlag"]?.ToString() == "keep me", "unrelated key was not preserved");
-        Assert(merged is not null && merged[LegacyFpsFlag]?.ToString() == "144", "managed flag was not written");
+        Assert(merged is not null && merged[FastFlagService.LegacyFpsFlag]?.ToString() == "144", "managed flag was not written");
 
         var restored = fastFlags.Restore();
         Assert(restored.ProfileCount == 3, "expected restore of three profiles");
