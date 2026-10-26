@@ -1,0 +1,60 @@
+{
+  "product": "Roptimer Hub",
+  "version": "3.2.0",
+  "allowlistVersion": 1,
+  "description": "Canonical list of Roblox local ClientAppSettings.json FastFlags that Roptimer may recognize, preserve, back up, and restore. Only these rendering, geometry, and UI keys are allowlisted for local management. The legacy FPS flag is tracked separately and is not part of this allowlist.",
+  "source": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569",
+  "safety": {
+    "localJsonOnly": true,
+    "injection": false,
+    "memoryReads": false,
+    "memoryWrites": false,
+    "telemetryDisable": false,
+    "antiCheatBypass": false,
+    "gameScriptExecution": false
+  },
+  "categories": [
+    {
+      "name": "Geometry",
+      "flags": [
+        "DFIntCSGLevelOfDetailSwitchingDistance",
+        "DFIntCSGLevelOfDetailSwitchingDistanceL12",
+        "DFIntCSGLevelOfDetailSwitchingDistanceL23",
+        "DFIntCSGLevelOfDetailSwitchingDistanceL34"
+      ]
+    },
+    {
+      "name": "Rendering",
+      "flags": [
+        "FFlagHandleAltEnterFullscreenManually",
+        "DFFlagTextureQualityOverrideEnabled",
+        "DFIntTextureQualityOverride",
+        "FIntDebugForceMSAASamples",
+        "DFFlagDisableDPIScale",
+        "FFlagDebugGraphicsPreferD3D11",
+        "FFlagDebugSkyGray",
+        "DFFlagDebugPauseVoxelizer",
+        "DFIntDebugFRMQualityLevelOverride",
+        "FIntFRMMaxGrassDistance",
+        "FIntFRMMinGrassDistance",
+        "FFlagDebugGraphicsPreferVulkan",
+        "FFlagDebugGraphicsPreferOpenGL"
+      ]
+    },
+    {
+      "name": "User Interface",
+      "flags": [
+        "FIntGrassMovementReducedMotionFactor"
+      ]
+    }
+  ],
+  "legacyNotInAllowlist": [
+    "DFIntTaskSchedulerTargetFps"
+  ],
+  "rejected": [
+    "Telemetry suppression flags",
+    "Crashpad or Backtrace disabling flags",
+    "Screenshot/report upload disabling flags",
+    "Fullbright, x-ray, building removal, or anti-cheat bypass flags"
+  ]
+}

@@ -14,14 +14,14 @@
                     <StackPanel HorizontalAlignment="Center">
                         <Image Source="pack://application:,,,/Assets/RoptimerShield.png" Width="150" Height="150" />
                         <TextBlock Text="ROPTIMER HUB" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
-                        <TextBlock Text="V3.0.0 • .NET 8 WPF" Style="{StaticResource MutedText}" HorizontalAlignment="Center" />
+                        <TextBlock Text="V3.2.0 • .NET 8 WPF" Style="{StaticResource MutedText}" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Text="WHAT THIS IS" Style="{StaticResource SectionText}" />
-                        <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="Roptimer Hub V3 is a safe Roblox performance bootstrapper built in C#/.NET 8. Its settings-window layout is inspired by Bubblestrap/Bloxstrap-style WPF navigation, but this is an original dependency-free implementation with a different shield icon and a strict local-settings-only feature set." />
-                        <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="It discovers Roblox version folders, writes allowlisted ClientAppSettings.json flags, creates backups, restores managed keys, quarantines old log/temp files, detects OS-level client metadata, and launches Roblox through roblox://." />
+                        <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="Roptimer Hub V3.2 is a safe Roblox performance bootstrapper built in C#/.NET 8. Its settings-window layout is inspired by Bubblestrap/Bloxstrap-style WPF navigation, but this is an original dependency-free implementation with a different shield icon and a strict local-settings-only feature set." />
+                        <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="It discovers Roblox version folders, writes only the 18 canonical allowlisted ClientAppSettings.json flags, creates backups, restores managed keys, quarantines old log/temp files, detects OS-level client metadata, and launches Roblox through roblox://." />
                         <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="It does not inject DLLs, modify memory, disable Roblox telemetry/Crashpad/Backtrace, add fullbright/x-ray, remove buildings, bypass anti-cheat, or automate gameplay." />
                         <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                             <Button Content="Open GitHub" Tag="https://github.com/gefrus112/robloxclinetbooster" Click="OpenLink_Click" />
@@ -34,7 +34,7 @@
             <Border Style="{StaticResource Card}" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock Text="WINDOWS COMMANDS" Style="{StaticResource SectionText}" />
-                    <TextBox IsReadOnly="True" AcceptsReturn="True" Height="120" Margin="0,10,0,0" FontFamily="Consolas" Text="RoptimerBoost.exe open&#x0a;RoptimerBoost.exe bootstrap --launch&#x0a;RoptimerBoost.exe preview --mode &quot;Reduce building lag&quot; --tier 21 --texture 0&#x0a;RoptimerBoost.exe restore&#x0a;RoptimerBoost.exe cache-clean --days 7 --force" />
+                    <TextBox IsReadOnly="True" AcceptsReturn="True" Height="120" Margin="0,10,0,0" FontFamily="Consolas" Text="RoptimerBoost.exe open&#x0a;RoptimerBoost.exe bootstrap --launch&#x0a;RoptimerBoost.exe preview --mode &quot;Reduce building lag&quot; --tier 21 --texture 0&#x0a;RoptimerBoost.exe restore&#x0a;RoptimerBoost.exe allowlist&#x0a;RoptimerBoost.exe cache-clean --days 7 --force" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}">

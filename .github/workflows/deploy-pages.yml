@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - arena/ebd36b53-robloxclinetbooster
+      - arena/48fc7138-robloxclinetbooster
     paths:
       - "web/**"
       - "index.html"
@@ -14,6 +14,7 @@ on:
       - "build_downloads.py"
       - "build_screenshots.py"
       - "feature-status.json"
+      - "fastflags-allowlist.json"
       - "docs/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:

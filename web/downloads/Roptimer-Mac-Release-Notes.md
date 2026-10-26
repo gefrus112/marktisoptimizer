@@ -10,6 +10,8 @@ This release adds macOS downloads, Sirius-style dark website tabs, CLI/how-it-wo
 - `Roptimer-Mac-Companion.zip.sha256` — checksum for the portable package.
 - `Roptimer-CLI-Docs.md` — Boost CLI reference.
 - `Roptimer-Mac-README.md` — macOS setup and troubleshooting.
+- `Roptimer-FastFlag-Allowlist.md` — canonical 18-flag allowlist guide.
+- `fastflags-allowlist.json` — machine-readable allowlist.
 
 ## Notes
 

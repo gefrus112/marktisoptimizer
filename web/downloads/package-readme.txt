@@ -11,8 +11,10 @@ WHAT IS INCLUDED
   roptimer_hud.py          Optional separate always-on-top HUD
   hud-settings.json        Default HUD preferences
   feature-status.json      Implemented / legacy / rejected feature catalog
+  fastflags-allowlist.json Canonical 18-flag Geometry / Rendering / UI allowlist
+  Roptimer-FastFlag-Allowlist.md  Human-readable allowlist guide
   assets/                  Shield app, HUD, and website icons
-  docs/                    CLI, how-it-works, macOS, Pages, and Script Hub docs
+  docs/                    CLI, how-it-works, macOS, Pages, allowlist, and Script Hub docs
   index.html               Root GitHub Pages fallback entry
   404.html / .nojekyll     Static Pages support files
   web/                     Primary GitHub Pages artifact with 100x FX
@@ -58,6 +60,7 @@ BOOST CLI COMMANDS
     RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
     RoptimerBoost.exe restore
     RoptimerBoost.exe features
+    RoptimerBoost.exe allowlist
     RoptimerBoost.exe cache-clean --days 7 --force
     RoptimerBoost.exe self-test
 
@@ -65,10 +68,14 @@ BOOST CLI COMMANDS
     ./Roptimer\ Boost.command --preview
     ./Roptimer\ Boost.command --apply --mode "Reduce building lag" --graphics-tier 21 --texture-tier 0
     ./Roptimer\ Boost.command --restore
+    ./Roptimer\ Boost.command --allowlist
+    python3 roblox_fps_optimizer.py --allowlist
     python3 roblox_fps_optimizer.py --self-test
 
 SAFETY
-  No DLL injection. No Roblox memory reads/writes. No full bright exploit.
+  Only the canonical 18 allowlisted Geometry, Rendering, and User Interface
+  FastFlags are recognized as managed local JSON keys. The legacy FPS flag is
+  separate. No DLL injection. No Roblox memory reads/writes. No full bright exploit.
   No building removal, no x-ray, no anti-cheat bypass, no gameplay automation.
   No Crashpad/Backtrace/telemetry/screenshot-report disabling. The app sends no
   analytics of its own. It writes reversible local ClientAppSettings.json files,

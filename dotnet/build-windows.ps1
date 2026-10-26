@@ -27,6 +27,8 @@ Write-Host "== Publishing Boost CLI ==" -ForegroundColor Cyan
 dotnet publish (Join-Path $root "src/Roptimer.Cli/Roptimer.Cli.csproj") -c $Configuration -r $Runtime --self-contained false --no-restore -o $publish
 
 Copy-Item (Join-Path $repo "feature-status.json") (Join-Path $publish "feature-status.json")
+Copy-Item (Join-Path $repo "fastflags-allowlist.json") (Join-Path $publish "fastflags-allowlist.json")
+Copy-Item (Join-Path $repo "docs/FASTFLAG_ALLOWLIST.md") (Join-Path $publish "Roptimer-FastFlag-Allowlist.md")
 Copy-Item (Join-Path $root "RoptimerBoost.bat") (Join-Path $publish "RoptimerBoost.bat")
 Copy-Item (Join-Path $root "Run Roptimer.bat") (Join-Path $publish "Run Roptimer.bat")
 Copy-Item (Join-Path $root "Install-DotNet8-DesktopRuntime.bat") (Join-Path $publish "Install-DotNet8-DesktopRuntime.bat")
@@ -52,6 +54,10 @@ $sourceFiles = @(
   "dotnet/README.md",
   "dotnet/src",
   "feature-status.json",
+  "fastflags-allowlist.json",
+  "docs/FASTFLAG_ALLOWLIST.md",
+  "build_downloads.py",
+  "build_website.py",
   ".github/workflows/build-windows.yml",
   "web/assets/lumina-hero.png",
   "web/assets/icons/roptimzier-shield.png",

@@ -4,10 +4,15 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - arena/dfe7eccf-robloxclinetbooster
+      - main
+      - arena/48fc7138-robloxclinetbooster
     paths:
       - "dotnet/**"
       - "feature-status.json"
+      - "fastflags-allowlist.json"
+      - "build_downloads.py"
+      - "build_website.py"
+      - "docs/**"
       - ".github/workflows/**"
 
 permissions:
@@ -62,7 +67,9 @@ jobs:
             'dotnet/artifacts/publish/Run Roptimer.bat',
             'dotnet/artifacts/publish/Install-DotNet8-DesktopRuntime.bat',
             'dotnet/artifacts/publish/Roptimer Boost Commands.txt',
-            'dotnet/artifacts/publish/feature-status.json'
+            'dotnet/artifacts/publish/feature-status.json',
+            'dotnet/artifacts/publish/fastflags-allowlist.json',
+            'dotnet/artifacts/publish/Roptimer-FastFlag-Allowlist.md'
           )
           foreach ($file in $files) {
             if (-not (Test-Path $file)) { throw "Missing release asset: $file" }

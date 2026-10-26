@@ -48,7 +48,7 @@ The real implementation behind the preview is plain HTML/CSS/JavaScript in `web/
 
 ## Screenshots
 
-The website includes seven SVG screenshots of:
+The website includes eight SVG screenshots of:
 
 - The new Sirius-style Download tab.
 - The CLI Docs / How it works tab.
@@ -57,6 +57,7 @@ The website includes seven SVG screenshots of:
 - The macOS companion window.
 - The V3.2 command palette.
 - The 100× animated starfield engine.
+- The canonical FastFlag allowlist page.
 
 The command palette also includes actions for opening the Script Hub, restarting the local preview, copying Boost commands, and jumping to safety docs. These are design previews generated for this repository. They are not screenshots of a Roblox game.
 

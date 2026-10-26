@@ -2,11 +2,18 @@ name: Build macOS companion
 
 on:
   push:
+    branches:
+      - main
+      - arena/48fc7138-robloxclinetbooster
     paths:
       - "roblox_fps_optimizer.py"
       - "roptimer_hud.py"
       - "feature-status.json"
+      - "fastflags-allowlist.json"
       - "requirements*.txt"
+      - "build_downloads.py"
+      - "build_website.py"
+      - "build_screenshots.py"
       - "mac/**"
       - "docs/**"
       - "web/**"
@@ -106,4 +113,6 @@ jobs:
             web/downloads/Roptimer-CLI-Docs.md \
             web/downloads/Roptimer-Mac-README.md \
             web/downloads/Roptimer-Script-Hub.md \
+            web/downloads/Roptimer-FastFlag-Allowlist.md \
+            web/downloads/fastflags-allowlist.json \
             --clobber

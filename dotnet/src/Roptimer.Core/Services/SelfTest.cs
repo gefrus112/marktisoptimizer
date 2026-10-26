@@ -20,6 +20,7 @@ public static class SelfTest
         var cache = new CacheCleaner(locator);
         var sessions = new SessionDetector(locator);
         var catalog = FeatureCatalog.Load();
+        var allowlist = FastFlagAllowlist.Load();
 
         Assert(locator.DiscoverVersions().Count == 2, "expected two fake Roblox versions");
         var settings = store.Load();
@@ -39,6 +40,10 @@ public static class SelfTest
         Assert(flags["DFIntTextureQualityOverride"] == "0" || flags["DFIntTextureQualityOverride"] == "1", "texture tier missing");
         Assert(flags["FIntFRMMaxGrassDistance"] == "0", "building-lag grass distance missing");
         Assert(flags.Keys.All(FastFlagService.ManagedFlags.Contains), "unmanaged flag produced");
+        Assert(allowlist.FlagCount == 18, "expected 18 canonical allowlist flags");
+        Assert(allowlist.CategoryCount == 3, "expected Geometry, Rendering, and User Interface allowlist categories");
+        Assert(allowlist.Flags.SetEquals(FastFlagService.AllowlistedManagedFlags), "allowlist does not match managed flags");
+        Assert(!allowlist.Contains(FastFlagService.LegacyFpsFlag), "legacy FPS flag must not be allowlisted");
 
         var existing = Path.Combine(versionA, "ClientSettings", "ClientAppSettings.json");
         Directory.CreateDirectory(Path.GetDirectoryName(existing)!);
@@ -74,7 +79,7 @@ public static class SelfTest
         Assert(session.DisplayUsername.Length > 0, "display username missing");
         Assert(session.Notification.Contains("no client injection", StringComparison.OrdinalIgnoreCase), "safe notification missing");
 
-        return $"ROPTIMER .NET SELF-TEST OK: 2 versions, {applied.Profiles.Count} profiles, {flags.Count} flags, tier 21 verified, safety boundaries verified.";
+        return $"ROPTIMER .NET SELF-TEST OK: 2 versions, {applied.Profiles.Count} profiles, {flags.Count} flags, tier 21 verified, allowlist {allowlist.FlagCount} verified, safety boundaries verified.";
     }
 
     private static void Assert(bool condition, string message)

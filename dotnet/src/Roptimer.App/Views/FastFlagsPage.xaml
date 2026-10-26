@@ -8,7 +8,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="4,0,8,24">
             <TextBlock Text="FastFlags" Style="{StaticResource TitleText}" />
-            <TextBlock Text="Only allowlisted local flags are managed. This page shows the exact JSON that will be written to ClientAppSettings.json." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <TextBlock Text="Only the 18 canonical allowlisted local flags are managed. This page shows the exact JSON that will be written to ClientAppSettings.json; see Allowlist for the full Geometry, Rendering, and User Interface catalog." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,12">
@@ -37,7 +37,7 @@
                 </Border>
             </Grid>
             <Border Style="{StaticResource Card}">
-                <TextBlock Style="{StaticResource MutedText}" Text="Feature audit: Unlocking FPS is legacy and may be ignored. Texture and cache alterations are implemented as texture tiers 0-3 plus conservative old log/temp quarantine. Disabling Crashpad, Backtrace, telemetry, or background screenshot uploads is rejected. Extended graphic tiers 0-21 are implemented through DFIntDebugFRMQualityLevelOverride." />
+                <TextBlock Style="{StaticResource MutedText}" Text="Feature audit: Unlocking FPS is legacy and may be ignored. Texture and cache alterations are implemented as texture tiers 0-3 plus conservative old log/temp quarantine. Disabling Crashpad, Backtrace, telemetry, or background screenshot uploads is rejected. Extended graphic tiers 0-21 are implemented through DFIntDebugFRMQualityLevelOverride. The canonical allowlist contains 18 flags in 3 categories and excludes the legacy FPS flag." />
             </Border>
         </StackPanel>
     </ScrollViewer>

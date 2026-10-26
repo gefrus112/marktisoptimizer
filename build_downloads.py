@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the downloadable Roptimer Hub V3.1 packages used by web/index.html.
+"""Build the downloadable Roptimer Hub V3.2 packages used by web/index.html.
 
 Outputs:
     index.html
@@ -10,6 +10,8 @@ Outputs:
     web/.nojekyll
     web/site.webmanifest
     web/downloads/Roptimer-Pages-Help.md
+    web/downloads/Roptimer-FastFlag-Allowlist.md
+    web/downloads/fastflags-allowlist.json
     web/downloads/Roptimer-DotNet-Source.zip
     web/downloads/Roptimzier-Windows.zip
     web/downloads/Roptimer-Mac.zip
@@ -50,7 +52,7 @@ APP_SOURCE = ROOT / "roblox_fps_optimizer.py"
 HUD_SOURCE = ROOT / "roptimer_hud.py"
 
 DEFAULT_HUD_SETTINGS = {
-    "app": "Roptimer HUD V3.1",
+    "app": "Roptimer HUD V3.2",
     "version": 3,
     "showFps": True,
     "showPing": True,
@@ -99,8 +101,10 @@ WHAT IS INCLUDED
   roptimer_hud.py          Optional separate always-on-top HUD
   hud-settings.json        Default HUD preferences
   feature-status.json      Implemented / legacy / rejected feature catalog
+  fastflags-allowlist.json Canonical 18-flag Geometry / Rendering / UI allowlist
+  Roptimer-FastFlag-Allowlist.md  Human-readable allowlist guide
   assets/                  Shield app, HUD, and website icons
-  docs/                    CLI, how-it-works, macOS, Pages, and Script Hub docs
+  docs/                    CLI, how-it-works, macOS, Pages, allowlist, and Script Hub docs
   index.html               Root GitHub Pages fallback entry
   404.html / .nojekyll     Static Pages support files
   web/                     Primary GitHub Pages artifact with 100x FX
@@ -146,6 +150,7 @@ BOOST CLI COMMANDS
     RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
     RoptimerBoost.exe restore
     RoptimerBoost.exe features
+    RoptimerBoost.exe allowlist
     RoptimerBoost.exe cache-clean --days 7 --force
     RoptimerBoost.exe self-test
 
@@ -153,10 +158,14 @@ BOOST CLI COMMANDS
     ./Roptimer\\ Boost.command --preview
     ./Roptimer\\ Boost.command --apply --mode "Reduce building lag" --graphics-tier 21 --texture-tier 0
     ./Roptimer\\ Boost.command --restore
+    ./Roptimer\\ Boost.command --allowlist
+    python3 roblox_fps_optimizer.py --allowlist
     python3 roblox_fps_optimizer.py --self-test
 
 SAFETY
-  No DLL injection. No Roblox memory reads/writes. No full bright exploit.
+  Only the canonical 18 allowlisted Geometry, Rendering, and User Interface
+  FastFlags are recognized as managed local JSON keys. The legacy FPS flag is
+  separate. No DLL injection. No Roblox memory reads/writes. No full bright exploit.
   No building removal, no x-ray, no anti-cheat bypass, no gameplay automation.
   No Crashpad/Backtrace/telemetry/screenshot-report disabling. The app sends no
   analytics of its own. It writes reversible local ClientAppSettings.json files,
@@ -250,6 +259,7 @@ def copy_dotnet_support_files() -> None:
         DOTNET / "LICENSE": DOWNLOADS / "Roptimer-DotNet-LICENSE.txt",
         DOTNET / "THIRD_PARTY_NOTICES.md": DOWNLOADS / "THIRD_PARTY_NOTICES.md",
         ROOT / "feature-status.json": DOWNLOADS / "feature-status.json",
+        ROOT / "fastflags-allowlist.json": DOWNLOADS / "fastflags-allowlist.json",
     }
     for source, destination in mappings.items():
         if source.is_file():
@@ -265,6 +275,7 @@ def copy_docs_to_downloads() -> None:
         DOCS / "MAC.md": DOWNLOADS / "Roptimer-Mac-README.md",
         DOCS / "MAC_RELEASE_NOTES.md": DOWNLOADS / "Roptimer-Mac-Release-Notes.md",
         DOCS / "PAGES.md": DOWNLOADS / "Roptimer-Pages-Help.md",
+        DOCS / "FASTFLAG_ALLOWLIST.md": DOWNLOADS / "Roptimer-FastFlag-Allowlist.md",
     }
     for source, destination in mappings.items():
         if source.is_file():
@@ -277,6 +288,18 @@ def sync_feature_catalog() -> None:
     targets = [
         DOTNET / "src" / "Roptimer.Core" / "feature-status.json",
         DOWNLOADS / "feature-status.json",
+    ]
+    for target in targets:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+
+def sync_fastflag_allowlist() -> None:
+    """Keep the C# core, website, and download copies in sync with the root allowlist."""
+    source = ROOT / "fastflags-allowlist.json"
+    targets = [
+        DOTNET / "src" / "Roptimer.Core" / "fastflags-allowlist.json",
+        DOWNLOADS / "fastflags-allowlist.json",
     ]
     for target in targets:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -302,6 +325,7 @@ def build_dotnet_source_zip() -> Path:
             archive.write(path, arcname.as_posix())
         extras = [
             ROOT / "feature-status.json",
+            ROOT / "fastflags-allowlist.json",
             ROOT / "README.md",
             ROOT / "build_downloads.py",
             ROOT / "build_website.py",
@@ -327,6 +351,8 @@ def build_dotnet_source_zip() -> Path:
             WEB / "assets/sirius.js",
             WEB / "assets/sirius-hero.png",
             WEB / "assets/roptimzier-shield-icon.svg",
+            WEB / "downloads/fastflags-allowlist.json",
+            WEB / "downloads/Roptimer-FastFlag-Allowlist.md",
             ICONS / "roptimzier-shield.png",
             ICONS / "roptimzier-shield.ico",
             ICONS / "favicon.ico",
@@ -381,6 +407,7 @@ def build_mac_zip(zip_path: Path, root_name: str, settings_copy: Path) -> Path:
         add_zip_file(archive, HUD_SOURCE, prefix + "roptimer_hud.py")
         add_zip_file(archive, settings_copy, prefix + "hud-settings.json")
         add_zip_file(archive, ROOT / "feature-status.json", prefix + "feature-status.json")
+        add_zip_file(archive, ROOT / "fastflags-allowlist.json", prefix + "fastflags-allowlist.json")
 
         launchers = {
             MAC / "Roptimer Mac.command": "Roptimer Mac.command",
@@ -407,6 +434,7 @@ def build_mac_zip(zip_path: Path, root_name: str, settings_copy: Path) -> Path:
             DOCS / "SCRIPT_HUB.md": "Roptimer-Script-Hub.md",
             DOCS / "MAC.md": "Roptimer-Mac-README.md",
             DOCS / "PAGES.md": "Roptimer-Pages-Help.md",
+            DOCS / "FASTFLAG_ALLOWLIST.md": "Roptimer-FastFlag-Allowlist.md",
         }
         for source, name in doc_names.items():
             if source.is_file():
@@ -438,6 +466,7 @@ def build() -> None:
     copy_assets_to_root()
     copy_dotnet_support_files()
     sync_feature_catalog()
+    sync_fastflag_allowlist()
     copy_docs_to_downloads()
     source_zip = build_dotnet_source_zip()
 
@@ -487,8 +516,10 @@ def build() -> None:
         archive.write(app_bat, "Roptimzier-Windows/Run Roptimzier.bat")
         archive.write(hud_bat, "Roptimzier-Windows/Run HUD.bat")
         archive.write(ROOT / "feature-status.json", "Roptimzier-Windows/feature-status.json")
+        archive.write(ROOT / "fastflags-allowlist.json", "Roptimzier-Windows/fastflags-allowlist.json")
         archive.write(DOTNET / "README.md", "Roptimzier-Windows/Roptimer-DotNet-README.md")
         archive.write(DOCS / "PAGES.md", "Roptimzier-Windows/Roptimer-Pages-Help.md")
+        archive.write(DOCS / "FASTFLAG_ALLOWLIST.md", "Roptimzier-Windows/Roptimer-FastFlag-Allowlist.md")
         archive.write(source_zip, "Roptimzier-Windows/Roptimer-DotNet-Source.zip")
         archive.write(DOTNET / "RoptimerBoost.bat", "Roptimzier-Windows/RoptimerBoost.bat")
         archive.write(DOTNET / "Roptimer Boost Commands.txt", "Roptimzier-Windows/Roptimer-Boost-Commands.txt")
@@ -503,7 +534,7 @@ def build() -> None:
     print(f"Built {source_zip} ({source_zip.stat().st_size:,} bytes)")
     for path in mac_outputs[:2]:
         print(f"Built {path} ({path.stat().st_size:,} bytes)")
-    print("Generated website, root Pages fallback, source package, macOS packages, docs, and Python copies.")
+    print("Generated website, root Pages fallback, allowlist files, source package, macOS packages, docs, and Python copies.")
 
 
 if __name__ == "__main__":

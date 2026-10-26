@@ -19,11 +19,12 @@ Apply a mode to all discovered versions:
 Restore managed flags:
   RoptimerBoost.exe restore
 
-Session snapshot, modes, tiers, features:
+Session snapshot, modes, tiers, features, allowlist:
   RoptimerBoost.exe session
   RoptimerBoost.exe modes
   RoptimerBoost.exe tiers
   RoptimerBoost.exe features
+  RoptimerBoost.exe allowlist
 
 Safe cache maintenance (old log/temp files only):
   RoptimerBoost.exe cache-report --days 7
@@ -33,5 +34,7 @@ Headless validation:
   RoptimerBoost.exe self-test
 
 SAFETY
-  No DLL injection, process hooks, memory reads/writes, Roblox telemetry disabling,
+  Only the 18 canonical allowlisted Geometry, Rendering, and User Interface
+  FastFlags are recognized as managed keys. No DLL injection, process hooks,
+  memory reads/writes, Roblox telemetry disabling,
   fullbright, x-ray, building removal, anti-cheat bypass, or automation.

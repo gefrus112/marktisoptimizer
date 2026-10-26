@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Roptimer Hub V3 — Safe Roblox Performance Bootstrapper"
+        Title="Roptimer Hub V3.2 — Safe Roblox Performance Bootstrapper"
         Icon="Assets/RoptimerShield.ico"
         Height="720" Width="1140" MinHeight="620" MinWidth="980"
         WindowStartupLocation="CenterScreen"
@@ -29,7 +29,7 @@
                         <TextBlock Text="NO DLL INJECTOR" Style="{StaticResource PillText}" />
                     </Border>
                     <Border Style="{StaticResource Pill}">
-                        <TextBlock Text="V3.0.0 • .NET 8" Style="{StaticResource PillText}" />
+                        <TextBlock Text="V3.2.0 • .NET 8" Style="{StaticResource PillText}" />
                     </Border>
                 </StackPanel>
             </DockPanel>
@@ -59,6 +59,9 @@
                         </ListBoxItem>
                         <ListBoxItem Tag="FastFlags">
                             <StackPanel Orientation="Horizontal"><TextBlock Text="⚑" Foreground="{DynamicResource InfoBrush}" Margin="0,0,10,0"/><TextBlock Text="FastFlags"/></StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="Allowlist">
+                            <StackPanel Orientation="Horizontal"><TextBlock Text="✓" Foreground="{DynamicResource InfoBrush}" Margin="0,0,10,0"/><TextBlock Text="Allowlist"/></StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="Session">
                             <StackPanel Orientation="Horizontal"><TextBlock Text="◎" Foreground="{DynamicResource Accent2Brush}" Margin="0,0,10,0"/><TextBlock Text="Session"/></StackPanel>

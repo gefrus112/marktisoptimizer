@@ -1,11 +1,11 @@
-# Roptimer Hub V3 — C#/.NET 8
+# Roptimer Hub V3.2 — C#/.NET 8
 
 A safe Roblox performance bootstrapper built with WPF and .NET 8. It uses a Bubblestrap/Bloxstrap-like settings layout with a custom shield icon and blue Lumina theme.
 
 ## Projects
 
-- `Roptimer.Core` — settings, Roblox version discovery, allowlisted FastFlags, backups/restores, session detection, cache quarantine, feature catalog, CLI runner, self-test.
-- `Roptimer.App` — WPF desktop app (`Roptimer.exe`).
+- `Roptimer.Core` — settings, Roblox version discovery, canonical FastFlag allowlist, backups/restores, session detection, cache quarantine, feature catalog, CLI runner, self-test.
+- `Roptimer.App` — WPF desktop app (`Roptimer.exe`) with Dashboard, Boost, FastFlags, Allowlist, Session, Settings, Safety, and About pages.
 - `Roptimer.Cli` — console Boost CLI/bootstrapper (`RoptimerBoost.exe`).
 
 ## Build on Windows
@@ -33,9 +33,21 @@ RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
 RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
 RoptimerBoost.exe restore
 RoptimerBoost.exe features
+RoptimerBoost.exe allowlist
 RoptimerBoost.exe cache-clean --days 7 --force
 RoptimerBoost.exe self-test
 ```
+
+## FastFlag allowlist
+
+The canonical allowlist is `fastflags-allowlist.json` at the repository root. It is embedded in `Roptimer.Core` and exposed through:
+
+- `RoptimerBoost.exe allowlist`
+- The WPF **Allowlist** page
+- The website Docs tab
+- `docs/FASTFLAG_ALLOWLIST.md`
+
+It contains 18 flags in three categories: Geometry, Rendering, and User Interface. `DFIntTaskSchedulerTargetFps` remains a separate legacy compatibility flag and is not allowlisted.
 
 ## Safety
 
@@ -49,7 +61,7 @@ The Windows EXEs are published on the [v3.0.0-windows release](https://github.co
 
 ## Website and macOS companion
 
-This WPF app is Windows-only. The repository root also contains the V3.2 Sirius-style dark static website at `web/index.html` with Download, Docs, and Scripts tabs, GitHub Pages deployment, a command palette, animated starfield, and a Python/Tkinter macOS companion.
+This WPF app is Windows-only. The repository root also contains the V3.2 Sirius-style dark static website at `web/index.html` with Download, Docs, and Scripts tabs, the FastFlag allowlist Docs section, GitHub Pages deployment, a command palette, animated starfield, and a Python/Tkinter macOS companion.
 
 The macOS companion is packaged by `build_downloads.py` and by `.github/workflows/build-macos.yml`. It writes the same reversible local `ClientAppSettings.json` settings and never injects code into Roblox. See `docs/MAC.md`, `docs/CLI.md`, and `docs/SCRIPT_HUB.md` in the repository root.
 

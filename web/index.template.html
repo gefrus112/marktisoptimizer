@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#040405" />
-  <meta name="description" content="Roptimer Hub V3.2 — a 100× cooler Sirius-dark website for safe Roblox performance settings, Windows and macOS downloads, Boost CLI docs, and a local Script Hub preview." />
+  <meta name="description" content="Roptimer Hub V3.2 — a 100× cooler Sirius-dark website for safe Roblox performance settings, Windows and macOS downloads, the canonical FastFlag allowlist, Boost CLI docs, and a local Script Hub preview." />
   <title>Roptimer — Serious performance tooling.</title>
   <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
   <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
@@ -211,6 +211,7 @@
             <span class="nav-title">On this page</span>
             <a href="#how-it-works" data-doc-anchor="how-it-works" class="active">How it works</a>
             <a href="#cli-performance" data-doc-anchor="cli-performance">Boost CLI performance</a>
+            <a href="#fastflag-allowlist" data-doc-anchor="fastflag-allowlist">FastFlag allowlist</a>
             <a href="#settings" data-doc-anchor="settings">Settings builder</a>
             <a href="#feature-status" data-doc-anchor="feature-status">Feature status</a>
             <a href="#safety" data-doc-anchor="safety">Safety</a>
@@ -261,6 +262,19 @@ RoptimerBoost.exe self-test</pre></div>
                 <a class="button small" href="downloads/Roptimer-CLI-Docs.md" download>Full CLI docs</a>
                 <a class="button ghost small" href="__RELEASE_CLI__" data-download>Download Boost CLI</a>
               </div>
+            </article>
+
+            <article class="doc-section" id="fastflag-allowlist">
+              <h3>FastFlag allowlist</h3>
+              <p>These are the only <strong>18</strong> local <code>ClientAppSettings.json</code> keys Roptimer recognizes as allowlisted managed flags. Unrelated keys are preserved, and the legacy FPS flag is tracked separately.</p>
+              <span class="tag blue">3 categories · 18 flags</span>
+              <div class="allowlist-grid" id="allowlistCards"></div>
+              <div class="inline-actions">
+                <a class="button small" href="downloads/fastflags-allowlist.json" download>Download allowlist JSON</a>
+                <a class="button ghost small" href="downloads/Roptimer-FastFlag-Allowlist.md" download>Allowlist guide</a>
+                <a class="button ghost small" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noopener noreferrer">Official source</a>
+              </div>
+              <div class="notice" style="margin-top:18px"><strong>Safety:</strong> <code>DFIntTaskSchedulerTargetFps</code> is legacy and is not in this allowlist. Telemetry/Crashpad/Backtrace suppression, fullbright, x-ray, building removal, anti-cheat bypass, and game script execution are not allowlisted and are never written.</div>
             </article>
 
             <article class="doc-section" id="settings">
@@ -396,9 +410,9 @@ RoptimerBoost.exe self-test</pre></div>
         <div class="section-head" style="margin-top:48px">
           <div>
             <h2 style="font-size:36px">Screenshots</h2>
-            <p>Original SVG previews of the dark website, CLI docs, Script Hub, loading GUI, macOS companion, command palette, and 100× starfield engine.</p>
+            <p>Original SVG previews of the dark website, CLI docs, Script Hub, loading GUI, macOS companion, command palette, starfield engine, and the FastFlag allowlist.</p>
           </div>
-          <span class="tag amber">7 previews</span>
+          <span class="tag amber">8 previews</span>
         </div>
         <div class="screenshot-gallery">
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Roptimer dark Download tab screenshot" data-caption="Download tab — Windows and macOS cards in the Sirius-style dark layout."><img src="assets/sirius-download.svg" alt="Roptimer dark Download tab screenshot" /><span><strong>01 · Download</strong>Windows EXE and macOS companion cards.</span></button>
@@ -408,6 +422,7 @@ RoptimerBoost.exe self-test</pre></div>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-mac.svg" data-alt="Roptimer macOS companion screenshot" data-caption="macOS companion — .app launcher and Boost.command terminal."><img src="assets/sirius-mac.svg" alt="Roptimer macOS companion screenshot" /><span><strong>05 · macOS</strong>Mac companion window and safe CLI output.</span></button>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Roptimer command palette screenshot" data-caption="Command palette — searchable actions for downloads, docs, scripts, and CLI commands."><img src="assets/sirius-command-palette.svg" alt="Roptimer command palette screenshot" /><span><strong>06 · Command palette</strong>Searchable 100× navigation overlay.</span></button>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Roptimer starfield website screenshot" data-caption="100× starfield engine — animated canvas, cursor spotlight, counters, and reveal effects."><img src="assets/sirius-starfield.svg" alt="Roptimer starfield website screenshot" /><span><strong>07 · 100× starfield</strong>Animated canvas and spotlight system.</span></button>
+          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-allowlist.svg" data-alt="Roptimer FastFlag allowlist screenshot" data-caption="FastFlag allowlist — Geometry, Rendering, and User Interface categories rendered from the canonical JSON."><img src="assets/sirius-allowlist.svg" alt="Roptimer FastFlag allowlist screenshot" /><span><strong>08 · Allowlist</strong>18 official local FastFlags in three groups.</span></button>
         </div>
       </section>
     </div>
@@ -415,7 +430,7 @@ RoptimerBoost.exe self-test</pre></div>
 
   <footer class="site-footer">
     <div><strong>Roptimer Hub V3.2</strong><br />Safe local Roblox performance settings for Windows and macOS. 100× cooler, still no green neon dots.</div>
-    <div><a href="__REPO__" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">Windows release</a> · <a href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">macOS release</a> · <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> · <a href="downloads/Roptimer-Pages-Help.md" download>Pages help</a></div>
+    <div><a href="__REPO__" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">Windows release</a> · <a href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">macOS release</a> · <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> · <a href="downloads/fastflags-allowlist.json" download>Allowlist</a> · <a href="downloads/Roptimer-Pages-Help.md" download>Pages help</a></div>
   </footer>
 
   <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot preview">
@@ -444,6 +459,7 @@ RoptimerBoost.exe self-test</pre></div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script id="featureCatalog" type="application/json">__FEATURE_JSON__</script>
+  <script id="fastflagAllowlist" type="application/json">__FASTFLAG_ALLOWLIST_JSON__</script>
   <script src="assets/sirius.js"></script>
 </body>
 </html>

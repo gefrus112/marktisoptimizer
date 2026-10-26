@@ -6,7 +6,8 @@ Roptimer Hub V3.1 — Roblox FPS & Performance Optimizer
 
 A single-file, dependency-free Python/Tkinter desktop utility that writes a
 SAFE, reversible ``ClientAppSettings.json`` performance profile to Roblox
-Windows installations and macOS app bundles.
+Windows installations and macOS app bundles. The exact local FastFlag
+allowlist is loaded from the sibling ``fastflags-allowlist.json`` catalog.
 
 Version 2 adds a safe Session panel: it detects a running Roblox client through
 normal OS process/window metadata, shows a locally entered username, and sends
@@ -104,10 +105,10 @@ except Exception as exc:  # pragma: no cover - headless systems
 # App constants and visual language
 # ---------------------------------------------------------------------------
 
-APP_TITLE = "Roptimer Hub V3.1 — Sirius Roblox Performance Hub"
-APP_VERSION = "3.1.0"
+APP_TITLE = "Roptimer Hub V3.2 — Sirius Roblox Performance Hub"
+APP_VERSION = "3.2.0"
 APP_SLUG = "RobloxFpsOptimizer"
-BRAND_NAME = "ROPTIMER HUB V3.1"
+BRAND_NAME = "ROPTIMER HUB V3.2"
 
 
 def app_resource_path(relative: str) -> Path:
@@ -118,6 +119,27 @@ def app_resource_path(relative: str) -> Path:
 
 
 APP_ICON_PATH = app_resource_path("assets/roptimzier-shield.ico")
+ALLOWLIST_PATH = Path(__file__).with_name("fastflags-allowlist.json")
+FASTFLAG_ALLOWLIST_FALLBACK: tuple[str, ...] = (
+    "DFIntCSGLevelOfDetailSwitchingDistance",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL12",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL23",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL34",
+    "FFlagHandleAltEnterFullscreenManually",
+    "DFFlagTextureQualityOverrideEnabled",
+    "DFIntTextureQualityOverride",
+    "FIntDebugForceMSAASamples",
+    "DFFlagDisableDPIScale",
+    "FFlagDebugGraphicsPreferD3D11",
+    "FFlagDebugSkyGray",
+    "DFFlagDebugPauseVoxelizer",
+    "DFIntDebugFRMQualityLevelOverride",
+    "FIntFRMMaxGrassDistance",
+    "FIntFRMMinGrassDistance",
+    "FFlagDebugGraphicsPreferVulkan",
+    "FFlagDebugGraphicsPreferOpenGL",
+    "FIntGrassMovementReducedMotionFactor",
+)
 CLIENT_SETTINGS_FILE = "ClientAppSettings.json"
 LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps"
 MAX_NATIVE_FPS = 240
@@ -161,33 +183,44 @@ if platform.system() != "Windows":
     FONT_UI = "DejaVu Sans"
     FONT_MONO = "DejaVu Sans Mono"
 
-# Every flag this application may write. Only keys in this set are ever
-# removed/overwritten, so unrelated user flags in an existing JSON are kept.
-ALLOWLISTED_MANAGED_FLAGS: frozenset[str] = frozenset(
-    {
-        # Geometry
-        "DFIntCSGLevelOfDetailSwitchingDistance",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL12",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL23",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL34",
-        # Rendering
-        "FFlagHandleAltEnterFullscreenManually",
-        "DFFlagTextureQualityOverrideEnabled",
-        "DFIntTextureQualityOverride",
-        "FIntDebugForceMSAASamples",
-        "DFFlagDisableDPIScale",
-        "FFlagDebugGraphicsPreferD3D11",
-        "FFlagDebugSkyGray",
-        "DFFlagDebugPauseVoxelizer",
-        "DFIntDebugFRMQualityLevelOverride",
-        "FIntFRMMaxGrassDistance",
-        "FIntFRMMinGrassDistance",
-        "FFlagDebugGraphicsPreferVulkan",
-        "FFlagDebugGraphicsPreferOpenGL",
-        # UI / motion
-        "FIntGrassMovementReducedMotionFactor",
+def load_fastflag_allowlist() -> dict[str, Any]:
+    """Load the canonical grouped FastFlag allowlist shipped with the project."""
+    try:
+        data = json.loads(ALLOWLIST_PATH.read_text(encoding="utf-8"))
+        if isinstance(data, dict) and isinstance(data.get("categories"), list):
+            return data
+    except Exception:
+        pass
+    return {
+        "product": BRAND_NAME,
+        "version": APP_VERSION,
+        "description": "Fallback allowlist when fastflags-allowlist.json is unavailable.",
+        "source": OFFICIAL_ALLOWLIST_URL,
+        "categories": [
+            {"name": "Geometry", "flags": list(FASTFLAG_ALLOWLIST_FALLBACK[:4])},
+            {"name": "Rendering", "flags": list(FASTFLAG_ALLOWLIST_FALLBACK[4:17])},
+            {"name": "User Interface", "flags": list(FASTFLAG_ALLOWLIST_FALLBACK[17:])},
+        ],
+        "legacyNotInAllowlist": [LEGACY_FPS_FLAG],
     }
-)
+
+
+def allowlist_flag_set(data: dict[str, Any] | None = None) -> frozenset[str]:
+    """Flatten the grouped allowlist into the exact set of managed keys."""
+    payload = data if isinstance(data, dict) else load_fastflag_allowlist()
+    flags: set[str] = set()
+    for category in payload.get("categories", []):
+        if not isinstance(category, dict):
+            continue
+        for flag in category.get("flags", []):
+            if isinstance(flag, str) and flag.strip():
+                flags.add(flag.strip())
+    return frozenset(flags or FASTFLAG_ALLOWLIST_FALLBACK)
+
+
+# Every allowlisted flag this application may write. Only keys in this set are
+# ever removed/overwritten, so unrelated user flags in an existing JSON are kept.
+ALLOWLISTED_MANAGED_FLAGS: frozenset[str] = allowlist_flag_set(load_fastflag_allowlist())
 MANAGED_FLAGS: frozenset[str] = ALLOWLISTED_MANAGED_FLAGS | {LEGACY_FPS_FLAG}
 
 MACOS_CLIENT_ROOTS = (
@@ -274,7 +307,7 @@ def load_feature_status() -> dict[str, Any]:
     try:
         return json.loads(FEATURE_STATUS_PATH.read_text(encoding="utf-8"))
     except Exception:
-        return {"product": "Roptimer Hub V3", "version": APP_VERSION, "features": [], "sources": []}
+        return {"product": BRAND_NAME, "version": APP_VERSION, "features": [], "sources": []}
 
 # Geometry LOD distances based on conservative community presets for the
 # allowlisted CSG flags. Lower numbers switch to simpler geometry sooner.
@@ -1804,12 +1837,18 @@ def run_self_test() -> int:
         cache_report = cache.report(7)
         assert cache_report["olderThanDays"] == 7
         assert "ClientAppSettings" in cache_report["safety"]
+        allowlist_doc = load_fastflag_allowlist()
+        allowlist_flags = allowlist_flag_set(allowlist_doc)
+        assert len(allowlist_flags) == 18, f"expected 18 allowlisted flags, found {len(allowlist_flags)}"
+        assert allowlist_flags == ALLOWLISTED_MANAGED_FLAGS, "canonical allowlist does not match managed flags"
+        assert LEGACY_FPS_FLAG not in allowlist_flags, "legacy FPS flag must not be in the allowlist"
+        assert [c["name"] for c in allowlist_doc["categories"]] == ["Geometry", "Rendering", "User Interface"]
         assert MACOS_CLIENT_ROOTS[0].as_posix().endswith("Roblox.app/Contents/MacOS")
         assert "RobloxPlayer" in PLAYER_EXECUTABLES
 
         print(
             f"SELF-TEST OK: {len(versions)} versions, {len(result.profile_paths)} profiles, "
-            f"{len(flags)} flags, V3.1 session=safe, V3.1 tiers/modes/catalog/cache/mac=safe."
+            f"{len(flags)} flags, V3.2 session=safe, allowlist=18, tiers/modes/catalog/cache/mac=safe."
         )
         return 0
 
@@ -4289,6 +4328,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--graphics-tier", type=int, help=f"set extended graphics tier {GRAPHICS_TIER_MIN}-{GRAPHICS_TIER_MAX}")
     parser.add_argument("--texture-tier", type=int, help=f"set texture tier {TEXTURE_TIER_MIN}-{TEXTURE_TIER_MAX}")
     parser.add_argument("--features", action="store_true", help="print the shared feature status catalog and exit")
+    parser.add_argument("--allowlist", action="store_true", help="print the canonical allowed FastFlag catalog and exit")
     parser.add_argument("--tiers", action="store_true", help="print graphics and texture tier information and exit")
     parser.add_argument("--modes", action="store_true", help="print optimization modes and exit")
     parser.add_argument("--build-info", action="store_true", help="print build and safety information and exit")
@@ -4306,6 +4346,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.features:
         print(json.dumps(load_feature_status(), indent=2, ensure_ascii=False))
         return 0
+    if args.allowlist:
+        print(json.dumps(load_fastflag_allowlist(), indent=2, ensure_ascii=False))
+        return 0
     if args.tiers:
         print(json.dumps({
             "graphics": [{"value": i, "label": graphics_tier_label(i), "flag": "DFIntDebugFRMQualityLevelOverride"} for i in range(GRAPHICS_TIER_MIN, GRAPHICS_TIER_MAX + 1)],
@@ -4318,10 +4361,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.build_info:
         print(json.dumps({
-            "product": "Roptimer Hub V3.1",
+            "product": BRAND_NAME,
             "pythonApp": APP_VERSION,
             "dotnetApp": "3.0.0",
             "platform": "Windows 10+ / macOS 11+ (Python companion) / .NET 8",
+            "allowlist": {
+                "version": load_fastflag_allowlist().get("allowlistVersion"),
+                "categories": len(load_fastflag_allowlist().get("categories", [])),
+                "flags": len(ALLOWLISTED_MANAGED_FLAGS),
+                "legacyFpsFlagSeparate": LEGACY_FPS_FLAG not in ALLOWLISTED_MANAGED_FLAGS
+            },
             "safety": {"injection": False, "memoryReads": False, "telemetryDisable": False, "antiCheatBypass": False, "gameScriptExecution": False}
         }, indent=2, ensure_ascii=False))
         return 0

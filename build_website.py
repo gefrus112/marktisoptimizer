@@ -8,6 +8,7 @@ Outputs:
     web/site.webmanifest    install metadata
     web/robots.txt          crawler metadata
     web/sitemap.xml         basic sitemap
+    web/downloads/fastflags-allowlist.json
     index.html              root fallback for legacy branch-based Pages
     404.html                root not-found fallback
     .nojekyll               root Jekyll bypass
@@ -33,6 +34,7 @@ WEB = ROOT / "web"
 TEMPLATE = WEB / "index.template.html"
 OUTPUT = WEB / "index.html"
 FEATURES = ROOT / "feature-status.json"
+ALLOWLIST = ROOT / "fastflags-allowlist.json"
 DOWNLOADS = WEB / "downloads"
 
 ROOT_INDEX = ROOT / "index.html"
@@ -131,12 +133,15 @@ NOT_FOUND_HTML = """<!doctype html>
 """
 
 
-def replacements(catalog: dict) -> dict[str, str]:
+def replacements(catalog: dict, allowlist: dict) -> dict[str, str]:
     # Escape '<' so an embedded JSON value can never terminate the script tag.
     compact = json.dumps(catalog, ensure_ascii=False, separators=(",", ":"))
     safe_json = compact.replace("<", "\\u003c")
+    allowlist_compact = json.dumps(allowlist, ensure_ascii=False, separators=(",", ":"))
+    safe_allowlist_json = allowlist_compact.replace("<", "\\u003c")
     return {
         "__FEATURE_JSON__": safe_json,
+        "__FASTFLAG_ALLOWLIST_JSON__": safe_allowlist_json,
         "__REPO__": html.escape(REPO, quote=True),
         "__RELEASE_PAGE_WINDOWS__": html.escape(RELEASE_PAGE_WINDOWS, quote=True),
         "__RELEASE_PAGE_MAC__": html.escape(RELEASE_PAGE_MAC, quote=True),
@@ -150,8 +155,8 @@ def replacements(catalog: dict) -> dict[str, str]:
     }
 
 
-def render(template: str, catalog: dict) -> str:
-    values = replacements(catalog)
+def render(template: str, catalog: dict, allowlist: dict) -> str:
+    values = replacements(catalog, allowlist)
     for key, value in values.items():
         template = template.replace(key, value)
     remaining = sorted(set(PLACEHOLDER_RE.findall(template)))
@@ -169,7 +174,8 @@ def build() -> None:
     DOWNLOADS.mkdir(parents=True, exist_ok=True)
     template = TEMPLATE.read_text(encoding="utf-8")
     catalog = json.loads(FEATURES.read_text(encoding="utf-8"))
-    web_html = render(template, catalog)
+    allowlist = json.loads(ALLOWLIST.read_text(encoding="utf-8"))
+    web_html = render(template, catalog, allowlist)
 
     # Primary Pages artifact.
     WEB_INDEX.write_text(web_html, encoding="utf-8")
@@ -187,9 +193,13 @@ def build() -> None:
     (DOWNLOADS / "feature-status.json").write_text(
         json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    (DOWNLOADS / "fastflags-allowlist.json").write_text(
+        json.dumps(allowlist, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     print(
         "Generated web/index.html, root index.html, .nojekyll, 404.html, "
-        "site.webmanifest, robots.txt, sitemap.xml, and downloads/feature-status.json"
+        "site.webmanifest, robots.txt, sitemap.xml, downloads/feature-status.json, "
+        "and downloads/fastflags-allowlist.json"
     )
 
 
@@ -234,6 +244,8 @@ def check() -> None:
         ROOT_404,
         ROOT_NOJEKYLL,
         DOWNLOADS / "feature-status.json",
+        DOWNLOADS / "fastflags-allowlist.json",
+        DOWNLOADS / "Roptimer-FastFlag-Allowlist.md",
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
     if missing:
@@ -256,15 +268,29 @@ def check() -> None:
     catalog = json.loads(match.group(1))
     if not isinstance(catalog.get("features"), list) or not catalog["features"]:
         raise RuntimeError("featureCatalog has no features")
+
+    allowlist_match = re.search(
+        r'<script id="fastflagAllowlist" type="application/json">(.*?)</script>', web_html, re.S
+    )
+    if not allowlist_match:
+        raise RuntimeError("fastflagAllowlist script is missing")
+    allowlist = json.loads(allowlist_match.group(1))
+    categories = allowlist.get("categories", [])
+    flags = [flag for group in categories for flag in group.get("flags", [])]
+    if len(categories) != 3 or len(flags) != 18 or "DFIntTaskSchedulerTargetFps" in flags:
+        raise RuntimeError("Embedded FastFlag allowlist is invalid")
     json.loads(WEB_MANIFEST.read_text(encoding="utf-8"))
 
     root_html = ROOT_INDEX.read_text(encoding="utf-8")
     if 'href="web/assets/sirius.css"' not in root_html or 'src="web/assets/sirius.js"' not in root_html:
         raise RuntimeError("Root index does not use web/ prefixed assets")
+    if 'id="fastflag-allowlist"' not in web_html or 'id="fastflag-allowlist"' not in root_html:
+        raise RuntimeError("FastFlag allowlist Docs section is missing")
 
     print(
         f"WEBSITE CHECK OK: {len(catalog['features'])} features, "
-        f"{len(catalog.get('sources', []))} sources, root fallback + Pages artifact valid."
+        f"{len(catalog.get('sources', []))} sources, {len(flags)} allowlisted flags, "
+        f"root fallback + Pages artifact valid."
     )
 
 
