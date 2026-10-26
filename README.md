@@ -11,9 +11,10 @@ A **safe, performance-only** Roblox Windows client settings utility written in o
 | File | Purpose |
 | --- | --- |
 | `roblox_fps_optimizer.py` | Complete single-file Tkinter desktop app, core logic, CLI, and self-tests |
-| `web/index.html` | Offline dark-themed web companion with tabs, FPS slider, toggles, JSON preview, copy/download |
+| `roptimer_hud.py` | Safe separate always-on-top ROPTIMER HUD window (FPS target, ping, CPU/RAM hints, notifications) |
+| `web/index.html` | Red-themed offline **ROPTIMER** website: downloads, device lab, profile builder, game lab, HUD settings, safety FAQ |
 | `requirements.txt` | Runtime dependencies (none required) |
-| `requirements-optional.txt` | Optional `psutil` for better running-process detection |
+| `requirements-optional.txt` | Optional `psutil` for process detection and HUD CPU/RAM hints |
 
 ---
 
@@ -143,7 +144,9 @@ Settings are read when Roblox starts. **Close and reopen Roblox after applying.*
 
 ---
 
-## Web companion
+## ROPTIMER website and Roptimer HUD
+
+The website is now a full red/black **ROPTIMER** landing and performance lab for the **Roptimzier** app.
 
 Open `web/index.html` directly in a browser, or serve it locally:
 
@@ -153,13 +156,42 @@ python -m http.server 8000 --directory web
 
 Then visit `http://localhost:8000`.
 
-The web companion:
+### Website features
 
-- Uses the same dark layout and settings language.
-- Generates a live `ClientAppSettings.json` preview.
-- Lets you copy or download the JSON.
-- Explains the safe manual installation path.
-- Does **not** claim to access Roblox files from the browser; the Python desktop app performs the safe file writes.
+- Animated red grid, particles, glow rings, scanlines, glitch title, parallax monitor, reveal animations, ripple buttons and scroll progress.
+- Direct downloads for `roblox_fps_optimizer.py`, `roptimer_hud.py`, generated `ClientAppSettings.json`, `hud-settings.json`, and a game test plan.
+- **Device Lab**: reads privacy-safe browser hints such as CPU threads, memory hint, WebGL GPU string, connection info, screen size, battery presence, and an estimated display refresh rate. You can manually choose school laptop, ultrabook, gaming laptop, or desktop.
+- **Profile Builder**: FPS slider, graphics/texture dropdowns, rendering toggles and a live JSON preview.
+- **Game Lab**: offline test plans for roleplay, combat, shooter, open-world, obby, and simulator-style Roblox experiences. It does not connect to a game or read live game data.
+- **HUD Settings**: choose FPS target display, ping, CPU/RAM hints, notifications, low-FPS reminders, ping-spike alerts, corner position, opacity, red accent, and game profile.
+- **Safety FAQ**: clearly states that no injector, exploit, memory reader, anti-cheat bypass, stealth, or gameplay automation is included.
+
+### Roptimer HUD
+
+`roptimer_hud.py` is a separate always-on-top Python window. It can show:
+
+- your configured **FPS target**;
+- real TCP latency to `www.roblox.com:443` (“ping to Roblox”, not server/game ping);
+- optional CPU/RAM system hints via `psutil`;
+- HUD refresh rate, game profile and notification messages.
+
+It does **not** show a memory-read in-game FPS value. Roblox already documents built-in Performance Stats / Debug Stats for real in-game FPS and ping [1](https://create.roblox.com/docs/performance-optimization/identify). The HUD can open that official guide.
+
+Run it:
+
+```powershell
+python roptimer_hud.py --settings hud-settings.json
+```
+
+Download `hud-settings.json` from the website’s HUD Settings section and place it next to `roptimer_hud.py`, or pass its path with `--settings`.
+
+```powershell
+python roptimer_hud.py --self-test
+python roptimer_hud.py --print-defaults
+python roptimer_hud.py --no-gui
+```
+
+> **No ban-evasion promise:** no third-party tool can guarantee how Roblox will treat it. This project avoids exploit-style behavior by design: no injection, no memory reads, no anti-cheat bypass, no gameplay automation, and no hidden files. It writes local settings and runs a separate window.
 
 ---
 
@@ -193,6 +225,7 @@ State and target snapshots are stored under:
 ## Official references
 
 - Roblox DevForum — [Allowlist for local client configuration via Fast Flags](https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569)
+- Roblox Creator Docs — [Identify performance issues / built-in Performance Stats](https://create.roblox.com/docs/performance-optimization/identify)
 - Roblox Support — [Graphics Quality](https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality)
 - Roblox Support — [How to Reduce Lag and Speed Up Play](https://en.help.roblox.com/hc/en-us/articles/203314150-How-to-Reduce-Lag-and-Speed-Up-Play)
 - Roblox DevForum — [Introducing the Maximum Framerate setting](https://devforum.roblox.com/t/introducing-the-maximum-framerate-setting/2995965)

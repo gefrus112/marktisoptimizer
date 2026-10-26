@@ -22,6 +22,8 @@ dist/
 
 # Local app state and backups (should never be committed)
 state.json
+hud-settings.json
+roptimer-game-test-plan.json
 ClientAppSettings.json.bak-*
 roblox-optimizer-log.txt
 
