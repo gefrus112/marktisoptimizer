@@ -90,7 +90,15 @@ python3 build_downloads.py
 
 ## Deploy GitHub Pages
 
-Preferred setup:
+The README-as-homepage bug is fixed for the current legacy setting (`main / /`) by the generated root `index.html`. After this branch is merged, GitHub Pages serves the website directly.
+
+For **Actions-based deployment**, a repository admin must make a one-time change:
+
+> **Settings → Pages → Build and deployment → Source → GitHub Actions**
+
+The available automation token cannot change that setting (`403 Resource not accessible by integration`); it needs an admin PAT or the GitHub UI. The deploy workflow detects this: if Pages is still legacy, it regenerates and validates the site, skips the Actions deploy, and the root fallback still publishes correctly. If Pages is set to GitHub Actions, it uploads `web/` and deploys automatically.
+
+Admin-token equivalent, if available:
 
 ```bash
 gh api repos/gefrus112/robloxclinetbooster/pages \
@@ -100,7 +108,7 @@ gh api repos/gefrus112/robloxclinetbooster/pages \
   --field source.path=/
 ```
 
-Then push changes to `web/**`, `index.html`, `build_website.py`, `build_downloads.py`, `build_screenshots.py`, `feature-status.json`, `docs/**`, or `.github/workflows/deploy-pages.yml`. The workflow regenerates screenshots, downloads, and HTML, validates the site, and deploys `web/` automatically.
+Pushing changes to `web/**`, `index.html`, `build_website.py`, `build_downloads.py`, `build_screenshots.py`, `feature-status.json`, `docs/**`, or `.github/workflows/deploy-pages.yml` triggers the workflow. It regenerates screenshots, downloads, and HTML, then validates the site.
 
 Check the latest deployment:
 

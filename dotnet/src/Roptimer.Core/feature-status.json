@@ -193,7 +193,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, uploads web/ as a Pages artifact, and deploys with actions/deploy-pages@v4. Pages source can be set to GitHub Actions instead of README-based legacy publishing."
+        "details": "A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, checks the current Pages build type, and deploys web/ with actions/deploy-pages@v4 when source is GitHub Actions. If source stays legacy, it skips deployment and the committed root index.html fallback serves the site instead of README.md."
     },
     {
       "id": "website-generator-v2",

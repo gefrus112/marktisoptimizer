@@ -12,9 +12,11 @@ If GitHub Pages shows the repository README instead of the website, Pages is ser
 
 `.github/workflows/deploy-pages.yml` builds the site and deploys the `web/` directory with the official Pages actions.
 
-Required repository setting:
+Required repository setting for Actions deployment:
 
 - **Settings → Pages → Build and deployment → Source:** `GitHub Actions`
+
+> **Admin-only one-time switch:** the GitHub token available to automated coding sessions and to `GITHUB_TOKEN` cannot change an existing Pages source from legacy to workflow. A repository admin must make that single Settings change if you want Actions deployments. If it is not changed, the workflow still succeeds: it regenerates and validates the site, then skips deployment, while the root `index.html` fallback fixes legacy `main / /` publishing automatically.
 
 The workflow:
 
@@ -22,8 +24,9 @@ The workflow:
 2. Runs `python build_screenshots.py`.
 3. Runs `python build_downloads.py` (which calls `build_website.py` and refreshes downloadable docs/packages).
 4. Runs `python build_website.py --check`.
-5. Uploads `web/` as the Pages artifact.
-6. Deploys it with `actions/deploy-pages@v4`.
+5. Checks the current Pages `build_type`.
+6. If it is `workflow`, uploads `web/` as the Pages artifact and deploys with `actions/deploy-pages@v4`.
+7. If it is `legacy`, skips deployment and relies on the committed root `index.html` fallback.
 
 It runs on pushes to `main` and `arena/ebd36b53-robloxclinetbooster` when website files change, and can also be started manually from the Actions tab.
 

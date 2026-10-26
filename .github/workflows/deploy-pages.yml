@@ -30,6 +30,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.pages_check.outputs.deploy }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,15 +55,32 @@ jobs:
           test -f index.html
           test -f .nojekyll
 
+      - name: Check Pages build type
+        id: pages_check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          build_type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || true)
+          if [ "$build_type" = "workflow" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "Pages source is GitHub Actions; deployment enabled."
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Pages source is '${build_type:-unknown}'. The root index.html fallback will serve the site; skipping Actions deployment."
+          fi
+
       - name: Configure Pages
+        if: steps.pages_check.outputs.deploy == 'true'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        if: steps.pages_check.outputs.deploy == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: web
 
   deploy:
+    if: needs.build.outputs.deploy == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:
