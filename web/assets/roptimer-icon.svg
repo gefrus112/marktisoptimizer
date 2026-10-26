@@ -8,5 +8,5 @@
   </defs>
   <rect width="64" height="64" rx="16" fill="#0b080b"/>
   <path d="M12 12h40v7H12zM12 45h40v7H12zM12 12h7v40h-7zM45 12h7v22H45zM33 12h7v23h-7zM33 30h19v7H33z" fill="url(#g)" filter="url(#glow)"/>
-  <circle cx="51" cy="51" r="6" fill="#4ef0a3"/>
+  <circle cx="51" cy="51" r="6" fill="#22d3ee"/>
 </svg>

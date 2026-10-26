@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070a14" />
+  <meta name="description" content="ROPTIMER HUB — download Roptimer V3, a safe .NET 8 Roblox performance bootstrapper with a Boost CLI, blue Lumina UI, shield icon, and settings tab." />
+  <title>ROPTIMER HUB — Roptimer V3 .NET</title>
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
+  <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icons/roptimzier-shield.png" />
+  <style>
+    :root {
+      --bg: #070a14;
+      --bg-2: #0d1020;
+      --panel: #111729;
+      --panel-2: #151c31;
+      --card: #151c31;
+      --field: #0a0f1e;
+      --border: rgba(124, 92, 255, .22);
+      --border-strong: rgba(34, 211, 238, .52);
+      --text: #f3f6ff;
+      --muted: #a7b0d0;
+      --dim: #6d769a;
+      --accent: #7c5cff;
+      --accent-2: #22d3ee;
+      --accent-3: #4f46e5;
+      --cyan: #38bdf8;
+      --warning: #fbbf24;
+      --danger: #fb7185;
+      --purple: #a78bfa;
+      --radius: 18px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .6);
+      --glow: 0 0 32px rgba(124, 92, 255, .35);
+      font-family: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body { overflow-x: hidden; }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    ::selection { background: var(--accent); color: white; }
+
+    #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .34; }
+    .grid-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(124,92,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,.045) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(circle at 50% 12%, black, transparent 82%); }
+    .orb { position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none; opacity: .24; }
+    .orb.one { width: 440px; height: 440px; background: #4f46e5; top: -200px; left: -140px; animation: float1 16s ease-in-out infinite; }
+    .orb.two { width: 400px; height: 400px; background: #0891b2; bottom: -200px; right: -140px; animation: float2 18s ease-in-out infinite; }
+    @keyframes float1 { 50% { transform: translate(90px, 70px) scale(1.12); } }
+    @keyframes float2 { 50% { transform: translate(-90px, -60px) scale(1.12); } }
+    .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); z-index: 80; box-shadow: 0 0 14px var(--accent); }
+
+    .app-shell { position: relative; z-index: 2; display: grid; grid-template-columns: 242px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 22px 18px; background: rgba(9, 12, 26, .9); border-right: 1px solid var(--border); backdrop-filter: blur(18px); display: flex; flex-direction: column; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
+    .brand:hover { text-decoration: none; }
+    .brand img { width: 44px; height: 44px; border-radius: 12px; box-shadow: var(--glow); border: 1px solid var(--border-strong); }
+    .brand strong { display: block; letter-spacing: .14em; font-size: 13px; }
+    .brand small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .1em; margin-top: 3px; }
+    .sidebar-label { color: var(--dim); font-size: 9px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; margin: 4px 10px 0; }
+    .side-nav { display: flex; flex-direction: column; gap: 4px; }
+    .side-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border: 1px solid transparent; background: transparent; text-align: left; width: 100%; }
+    .side-link:hover { color: var(--text); background: rgba(124,92,255,.09); text-decoration: none; }
+    .side-link.active { color: white; background: linear-gradient(90deg, rgba(124,92,255,.28), rgba(34,211,238,.08)); border-color: rgba(124,92,255,.42); }
+    .side-link .glyph { width: 18px; text-align: center; color: var(--accent-2); }
+    .featured { margin-top: auto; border: 1px solid var(--border); background: linear-gradient(145deg, rgba(124,92,255,.18), rgba(34,211,238,.06)); border-radius: 16px; padding: 15px; }
+    .featured .kicker { color: var(--purple); font-size: 9px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .featured h3 { font-size: 17px; margin: 10px 0 6px; letter-spacing: -.03em; }
+    .featured p { color: var(--muted); font-size: 10px; line-height: 1.55; margin: 0 0 12px; }
+    .featured a { display: inline-block; background: var(--accent); color: white; border-radius: 9px; padding: 8px 11px; font-size: 10px; font-weight: 900; }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+    .sidebar-user div { line-height: 1.25; }
+    .sidebar-user strong { font-size: 10px; }
+    .sidebar-user small { color: var(--dim); font-size: 9px; }
+
+    main { min-width: 0; }
+    .topbar { height: 72px; position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 18px; padding: 0 34px; background: rgba(7,10,20,.86); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); }
+    .search { flex: 1; max-width: 560px; display: flex; align-items: center; gap: 9px; background: var(--field); border: 1px solid var(--border); border-radius: 11px; padding: 9px 12px; color: var(--dim); }
+    .search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); font-size: 11px; }
+    .search input::placeholder { color: var(--dim); }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .top-pill { border: 1px solid var(--border); border-radius: 999px; padding: 7px 11px; font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .top-pill b { color: var(--accent-2); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 15px; background: var(--field); color: var(--text); font-size: 11px; font-weight: 900; letter-spacing: .02em; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+    .btn:hover { transform: translateY(-1px); text-decoration: none; box-shadow: 0 10px 30px rgba(124,92,255,.18); }
+    .btn.primary { background: linear-gradient(90deg, var(--accent), var(--accent-3)); border-color: rgba(167,139,250,.6); color: white; box-shadow: var(--glow); }
+    .btn.cyan { background: rgba(34,211,238,.12); border-color: rgba(34,211,238,.5); color: #cffafe; }
+    .btn.ghost { background: transparent; }
+    .btn.small { padding: 7px 10px; font-size: 10px; }
+
+    .content { max-width: 1240px; margin: 0 auto; padding: 32px 34px 70px; }
+    .hero { position: relative; overflow: hidden; min-height: 330px; border-radius: 24px; border: 1px solid var(--border); background: linear-gradient(110deg, rgba(7,10,20,.96) 10%, rgba(7,10,20,.72) 52%, rgba(7,10,20,.18)), url("assets/lumina-hero.png") center/cover; box-shadow: var(--shadow); display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 30px; padding: 44px; }
+    .hero::after { content: ""; position: absolute; inset: 0; border-radius: 24px; background: radial-gradient(circle at 85% 20%, rgba(34,211,238,.18), transparent 35%), radial-gradient(circle at 15% 90%, rgba(124,92,255,.16), transparent 40%); pointer-events: none; }
+    .hero-badge { position: relative; z-index: 1; display: inline-flex; gap: 9px; align-items: center; border: 1px solid rgba(167,139,250,.45); background: rgba(124,92,255,.12); padding: 7px 12px; border-radius: 999px; color: #ddd6fe; font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .hero h1 { position: relative; z-index: 1; margin: 22px 0 12px; font-size: clamp(42px, 6vw, 76px); line-height: .9; letter-spacing: -.075em; font-weight: 950; }
+    .hero h1 span { background: linear-gradient(90deg, #fff, #c4b5fd 46%, #67e8f9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p { position: relative; z-index: 1; color: var(--muted); font-size: 13px; line-height: 1.75; max-width: 600px; margin: 0 0 20px; }
+    .hero-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px; }
+    .hero-card { position: relative; z-index: 1; justify-self: end; width: min(100%, 360px); border: 1px solid rgba(34,211,238,.25); background: rgba(7,10,20,.76); border-radius: 20px; padding: 22px; backdrop-filter: blur(12px); box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    .hero-card .eyebrow { color: var(--accent-2); font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+    .hero-card h2 { margin: 10px 0 8px; font-size: 27px; letter-spacing: -.05em; }
+    .hero-card p { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 0 0 16px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .hero-meta span { border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; font-size: 9px; color: var(--muted); }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 26px; }
+    .stat { border: 1px solid var(--border); background: rgba(17,23,41,.78); border-radius: 15px; padding: 15px 16px; }
+    .stat label { color: var(--dim); font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .stat b { display: block; margin-top: 7px; font-size: 23px; color: var(--accent-2); letter-spacing: -.04em; }
+    .stat small { color: var(--muted); font-size: 9px; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 22px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .tab { border: 1px solid var(--border); background: rgba(17,23,41,.7); color: var(--muted); border-radius: 10px; padding: 9px 13px; font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .tab.active { background: linear-gradient(90deg, rgba(124,92,255,.28), rgba(34,211,238,.1)); color: white; border-color: rgba(124,92,255,.5); }
+    .tab-panel { display: none; animation: fade .25s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 0 0 18px; }
+    .section-head h2 { margin: 0 0 5px; font-size: 25px; letter-spacing: -.05em; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 11px; max-width: 720px; line-height: 1.6; }
+    .grid { display: grid; gap: 14px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card { position: relative; border: 1px solid var(--border); background: linear-gradient(145deg, rgba(21,28,49,.92), rgba(13,16,32,.92)); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+    .card h3 { margin: 0 0 8px; font-size: 16px; letter-spacing: -.03em; }
+    .card p { color: var(--muted); font-size: 11px; line-height: 1.65; margin: 0 0 12px; }
+    .eyebrow { color: var(--purple); font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+    .tag { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 5px 9px; font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: rgba(124,92,255,.06); }
+    .tag.blue { color: #bae6fd; border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.08); }
+    .tag.cyan { color: #a5f3fc; border-color: rgba(34,211,238,.35); background: rgba(34,211,238,.08); }
+    .tag.orange { color: #fde68a; border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.08); }
+    .tag.red { color: #fecdd3; border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.08); }
+    .tag.violet { color: #ddd6fe; border-color: rgba(167,139,250,.4); background: rgba(167,139,250,.09); }
+
+    .download-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; align-items: start; }
+    .download-hero { border: 1px solid rgba(124,92,255,.4); background: linear-gradient(150deg, rgba(124,92,255,.18), rgba(21,28,49,.96) 55%, rgba(34,211,238,.08)); border-radius: 22px; padding: 26px; position: relative; overflow: hidden; }
+    .download-hero::after { content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; background: var(--accent); filter: blur(90px); opacity: .14; top: -120px; right: -80px; }
+    .download-hero .icon-row { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+    .download-hero img { width: 64px; height: 64px; border-radius: 16px; box-shadow: var(--glow); }
+    .download-hero h3 { margin: 18px 0 6px; font-size: 27px; letter-spacing: -.05em; position: relative; z-index: 1; }
+    .download-hero p { color: var(--muted); font-size: 11px; line-height: 1.7; position: relative; z-index: 1; }
+    .download-meta { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0 18px; position: relative; z-index: 1; }
+    .download-actions { display: flex; flex-wrap: wrap; gap: 9px; position: relative; z-index: 1; }
+    .file-list { display: grid; gap: 9px; }
+    .file-row { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 13px; padding: 12px 14px; background: rgba(10,15,30,.65); }
+    .file-row .file-icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: rgba(124,92,255,.14); color: var(--purple); font-weight: 900; font-size: 10px; }
+    .file-row div { flex: 1; min-width: 0; }
+    .file-row strong { display: block; font-size: 11px; }
+    .file-row small { color: var(--dim); font-size: 9px; }
+    .file-row a { font-size: 10px; font-weight: 900; }
+
+    .feature-card { border: 1px solid var(--border); background: rgba(17,23,41,.78); border-radius: 16px; padding: 17px; }
+    .feature-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(124,92,255,.16); color: var(--purple); font-weight: 900; margin-bottom: 12px; }
+    .feature-card h3 { margin: 0 0 7px; font-size: 13px; }
+    .feature-card p { margin: 0 0 10px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .status-chip { border-radius: 999px; padding: 4px 8px; font-size: 8px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+    .status-ok { color: #a5f3fc; background: rgba(34,211,238,.1); border: 1px solid rgba(34,211,238,.3); }
+    .status-legacy { color: #fde68a; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); }
+    .status-rejected { color: #fecdd3; background: rgba(251,113,133,.1); border: 1px solid rgba(251,113,133,.3); }
+
+    .settings-layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; align-items: start; }
+    .control { margin-bottom: 14px; }
+    .control label { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; font-weight: 800; margin-bottom: 7px; }
+    .control label b { color: var(--accent-2); }
+    .control input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .control select { width: 100%; border: 1px solid var(--border); border-radius: 10px; background: var(--field); color: var(--text); padding: 10px 11px; font-size: 11px; outline: none; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; margin-bottom: 8px; background: rgba(10,15,30,.58); }
+    .toggle-row span { font-size: 10px; color: var(--muted); }
+    .switch { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #252c4c; border-radius: 999px; transition: .2s; }
+    .slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .2s; }
+    .switch input:checked + .slider { background: var(--accent); }
+    .switch input:checked + .slider::before { transform: translateX(16px); }
+    .command-box { border: 1px solid var(--border); border-radius: 13px; background: #060913; padding: 14px; color: #bae6fd; font-family: Consolas, "SFMono-Regular", monospace; font-size: 10px; line-height: 1.7; word-break: break-word; min-height: 86px; }
+    .setting-note { border-left: 3px solid var(--accent-2); background: rgba(34,211,238,.06); color: #cffafe; padding: 11px 13px; border-radius: 0 12px 12px 0; font-size: 10px; line-height: 1.6; }
+
+    .screenshot-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) 260px; gap: 16px; }
+    .screenshot-stage { border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: #070a14; }
+    .screenshot-stage img { display: block; width: 100%; height: auto; aspect-ratio: 5 / 3; object-fit: cover; }
+    .screenshot-caption { padding: 13px 16px; border-top: 1px solid var(--border); }
+    .screenshot-caption h3 { margin: 0 0 4px; font-size: 14px; }
+    .screenshot-caption p { margin: 0; color: var(--muted); font-size: 10px; }
+    .screenshot-controls { display: flex; gap: 8px; margin-top: 12px; }
+    .screenshot-thumbs { display: grid; gap: 10px; }
+    .thumb { display: grid; grid-template-columns: 82px 1fr; align-items: center; gap: 10px; border: 1px solid var(--border); background: rgba(17,23,41,.72); color: var(--muted); border-radius: 12px; padding: 7px; text-align: left; font-size: 9px; font-weight: 900; letter-spacing: .05em; }
+    .thumb img { width: 82px; height: 49px; object-fit: cover; border-radius: 8px; }
+    .thumb.active { border-color: var(--accent); color: var(--text); background: rgba(124,92,255,.14); }
+
+    .cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .code-card { border: 1px solid var(--border); background: #060913; border-radius: 16px; padding: 16px; }
+    .code-card pre { margin: 0; color: #bae6fd; font-family: Consolas, "SFMono-Regular", monospace; font-size: 10px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+    .source-list { display: grid; gap: 9px; margin-top: 14px; }
+    .source-list a { display: block; border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; background: rgba(10,15,30,.58); font-size: 10px; }
+    details { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: rgba(17,23,41,.72); margin-bottom: 9px; }
+    details summary { cursor: pointer; font-size: 11px; font-weight: 900; }
+    details p { color: var(--muted); font-size: 10px; line-height: 1.65; margin: 9px 0 0; }
+
+    .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: grid; gap: 9px; }
+    .toast { border: 1px solid rgba(34,211,238,.45); background: #111729; color: var(--text); border-radius: 12px; padding: 12px 15px; font-size: 10px; box-shadow: var(--shadow); animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    footer { border-top: 1px solid var(--border); padding: 22px 34px; color: var(--dim); font-size: 10px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    footer a { color: var(--muted); }
+
+    @media (max-width: 980px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+      .side-nav { flex-direction: row; flex-wrap: wrap; flex: 1; }
+      .featured, .sidebar-user, .sidebar-label { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-card { justify-self: start; }
+      .download-grid, .settings-layout, .screenshot-layout, .cli-grid { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .screenshot-thumbs { grid-template-columns: repeat(3, 1fr); }
+      .thumb { display: block; }
+      .thumb img { width: 100%; height: 62px; margin-bottom: 5px; }
+    }
+    @media (max-width: 640px) {
+      .topbar { padding: 0 16px; }
+      .top-pill { display: none; }
+      .content { padding: 22px 16px 50px; }
+      .hero { padding: 28px 22px; }
+      .stats, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .screenshot-thumbs { grid-template-columns: repeat(2, 1fr); }
+      .section-head { flex-direction: column; align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="orb one" aria-hidden="true"></div>
+  <div class="orb two" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#top" aria-label="ROPTIMER HUB home">
+        <img src="assets/icons/roptimzier-shield.png" alt="ROPTIMER shield app icon" />
+        <span><strong>ROPTIMER HUB</strong><small>V3 • .NET 8 • WPF</small></span>
+      </a>
+      <div class="sidebar-label">Main</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="side-link active" data-tab="download"><span class="glyph">↓</span>Download</button>
+        <button class="side-link" data-tab="features"><span class="glyph">⚡</span>Features</button>
+        <button class="side-link" data-tab="settings"><span class="glyph">⚙</span>Settings</button>
+        <button class="side-link" data-tab="screenshots"><span class="glyph">▣</span>Screenshots</button>
+        <button class="side-link" data-tab="cli"><span class="glyph">&gt;_</span>Boost CLI</button>
+        <button class="side-link" data-tab="safety"><span class="glyph">⛨</span>Safety</button>
+      </nav>
+      <div class="featured">
+        <div class="kicker">Featured download</div>
+        <h3>Roptimer V3</h3>
+        <p>Blue Lumina interface, shield icon, settings tab, and a safe .NET bootstrapper. No DLL injector.</p>
+        <a href="__RELEASE_ZIP__" data-download>Download Windows ZIP</a>
+      </div>
+      <div class="sidebar-user">
+        <div class="avatar">R</div>
+        <div><strong>Local profile</strong><br /><small>No account required</small></div>
+      </div>
+    </aside>
+
+    <main id="top">
+      <header class="topbar">
+        <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search features, flags, commands..." aria-label="Search features" /></label>
+        <div class="top-actions">
+          <span class="top-pill"><b>SAFE MODE</b> • local JSON only</span>
+          <a class="btn ghost small" href="__RELEASE_PAGE__">Release notes</a>
+          <a class="btn primary small" href="__RELEASE_EXE__" data-download>Download Roptimer.exe</a>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <div class="hero-badge">Version 3 • C# .NET 8 • Windows 10/11</div>
+            <h1><span>Roptimer Hub</span></h1>
+            <p>
+              A safe Roblox performance bootstrapper with a Bubblestrap-inspired WPF layout, a different shield app icon,
+              blue Lumina styling, extended graphics tiers, a Settings tab, and RoptimerBoost CLI. It writes reversible
+              local settings only.
+            </p>
+            <div class="hero-actions">
+              <a class="btn primary" href="__RELEASE_ZIP__" data-download>↓ Download Windows package</a>
+              <a class="btn cyan" href="#panel-cli" data-tab="cli">View Boost CLI</a>
+              <a class="btn ghost" href="__SOURCE_ZIP__" download>Download C# source</a>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="eyebrow">Built for safe optimization</div>
+            <h2>Local settings. Clear boundaries.</h2>
+            <p>
+              Applies allowlisted rendering flags, keeps timestamped backups, restores managed keys, and launches Roblox
+              through the normal <code>roblox://</code> protocol.
+            </p>
+            <div class="hero-meta">
+              <span>.NET 8 WPF</span><span>0–21 tiers</span><span>Boost CLI</span><span>No injector</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats" aria-label="Project statistics">
+          <div class="stat"><label>Modes</label><b data-count="5">0</b><small>Better FPS, building lag, and more</small></div>
+          <div class="stat"><label>Graphics tiers</label><b data-count="22">0</b><small>0 through 21</small></div>
+          <div class="stat"><label>Texture tiers</label><b data-count="4">0</b><small>0 through 3</small></div>
+          <div class="stat"><label>Injectors</label><b>0</b><small>DLL injection is rejected</small></div>
+        </section>
+
+        <div class="tabs" role="tablist" aria-label="ROPTIMER HUB sections">
+          <button class="tab active" data-tab="download" role="tab" aria-selected="true">↓ Download</button>
+          <button class="tab" data-tab="features" role="tab" aria-selected="false">⚡ Features</button>
+          <button class="tab" data-tab="settings" role="tab" aria-selected="false">⚙ Settings</button>
+          <button class="tab" data-tab="screenshots" role="tab" aria-selected="false">▣ Screenshots</button>
+          <button class="tab" data-tab="cli" role="tab" aria-selected="false">&gt;_ Boost CLI</button>
+          <button class="tab" data-tab="safety" role="tab" aria-selected="false">✓ Safety</button>
+        </div>
+
+        <section class="tab-panel active" id="panel-download" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Download Roptimer V3</h2><p>Get the dependency-free .NET 8 WPF app, the Boost CLI, full source, or the legacy Python package. GitHub Actions builds the Windows binaries on a Windows runner.</p></div>
+            <span class="tag cyan">v3.0.0</span>
+          </div>
+          <div class="download-grid">
+            <article class="download-hero">
+              <div class="icon-row">
+                <img src="assets/icons/roptimzier-shield.png" alt="Roptimer shield app icon" />
+                <div><span class="tag violet">Recommended</span><h3 style="margin:8px 0 0">Roptimer-Windows-x64.zip</h3></div>
+              </div>
+              <p>Contains <strong>Roptimer.exe</strong>, <strong>RoptimerBoost.exe</strong>, launchers, runtime installer, feature catalog, license, and the Windows README. Built from the C#/.NET source on GitHub Actions.</p>
+              <div class="download-meta">
+                <span class="tag blue">Windows 10 / 11</span>
+                <span class="tag blue">.NET 8 Desktop Runtime</span>
+                <span class="tag orange">Single-file EXE</span>
+                <span class="tag cyan">v3.0.0</span>
+              </div>
+              <div class="download-actions">
+                <a class="btn primary" href="__RELEASE_ZIP__" data-download>↓ Download Windows ZIP</a>
+                <a class="btn cyan" href="downloads/Roptimer-Windows-x64.zip" download>Local copy</a>
+                <a class="btn ghost" href="__RELEASE_EXE__" data-download>Roptimer.exe</a>
+                <a class="btn ghost" href="__RELEASE_CLI__" data-download>RoptimerBoost.exe</a>
+                <a class="btn ghost" href="downloads/Roptimer.exe" download>Local Roptimer.exe</a>
+                <a class="btn ghost" href="downloads/RoptimerBoost.exe" download>Local CLI</a>
+                <a class="btn ghost" href="downloads/SHA256SUMS.txt" download>Checksums</a>
+              </div>
+            </article>
+            <div class="file-list">
+              <div class="file-row"><div class="file-icon">CS</div><div><strong>C# source code</strong><small>Roptimer.sln, WPF, Core, CLI, build scripts</small></div><a href="__SOURCE_ZIP__" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">PY</div><div><strong>Legacy Python package</strong><small>Tkinter optimizer + separate HUD</small></div><a href="downloads/Roptimzier-Windows.zip" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">BAT</div><div><strong>RoptimerBoost.bat</strong><small>Windows CLI launcher</small></div><a href="downloads/RoptimerBoost.bat" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">EXE</div><div><strong>Runtime installer</strong><small>Installs .NET 8 Desktop Runtime if needed</small></div><a href="downloads/Install-DotNet8-DesktopRuntime.bat" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">TXT</div><div><strong>Command reference</strong><small>Boost CLI examples and safety notes</small></div><a href="downloads/Roptimer-Boost-Commands.txt" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">JSON</div><div><strong>Feature catalog</strong><small>Implemented, legacy, and rejected features</small></div><a href="downloads/feature-status.json" download>Download</a></div>
+              <div class="file-row"><div class="file-icon">MD</div><div><strong>.NET README</strong><small>Build and command documentation</small></div><a href="downloads/Roptimer-DotNet-README.md" download>Download</a></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-features" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Feature status</h2><p>Every requested idea is labelled honestly: implemented safely, legacy/allowlist-limited, or intentionally rejected. The catalog is shared with the desktop app and CLI.</p></div>
+            <span class="tag blue" id="featureCount">0 features</span>
+          </div>
+          <div class="grid grid-3" id="featureCards"></div>
+        </section>
+
+        <section class="tab-panel" id="panel-settings" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Settings</h2><p>Build a local profile, generate a Boost CLI command, and download the JSON settings. These controls do not change Roblox until you run the app or CLI.</p></div>
+            <span class="tag cyan">No green neon dots</span>
+          </div>
+          <div class="settings-layout">
+            <article class="card">
+              <div class="eyebrow">Profile builder</div>
+              <h3 style="margin-top:10px">Safe optimization settings</h3>
+              <div class="control"><label>Optimization mode <b id="modeValue">Reduce building lag</b></label><select id="modeSelect"><option>Better FPS</option><option selected>Reduce building lag</option><option>Balanced</option><option>Maximum performance</option><option>Visual quality</option><option>Custom</option></select></div>
+              <div class="control"><label>Legacy FPS target <b id="fpsValue">144</b></label><input id="fpsRange" type="range" min="60" max="240" value="144" step="1" /></div>
+              <div class="control"><label>Extended graphics tier <b id="tierValue">21</b></label><input id="tierRange" type="range" min="0" max="21" value="21" step="1" /></div>
+              <div class="control"><label>Texture tier <b id="textureValue">0</b></label><input id="textureRange" type="range" min="0" max="3" value="0" step="1" /></div>
+              <div class="control"><label>Cache quarantine age <b id="cacheValue">7 days</b></label><input id="cacheRange" type="range" min="1" max="90" value="7" step="1" /></div>
+              <div class="toggle-row"><span>Write legacy DFIntTaskSchedulerTargetFps</span><label class="switch"><input id="legacyToggle" type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>VFX / world detail reducer</span><label class="switch"><input id="vfxToggle" type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>Reduce building / geometry lag</span><label class="switch"><input id="buildingToggle" type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>Apply to all detected Roblox versions</span><label class="switch"><input id="allVersionsToggle" type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>Launch Roblox after apply</span><label class="switch"><input id="launchToggle" type="checkbox" /><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>In-app notifications</span><label class="switch"><input id="notificationsToggle" type="checkbox" checked /><span class="slider"></span></label></div>
+            </article>
+            <aside>
+              <article class="card">
+                <div class="eyebrow">Generated command</div>
+                <h3 style="margin-top:10px">RoptimerBoost.exe</h3>
+                <div class="command-box" id="generatedCommand">RoptimerBoost.exe apply --mode "Reduce building lag" --fps 144 --tier 21 --texture 0 --all-versions</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                  <button class="btn primary small" id="copyCommand">Copy command</button>
+                  <button class="btn cyan small" id="downloadSettings">Download settings.json</button>
+                  <button class="btn ghost small" id="resetSettings">Reset</button>
+                </div>
+              </article>
+              <div class="setting-note" style="margin-top:14px">
+                <strong>Compatibility:</strong> DFIntTaskSchedulerTargetFps is a legacy flag and may be ignored by current allowlisted Roblox clients.
+                Use Roblox Settings &gt; Maximum Framerate for the supported FPS cap. Values above graphics tier 10 are legacy/micro levels.
+              </div>
+              <div class="source-list" id="sourceList"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-screenshots" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Screenshots</h2><p>Blue Lumina-style previews of the .NET WPF app, Settings tab, legacy Python optimizer, HUD, and Session panel.</p></div>
+            <span class="tag blue">6 previews</span>
+          </div>
+          <div class="screenshot-layout">
+            <article class="card">
+              <div class="screenshot-stage">
+                <img id="screenshotMain" src="assets/screenshot-dotnet.svg" alt="Roptimer V3 .NET WPF dashboard preview" />
+                <div class="screenshot-caption"><h3 id="screenshotTitle">Roptimer V3 .NET app</h3><p id="screenshotDesc">Bubblestrap-inspired WPF layout with a different shield icon.</p></div>
+              </div>
+              <div class="screenshot-controls">
+                <button class="btn small" id="prevShot">← Previous</button>
+                <button class="btn small" id="nextShot">Next →</button>
+              </div>
+            </article>
+            <aside class="screenshot-thumbs">
+              <button class="thumb active" data-shot="0"><img src="assets/screenshot-dotnet.svg" alt=".NET app screenshot" /><span>01 · .NET app</span></button>
+              <button class="thumb" data-shot="1"><img src="assets/screenshot-settings.svg" alt="Settings tab screenshot" /><span>02 · Settings</span></button>
+              <button class="thumb" data-shot="2"><img src="assets/screenshot-dashboard.svg" alt="Dashboard screenshot" /><span>03 · Dashboard</span></button>
+              <button class="thumb" data-shot="3"><img src="assets/screenshot-optimizer.svg" alt="Optimizer screenshot" /><span>04 · Optimizer</span></button>
+              <button class="thumb" data-shot="4"><img src="assets/screenshot-hud.svg" alt="HUD screenshot" /><span>05 · HUD</span></button>
+              <button class="thumb" data-shot="5"><img src="assets/screenshot-session.svg" alt="Session screenshot" /><span>06 · Session</span></button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-cli" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Boost CLI</h2><p>RoptimerBoost.exe is the safe command-line controller. It can open the desktop app, apply local settings, restore, inspect OS-level session metadata, and quarantine old log/temp files.</p></div>
+            <span class="tag red">No DLL injector</span>
+          </div>
+          <div class="cli-grid">
+            <article class="card">
+              <div class="eyebrow">Windows commands</div>
+              <h3 style="margin-top:10px">Run from the downloaded folder</h3>
+              <div class="code-card"><pre>RoptimerBoost.exe open
+RoptimerBoost.exe bootstrap --launch
+RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
+RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
+RoptimerBoost.exe restore
+RoptimerBoost.exe features
+RoptimerBoost.exe cache-clean --days 7 --force
+RoptimerBoost.exe self-test</pre></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                <a class="btn primary small" href="__RELEASE_CLI__" data-download>Download RoptimerBoost.exe</a>
+                <a class="btn cyan small" href="downloads/RoptimerBoost.bat" download>Download launcher</a>
+                <a class="btn ghost small" href="downloads/Roptimer-Boost-Commands.txt" download>Command reference</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="eyebrow">Build from source</div>
+              <h3 style="margin-top:10px">Windows + .NET 8 SDK</h3>
+              <div class="code-card"><pre>git clone https://github.com/gefrus112/robloxclinetbooster.git
+cd robloxclinetbooster
+.\dotnet\build-windows.ps1
+
+# Outputs in dotnet\artifacts:
+# Roptimer.exe
+# RoptimerBoost.exe
+# Roptimer-Windows-x64.zip
+# Roptimer-DotNet-Source.zip
+# SHA256SUMS.txt</pre></div>
+              <div class="setting-note" style="margin-top:14px">
+                The published EXEs are framework-dependent single-file builds. Install the .NET 8 Desktop Runtime once, or run the included installer.
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-safety" role="tabpanel">
+          <div class="section-head">
+            <div><h2>Safety &amp; rejected requests</h2><p>No “hardware ban” promise. No exploit tricks. No hidden diagnostic disabling. The app writes local JSON and keeps backups.</p></div>
+            <span class="tag violet">Safe by design</span>
+          </div>
+          <div class="grid grid-2">
+            <article class="card">
+              <div class="eyebrow">Safety</div>
+              <h3 style="margin-top:14px;font-size:24px;letter-spacing:-.04em">Performance-only local settings.</h3>
+              <p>
+                No DLL injection, process hooks, memory reads/writes, executable patching, fullbright, x-ray, building removal,
+                anti-cheat bypass, gameplay automation, or Roblox telemetry/Crashpad/Backtrace disabling. The app also sends no
+                analytics of its own.
+              </p>
+              <div class="setting-note">
+                For real in-game FPS/ping, use Roblox’s built-in Performance Stats / Debug Stats. The HUD shows targets and system
+                hints, not memory-read game values.
+              </div>
+              <div style="margin-top:16px" id="safetyMatrix"></div>
+            </article>
+            <article class="card">
+              <div class="eyebrow">FAQ</div>
+              <h3 style="margin-top:14px">Common questions</h3>
+              <details><summary>Does this inject a DLL into Roblox?</summary><p>No. There is no injector. The bootstrapper writes local ClientAppSettings.json files and launches Roblox through the normal protocol.</p></details>
+              <details><summary>Can it disable Crashpad, Backtrace, or screenshot uploads?</summary><p>No. Those hidden diagnostic/abuse-reporting flags are not allowlisted and are intentionally not written. The app has no telemetry of its own.</p></details>
+              <details><summary>Does the legacy FPS flag unlock 240+ FPS?</summary><p>Not reliably. DFIntTaskSchedulerTargetFps is not on the current baseline allowlist and may be ignored. Use Roblox Settings &gt; Maximum Framerate for supported FPS changes.</p></details>
+              <details><summary>What are graphics tiers 0–21?</summary><p>They map to the allowlisted DFIntDebugFRMQualityLevelOverride flag. 0 is automatic, 1–6 are low, and 7–21 are high/legacy micro levels. Roblox may change this behavior.</p></details>
+              <details><summary>What does “reduce building lag” mean?</summary><p>It lowers geometry LOD distance, grass distance, textures, MSAA, and motion through local settings. It does not remove buildings or change collision.</p></details>
+              <details><summary>Can it remove buildings or add fullbright?</summary><p>No. Those are exploit-style visual changes and are rejected.</p></details>
+              <div class="source-list" id="safetySources"></div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        <span>ROPTIMER HUB V3 • Safe local-settings bootstrapper • No injector, no exploits, no telemetry disabling.</span>
+        <span><a href="__RELEASE_PAGE__">Release</a> • <a href="https://github.com/gefrus112/robloxclinetbooster">Source</a> • <a href="downloads/feature-status.json">Feature catalog</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <script type="application/json" id="featureData">__FEATURE_JSON__</script>
+  <script>
+    (() => {
+      "use strict";
+      const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const RELEASE_PAGE = "__RELEASE_PAGE__";
+      const RELEASE_ZIP = "__RELEASE_ZIP__";
+      const RELEASE_EXE = "__RELEASE_EXE__";
+      const RELEASE_CLI = "__RELEASE_CLI__";
+      const SOURCE_ZIP = "__SOURCE_ZIP__";
+
+      const featureData = (() => {
+        try { return JSON.parse($("#featureData").textContent || "{}"); }
+        catch (_) { return { features: [], sources: [] }; }
+      })();
+
+      function toast(message) {
+        const node = document.createElement("div");
+        node.className = "toast";
+        node.textContent = message;
+        $("#toastStack").appendChild(node);
+        setTimeout(() => node.remove(), 3200);
+      }
+
+      function showTab(name) {
+        $$(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === `panel-${name}`));
+        $$("[data-tab]").forEach((button) => {
+          const active = button.getAttribute("data-tab") === name;
+          button.classList.toggle("active", active);
+          if (button.getAttribute("role") === "tab") button.setAttribute("aria-selected", String(active));
+        });
+        try { history.replaceState(null, "", `#${name}`); } catch (_) {}
+      }
+
+      $$("[data-tab]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          showTab(button.getAttribute("data-tab"));
+        });
+      });
+
+      const validTabs = ["download", "features", "settings", "screenshots", "cli", "safety"];
+      const initial = (location.hash || "").replace("#", "");
+      if (validTabs.includes(initial)) showTab(initial);
+
+      $$("[data-download]").forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          toast("Opening the GitHub release download…");
+          window.open(link.getAttribute("href"), "_blank", "noopener");
+        }, { capture: true });
+      });
+
+      function renderFeatures() {
+        const features = featureData.features || [];
+        const cards = $("#featureCards");
+        const matrix = $("#safetyMatrix");
+        $("#featureCount").textContent = `${features.length} features`;
+        cards.innerHTML = "";
+        matrix.innerHTML = "";
+        const search = ($("#searchInput").value || "").toLowerCase();
+        features.forEach((feature) => {
+          const haystack = `${feature.name} ${feature.status} ${feature.details} ${feature.flag || ""}`.toLowerCase();
+          if (search && !haystack.includes(search)) return;
+          const rejected = /reject|unsafe/i.test(feature.status) || feature.safe === false;
+          const legacy = /legacy|may be ignored/i.test(feature.status);
+          const chip = rejected ? "status-rejected" : legacy ? "status-legacy" : "status-ok";
+          const card = document.createElement("article");
+          card.className = "feature-card";
+          card.innerHTML = `<div class="feature-icon">${(feature.name || "F").trim().charAt(0).toUpperCase()}</div><h3></h3><p></p><span class="status-chip ${chip}"></span>`;
+          $("h3", card).textContent = feature.name || "Feature";
+          $("p", card).textContent = feature.details || "";
+          $(".status-chip", card).textContent = feature.status || "Unknown";
+          cards.appendChild(card);
+          const row = document.createElement("div");
+          row.className = "file-row";
+          row.style.marginBottom = "8px";
+          row.innerHTML = `<div class="file-icon">${rejected ? "×" : "✓"}</div><div><strong></strong><small></small></div><span class="status-chip ${chip}"></span>`;
+          $("strong", row).textContent = feature.name || "Feature";
+          $("small", row).textContent = feature.flag || "safety boundary";
+          $(".status-chip", row).textContent = feature.status || "Unknown";
+          matrix.appendChild(row);
+        });
+        if (!cards.children.length) cards.innerHTML = `<article class="card"><p>No features match “${search}”.</p></article>`;
+      }
+
+      function renderSources() {
+        [$("#sourceList"), $("#safetySources")].forEach((container) => {
+          if (!container) return;
+          container.innerHTML = "";
+          (featureData.sources || []).slice(0, 6).forEach((source) => {
+            const link = document.createElement("a");
+            link.href = source.url;
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = "↗ " + source.title;
+            container.appendChild(link);
+          });
+        });
+      }
+
+      $("#searchInput").addEventListener("input", renderFeatures);
+      renderFeatures();
+      renderSources();
+
+      const SHOTS = [
+        { src: "assets/screenshot-dotnet.svg", alt: "Roptimer V3 .NET WPF dashboard preview", title: "Roptimer V3 .NET app", desc: "Bubblestrap-inspired WPF layout with a different shield icon." },
+        { src: "assets/screenshot-settings.svg", alt: "Blue Settings tab preview", title: "Settings tab", desc: "Build a local profile and generate the exact Boost CLI command." },
+        { src: "assets/screenshot-dashboard.svg", alt: "Dashboard UI preview", title: "Dashboard", desc: "Quick stats, safe mode, and optimization modes." },
+        { src: "assets/screenshot-optimizer.svg", alt: "Optimizer UI preview", title: "Optimizer", desc: "Legacy Python companion with flags, profiles, and JSON preview." },
+        { src: "assets/screenshot-hud.svg", alt: "Roptimer HUD preview", title: "Roptimer HUD", desc: "Separate always-on-top window for targets and local hints." },
+        { src: "assets/screenshot-session.svg", alt: "Safe Session panel preview", title: "Safe Session", desc: "OS-level client detection, local display name, and readiness notification." }
+      ];
+      let shotIndex = 0;
+      function showShot(index) {
+        shotIndex = (index + SHOTS.length) % SHOTS.length;
+        const shot = SHOTS[shotIndex];
+        $("#screenshotMain").setAttribute("src", shot.src);
+        $("#screenshotMain").setAttribute("alt", shot.alt);
+        $("#screenshotTitle").textContent = shot.title;
+        $("#screenshotDesc").textContent = shot.desc;
+        $$(".thumb").forEach((thumb) => thumb.classList.toggle("active", Number(thumb.getAttribute("data-shot")) === shotIndex));
+      }
+      $$(".thumb").forEach((thumb) => thumb.addEventListener("click", () => showShot(Number(thumb.getAttribute("data-shot")))));
+      $("#nextShot").addEventListener("click", () => showShot(shotIndex + 1));
+      $("#prevShot").addEventListener("click", () => showShot(shotIndex - 1));
+
+      const ids = ["modeSelect", "fpsRange", "tierRange", "textureRange", "cacheRange", "legacyToggle", "vfxToggle", "buildingToggle", "allVersionsToggle", "launchToggle", "notificationsToggle"];
+      const defaults = {
+        modeSelect: "Reduce building lag", fpsRange: "144", tierRange: "21", textureRange: "0", cacheRange: "7",
+        legacyToggle: true, vfxToggle: true, buildingToggle: true, allVersionsToggle: true, launchToggle: false, notificationsToggle: true
+      };
+      function currentSettings() {
+        const settings = {};
+        ids.forEach((id) => {
+          const node = $("#" + id);
+          settings[id] = node.type === "checkbox" ? node.checked : node.value;
+        });
+        return settings;
+      }
+      function generatedCommand(settings) {
+        let command = `RoptimerBoost.exe apply --mode "${settings.modeSelect}" --fps ${settings.fpsRange} --tier ${settings.tierRange} --texture ${settings.textureRange}`;
+        if (settings.allVersionsToggle) command += " --all-versions";
+        if (!settings.legacyToggle) command += " --no-legacy-fps";
+        if (settings.launchToggle) command += " --launch";
+        return command;
+      }
+      function settingsJson(settings) {
+        return {
+          product: "Roptimer Hub V3",
+          version: "3.0.0",
+          optimizationMode: settings.modeSelect,
+          fpsTarget: Number(settings.fpsRange),
+          graphicsTier: Number(settings.tierRange),
+          textureTier: Number(settings.textureRange),
+          legacyFpsFlag: settings.legacyToggle,
+          vfxReducer: settings.vfxToggle,
+          buildingLagReducer: settings.buildingToggle,
+          allVersions: settings.allVersionsToggle,
+          launchAfterApply: settings.launchToggle,
+          notifications: settings.notificationsToggle,
+          cacheCleanupDays: Number(settings.cacheRange),
+          safety: { injection: false, memoryReads: false, telemetryDisable: false, antiCheatBypass: false }
+        };
+      }
+      function updateSettings() {
+        const settings = currentSettings();
+        $("#modeValue").textContent = settings.modeSelect;
+        $("#fpsValue").textContent = settings.fpsRange;
+        $("#tierValue").textContent = settings.tierRange;
+        $("#textureValue").textContent = settings.textureRange;
+        $("#cacheValue").textContent = `${settings.cacheRange} days`;
+        $("#generatedCommand").textContent = generatedCommand(settings);
+        try { localStorage.setItem("roptimer-v3-settings", JSON.stringify(settings)); } catch (_) {}
+      }
+      ids.forEach((id) => {
+        const node = $("#" + id);
+        node.addEventListener("input", updateSettings);
+        node.addEventListener("change", updateSettings);
+      });
+      try {
+        const saved = JSON.parse(localStorage.getItem("roptimer-v3-settings") || "null");
+        if (saved) ids.forEach((id) => {
+          const node = $("#" + id);
+          if (saved[id] === undefined) return;
+          if (node.type === "checkbox") node.checked = Boolean(saved[id]); else node.value = saved[id];
+        });
+      } catch (_) {}
+      updateSettings();
+
+      $("#copyCommand").addEventListener("click", () => {
+        const text = $("#generatedCommand").textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
+        toast("Boost CLI command copied.");
+      });
+      $("#downloadSettings").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(settingsJson(currentSettings()), null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "roptimer-settings.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        toast("Downloaded roptimer-settings.json.");
+      });
+      $("#resetSettings").addEventListener("click", () => {
+        ids.forEach((id) => {
+          const node = $("#" + id);
+          if (node.type === "checkbox") node.checked = Boolean(defaults[id]); else node.value = defaults[id];
+        });
+        updateSettings();
+        toast("Settings reset to safe defaults.");
+      });
+
+      $$("[data-count]").forEach((node) => {
+        const target = Number(node.getAttribute("data-count"));
+        let value = 0;
+        const step = Math.max(1, Math.ceil(target / 22));
+        const timer = setInterval(() => {
+          value += step;
+          if (value >= target) { value = target; clearInterval(timer); }
+          node.textContent = String(value);
+        }, 35);
+      });
+
+      const canvas = $("#fx");
+      const ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
+      let particles = [];
+      function resizeCanvas() {
+        if (!canvas || !ctx) return;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        particles = Array.from({ length: 34 }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.6 + .4,
+          vx: (Math.random() - .5) * .18,
+          vy: (Math.random() - .5) * .18,
+          c: Math.random() > .5 ? "124,92,255" : "34,211,238"
+        }));
+      }
+      function animate() {
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${p.c},.16)`;
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      if (ctx) { resizeCanvas(); window.addEventListener("resize", resizeCanvas); animate(); }
+
+      window.addEventListener("scroll", () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+        $("#scrollProgress").style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      }, { passive: true });
+
+      window.ROPTIMER = { showTab, showShot, generatedCommand, settingsJson, featureData, release: { page: RELEASE_PAGE, zip: RELEASE_ZIP, exe: RELEASE_EXE, cli: RELEASE_CLI, source: SOURCE_ZIP } };
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<Page x:Class="Roptimer.App.Views.SafetyPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d" d:DesignHeight="620" d:DesignWidth="850"
+      Background="Transparent" Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0,8,24">
+            <TextBlock Text="Safety" Style="{StaticResource TitleText}" />
+            <TextBlock Text="A clear audit of what is implemented, what is legacy, and what is intentionally rejected." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,0"><StackPanel><TextBlock Text="NO INJECTION" Foreground="{DynamicResource Accent2Brush}" FontWeight="Bold"/><TextBlock Text="No DLL loading, process hooks, renderer hooks, memory patching, or executable edits." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel></Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,10,0"><StackPanel><TextBlock Text="NO EXPLOIT VISUALS" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold"/><TextBlock Text="No fullbright, x-ray, transparent walls, building removal, or collision edits." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel></Border>
+                <Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="REVERSIBLE" Foreground="{DynamicResource InfoBrush}" FontWeight="Bold"/><TextBlock Text="Timestamped backups, managed-key restore, and preservation of unrelated JSON flags." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel></Border>
+            </Grid>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="FEATURE AUDIT" Style="{StaticResource SectionText}" Margin="0,0,0,10" />
+                    <DataGrid x:Name="FeatureGrid" AutoGenerateColumns="False" IsReadOnly="True" Height="300">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Feature" Binding="{Binding Name}" Width="1.7*" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="1.1*" />
+                            <DataGridTextColumn Header="Safety" Binding="{Binding Safety}" Width="0.8*" />
+                            <DataGridTextColumn Header="Details" Binding="{Binding Details}" Width="4*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="WHY SOME REQUESTS ARE REJECTED" Style="{StaticResource SectionText}" />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="Roblox's local FastFlag allowlist ignores unlisted flags, and the list can change. Hidden diagnostic flags, telemetry suppression, Crashpad/Backtrace changes, automation, and abuse-report screenshot controls are outside safe local performance tuning. This app writes only reversible rendering/geometry settings and keeps Roblox diagnostics intact." />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0" Text="For real in-game FPS and ping, use Roblox's built-in Performance Stats / Debug Stats. The HUD and Session page show targets and OS metadata, not memory-read game values." />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

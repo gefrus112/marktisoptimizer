@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Roptimzier V2 — Roblox FPS & Performance Optimizer
+Roptimzier V3 — Roblox FPS & Performance Optimizer
 ==================================================
 
 A single-file, dependency-free Python/Tkinter desktop utility that writes a
@@ -12,6 +12,10 @@ Version 2 adds a safe Session panel: it detects a running Roblox client through
 normal OS process/window metadata, shows a locally entered username, and sends
 an in-app readiness notification. It does NOT inject into the client, read game
 memory, extract account data, or add fullbright/exploit visuals.
+
+Version 2.1 adds a Safe Optimization Engine with Better FPS, Reduce building lag,
+and auto-selected performance modes. It still writes only local JSON settings:
+there is no DLL injector, even for optimization.
 
 What this app DOES:
   * Finds ``%LOCALAPPDATA%\\Roblox\\Versions\\version-*`` folders.
@@ -98,10 +102,10 @@ except Exception as exc:  # pragma: no cover - headless systems
 # App constants and visual language
 # ---------------------------------------------------------------------------
 
-APP_TITLE = "Roptimzier V2 — Roblox FPS & Performance Optimizer"
-APP_VERSION = "2.0.0"
+APP_TITLE = "Roptimzier V3 — Lumina Roblox Performance Hub"
+APP_VERSION = "3.0.0"
 APP_SLUG = "RobloxFpsOptimizer"
-BRAND_NAME = "ROPTIMZIER"
+BRAND_NAME = "ROPTIMER HUB"
 
 
 def app_resource_path(relative: str) -> Path:
@@ -111,7 +115,7 @@ def app_resource_path(relative: str) -> Path:
     return Path(__file__).resolve().parent / relative
 
 
-APP_ICON_PATH = app_resource_path("assets/roptimzier-app.ico")
+APP_ICON_PATH = app_resource_path("assets/roptimzier-shield.ico")
 CLIENT_SETTINGS_FILE = "ClientAppSettings.json"
 LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps"
 MAX_NATIVE_FPS = 240
@@ -132,22 +136,22 @@ OFFICIAL_LAG_URL = (
 ROBLOX_HOME_URL = "https://www.roblox.com/home"
 
 # Dark gaming palette requested by the user, with a neon violet/blue accent.
-BG = "#15151b"
-HEADER = "#181820"
-SIDEBAR = "#101016"
-PANEL = "#1e1e24"  # Requested primary panel color.
-CARD = "#23232d"
-CARD_2 = "#282833"
-FIELD = "#17171f"
-BORDER = "#343444"
-TEXT = "#f4f5fb"
-MUTED = "#9ba1b8"
-ACCENT = "#8b5cf6"
+BG = "#070a14"
+HEADER = "#0b1020"
+SIDEBAR = "#080c18"
+PANEL = "#111729"  # Requested primary panel color.
+CARD = "#151c31"
+CARD_2 = "#1b2340"
+FIELD = "#0a0f1e"
+BORDER = "#2a3358"
+TEXT = "#f3f6ff"
+MUTED = "#a7b0d0"
+ACCENT = "#7c5cff"
 ACCENT_2 = "#22d3ee"
 ACCENT_HOVER = "#a78bfa"
-SUCCESS = "#43e6a0"
-WARNING = "#ffbf5e"
-ERROR = "#ff6482"
+SUCCESS = "#38bdf8"
+WARNING = "#fbbf24"
+ERROR = "#fb7185"
 
 FONT_UI = "Segoe UI"
 FONT_MONO = "Cascadia Mono"
@@ -232,6 +236,39 @@ GRASS_MOTION = {
     "Still": "0",
 }
 
+GRAPHICS_TIER_MIN = 0
+GRAPHICS_TIER_MAX = 21
+TEXTURE_TIER_MIN = 0
+TEXTURE_TIER_MAX = 3
+FEATURE_STATUS_PATH = Path(__file__).with_name("feature-status.json")
+SAFE_CACHE_EXTENSIONS = frozenset({".log", ".txt", ".tmp", ".old"})
+
+
+def graphics_tier_label(level: int) -> str:
+    level = max(GRAPHICS_TIER_MIN, min(GRAPHICS_TIER_MAX, int(level)))
+    if level == 0:
+        return "Tier 0 (automatic)"
+    return f"Tier {level} (micro)" if level > 10 else f"Tier {level}"
+
+
+def texture_tier_label(level: int) -> str:
+    level = max(TEXTURE_TIER_MIN, min(TEXTURE_TIER_MAX, int(level)))
+    return f"Texture tier {level}"
+
+
+for _tier in range(GRAPHICS_TIER_MIN, GRAPHICS_TIER_MAX + 1):
+    GRAPHICS_QUALITY[graphics_tier_label(_tier)] = str(_tier)
+for _tier in range(TEXTURE_TIER_MIN, TEXTURE_TIER_MAX + 1):
+    TEXTURE_QUALITY[texture_tier_label(_tier)] = str(_tier)
+
+
+def load_feature_status() -> dict[str, Any]:
+    """Return the shared safety/feature catalog used by the website and .NET app."""
+    try:
+        return json.loads(FEATURE_STATUS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"product": "Roptimer Hub V3", "version": APP_VERSION, "features": [], "sources": []}
+
 # Geometry LOD distances based on conservative community presets for the
 # allowlisted CSG flags. Lower numbers switch to simpler geometry sooner.
 GEOMETRY_PRESETS = {
@@ -239,6 +276,8 @@ GEOMETRY_PRESETS = {
     "Balanced": ("2000", "1000", "1500", "2500"),
     "Visual": ("10000", "10000", "10000", "10000"),
     "Lag Rescue": ("50", "30", "40", "60"),
+    "Building Lag": ("25", "15", "20", "30"),
+    "Maximum performance": ("50", "30", "40", "60"),
     "Custom": ("1000", "600", "800", "1200"),
 }
 
@@ -254,8 +293,26 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "msaa": "1x / off",
         "grass_motion": "Still",
         "vfx_reducer": True,
+        "building_lag_reducer": True,
         "notifications": True,
         "bright_ui": False,
+        "optimization_mode": "Reduce building lag",
+    },
+    "Building Lag": {
+        "fps_target": 120,
+        "optimize_rendering": True,
+        "lower_textures": True,
+        "reduce_grass_motion": True,
+        "renderer": "Automatic (recommended)",
+        "graphics_quality": "Ultra low",
+        "texture_quality": "Low (best performance)",
+        "msaa": "1x / off",
+        "grass_motion": "Still",
+        "vfx_reducer": True,
+        "building_lag_reducer": True,
+        "notifications": True,
+        "bright_ui": False,
+        "optimization_mode": "Reduce building lag",
     },
     "Performance": {
         "fps_target": 144,
@@ -268,8 +325,10 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "msaa": "1x / off",
         "grass_motion": "Still",
         "vfx_reducer": True,
+        "building_lag_reducer": False,
         "notifications": True,
         "bright_ui": False,
+        "optimization_mode": "Better FPS",
     },
     "Balanced": {
         "fps_target": 144,
@@ -282,8 +341,26 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "msaa": "2x",
         "grass_motion": "Reduced",
         "vfx_reducer": False,
+        "building_lag_reducer": False,
         "notifications": True,
         "bright_ui": False,
+        "optimization_mode": "Balanced",
+    },
+    "Maximum performance": {
+        "fps_target": 240,
+        "optimize_rendering": True,
+        "lower_textures": True,
+        "reduce_grass_motion": True,
+        "renderer": "Automatic (recommended)",
+        "graphics_quality": "Ultra low",
+        "texture_quality": "Low (best performance)",
+        "msaa": "1x / off",
+        "grass_motion": "Still",
+        "vfx_reducer": True,
+        "building_lag_reducer": True,
+        "notifications": True,
+        "bright_ui": False,
+        "optimization_mode": "Maximum performance",
     },
     "Visual": {
         "fps_target": 240,
@@ -296,8 +373,112 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "msaa": "4x",
         "grass_motion": "Default",
         "vfx_reducer": False,
+        "building_lag_reducer": False,
         "notifications": True,
         "bright_ui": False,
+        "optimization_mode": "Visual quality",
+    },
+}
+
+# Safe, non-injecting optimization modes. These only change local JSON settings.
+# There is intentionally NO DLL injector: process injection is not safe for a
+# Roblox performance tool, even when the stated goal is optimization.
+AUTO_MODE_LABEL = "Choose better performance"
+OPTIMIZATION_MODES: dict[str, dict[str, Any]] = {
+    "Better FPS": {
+        "icon": "F",
+        "description": "Stable 144 FPS target with low graphics overhead for smoother gameplay.",
+        "values": {
+            "preset": "Performance",
+            "fps_target": 144,
+            "legacy_fps_flag": True,
+            "optimize_rendering": True,
+            "lower_textures": True,
+            "reduce_grass_motion": True,
+            "vfx_reducer": True,
+            "building_lag_reducer": False,
+            "graphics_quality": "Ultra low",
+            "texture_quality": "Low (best performance)",
+            "msaa": "1x / off",
+            "grass_motion": "Still",
+        },
+    },
+    "Reduce building lag": {
+        "icon": "B",
+        "description": "Aggressive but safe geometry LOD, grass distance and texture reduction. Does not remove buildings.",
+        "values": {
+            "preset": "Building Lag",
+            "fps_target": 120,
+            "legacy_fps_flag": True,
+            "optimize_rendering": True,
+            "lower_textures": True,
+            "reduce_grass_motion": True,
+            "vfx_reducer": True,
+            "building_lag_reducer": True,
+            "graphics_quality": "Ultra low",
+            "texture_quality": "Low (best performance)",
+            "msaa": "1x / off",
+            "grass_motion": "Still",
+        },
+    },
+    "Balanced": {
+        "icon": "=",
+        "description": "A middle-ground profile for mixed performance and image quality.",
+        "values": {
+            "preset": "Balanced",
+            "fps_target": 144,
+            "legacy_fps_flag": True,
+            "optimize_rendering": True,
+            "lower_textures": True,
+            "reduce_grass_motion": True,
+            "vfx_reducer": False,
+            "building_lag_reducer": False,
+            "graphics_quality": "Low",
+            "texture_quality": "Medium",
+            "msaa": "2x",
+            "grass_motion": "Reduced",
+        },
+    },
+    "Maximum performance": {
+        "icon": "M",
+        "description": "Highest safe local detail reduction with a 240 FPS target. Still allowlist-based.",
+        "values": {
+            "preset": "Maximum performance",
+            "fps_target": 240,
+            "legacy_fps_flag": True,
+            "optimize_rendering": True,
+            "lower_textures": True,
+            "reduce_grass_motion": True,
+            "vfx_reducer": True,
+            "building_lag_reducer": True,
+            "graphics_quality": "Ultra low",
+            "texture_quality": "Low (best performance)",
+            "msaa": "1x / off",
+            "grass_motion": "Still",
+        },
+    },
+    "Visual quality": {
+        "icon": "V",
+        "description": "Keeps more detail while retaining a higher frame target.",
+        "values": {
+            "preset": "Visual",
+            "fps_target": 240,
+            "legacy_fps_flag": True,
+            "optimize_rendering": False,
+            "lower_textures": False,
+            "reduce_grass_motion": False,
+            "vfx_reducer": False,
+            "building_lag_reducer": False,
+            "graphics_quality": "High",
+            "texture_quality": "High",
+            "msaa": "4x",
+            "grass_motion": "Default",
+        },
+    },
+    "Custom": {
+        "icon": "C",
+        "description": "Manual settings. Choose individual toggles in the Optimizer page.",
+        "values": {},
     },
 }
 
@@ -469,13 +650,18 @@ class OptimizerSettings:
     lower_textures: bool = True
     reduce_grass_motion: bool = True
     vfx_reducer: bool = True
+    building_lag_reducer: bool = True
     notifications: bool = True
     bright_ui: bool = False
     roblox_username: str = ""
+    optimization_mode: str = "Better FPS"
     preset: str = "Performance"
     renderer: str = "Automatic (recommended)"
     graphics_quality: str = "Ultra low"
     texture_quality: str = "Low (best performance)"
+    graphics_tier: int = 1
+    texture_tier: int = 1
+    cache_cleanup_days: int = 7
     msaa: str = "1x / off"
     grass_motion: str = "Still"
     target_scope: str = "Active version + shared profile"
@@ -504,6 +690,8 @@ class OptimizerSettings:
 
         if self.preset not in (*PRESET_VALUES, "Custom"):
             self.preset = "Custom"
+        if self.optimization_mode not in OPTIMIZATION_MODES:
+            self.optimization_mode = "Better FPS"
         if self.renderer not in RENDERER_FLAGS:
             self.renderer = "Automatic (recommended)"
         if self.graphics_quality not in GRAPHICS_QUALITY:
@@ -514,6 +702,18 @@ class OptimizerSettings:
             self.msaa = "Default"
         if self.grass_motion not in GRASS_MOTION:
             self.grass_motion = "Default"
+        try:
+            self.graphics_tier = max(GRAPHICS_TIER_MIN, min(GRAPHICS_TIER_MAX, int(self.graphics_tier)))
+        except (TypeError, ValueError):
+            self.graphics_tier = 1
+        try:
+            self.texture_tier = max(TEXTURE_TIER_MIN, min(TEXTURE_TIER_MAX, int(self.texture_tier)))
+        except (TypeError, ValueError):
+            self.texture_tier = 1
+        try:
+            self.cache_cleanup_days = max(1, min(90, int(self.cache_cleanup_days)))
+        except (TypeError, ValueError):
+            self.cache_cleanup_days = 7
         if self.target_scope not in TARGET_SCOPES:
             self.target_scope = TARGET_SCOPES[0]
         for name in (
@@ -522,6 +722,7 @@ class OptimizerSettings:
             "lower_textures",
             "reduce_grass_motion",
             "vfx_reducer",
+            "building_lag_reducer",
             "notifications",
             "bright_ui",
             "shared_profile",
@@ -533,6 +734,84 @@ class OptimizerSettings:
         # Locally entered display name only. Never read from a Roblox process.
         cleaned = "".join(ch for ch in str(self.roblox_username or "") if ch.isprintable())
         self.roblox_username = cleaned.strip()[:32]
+
+
+@dataclasses.dataclass
+class SystemProfile:
+    """Privacy-safe local hardware hints used to choose an optimization mode."""
+
+    cpu_cores: int = 0
+    memory_gb: float = 0.0
+    psutil_available: bool = False
+    source: str = "os.cpu_count"
+
+    @classmethod
+    def detect(cls) -> "SystemProfile":
+        cores = os.cpu_count() or 0
+        memory_gb = 0.0
+        available = False
+        try:
+            import psutil  # type: ignore
+
+            available = True
+            cores = int(psutil.cpu_count(logical=True) or cores)
+            memory_gb = float(psutil.virtual_memory().total) / (1024 ** 3)
+        except Exception:
+            # psutil is optional; os.cpu_count is enough for a safe fallback.
+            pass
+        return cls(
+            cpu_cores=cores,
+            memory_gb=round(memory_gb, 1),
+            psutil_available=available,
+            source="psutil" if available else "os.cpu_count",
+        )
+
+    @property
+    def tier(self) -> str:
+        if self.cpu_cores <= 4 or (0 < self.memory_gb <= 4):
+            return "low"
+        if self.cpu_cores <= 8 or (0 < self.memory_gb <= 8):
+            return "medium"
+        if self.cpu_cores >= 12 or self.memory_gb >= 16:
+            return "high"
+        return "balanced"
+
+
+class SafeOptimizationEngine:
+    """Choose safe local JSON settings. Never injects a DLL into Roblox."""
+
+    @staticmethod
+    def detect_profile() -> SystemProfile:
+        return SystemProfile.detect()
+
+    @classmethod
+    def choose_mode(cls, profile: SystemProfile | None = None) -> str:
+        detected = profile or cls.detect_profile()
+        tier = detected.tier
+        if tier == "low":
+            return "Reduce building lag"
+        if tier == "medium":
+            return "Better FPS"
+        if tier == "high":
+            return "Maximum performance"
+        return "Balanced"
+
+    @classmethod
+    def apply_mode(
+        cls,
+        settings: OptimizerSettings,
+        mode: str,
+        profile: SystemProfile | None = None,
+    ) -> OptimizerSettings:
+        if mode == AUTO_MODE_LABEL or mode not in OPTIMIZATION_MODES:
+            mode = cls.choose_mode(profile)
+        values = OPTIMIZATION_MODES[mode]["values"]
+        for key, value in values.items():
+            if hasattr(settings, key):
+                setattr(settings, key, value)
+        settings.optimization_mode = mode
+        settings.normalize_in_place()
+        return settings
 
 
 @dataclasses.dataclass
@@ -649,6 +928,112 @@ def backup_existing_file(path: Path) -> Path | None:
 # ---------------------------------------------------------------------------
 # Core optimizer logic (GUI-independent and unit-testable)
 # ---------------------------------------------------------------------------
+
+
+class SafeCacheCleaner:
+    """Conservative quarantine for old log/temp files; never touches settings or assets."""
+
+    def __init__(self) -> None:
+        override = os.getenv("RFO_LOCALAPPDATA")
+        self.local_appdata = Path(override).expanduser() if override else Path(
+            os.getenv("LOCALAPPDATA") or (Path.home() / "AppData" / "Local")
+        )
+        override_appdata = os.getenv("RFO_APPDATA")
+        self.appdata = Path(override_appdata).expanduser() if override_appdata else Path(
+            os.getenv("APPDATA") or (Path.home() / "AppData" / "Roaming")
+        )
+        self.state_root = self.appdata / APP_SLUG
+
+    def roots(self) -> list[Path]:
+        roots = [
+            self.local_appdata / "Roblox" / "logs",
+            self.local_appdata / "Roblox" / "ClientSettings" / "logs",
+            self.state_root / "logs",
+            Path(tempfile.gettempdir()) / "Roblox",
+        ]
+        versions = self.local_appdata / "Roblox" / "Versions"
+        if versions.is_dir():
+            roots.extend(folder / "logs" for folder in versions.glob("version-*"))
+        seen: set[str] = set()
+        result: list[Path] = []
+        for root in roots:
+            key = norm_path(root)
+            if key not in seen:
+                seen.add(key)
+                result.append(root)
+        return result
+
+    @staticmethod
+    def _is_safe_file(path: Path, root: Path) -> bool:
+        try:
+            resolved = path.resolve()
+            root_resolved = root.resolve()
+            resolved.relative_to(root_resolved)
+        except (OSError, ValueError):
+            return False
+        if path.suffix.lower() not in SAFE_CACHE_EXTENSIONS:
+            return False
+        if "ClientAppSettings" in path.name:
+            return False
+        if path.is_symlink():
+            return False
+        return True
+
+    def report(self, older_than_days: int = 7) -> dict[str, Any]:
+        older_than_days = max(1, min(90, int(older_than_days)))
+        cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=older_than_days)
+        items: list[dict[str, Any]] = []
+        errors: list[str] = []
+        for root in self.roots():
+            if not root.is_dir():
+                continue
+            for path in root.rglob("*"):
+                try:
+                    if not path.is_file() or not self._is_safe_file(path, root):
+                        continue
+                    stat = path.stat()
+                    modified = dt.datetime.fromtimestamp(stat.st_mtime, dt.timezone.utc)
+                    if modified > cutoff:
+                        continue
+                    items.append({
+                        "path": str(path.resolve()),
+                        "root": str(root.resolve()),
+                        "bytes": stat.st_size,
+                        "modifiedUtc": modified.isoformat(),
+                        "ageDays": (dt.datetime.now(dt.timezone.utc) - modified).days,
+                    })
+                except OSError as exc:
+                    errors.append(str(exc))
+        return {
+            "olderThanDays": older_than_days,
+            "items": sorted(items, key=lambda item: item["path"]),
+            "totalBytes": sum(item["bytes"] for item in items),
+            "errors": errors[:20],
+            "safety": "Only old log/temp files are reported. No ClientAppSettings, executables, or game assets are included.",
+        }
+
+    def clean(self, older_than_days: int = 7, force: bool = False) -> dict[str, Any]:
+        report = self.report(older_than_days)
+        quarantine = self.state_root / "quarantine" / dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%S")
+        if not force:
+            return {"dryRun": True, "movedFiles": 0, "movedBytes": 0, "quarantine": str(quarantine), "report": report}
+        quarantine.mkdir(parents=True, exist_ok=True)
+        moved = 0
+        moved_bytes = 0
+        for item in report["items"]:
+            source = Path(item["path"])
+            try:
+                relative = source.relative_to(Path(item["root"]))
+                destination = quarantine / Path(item["root"]).name / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                if destination.exists():
+                    destination = destination.with_name(destination.name + "-" + os.urandom(3).hex())
+                shutil.move(str(source), str(destination))
+                moved += 1
+                moved_bytes += int(item["bytes"])
+            except OSError:
+                continue
+        return {"dryRun": False, "movedFiles": moved, "movedBytes": moved_bytes, "quarantine": str(quarantine), "report": report}
 
 
 class OptimizerCore:
@@ -942,17 +1327,15 @@ class OptimizerCore:
             flags["FFlagHandleAltEnterFullscreenManually"] = "True"
 
         # Graphics quality (allowlisted FRM override).
-        quality = GRAPHICS_QUALITY.get(settings.graphics_quality)
-        if quality is not None:
-            flags["DFIntDebugFRMQualityLevelOverride"] = quality
+        # V3 extended graphics tiers 0-21. 0 is automatic; 1-6 are low;
+        # 7-21 are high/micro levels from the legacy 21-level slider.
+        quality = str(settings.graphics_tier)
+        flags["DFIntDebugFRMQualityLevelOverride"] = quality
 
-        # Texture quality / "lower hidden textures".
-        texture = TEXTURE_QUALITY.get(settings.texture_quality)
-        if settings.lower_textures and texture is None:
-            texture = "1"
-        if texture is not None:
-            flags["DFFlagTextureQualityOverrideEnabled"] = "True"
-            flags["DFIntTextureQualityOverride"] = texture
+        # Texture tiers 0-3 / "lower hidden textures".
+        texture = str(settings.texture_tier)
+        flags["DFFlagTextureQualityOverrideEnabled"] = "True"
+        flags["DFIntTextureQualityOverride"] = texture
 
         # Anti-aliasing.
         msaa = MSAA_SAMPLES.get(settings.msaa)
@@ -978,9 +1361,26 @@ class OptimizerCore:
         # remove buildings, change game lighting, create x-ray/fullbright, or
         # alter gameplay geometry.
         if settings.vfx_reducer:
-            flags["DFIntDebugFRMQualityLevelOverride"] = "1"
             flags["DFFlagTextureQualityOverrideEnabled"] = "True"
-            flags["DFIntTextureQualityOverride"] = "1"
+            flags["DFIntTextureQualityOverride"] = str(min(settings.texture_tier, 1))
+            flags["FIntDebugForceMSAASamples"] = "1"
+            flags["FIntGrassMovementReducedMotionFactor"] = "0"
+
+        # "Reduce building/geometry lag": the strongest SAFE local detail
+        # reduction. It lowers draw/LOD distances and grass rendering; it does
+        # not delete buildings, alter collision, create x-ray, or change game
+        # lighting. All keys are in the published local allowlist set above.
+        if settings.building_lag_reducer:
+            building_lod = GEOMETRY_PRESETS["Building Lag"]
+            flags["DFIntCSGLevelOfDetailSwitchingDistance"] = building_lod[0]
+            flags["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = building_lod[1]
+            flags["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = building_lod[2]
+            flags["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = building_lod[3]
+            flags["FIntFRMMaxGrassDistance"] = "0"
+            flags["FIntFRMMinGrassDistance"] = "0"
+            flags["DFFlagDebugPauseVoxelizer"] = "True"
+            flags["DFFlagTextureQualityOverrideEnabled"] = "True"
+            flags["DFIntTextureQualityOverride"] = str(min(settings.texture_tier, 1))
             flags["FIntDebugForceMSAASamples"] = "1"
             flags["FIntGrassMovementReducedMotionFactor"] = "0"
 
@@ -1011,6 +1411,11 @@ class OptimizerCore:
             notes.append(
                 "Bright UI changes this app's contrast only. It does not add full bright, "
                 "x-ray, building removal, or game-lighting changes."
+            )
+        if settings.building_lag_reducer:
+            notes.append(
+                "Building-lag mode reduces geometry LOD and grass distance through local JSON. "
+                "It does not remove buildings or change collision."
             )
         return notes
 
@@ -1318,9 +1723,33 @@ def run_self_test() -> int:
         assert "no client injection" in snapshot.notification.lower()
         assert snapshot.rows()[0] == ("Session state", "Roblox client running")
 
+        # V3 extended tiers, optimization modes, feature catalog and cache quarantine.
+        tier_settings = OptimizerSettings(
+            fps_target=144,
+            graphics_tier=21,
+            texture_tier=0,
+            legacy_fps_flag=True,
+            building_lag_reducer=True,
+        )
+        tier_flags = core.build_flags(tier_settings)
+        assert tier_flags["DFIntDebugFRMQualityLevelOverride"] == "21"
+        assert tier_flags["DFIntTextureQualityOverride"] == "0"
+        assert tier_flags[LEGACY_FPS_FLAG] == "144"
+        assert set(tier_flags).issubset(MANAGED_FLAGS)
+        mode_settings = SafeOptimizationEngine.apply_mode(OptimizerSettings(), "Reduce building lag")
+        assert mode_settings.optimization_mode == "Reduce building lag"
+        assert mode_settings.building_lag_reducer is True
+        catalog = load_feature_status()
+        assert any(f["id"] == "dll-injector" and not f["implemented"] for f in catalog["features"])
+        assert any(f["id"] == "telemetry-disable" and not f["implemented"] for f in catalog["features"])
+        cache = SafeCacheCleaner()
+        cache_report = cache.report(7)
+        assert cache_report["olderThanDays"] == 7
+        assert "ClientAppSettings" in cache_report["safety"]
+
         print(
             f"SELF-TEST OK: {len(versions)} versions, {len(result.profile_paths)} profiles, "
-            f"{len(flags)} flags, V2 session=safe."
+            f"{len(flags)} flags, V2 session=safe, V3 tiers/modes/catalog/cache=safe."
         )
         return 0
 
@@ -1577,6 +2006,7 @@ if HAS_TK:
             self.current_page = "Dashboard"
             self.busy = False
             self._setting_preset = False
+            self._setting_mode = False
             self._syncing_fps = False
             self._preview_job: str | None = None
             self.session_detector = SessionDetector()
@@ -1624,9 +2054,11 @@ if HAS_TK:
             self.hidden_textures_var = tk.BooleanVar(value=settings.lower_textures)
             self.grass_var = tk.BooleanVar(value=settings.reduce_grass_motion)
             self.vfx_var = tk.BooleanVar(value=settings.vfx_reducer)
+            self.building_lag_reducer_var = tk.BooleanVar(value=settings.building_lag_reducer)
             self.notifications_var = tk.BooleanVar(value=settings.notifications)
             self.bright_ui_var = tk.BooleanVar(value=settings.bright_ui)
             self.roblox_username_var = tk.StringVar(value=settings.roblox_username)
+            self.optimization_mode_var = tk.StringVar(value=settings.optimization_mode)
             self.preset_var = tk.StringVar(value=settings.preset)
             self.renderer_var = tk.StringVar(value=settings.renderer)
             self.graphics_quality_var = tk.StringVar(value=settings.graphics_quality)
@@ -2412,6 +2844,82 @@ if HAS_TK:
                 justify="left",
             ).pack(anchor="w", padx=18, pady=(0, 16))
 
+            # Safe Optimization Engine: better FPS, building-lag reduction and
+            # auto-selected performance. Explicitly no DLL injection.
+            engine_outer, engine_body = self._card(grid, padding=18)
+            engine_outer.grid(row=3, column=0, columnspan=3, sticky="nsew", pady=(0, 10))
+            tk.Label(
+                engine_body,
+                text="SAFE OPTIMIZATION ENGINE  •  NO DLL INJECTOR",
+                bg=CARD,
+                fg=ACCENT_2,
+                font=(FONT_UI, 10, "bold"),
+            ).pack(anchor="w", padx=18, pady=(16, 4))
+            tk.Label(
+                engine_body,
+                text=(
+                    "Pick Better FPS, Reduce building lag, Maximum performance, or let the app choose "
+                    "a better mode from local CPU/RAM hints. Every mode writes reversible JSON only."
+                ),
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 9),
+                wraplength=980,
+                justify="left",
+            ).pack(anchor="w", padx=18, pady=(0, 10))
+
+            engine_controls = tk.Frame(engine_body, bg=CARD)
+            engine_controls.pack(fill="x", padx=18, pady=(0, 6))
+            tk.Label(
+                engine_controls,
+                text="Optimization mode",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8, "bold"),
+            ).pack(anchor="w")
+            self.optimization_mode_combo = ttk.Combobox(
+                engine_controls,
+                textvariable=self.optimization_mode_var,
+                values=list(OPTIMIZATION_MODES),
+                state="readonly",
+                font=(FONT_UI, 9),
+                width=28,
+            )
+            self.optimization_mode_combo.pack(side="left", pady=(3, 0))
+            ttk.Button(
+                engine_controls,
+                text=AUTO_MODE_LABEL,
+                style="Ghost.TButton",
+                command=self._auto_choose_mode,
+            ).pack(side="left", padx=(10, 0), pady=(3, 0))
+
+            building_row = tk.Frame(engine_controls, bg=CARD)
+            building_row.pack(side="left", padx=(24, 0), pady=(3, 0))
+            ToggleSwitch(
+                building_row,
+                variable=self.building_lag_reducer_var,
+                command=self._schedule_preview,
+            ).pack(side="left")
+            tk.Label(
+                building_row,
+                text="Reduce building / geometry lag",
+                bg=CARD,
+                fg=WARNING,
+                font=(FONT_UI, 8, "bold"),
+            ).pack(side="left", padx=(8, 0))
+
+            self.optimization_mode_desc = tk.Label(
+                engine_body,
+                text="",
+                bg=CARD,
+                fg=SUCCESS,
+                font=(FONT_UI, 9, "bold"),
+                wraplength=980,
+                justify="left",
+            )
+            self.optimization_mode_desc.pack(anchor="w", padx=18, pady=(4, 14))
+            self._refresh_optimization_mode_label()
+
         def _build_optimizer(self, page: tk.Frame) -> None:
             inner = self._scrollable(page)
             self._section_title(
@@ -2534,6 +3042,18 @@ if HAS_TK:
                 "Uses the allowlisted reduced-motion grass factor.",
                 self.grass_var,
             )
+            self._toggle_row(
+                render_body,
+                "VFX / World Detail Reducer",
+                "Lowers quality, texture, MSAA and motion flags for smoother frames.",
+                self.vfx_var,
+            )
+            self._toggle_row(
+                render_body,
+                "Reduce Building / Geometry Lag",
+                "Lowest safe LOD and grass draw distance. Does NOT remove buildings.",
+                self.building_lag_reducer_var,
+            )
 
             dropdowns = tk.Frame(render_body, bg=CARD)
             dropdowns.pack(fill="x", padx=18, pady=(8, 14))
@@ -2545,6 +3065,14 @@ if HAS_TK:
             self._dropdown(dropdowns, "Texture quality", self.texture_quality_var, list(TEXTURE_QUALITY), 1, 2)
             self._dropdown(dropdowns, "Anti-aliasing", self.msaa_var, list(MSAA_SAMPLES), 2, 0)
             self._dropdown(dropdowns, "Grass motion", self.grass_motion_var, list(GRASS_MOTION), 2, 2)
+            self._dropdown(
+                dropdowns,
+                "Optimization mode",
+                self.optimization_mode_var,
+                list(OPTIMIZATION_MODES),
+                3,
+                0,
+            )
 
             tk.Label(
                 render_body,
@@ -3020,6 +3548,7 @@ if HAS_TK:
                 self.hidden_textures_var,
                 self.grass_var,
                 self.vfx_var,
+                self.building_lag_reducer_var,
                 self.notifications_var,
                 self.bright_ui_var,
                 self.legacy_var,
@@ -3036,6 +3565,7 @@ if HAS_TK:
             ):
                 variable.trace_add("write", self._on_setting_changed)
             self.preset_var.trace_add("write", self._on_preset_changed)
+            self.optimization_mode_var.trace_add("write", self._on_optimization_mode_changed)
 
         def _on_preset_changed(self, *_args: Any) -> None:
             if self._setting_preset:
@@ -3055,10 +3585,12 @@ if HAS_TK:
                     else:
                         # Map a few explicit names used by the preset table.
                         mapping = {
+                            "legacy_fps_flag": self.legacy_var,
                             "optimize_rendering": self.render_paths_var,
                             "lower_textures": self.hidden_textures_var,
                             "reduce_grass_motion": self.grass_var,
                             "vfx_reducer": self.vfx_var,
+                            "building_lag_reducer": self.building_lag_reducer_var,
                             "notifications": self.notifications_var,
                             "bright_ui": self.bright_ui_var,
                         }
@@ -3074,10 +3606,77 @@ if HAS_TK:
                 # it must not immediately be relabeled as "Custom".
                 self._on_preset_changed()
                 return
+            if variable is self.optimization_mode_var:
+                self._on_optimization_mode_changed()
+                return
             self._mark_custom()
 
-        def _on_setting_changed(self, *_args: Any) -> None:
+        def _refresh_optimization_mode_label(self) -> None:
+            if not hasattr(self, "optimization_mode_desc"):
+                return
+            mode = self.optimization_mode_var.get()
+            info = OPTIMIZATION_MODES.get(mode)
+            if info:
+                text = f"{mode}: {info['description']}"
+            else:
+                text = "Choose a safe, non-injecting optimization mode."
+            self.optimization_mode_desc.configure(text=text)
+
+        def _on_optimization_mode_changed(self, *_args: Any) -> None:
+            if self._setting_mode:
+                return
             if self._setting_preset:
+                # A preset is already loading its own values; just update text.
+                self._refresh_optimization_mode_label()
+                return
+            name = self.optimization_mode_var.get()
+            if name not in OPTIMIZATION_MODES:
+                return
+            self._setting_mode = True
+            previous_preset_guard = self._setting_preset
+            self._setting_preset = True
+            try:
+                values = OPTIMIZATION_MODES[name]["values"]
+                mapping = {
+                    "preset": self.preset_var,
+                    "legacy_fps_flag": self.legacy_var,
+                    "optimize_rendering": self.render_paths_var,
+                    "lower_textures": self.hidden_textures_var,
+                    "reduce_grass_motion": self.grass_var,
+                    "vfx_reducer": self.vfx_var,
+                    "building_lag_reducer": self.building_lag_reducer_var,
+                    "notifications": self.notifications_var,
+                    "bright_ui": self.bright_ui_var,
+                    "graphics_quality": self.graphics_quality_var,
+                    "texture_quality": self.texture_quality_var,
+                    "msaa": self.msaa_var,
+                    "grass_motion": self.grass_motion_var,
+                }
+                for key, value in values.items():
+                    if key == "fps_target":
+                        self._set_fps(int(value))
+                    elif key in mapping:
+                        mapping[key].set(value)
+                self._refresh_optimization_mode_label()
+            finally:
+                self._setting_preset = previous_preset_guard
+                self._setting_mode = False
+            self._schedule_preview()
+
+        def _auto_choose_mode(self) -> None:
+            profile = SafeOptimizationEngine.detect_profile()
+            mode = SafeOptimizationEngine.choose_mode(profile)
+            self.optimization_mode_var.set(mode)
+            self._on_optimization_mode_changed()
+            self._toast(f"Chose {mode} for {profile.tier} hardware.", "success")
+            self.emit_log(
+                "info",
+                f"Safe Optimization Engine selected {mode} "
+                f"({profile.cpu_cores} cores, {profile.memory_gb:.1f} GB RAM, {profile.source}).",
+            )
+
+        def _on_setting_changed(self, *_args: Any) -> None:
+            if self._setting_preset or self._setting_mode:
                 return
             self._mark_custom()
 
@@ -3086,6 +3685,11 @@ if HAS_TK:
                 self._setting_preset = True
                 self.preset_var.set("Custom")
                 self._setting_preset = False
+            if not self._setting_mode and self.optimization_mode_var.get() != "Custom":
+                self._setting_mode = True
+                self.optimization_mode_var.set("Custom")
+                self._setting_mode = False
+            self._refresh_optimization_mode_label()
             self._schedule_preview()
 
         def _on_fps_slider(self, value: str) -> None:
@@ -3154,9 +3758,11 @@ if HAS_TK:
                 lower_textures=bool(self.hidden_textures_var.get()),
                 reduce_grass_motion=bool(self.grass_var.get()),
                 vfx_reducer=bool(self.vfx_var.get()),
+                building_lag_reducer=bool(self.building_lag_reducer_var.get()),
                 notifications=bool(self.notifications_var.get()),
                 bright_ui=bool(self.bright_ui_var.get()),
                 roblox_username=self.roblox_username_var.get(),
+                optimization_mode=self.optimization_mode_var.get(),
                 preset=self.preset_var.get(),
                 renderer=self.renderer_var.get(),
                 graphics_quality=self.graphics_quality_var.get(),
@@ -3618,6 +4224,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fps", type=int, help=f"set FPS target ({FPS_MIN}-{FPS_MAX})")
     parser.add_argument("--all-versions", action="store_true", help="apply to every detected version")
     parser.add_argument("--no-launch", action="store_true", help="do not launch Roblox when applying")
+    parser.add_argument("--mode", choices=[name for name in OPTIMIZATION_MODES if name != "Custom"], help="apply a safe optimization mode")
+    parser.add_argument("--auto-mode", action="store_true", help="auto-select a mode from local CPU/RAM hints")
+    parser.add_argument("--graphics-tier", type=int, help=f"set extended graphics tier {GRAPHICS_TIER_MIN}-{GRAPHICS_TIER_MAX}")
+    parser.add_argument("--texture-tier", type=int, help=f"set texture tier {TEXTURE_TIER_MIN}-{TEXTURE_TIER_MAX}")
+    parser.add_argument("--features", action="store_true", help="print the shared feature status catalog and exit")
+    parser.add_argument("--tiers", action="store_true", help="print graphics and texture tier information and exit")
+    parser.add_argument("--modes", action="store_true", help="print optimization modes and exit")
+    parser.add_argument("--build-info", action="store_true", help="print build and safety information and exit")
+    parser.add_argument("--cache-report", action="store_true", help="report old log/temp cache files and exit")
+    parser.add_argument("--cache-clean", action="store_true", help="quarantine old log/temp cache files (dry run without --cache-force)")
+    parser.add_argument("--cache-days", type=int, default=7, help="minimum age in days for cache cleanup (1-90)")
+    parser.add_argument("--cache-force", action="store_true", help="actually quarantine files with --cache-clean")
     return parser
 
 
@@ -3625,11 +4243,51 @@ def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     if args.self_test:
         return run_self_test()
+    if args.features:
+        print(json.dumps(load_feature_status(), indent=2, ensure_ascii=False))
+        return 0
+    if args.tiers:
+        print(json.dumps({
+            "graphics": [{"value": i, "label": graphics_tier_label(i), "flag": "DFIntDebugFRMQualityLevelOverride"} for i in range(GRAPHICS_TIER_MIN, GRAPHICS_TIER_MAX + 1)],
+            "texture": [{"value": i, "label": texture_tier_label(i), "flag": "DFIntTextureQualityOverride"} for i in range(TEXTURE_TIER_MIN, TEXTURE_TIER_MAX + 1)],
+            "note": "Values above 10 are legacy/micro levels; Roblox may change or ignore them."
+        }, indent=2, ensure_ascii=False))
+        return 0
+    if args.modes:
+        print(json.dumps({name: info for name, info in OPTIMIZATION_MODES.items()}, indent=2, ensure_ascii=False))
+        return 0
+    if args.build_info:
+        print(json.dumps({
+            "product": "Roptimer Hub V3",
+            "pythonApp": APP_VERSION,
+            "dotnetApp": "3.0.0",
+            "platform": "Windows 10+ / Python 3.10+ / .NET 8",
+            "safety": {"injection": False, "memoryReads": False, "telemetryDisable": False, "antiCheatBypass": False}
+        }, indent=2, ensure_ascii=False))
+        return 0
+    if args.cache_report or args.cache_clean:
+        cleaner = SafeCacheCleaner()
+        payload = cleaner.clean(args.cache_days, force=args.cache_force) if args.cache_clean else cleaner.report(args.cache_days)
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 0
 
     core = OptimizerCore(logger=default_logger)
     settings = core.settings
+    if args.mode:
+        SafeOptimizationEngine.apply_mode(settings, args.mode)
+    if args.auto_mode:
+        profile = SystemProfile.detect()
+        chosen = SafeOptimizationEngine.choose_mode(profile)
+        SafeOptimizationEngine.apply_mode(settings, chosen)
+        default_logger("info", f"Auto-selected {chosen} for {profile.tier} hardware.")
     if args.fps is not None:
         settings.fps_target = max(FPS_MIN, min(FPS_MAX, int(args.fps)))
+    if args.graphics_tier is not None:
+        settings.graphics_tier = args.graphics_tier
+        settings.graphics_quality = graphics_tier_label(args.graphics_tier)
+    if args.texture_tier is not None:
+        settings.texture_tier = args.texture_tier
+        settings.texture_quality = texture_tier_label(args.texture_tier)
     if args.all_versions:
         settings.target_scope = "All detected versions + shared profile"
     if args.no_launch:

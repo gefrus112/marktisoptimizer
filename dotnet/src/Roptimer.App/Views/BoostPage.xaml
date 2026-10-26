@@ -1,0 +1,78 @@
+<Page x:Class="Roptimer.App.Views.BoostPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d" d:DesignHeight="620" d:DesignWidth="850"
+      Background="Transparent" Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0,8,24">
+            <TextBlock Text="Boost" Style="{StaticResource TitleText}" />
+            <TextBlock Text="Choose a safe optimization mode or build your own with graphics tiers 0-21, texture tiers 0-3, and allowlisted rendering flags." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,12">
+                    <StackPanel>
+                        <TextBlock Text="OPTIMIZATION MODE" Style="{StaticResource SectionText}" />
+                        <ComboBox x:Name="ModeCombo" SelectedValuePath="Name" DisplayMemberPath="Name" SelectionChanged="ModeCombo_SelectionChanged" />
+                        <TextBlock x:Name="ModeDescription" Style="{StaticResource MutedText}" Margin="0,0,0,10" />
+                        <Button Content="Auto choose best mode" Click="AutoChoose_Click" Style="{StaticResource PrimaryButton}" />
+                        <TextBlock x:Name="AutoProfileText" Style="{StaticResource MutedText}" Margin="0,10,0,0" />
+                        <TextBlock Text="LOCAL DISPLAY NAME" Style="{StaticResource SectionText}" Margin="0,18,0,4" />
+                        <TextBox x:Name="DisplayNameBox" FontFamily="Segoe UI" TextChanged="NameChanged" />
+                        <TextBlock Text="Typed locally only. No Roblox account data is read." Style="{StaticResource MutedText}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="PERFORMANCE CONTROLS" Style="{StaticResource SectionText}" />
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Legacy FPS target" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="FpsLabel" Grid.Column="1" Text="144" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="FpsSlider" Minimum="60" Maximum="240" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SliderChanged" />
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Graphics tier 0-21" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="GraphicsTierLabel" Grid.Column="1" Text="1" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="GraphicsTierSlider" Minimum="0" Maximum="21" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SliderChanged" />
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Texture tier 0-3" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="TextureTierLabel" Grid.Column="1" Text="1" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="TextureTierSlider" Minimum="0" Maximum="3" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SliderChanged" />
+                        <CheckBox x:Name="LegacyCheck" Content="Write legacy DFIntTaskSchedulerTargetFps" Click="CheckChanged" />
+                        <CheckBox x:Name="VfxCheck" Content="VFX / world detail reducer" Click="CheckChanged" />
+                        <CheckBox x:Name="BuildingLagCheck" Content="Reduce building / geometry lag" Click="CheckChanged" />
+                        <CheckBox x:Name="AllVersionsCheck" Content="Apply to all detected Roblox versions" Click="CheckChanged" />
+                        <CheckBox x:Name="LaunchAfterApplyCheck" Content="Launch Roblox after apply" Click="CheckChanged" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Text="GENERATED BOOST CLI COMMAND" Style="{StaticResource SectionText}" />
+                        <TextBox x:Name="CommandBox" IsReadOnly="True" Margin="0,8,0,8" FontFamily="Consolas" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="Copy command" Click="CopyCommand_Click" />
+                            <Button Content="Refresh preview" Click="RefreshPreview_Click" />
+                            <Button Content="Apply settings" Click="Apply_Click" Style="{StaticResource PrimaryButton}" />
+                            <Button Content="Restore" Click="Restore_Click" Style="{StaticResource DangerButton}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBox x:Name="PreviewBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" MinHeight="190" FontFamily="Consolas" FontSize="11" />
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Card}">
+                <TextBlock Style="{StaticResource MutedText}" Text="Reminder: DFIntTaskSchedulerTargetFps is a legacy compatibility flag and may be ignored by current allowlisted Roblox clients. Use Roblox Settings > Maximum Framerate for the supported cap. Extended tiers 0-21 use the allowlisted DFIntDebugFRMQualityLevelOverride flag; values above 10 are legacy/micro levels." />
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

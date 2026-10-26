@@ -1,0 +1,45 @@
+name: Build Windows .NET EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - arena/dfe7eccf-robloxclinetbooster
+    paths:
+      - "dotnet/**"
+      - "feature-status.json"
+      - ".github/workflows/build-windows.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build, self-test and package
+        shell: pwsh
+        working-directory: dotnet
+        run: |
+          ./build-windows.ps1 -Configuration Release -Runtime win-x64
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roptimer-Windows-x64
+          path: |
+            dotnet/artifacts/Roptimer-Windows-x64.zip
+            dotnet/artifacts/Roptimer-DotNet-Source.zip
+            dotnet/artifacts/SHA256SUMS.txt
+            dotnet/artifacts/publish/Roptimer.exe
+            dotnet/artifacts/publish/RoptimerBoost.exe
+          if-no-files-found: error

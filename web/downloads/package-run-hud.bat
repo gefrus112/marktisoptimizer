@@ -1,5 +1,5 @@
 @echo off
-title Roptimer HUD
+title Roptimer HUD V3
 cd /d "%~dp0"
 where py >nul 2>nul
 if %errorlevel%==0 (

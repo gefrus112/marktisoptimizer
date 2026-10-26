@@ -1,0 +1,75 @@
+<Page x:Class="Roptimer.App.Views.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d" d:DesignHeight="620" d:DesignWidth="850"
+      Background="Transparent" Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0,8,24">
+            <TextBlock Text="Settings" Style="{StaticResource TitleText}" />
+            <TextBlock Text="Appearance, delivery, notifications, cache maintenance, and safety preferences." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,12">
+                    <StackPanel>
+                        <TextBlock Text="APPEARANCE" Style="{StaticResource SectionText}" />
+                        <TextBlock Text="Theme" Style="{StaticResource MutedText}" Margin="0,12,0,4" />
+                        <ComboBox x:Name="ThemeCombo" SelectionChanged="ThemeCombo_SelectionChanged">
+                            <ComboBoxItem Content="Lumina" />
+                            <ComboBoxItem Content="Midnight" />
+                            <ComboBoxItem Content="Frost" />
+                        </ComboBox>
+                        <CheckBox x:Name="BrightUiCheck" Content="High-contrast app UI (does not change Roblox lighting)" Click="SettingsChangedClick" />
+                        <CheckBox x:Name="NotificationsCheck" Content="In-app notifications" Click="SettingsChangedClick" />
+                        <TextBlock Text="APP PRIVACY" Style="{StaticResource SectionText}" Margin="0,18,0,6" />
+                        <TextBlock Text="Roptimer sends no analytics or telemetry. Roblox's own telemetry, Crashpad, Backtrace, and screenshot/reporting systems are intentionally untouched." Style="{StaticResource MutedText}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="DELIVERY &amp; CACHE" Style="{StaticResource SectionText}" />
+                        <CheckBox x:Name="AllVersionsCheck" Content="Write to all detected Roblox versions" Click="SettingsChangedClick" />
+                        <CheckBox x:Name="LegacyFpsCheck" Content="Write legacy FPS flag for older clients" Click="SettingsChangedClick" />
+                        <CheckBox x:Name="LaunchAfterApplyCheck" Content="Launch Roblox after applying" Click="SettingsChangedClick" />
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Cache quarantine age" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="CacheDaysLabel" Grid.Column="1" Text="7 days" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="CacheDaysSlider" Minimum="1" Maximum="90" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SettingsChangedValue" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,10">
+                            <Button Content="Report cache" Click="ReportCache_Click" />
+                            <Button Content="Quarantine old cache" Click="CleanCache_Click" Style="{StaticResource PrimaryButton}" />
+                        </StackPanel>
+                        <TextBox x:Name="CacheReportBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="110" FontSize="10" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="FEATURE STATUS MATRIX" Style="{StaticResource SectionText}" Margin="0,0,0,10" />
+                    <DataGrid x:Name="FeatureGrid" AutoGenerateColumns="False" IsReadOnly="True" Height="230">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Feature" Binding="{Binding Name}" Width="2*" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="1.2*" />
+                            <DataGridTextColumn Header="Flag / scope" Binding="{Binding Flag}" Width="1.5*" />
+                            <DataGridTextColumn Header="Details" Binding="{Binding Details}" Width="3*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="SETTINGS FILE" Style="{StaticResource SectionText}" />
+                    <TextBox x:Name="SettingsPathBox" IsReadOnly="True" Margin="0,10,0,10" FontFamily="Segoe UI" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Save settings" Click="Save_Click" Style="{StaticResource PrimaryButton}" />
+                        <Button Content="Open data folder" Click="OpenFolder_Click" />
+                        <Button Content="Reset to defaults" Click="Reset_Click" Style="{StaticResource DangerButton}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

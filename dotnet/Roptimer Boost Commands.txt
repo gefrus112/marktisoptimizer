@@ -1,0 +1,37 @@
+ROPTIMER BOOST CLI — WINDOWS COMMANDS
+=====================================
+
+Open the desktop app:
+  RoptimerBoost.exe open
+
+Auto-pick a safe mode, apply it, and open the app:
+  RoptimerBoost.exe bootstrap
+
+Auto-apply and launch Roblox through roblox://:
+  RoptimerBoost.exe bootstrap --launch
+
+Preview exact ClientAppSettings.json flags:
+  RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
+
+Apply a mode to all discovered versions:
+  RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
+
+Restore managed flags:
+  RoptimerBoost.exe restore
+
+Session snapshot, modes, tiers, features:
+  RoptimerBoost.exe session
+  RoptimerBoost.exe modes
+  RoptimerBoost.exe tiers
+  RoptimerBoost.exe features
+
+Safe cache maintenance (old log/temp files only):
+  RoptimerBoost.exe cache-report --days 7
+  RoptimerBoost.exe cache-clean --days 7 --force
+
+Headless validation:
+  RoptimerBoost.exe self-test
+
+SAFETY
+  No DLL injection, process hooks, memory reads/writes, Roblox telemetry disabling,
+  fullbright, x-ray, building removal, anti-cheat bypass, or automation.

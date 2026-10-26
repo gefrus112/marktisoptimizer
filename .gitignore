@@ -32,3 +32,19 @@ roblox-optimizer-log.txt
 .idea/
 .DS_Store
 Thumbs.db
+
+# .NET / WPF
+.tmp_references/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pdb
+*.cache
+!web/downloads/*.exe
+
+# .NET build output
+dotnet/**/bin/
+dotnet/**/obj/
+dotnet/artifacts/

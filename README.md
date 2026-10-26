@@ -1,278 +1,177 @@
-# Roptimzier V2 — Roblox FPS & Performance Optimizer
+# Roptimer Hub V3 — safe Roblox performance bootstrapper
 
-A **safe, performance-only** Roblox Windows client settings utility written in one Python file, plus an offline ROPTIMER download portal and a separate HUD companion. Version 2 adds a safe Session panel that detects a running Roblox client using OS metadata, shows a locally typed display name, and sends an in-app readiness notification.
+A **safe, performance-only** Roblox Windows settings utility. Version 3 adds an original **C#/.NET 8 WPF desktop app** with a Bubblestrap/Bloxstrap-inspired settings layout, a custom shield app icon, a blue Lumina interface, a Settings tab, and a safe `RoptimerBoost.exe` CLI/bootstrapper.
 
-> **No hacks. No injection. No memory/account reads.** The app writes a reversible `ClientAppSettings.json` file, backs up the previous file, and can restore it. It does not patch executables/DLLs, inject code, hook the renderer, read game memory or account data, add fullbright, automate gameplay, or bypass Roblox anti-cheat.
+> **No hacks. No injection. No memory/account reads.** The app writes reversible `ClientAppSettings.json` files, backs them up, and can restore them. It does not inject DLLs, patch executables/DLLs, hook the renderer, read game memory or account data, disable Roblox telemetry/Crashpad/Backtrace, add fullbright/x-ray, remove buildings, automate gameplay, or bypass anti-cheat.
 
 ---
 
 ## What is included
 
-| File | Purpose |
+| Path | Purpose |
 | --- | --- |
-| `roblox_fps_optimizer.py` | Complete single-file Tkinter desktop app, core logic, CLI, and self-tests |
-| `roptimer_hud.py` | Safe separate always-on-top ROPTIMER HUD window (FPS target, ping, CPU/RAM hints, notifications) |
-| `web/index.html` | Red-themed offline **ROPTIMER** download portal with Download / Features / Screenshots / Safety tabs |
-| `web/assets/` | SVG screenshots, favicon, website icon, Python-app icon, HUD icon, PNG and ICO exports |
-| `web/downloads/` | Downloadable `Roptimzier.py`, `roptimer_hud.py`, `hud-settings.json`, and `Roptimzier-Windows.zip` |
-| `assets/` | Icon copies used by the source Python apps at runtime |
-| `build_downloads.py` | Regenerates `web/downloads/` and the Windows ZIP package after code or icon changes |
-| `requirements.txt` | Runtime dependencies (none required) |
-| `requirements-optional.txt` | Optional `psutil` for process detection and HUD CPU/RAM hints |
+| `dotnet/Roptimer.sln` | C#/.NET 8 solution for the V3 Windows app |
+| `dotnet/src/Roptimer.App` | WPF desktop app — `Roptimer.exe` |
+| `dotnet/src/Roptimer.Core` | Shared services, FastFlags, settings, backup/restore, session detection, cache quarantine, feature catalog, CLI runner, self-test |
+| `dotnet/src/Roptimer.Cli` | Console Boost CLI — `RoptimerBoost.exe` |
+| `dotnet/build-windows.ps1` | Build, self-test, publish, and package on Windows |
+| `.github/workflows/build-windows.yml` | GitHub Actions workflow that builds the real Windows EXEs |
+| `feature-status.json` | Shared implemented / legacy / rejected feature catalog |
+| `web/index.template.html` | Source template for the blue Lumina download portal |
+| `web/index.html` | Generated static website |
+| `web/downloads/` | Generated download files and packages |
+| `roblox_fps_optimizer.py` | Legacy single-file Python/Tkinter optimizer, updated to V3 CLI parity |
+| `roptimer_hud.py` | Separate always-on-top HUD, updated to V3 |
+| `build_website.py` | Generates `web/index.html` from the template and feature catalog |
+| `build_downloads.py` | Regenerates the website and all download packages |
 
 ---
 
-## Run the desktop app
+## Version 3 desktop app
 
-Requires **Windows**, **Python 3.10+**, and a Python build that includes **Tkinter**.
+The WPF app uses a left navigation rail, breadcrumb, card-based pages, and a bottom Save / Save & Launch / Close bar, similar to Bubblestrap's settings-window layout. No Bubblestrap or Bloxstrap source code or assets are copied; only the general navigation pattern was used as visual inspiration.
+
+Pages:
+
+- **Dashboard** — quick modes, hardware profile, Roblox version count, feature status.
+- **Boost** — optimization mode, FPS target, graphics tier 0–21, texture tier 0–3, VFX reducer, building-lag reducer, generated CLI command, and JSON preview.
+- **FastFlags** — exact generated `ClientAppSettings.json`, managed flag matrix, allowlist status.
+- **Session** — safe OS-level client detection, locally typed display name, readiness notification.
+- **Settings** — theme, delivery options, cache quarantine, feature status matrix, settings file.
+- **Safety** — explicit audit of implemented and rejected features.
+- **About** — version, commands, sources, and layout attribution.
+
+The blue Lumina theme has no green neon status dots.
+
+---
+
+## Safe feature matrix
+
+| Requested idea | Status in V3 |
+| --- | --- |
+| Unlocking FPS / `DFIntTaskSchedulerTargetFps` | **Legacy only.** Written for older clients, clearly labelled as possibly ignored by current allowlisted clients. Use Roblox Settings > Maximum Framerate for supported FPS changes. |
+| Better FPS / optimization modes | **Implemented.** Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. |
+| Reduce building lag | **Implemented safely.** Lowers geometry LOD distance, grass distance, textures, MSAA, and motion. Does not remove buildings or change collision. |
+| Texture and cache alterations | **Implemented safely.** Texture tiers 0–3 through the allowlisted texture override, plus conservative quarantine of old log/temp files. No aggressive in-memory cache garbage collection. |
+| Extended graphic tiers | **Implemented.** `DFIntDebugFRMQualityLevelOverride` values 0–21. Values above 10 are legacy/micro levels and may change or be ignored. |
+| Client detection / username / notification | **Implemented safely.** OS process/window metadata only; display name is typed locally. No account data extraction. |
+| CLI injector / “boost strap” | **Reinterpreted as a safe CLI controller.** `RoptimerBoost.exe` can open the app, apply settings, restore, preview JSON, inspect session metadata, and quarantine old cache files. It never injects a DLL. |
+| Disabling Crashpad / Backtrace / telemetry / screenshot uploads | **Rejected.** Hidden diagnostic flags are not allowlisted and are not written. Roptimer sends no analytics of its own, but leaves Roblox diagnostics untouched. |
+| DLL injection, fullbright, x-ray, building removal, anti-cheat bypass, automation | **Rejected.** |
+
+---
+
+## Build the Windows EXEs
+
+Requirements:
+
+- Windows 10/11
+- .NET 8 SDK
+- .NET 8 Desktop Runtime to run the framework-dependent single-file EXEs
 
 ```powershell
-cd path\to\robloxclinetbooster
-python roblox_fps_optimizer.py
+.\dotnet\build-windows.ps1
 ```
 
-No third-party package is required. If `psutil` is installed, the app uses it only to identify the currently running Roblox executable:
-
-```powershell
-python -m pip install -r requirements-optional.txt
-```
-
-### Package as a Windows `.exe`
-
-```powershell
-python -m pip install pyinstaller
-pyinstaller --noconfirm --onefile --windowed ^
-  --name "Roptimzier" ^
-  --icon assets\roptimzier-app.ico ^
-  --add-data "assets\roptimzier-app.ico;assets" ^
-  roblox_fps_optimizer.py
-```
-
-The executable will be in `dist\`. The `--add-data` option embeds the custom app icon so the window title bar uses it. For the HUD, use `--icon assets\roptimer-hud.ico` and add `assets\roptimer-hud.ico;assets`.
-
----
-
-## Desktop app features
-
-- Modern dark gaming UI using the requested `#1e1e24` panel color and neon accents, now with custom red app icons.
-- Sidebar navigation: **Dashboard, Quick Setup, Optimizer, Client Link, JSON Preview, Activity Log, Safe Guide**.
-- **Quick Setup** page with big switches for FPS target, Performance Boost, Lag Rescue, VFX / world detail reducer, notifications, Bright UI and client sync.
-- **Lag Rescue** preset: one click for the lowest safe graphics settings when a game stutters.
-- **VFX reducer**: lowers safe graphics load with allowlisted quality/texture/MSAA/motion flags. It does not remove buildings, add full bright, or create x-ray vision.
-- **Bright UI**: high-contrast app theme only; it never changes Roblox world lighting.
-- **Notifications**: in-app toast messages for apply, restore, sync and auto-sync events.
-- FPS slider and exact input from **60** to **9999**.
-- Quick presets: 60, 120, 144, 165, 240, 9999/MAX, plus **Lag Rescue**.
-- Toggle switches for:
-  - **Optimize Rendering Paths**
-  - **Lower Hidden Textures**
-  - **Reduce Grass Motion**
-  - **Write legacy `DFIntTaskSchedulerTargetFps`**
-- Graphics dropdowns for renderer, graphics quality, texture quality, anti-aliasing, and grass motion.
-- Prominent **Apply Optimizations & Launch** button.
-- In-window status log with success, warning and error colors.
-- Detects any common Windows Roblox player version:
-  - `%LOCALAPPDATA%\Roblox\Versions\version-*`
-  - `%ProgramFiles(x86)%\Roblox\Versions`
-  - `%ProgramFiles%\Roblox\Versions`
-  - Windows Registry `clientExe` path
-  - Optional running-process path via `psutil`
-  - User-selected custom `version-*` folder
-- Can write to the active version, **every detected version**, a custom folder, or the persistent shared `%LOCALAPPDATA%\Roblox\ClientSettings` profile.
-- Auto-syncs newly created Roblox version folders.
-- Creates `ClientSettings\ClientAppSettings.json` if missing.
-- Merges only its own managed keys and preserves unrelated keys.
-- Creates timestamped backups before every write.
-- One-click **Restore** returns previous managed values and removes optimizer-only files.
-- Launches Roblox through the normal `roblox://` protocol, with a safe website fallback.
-
----
-
-## Version 2 safe session panel
-
-V2 adds a **Session** page that detects a running Roblox client using only normal OS metadata:
-
-- optional `psutil` process paths (no memory access);
-- the foreground Windows window title (OS metadata only);
-- the detected `version-*` folder name;
-- a locally typed Roblox display name and the local Windows username.
-
-It shows an in-app toast such as:
-
-> Roptimer V2 is ready for your Roblox session — local settings only, no client injection.
-
-It does **not** inject a DLL, hook the renderer, call `ReadProcessMemory`, read Roblox account usernames/tokens, join an experience, inspect player lists/chat, add fullbright, remove buildings, create x-ray, or bypass anti-cheat. The display name is typed by the user and stored locally in `state.json`.
-
-The Session page also exposes the safe V2 controls: FPS target, Performance Boost, world/building detail reducer, Lag Rescue, Bright UI (app only), and a large safety banner.
-
----
-
-## Important 2026 compatibility note
-
-Roblox introduced a local FastFlag allowlist in September 2025. The legacy flag:
-
-```json
-{
-  "DFIntTaskSchedulerTargetFps": 144
-}
-```
-
-is **not on the current allowlist**, so modern clients normally ignore it. Writing an unlisted key is harmless according to Roblox — it is simply ignored — but it should not be presented as a guaranteed FPS unlock. This app still supports the requested legacy flag for older client builds and labels it clearly.
-
-For the supported frame-rate control, use the in-experience menu:
-
-**Esc → Settings → Maximum Framerate**
-
-Roblox’s official supported maximum is **240 FPS**. Values such as `9999` are only a ceiling, not a promise of 9999 real frames per second; extremely high values can cause heat, stutter, or physics instability.
-
-The active rendering optimizations use keys from Roblox’s published allowlist, such as:
-
-- `DFIntDebugFRMQualityLevelOverride`
-- `DFFlagTextureQualityOverrideEnabled`
-- `DFIntTextureQualityOverride`
-- `FIntDebugForceMSAASamples`
-- `DFFlagDebugPauseVoxelizer`
-- `DFIntCSGLevelOfDetailSwitchingDistance*`
-- `FFlagDebugGraphicsPreferD3D11` / `FFlagDebugGraphicsPreferVulkan` / `FFlagDebugGraphicsPreferOpenGL`
-- `FIntGrassMovementReducedMotionFactor`
-
-Roblox can change the allowlist at any time.
-
----
-
-## Example generated JSON
-
-```json
-{
-  "DFFlagDebugPauseVoxelizer": "True",
-  "DFFlagTextureQualityOverrideEnabled": "True",
-  "DFIntCSGLevelOfDetailSwitchingDistance": "100",
-  "DFIntCSGLevelOfDetailSwitchingDistanceL12": "75",
-  "DFIntCSGLevelOfDetailSwitchingDistanceL23": "100",
-  "DFIntCSGLevelOfDetailSwitchingDistanceL34": "150",
-  "DFIntDebugFRMQualityLevelOverride": "1",
-  "DFIntTaskSchedulerTargetFps": "144",
-  "DFIntTextureQualityOverride": "1",
-  "FFlagHandleAltEnterFullscreenManually": "True",
-  "FIntDebugForceMSAASamples": "1",
-  "FIntGrassMovementReducedMotionFactor": "0"
-}
-```
-
-Target location:
+Outputs in `dotnet/artifacts`:
 
 ```text
-%LOCALAPPDATA%\Roblox\Versions\version-*\ClientSettings\ClientAppSettings.json
+Roptimer.exe
+RoptimerBoost.exe
+Roptimer-Windows-x64.zip
+Roptimer-DotNet-Source.zip
+SHA256SUMS.txt
 ```
 
-Some builds also read:
-
-```text
-%LOCALAPPDATA%\Roblox\ClientSettings\ClientAppSettings.json
-```
-
-Settings are read when Roblox starts. **Close and reopen Roblox after applying.**
+GitHub Actions runs the same build on `windows-latest` when the `.NET` source or workflow changes, and uploads the Windows package as an artifact.
 
 ---
 
-## ROPTIMER website and Roptimer HUD
+## Boost CLI commands
 
-The website is a **download portal**, not a web app. It uses a red/black ROPTIMER theme and focuses on one job: helping you download **Roptimzier V2**.
+```powershell
+RoptimerBoost.exe open
+RoptimerBoost.exe bootstrap --launch
+RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
+RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
+RoptimerBoost.exe restore
+RoptimerBoost.exe session
+RoptimerBoost.exe features
+RoptimerBoost.exe tiers
+RoptimerBoost.exe modes
+RoptimerBoost.exe cache-report --days 7
+RoptimerBoost.exe cache-clean --days 7 --force
+RoptimerBoost.exe self-test
+RoptimerBoost.exe build-info
+```
 
-Open `web/index.html` directly in a browser, or serve it locally:
+`RoptimerBoost.exe open` is the Windows command to launch the desktop app. `bootstrap` chooses a recommended mode, applies safe local settings, and opens the desktop app; add `--launch` to also open Roblox through `roblox://`.
+
+---
+
+## Legacy Python tools
+
+The original single-file Python app remains as a companion/fallback. It writes the same kind of reversible local JSON settings.
+
+```powershell
+py -3 roblox_fps_optimizer.py
+py -3 roptimer_hud.py --settings hud-settings.json
+```
+
+Headless checks:
 
 ```bash
-python -m http.server 8000 --directory web
+python3 roblox_fps_optimizer.py --self-test
+python3 roblox_fps_optimizer.py --preview
+python3 roblox_fps_optimizer.py --features
+python3 roblox_fps_optimizer.py --tiers
+python3 roblox_fps_optimizer.py --modes
+python3 roblox_fps_optimizer.py --cache-report --cache-days 7
+python3 roblox_fps_optimizer.py --build-info
+python3 roptimer_hud.py --self-test
 ```
 
-Then visit `http://localhost:8000`.
-
-### Website features
-
-- Four tabs: **Download, Features, Screenshots, Safety**.
-- Animated red grid, particles, glow rings, scanlines, glitch title, parallax app card, reveal animations, ripple buttons, ticker and scroll progress.
-- Real icon assets: website favicon, website icon, Python-app icon and HUD icon (SVG, PNG and ICO).
-- Four SVG screenshot-style UI previews: Dashboard, Quick Setup, Roptimer HUD and V2 Session.
-- Download buttons for the complete Windows ZIP, `Roptimzier.py`, `roptimer_hud.py`, and `hud-settings.json`.
-- Feature cards for FPS target, Performance Boost, Lag Rescue, VFX reducer, notifications, Bright UI, separate HUD, one-click restore, safe session panel, local display name, readiness notification and no-fullbright boundary.
-- Safety FAQ that clearly states: no injector, no full bright exploit, no building removal, no x-ray, no memory/account reads, no anti-cheat bypass, and no gameplay automation.
-
-Regenerate the download package after changing the Python apps or icons:
+After changing the Python apps, icons, website template, or feature catalog:
 
 ```bash
-python build_downloads.py
+python3 build_downloads.py
 ```
 
-### Roptimer HUD
-
-`roptimer_hud.py` is a separate always-on-top Python window. It can show:
-
-- your configured **FPS target**;
-- a locally supplied **display name** (or local Windows username);
-- real TCP latency to `www.roblox.com:443` (“ping to Roblox”, not server/game ping);
-- optional CPU/RAM system hints via `psutil`;
-- HUD refresh rate, game profile, V2 readiness notification and alert messages.
-
-It does **not** show a memory-read in-game FPS value or extract a Roblox account username. Roblox already documents built-in Performance Stats / Debug Stats for real in-game FPS and ping [1](https://create.roblox.com/docs/performance-optimization/identify). The HUD can open that official guide.
-
-Run it:
-
-```powershell
-python roptimer_hud.py --settings hud-settings.json
-```
-
-Download `hud-settings.json` from the website’s Download tab (or use the copy inside the ZIP) and place it next to `roptimer_hud.py`, or pass its path with `--settings`.
-
-```powershell
-python roptimer_hud.py --self-test
-python roptimer_hud.py --print-defaults
-python roptimer_hud.py --no-gui
-```
-
-> **No ban-evasion promise:** no third-party tool can guarantee how Roblox will treat it. This project avoids exploit-style behavior by design: no injection, no memory/account reads, no fullbright, no anti-cheat bypass, no gameplay automation, and no hidden files. It writes local settings and runs a separate window.
+This regenerates `web/index.html`, `web/downloads/feature-status.json`, `Roptimer-DotNet-Source.zip`, `Roptimzier-Windows.zip`, and all support files.
 
 ---
 
-## Console / automation commands
+## Website
 
-```powershell
-# Headless correctness test (works on Linux/macOS too)
-python roblox_fps_optimizer.py --self-test
+`web/index.html` is a static blue/purple Lumina-style download portal with six tabs:
 
-# Preview the generated JSON
-python roblox_fps_optimizer.py --preview
-python roblox_fps_optimizer.py --preview --fps 240
+1. Download
+2. Features
+3. Settings
+4. Screenshots
+5. Boost CLI
+6. Safety
 
-# Apply saved settings without opening the GUI
-python roblox_fps_optimizer.py --apply --fps 144 --all-versions --no-launch
+The Settings tab builds a local profile, generates the matching `RoptimerBoost.exe` command, and can download `roptimer-settings.json`.
 
-# Print a safe OS-level V2 session snapshot (no injection, no memory reads)
-python roblox_fps_optimizer.py --session
+Serve locally:
 
-# Restore every location this app changed
-python roblox_fps_optimizer.py --restore
+```bash
+python3 -m http.server 8000 --directory web
 ```
 
-The self-test creates a fake Roblox `Versions` tree in a temporary directory and verifies discovery, JSON merging, backups, multi-version writes, and restore.
-
-State and target snapshots are stored under:
-
-```text
-%APPDATA%\RobloxFpsOptimizer\state.json
-```
+Then open `http://localhost:8000`.
 
 ---
 
-## Official references
+## Safety / compatibility sources
 
-- Roblox DevForum — [Allowlist for local client configuration via Fast Flags](https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569)
-- Roblox Creator Docs — [Identify performance issues / built-in Performance Stats](https://create.roblox.com/docs/performance-optimization/identify)
-- Roblox Support — [Graphics Quality](https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality)
-- Roblox Support — [How to Reduce Lag and Speed Up Play](https://en.help.roblox.com/hc/en-us/articles/203314150-How-to-Reduce-Lag-and-Speed-Up-Play)
-- Roblox DevForum — [Introducing the Maximum Framerate setting](https://devforum.roblox.com/t/introducing-the-maximum-framerate-setting/2995965)
+- Roblox FastFlag allowlist announcement — <https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569>
+- Roblox QualityLevel enum (0–21) — <https://create.roblox.com/docs/reference/engine/enums/QualityLevel>
+- Allowlisted Roblox FastFlags guide and 0–21 FRM range — <https://github.com/dyokism/sober-fastflags>
+- Roblox graphics quality help — <https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality>
+- Roblox built-in performance stats — <https://create.roblox.com/docs/performance-optimization/identify>
+- Bubblestrap layout reference — <https://github.com/ItzBloxxy/Bubblestrap>
+- Bloxstrap original project — <https://github.com/bloxstraplabs/bloxstrap>
 
----
-
-## Disclaimer
-
-This is an independent performance configuration utility. Roblox, Fast Flags, client paths and allowed settings can change without notice. Use the **Restore** button if a client update behaves unexpectedly. The app intentionally avoids exploit-style features and anything that could be considered a hacking toolbox.
+The allowlist can change at any time. Current clients may ignore `DFIntTaskSchedulerTargetFps`; the app labels it as legacy. For real in-game FPS/ping, use Roblox's built-in Performance Stats / Debug Stats overlay.

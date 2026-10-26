@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <defs>
     <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f1117"/><stop offset="1" stop-color="#08070a"/></linearGradient>
-    <linearGradient id="r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff7a35"/><stop offset="1" stop-color="#ff2d3f"/></linearGradient>
+    <linearGradient id="r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#7c5cff"/></linearGradient>
   </defs>
-  <rect width="128" height="128" rx="28" fill="url(#b)" stroke="#ff2d3f" stroke-opacity=".5" stroke-width="3"/>
+  <rect width="128" height="128" rx="28" fill="url(#b)" stroke="#7c5cff" stroke-opacity=".5" stroke-width="3"/>
   <rect x="18" y="24" width="92" height="80" rx="12" fill="#0d0a0d" stroke="#3a1b23" stroke-width="2"/>
-  <path d="M18 42h92" stroke="#ff2d3f" stroke-opacity=".45" stroke-width="2"/>
-  <circle cx="30" cy="33" r="4" fill="#4ef0a3"/><circle cx="42" cy="33" r="4" fill="#ffbf5e"/><circle cx="54" cy="33" r="4" fill="#ff2d3f"/>
+  <path d="M18 42h92" stroke="#7c5cff" stroke-opacity=".45" stroke-width="2"/>
+  <circle cx="30" cy="33" r="4" fill="#22d3ee"/><circle cx="42" cy="33" r="4" fill="#fbbf24"/><circle cx="54" cy="33" r="4" fill="#7c5cff"/>
   <rect x="28" y="54" width="40" height="7" rx="3" fill="#5a3b43"/>
   <rect x="28" y="70" width="52" height="7" rx="3" fill="#5a3b43"/>
   <rect x="28" y="86" width="34" height="7" rx="3" fill="#5a3b43"/>

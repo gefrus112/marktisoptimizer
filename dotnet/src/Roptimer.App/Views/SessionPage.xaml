@@ -1,0 +1,47 @@
+<Page x:Class="Roptimer.App.Views.SessionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d" d:DesignHeight="620" d:DesignWidth="850"
+      Background="Transparent" Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0,8,24">
+            <TextBlock Text="Session" Style="{StaticResource TitleText}" />
+            <TextBlock Text="Safe OS-level client detection only. No DLL injection, memory reads, account-data extraction, or game-state inspection." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,12">
+                    <StackPanel>
+                        <TextBlock Text="LOCAL IDENTITY" Style="{StaticResource SectionText}" />
+                        <TextBlock Text="Roblox display name (typed by you)" Style="{StaticResource MutedText}" Margin="0,12,0,4" />
+                        <TextBox x:Name="DisplayNameBox" FontFamily="Segoe UI" />
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="Save name" Click="SaveName_Click" Style="{StaticResource PrimaryButton}" />
+                            <Button Content="Refresh session" Click="Refresh_Click" />
+                        </StackPanel>
+                        <Border Style="{StaticResource Pill}" Margin="0,18,0,0">
+                            <TextBlock x:Name="StatePill" Text="NO CLIENT DETECTED" Style="{StaticResource PillText}" />
+                        </Border>
+                        <TextBlock x:Name="NotificationText" Style="{StaticResource MutedText}" Margin="0,14,0,0" FontSize="13" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="SESSION METADATA" Style="{StaticResource SectionText}" Margin="0,0,0,10" />
+                        <DataGrid x:Name="SessionGrid" AutoGenerateColumns="False" IsReadOnly="True" Height="250">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Field" Binding="{Binding Label}" Width="*" />
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="2*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBox x:Name="PathsBox" DockPanel.Dock="Bottom" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="70" Margin="0,10,0,0" FontSize="10" />
+                    </DockPanel>
+                </Border>
+            </Grid>
+            <Border Style="{StaticResource Card}">
+                <TextBlock Style="{StaticResource MutedText}" Text="The notification says Roptimer is connected only in the sense that it detected OS process/window metadata. It does not connect to a game server, read player data, or attach to the Roblox process." />
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
