@@ -1,8 +1,8 @@
-# Roblox FPS & Performance Optimizer
+# Roptimzier V2 — Roblox FPS & Performance Optimizer
 
-A **safe, performance-only** Roblox Windows client settings utility written in one Python file, plus an offline web companion that generates the same JSON profile.
+A **safe, performance-only** Roblox Windows client settings utility written in one Python file, plus an offline ROPTIMER download portal and a separate HUD companion. Version 2 adds a safe Session panel that detects a running Roblox client using OS metadata, shows a locally typed display name, and sends an in-app readiness notification.
 
-> **No hacks. No injection. No memory edits.** The app writes a reversible `ClientAppSettings.json` file, backs up the previous file, and can restore it. It does not patch executables/DLLs, inject code, hook the renderer, read game memory, automate gameplay, or bypass Roblox anti-cheat.
+> **No hacks. No injection. No memory/account reads.** The app writes a reversible `ClientAppSettings.json` file, backs up the previous file, and can restore it. It does not patch executables/DLLs, inject code, hook the renderer, read game memory or account data, add fullbright, automate gameplay, or bypass Roblox anti-cheat.
 
 ---
 
@@ -88,6 +88,25 @@ The executable will be in `dist\`. The `--add-data` option embeds the custom app
 
 ---
 
+## Version 2 safe session panel
+
+V2 adds a **Session** page that detects a running Roblox client using only normal OS metadata:
+
+- optional `psutil` process paths (no memory access);
+- the foreground Windows window title (OS metadata only);
+- the detected `version-*` folder name;
+- a locally typed Roblox display name and the local Windows username.
+
+It shows an in-app toast such as:
+
+> Roptimer V2 is ready for your Roblox session — local settings only, no client injection.
+
+It does **not** inject a DLL, hook the renderer, call `ReadProcessMemory`, read Roblox account usernames/tokens, join an experience, inspect player lists/chat, add fullbright, remove buildings, create x-ray, or bypass anti-cheat. The display name is typed by the user and stored locally in `state.json`.
+
+The Session page also exposes the safe V2 controls: FPS target, Performance Boost, world/building detail reducer, Lag Rescue, Bright UI (app only), and a large safety banner.
+
+---
+
 ## Important 2026 compatibility note
 
 Roblox introduced a local FastFlag allowlist in September 2025. The legacy flag:
@@ -158,7 +177,7 @@ Settings are read when Roblox starts. **Close and reopen Roblox after applying.*
 
 ## ROPTIMER website and Roptimer HUD
 
-The website is now a **download portal**, not a web app. It uses a red/black ROPTIMER theme and focuses on one job: helping you download Roptimzier.
+The website is a **download portal**, not a web app. It uses a red/black ROPTIMER theme and focuses on one job: helping you download **Roptimzier V2**.
 
 Open `web/index.html` directly in a browser, or serve it locally:
 
@@ -173,10 +192,10 @@ Then visit `http://localhost:8000`.
 - Four tabs: **Download, Features, Screenshots, Safety**.
 - Animated red grid, particles, glow rings, scanlines, glitch title, parallax app card, reveal animations, ripple buttons, ticker and scroll progress.
 - Real icon assets: website favicon, website icon, Python-app icon and HUD icon (SVG, PNG and ICO).
-- Three SVG screenshot-style UI previews: Dashboard, Quick Setup and Roptimer HUD.
+- Four SVG screenshot-style UI previews: Dashboard, Quick Setup, Roptimer HUD and V2 Session.
 - Download buttons for the complete Windows ZIP, `Roptimzier.py`, `roptimer_hud.py`, and `hud-settings.json`.
-- Feature cards for FPS target, Performance Boost, Lag Rescue, VFX reducer, notifications, Bright UI, separate HUD, client sync, and one-click restore.
-- Safety FAQ that clearly states: no injector, no full bright exploit, no building removal, no x-ray, no memory edits, no anti-cheat bypass, and no gameplay automation.
+- Feature cards for FPS target, Performance Boost, Lag Rescue, VFX reducer, notifications, Bright UI, separate HUD, one-click restore, safe session panel, local display name, readiness notification and no-fullbright boundary.
+- Safety FAQ that clearly states: no injector, no full bright exploit, no building removal, no x-ray, no memory/account reads, no anti-cheat bypass, and no gameplay automation.
 
 Regenerate the download package after changing the Python apps or icons:
 
@@ -189,11 +208,12 @@ python build_downloads.py
 `roptimer_hud.py` is a separate always-on-top Python window. It can show:
 
 - your configured **FPS target**;
+- a locally supplied **display name** (or local Windows username);
 - real TCP latency to `www.roblox.com:443` (“ping to Roblox”, not server/game ping);
 - optional CPU/RAM system hints via `psutil`;
-- HUD refresh rate, game profile and notification messages.
+- HUD refresh rate, game profile, V2 readiness notification and alert messages.
 
-It does **not** show a memory-read in-game FPS value. Roblox already documents built-in Performance Stats / Debug Stats for real in-game FPS and ping [1](https://create.roblox.com/docs/performance-optimization/identify). The HUD can open that official guide.
+It does **not** show a memory-read in-game FPS value or extract a Roblox account username. Roblox already documents built-in Performance Stats / Debug Stats for real in-game FPS and ping [1](https://create.roblox.com/docs/performance-optimization/identify). The HUD can open that official guide.
 
 Run it:
 
@@ -201,7 +221,7 @@ Run it:
 python roptimer_hud.py --settings hud-settings.json
 ```
 
-Download `hud-settings.json` from the website’s HUD Settings section and place it next to `roptimer_hud.py`, or pass its path with `--settings`.
+Download `hud-settings.json` from the website’s Download tab (or use the copy inside the ZIP) and place it next to `roptimer_hud.py`, or pass its path with `--settings`.
 
 ```powershell
 python roptimer_hud.py --self-test
@@ -209,7 +229,7 @@ python roptimer_hud.py --print-defaults
 python roptimer_hud.py --no-gui
 ```
 
-> **No ban-evasion promise:** no third-party tool can guarantee how Roblox will treat it. This project avoids exploit-style behavior by design: no injection, no memory reads, no anti-cheat bypass, no gameplay automation, and no hidden files. It writes local settings and runs a separate window.
+> **No ban-evasion promise:** no third-party tool can guarantee how Roblox will treat it. This project avoids exploit-style behavior by design: no injection, no memory/account reads, no fullbright, no anti-cheat bypass, no gameplay automation, and no hidden files. It writes local settings and runs a separate window.
 
 ---
 
@@ -225,6 +245,9 @@ python roblox_fps_optimizer.py --preview --fps 240
 
 # Apply saved settings without opening the GUI
 python roblox_fps_optimizer.py --apply --fps 144 --all-versions --no-launch
+
+# Print a safe OS-level V2 session snapshot (no injection, no memory reads)
+python roblox_fps_optimizer.py --session
 
 # Restore every location this app changed
 python roblox_fps_optimizer.py --restore

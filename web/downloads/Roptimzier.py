@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Roblox FPS & Performance Optimizer
-==================================
+Roptimzier V2 — Roblox FPS & Performance Optimizer
+==================================================
 
 A single-file, dependency-free Python/Tkinter desktop utility that writes a
 SAFE, reversible ``ClientAppSettings.json`` performance profile to Roblox
 Windows installations.
+
+Version 2 adds a safe Session panel: it detects a running Roblox client through
+normal OS process/window metadata, shows a locally entered username, and sends
+an in-app readiness notification. It does NOT inject into the client, read game
+memory, extract account data, or add fullbright/exploit visuals.
 
 What this app DOES:
   * Finds ``%LOCALAPPDATA%\\Roblox\\Versions\\version-*`` folders.
@@ -49,8 +54,10 @@ Author: Arena.ai Agent Mode
 from __future__ import annotations
 
 import argparse
+import ctypes
 import dataclasses
 import datetime as dt
+import getpass
 import json
 import os
 import platform
@@ -91,8 +98,8 @@ except Exception as exc:  # pragma: no cover - headless systems
 # App constants and visual language
 # ---------------------------------------------------------------------------
 
-APP_TITLE = "Roptimzier — Roblox FPS & Performance Optimizer"
-APP_VERSION = "1.2.0"
+APP_TITLE = "Roptimzier V2 — Roblox FPS & Performance Optimizer"
+APP_VERSION = "2.0.0"
 APP_SLUG = "RobloxFpsOptimizer"
 BRAND_NAME = "ROPTIMZIER"
 
@@ -345,6 +352,114 @@ class RobloxVersion:
 
 
 @dataclasses.dataclass
+class SessionSnapshot:
+    """Safe, OS-level view of a Roblox session.
+
+    This contains only process paths, an OS window title, and locally supplied
+    usernames. It never contains account tokens, player-list data, chat, game
+    state, memory contents, or anything read from inside the Roblox process.
+    """
+
+    running: bool = False
+    running_paths: list[str] = dataclasses.field(default_factory=list)
+    active_window_title: str = ""
+    local_username: str = ""
+    roblox_username: str = ""
+    version_hint: str = "Not detected"
+    installed_versions: int = 0
+    notification: str = ""
+
+    @property
+    def display_username(self) -> str:
+        return self.roblox_username.strip() or self.local_username.strip() or "Guest"
+
+    def rows(self) -> list[tuple[str, str]]:
+        title = self.active_window_title or "Not exposed by Windows"
+        return [
+            ("Session state", "Roblox client running" if self.running else "Waiting for Roblox"),
+            ("Local Windows user", self.local_username or "Unknown"),
+            ("Display name", self.display_username),
+            ("Roblox version", self.version_hint),
+            ("Installed versions", str(self.installed_versions)),
+            ("Active window title", title[:90]),
+            ("Client paths", "\n".join(self.running_paths[:3]) if self.running_paths else "None"),
+        ]
+
+
+class SessionDetector:
+    """Detect a Roblox client using normal OS metadata only.
+
+    No ``OpenProcess`` with memory permissions, no ``ReadProcessMemory``, no
+    DLL injection, no hooks, and no game/experience data extraction.
+    """
+
+    def __init__(self, system_name: str | None = None) -> None:
+        self.system_name = system_name or platform.system()
+
+    @staticmethod
+    def active_window_title() -> str:
+        """Return the foreground window title on Windows (OS metadata only)."""
+        if platform.system() != "Windows":
+            return ""
+        try:
+            user32 = ctypes.windll.user32
+            hwnd = user32.GetForegroundWindow()
+            if not hwnd:
+                return ""
+            length = user32.GetWindowTextLengthW(hwnd)
+            if length <= 0:
+                return ""
+            buffer = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buffer, length + 1)
+            return buffer.value.strip()
+        except Exception:
+            return ""
+
+    @staticmethod
+    def local_username() -> str:
+        try:
+            return getpass.getuser()
+        except Exception:
+            return os.environ.get("USER") or os.environ.get("USERNAME") or "Unknown"
+
+    def snapshot(
+        self,
+        roblox_username: str = "",
+        installed_versions: int = 0,
+        running_paths: list[Path] | None = None,
+        window_title: str | None = None,
+    ) -> SessionSnapshot:
+        paths = [Path(p) for p in (running_paths or [])]
+        title = self.active_window_title() if window_title is None else window_title
+        version_hint = "Not detected"
+        if paths:
+            parent = paths[0].parent
+            version_hint = parent.name if parent.name else str(parent)
+        name = "".join(ch for ch in str(roblox_username or "") if ch.isprintable()).strip()[:32]
+        local = self.local_username()
+        display = name or local or "your"
+        if paths:
+            notification = (
+                f"Roptimer V2 is ready for {display}'s Roblox session — "
+                "local settings only, no client injection."
+            )
+        else:
+            notification = (
+                "Roptimer V2 is ready. Launch Roblox to use your local performance profile."
+            )
+        return SessionSnapshot(
+            running=bool(paths),
+            running_paths=[str(p) for p in paths],
+            active_window_title=title or "",
+            local_username=local,
+            roblox_username=name,
+            version_hint=version_hint,
+            installed_versions=max(0, int(installed_versions)),
+            notification=notification,
+        )
+
+
+@dataclasses.dataclass
 class OptimizerSettings:
     """All user-selectable optimization settings."""
 
@@ -356,6 +471,7 @@ class OptimizerSettings:
     vfx_reducer: bool = True
     notifications: bool = True
     bright_ui: bool = False
+    roblox_username: str = ""
     preset: str = "Performance"
     renderer: str = "Automatic (recommended)"
     graphics_quality: str = "Ultra low"
@@ -414,6 +530,9 @@ class OptimizerSettings:
         ):
             setattr(self, name, bool(getattr(self, name)))
         self.custom_root = str(self.custom_root or "")
+        # Locally entered display name only. Never read from a Roblox process.
+        cleaned = "".join(ch for ch in str(self.roblox_username or "") if ch.isprintable())
+        self.roblox_username = cleaned.strip()[:32]
 
 
 @dataclasses.dataclass
@@ -1185,7 +1304,24 @@ def run_self_test() -> int:
         final_existing, _ = read_json_object(existing_profile)
         assert final_existing == {"UserCustomFlag": "keep me"}
 
-        print(f"SELF-TEST OK: {len(versions)} versions, {len(result.profile_paths)} profiles, {len(flags)} flags.")
+        # V2 safe session detection: process paths + OS window title only.
+        detector = SessionDetector(system_name="Linux")
+        snapshot = detector.snapshot(
+            roblox_username="ROPTIMER_TEST_USER",
+            installed_versions=len(versions),
+            running_paths=[version_a / "RobloxPlayerBeta.exe"],
+            window_title="Roblox — Performance Test",
+        )
+        assert snapshot.running is True
+        assert snapshot.display_username == "ROPTIMER_TEST_USER"
+        assert snapshot.version_hint == "version-aaaaaaaaaaaaaaaa"
+        assert "no client injection" in snapshot.notification.lower()
+        assert snapshot.rows()[0] == ("Session state", "Roblox client running")
+
+        print(
+            f"SELF-TEST OK: {len(versions)} versions, {len(result.profile_paths)} profiles, "
+            f"{len(flags)} flags, V2 session=safe."
+        )
         return 0
 
 
@@ -1415,6 +1551,7 @@ if HAS_TK:
 
         NAV_ITEMS = (
             ("Dashboard", "◆"),
+            ("Session", "◉"),
             ("Quick Setup", "⚡"),
             ("Optimizer", "⚙"),
             ("Client Link", "⇄"),
@@ -1442,6 +1579,10 @@ if HAS_TK:
             self._setting_preset = False
             self._syncing_fps = False
             self._preview_job: str | None = None
+            self.session_detector = SessionDetector()
+            self.session_snapshot: SessionSnapshot | None = None
+            self._last_session_running = False
+            self.session_labels: dict[str, tk.Label] = {}
 
             self.core.logger = self.emit_log
             self.title(f"{APP_TITLE}  •  v{APP_VERSION}")
@@ -1462,6 +1603,7 @@ if HAS_TK:
             self.protocol("WM_DELETE_WINDOW", self._on_close)
             self.after(100, self._drain_queues)
             self.after(250, self._initial_scan)
+            self.after(900, self._refresh_session)
             self.after(6000, self._watch_versions)
 
         # -- construction --------------------------------------------------
@@ -1484,6 +1626,7 @@ if HAS_TK:
             self.vfx_var = tk.BooleanVar(value=settings.vfx_reducer)
             self.notifications_var = tk.BooleanVar(value=settings.notifications)
             self.bright_ui_var = tk.BooleanVar(value=settings.bright_ui)
+            self.roblox_username_var = tk.StringVar(value=settings.roblox_username)
             self.preset_var = tk.StringVar(value=settings.preset)
             self.renderer_var = tk.StringVar(value=settings.renderer)
             self.graphics_quality_var = tk.StringVar(value=settings.graphics_quality)
@@ -1520,6 +1663,7 @@ if HAS_TK:
                 self.pages[name] = page
 
             self._build_dashboard(self.pages["Dashboard"])
+            self._build_session(self.pages["Session"])
             self._build_quick_setup(self.pages["Quick Setup"])
             self._build_optimizer(self.pages["Optimizer"])
             self._build_client_link(self.pages["Client Link"])
@@ -1848,6 +1992,236 @@ if HAS_TK:
             log_card.pack(fill="both", expand=True, pady=(16, 8))
             self.compact_log = self._make_log_text(log_body, height=7)
             self.compact_log.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+
+        def _build_session(self, page: tk.Frame) -> None:
+            inner = self._scrollable(page)
+            self._section_title(
+                inner,
+                "Session",
+                "V2 detects a running Roblox client through normal OS metadata, shows a local display name, "
+                "and sends a safe readiness notification. No injection and no game-memory access.",
+            )
+
+            status_outer, status_body = self._card(inner, "Safe session status", padding=18)
+            status_outer.pack(fill="x", pady=(0, 14))
+            self.session_status_label = tk.Label(
+                status_body,
+                text="Checking for a Roblox client…",
+                bg=CARD,
+                fg=ACCENT_2,
+                font=(FONT_UI, 18, "bold"),
+            )
+            self.session_status_label.pack(anchor="w", padx=18, pady=(14, 4))
+            self.session_notification_label = tk.Label(
+                status_body,
+                text="Roptimer V2 is ready. Launch Roblox to use your local performance profile.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 9),
+                wraplength=920,
+                justify="left",
+            )
+            self.session_notification_label.pack(anchor="w", padx=18, pady=(0, 12))
+            actions = tk.Frame(status_body, bg=CARD)
+            actions.pack(anchor="w", padx=18, pady=(0, 16))
+            ttk.Button(actions, text="Refresh session", style="Ghost.TButton", command=lambda: self._refresh_session(False)).pack(side="left", padx=(0, 8))
+            ttk.Button(actions, text="Show readiness notification", style="Accent.TButton", command=self._show_session_notification).pack(side="left")
+
+            info = tk.Frame(inner, bg=BG)
+            info.pack(fill="x", pady=(0, 14))
+            info.grid_columnconfigure(0, weight=1, uniform="session")
+            info.grid_columnconfigure(1, weight=1, uniform="session")
+
+            identity_outer, identity_body = self._card(info, "Identity (local only)", padding=16)
+            identity_outer.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+            tk.Label(identity_body, text="Roblox display name (typed by you)", bg=CARD, fg=MUTED, font=(FONT_UI, 9, "bold")).pack(anchor="w", padx=16, pady=(12, 4))
+            ttk.Entry(identity_body, textvariable=self.roblox_username_var, width=34).pack(anchor="w", padx=16, pady=(0, 8))
+            local_name = SessionDetector.local_username()
+            tk.Label(identity_body, text=f"Local Windows user: {local_name}", bg=CARD, fg=ACCENT_2, font=(FONT_UI, 9, "bold")).pack(anchor="w", padx=16, pady=(2, 4))
+            self.session_display_label = tk.Label(identity_body, text="Display name: —", bg=CARD, fg=SUCCESS, font=(FONT_UI, 10, "bold"))
+            self.session_display_label.pack(anchor="w", padx=16, pady=(0, 8))
+            tk.Label(
+                identity_body,
+                text="This name is stored locally. Roptimer does not read Roblox account data, tokens, player lists, chat, or game memory.",
+                bg=CARD,
+                fg=WARNING,
+                font=(FONT_UI, 8),
+                wraplength=430,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            detect_outer, detect_body = self._card(info, "Client detection", padding=16)
+            detect_outer.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
+            for key in (
+                "Session state",
+                "Local Windows user",
+                "Display name",
+                "Roblox version",
+                "Installed versions",
+                "Active window title",
+                "Client paths",
+            ):
+                row = tk.Frame(detect_body, bg=CARD)
+                row.pack(fill="x", padx=16, pady=3)
+                tk.Label(row, text=key, bg=CARD, fg=MUTED, font=(FONT_UI, 8, "bold"), width=20, anchor="w").pack(side="left")
+                value = tk.Label(
+                    row,
+                    text="—",
+                    bg=CARD,
+                    fg=TEXT,
+                    font=(FONT_UI, 8),
+                    anchor="w",
+                    justify="left",
+                    wraplength=390,
+                )
+                value.pack(side="left", fill="x", expand=True)
+                self.session_labels[key] = value
+            tk.Label(
+                detect_body,
+                text="Detection uses process paths and OS window titles only. It cannot see game servers, experience state, or other players.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8),
+                wraplength=430,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(10, 14))
+
+            controls = tk.Frame(inner, bg=BG)
+            controls.pack(fill="x")
+            for col in range(3):
+                controls.grid_columnconfigure(col, weight=1, uniform="session-controls")
+
+            fps_outer, fps_body = self._card(controls, "FPS booster", padding=16)
+            fps_outer.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+            self.session_fps_label = tk.Label(fps_body, text="144 FPS", bg=CARD, fg=ACCENT, font=(FONT_UI, 22, "bold"))
+            self.session_fps_label.pack(anchor="w", padx=16, pady=(12, 4))
+            fps_chips = tk.Frame(fps_body, bg=CARD)
+            fps_chips.pack(anchor="w", padx=16, pady=(0, 10))
+            for value in (60, 120, 144, 240):
+                tk.Button(
+                    fps_chips,
+                    text=str(value),
+                    bg=FIELD,
+                    fg=ACCENT_2,
+                    activebackground=ACCENT,
+                    activeforeground="white",
+                    bd=0,
+                    relief="flat",
+                    font=(FONT_UI, 8, "bold"),
+                    padx=7,
+                    pady=4,
+                    cursor="hand2",
+                    command=lambda v=value: self._set_fps(v),
+                ).pack(side="left", padx=(0, 4))
+            boost_row = tk.Frame(fps_body, bg=CARD)
+            boost_row.pack(fill="x", padx=16, pady=(0, 14))
+            ToggleSwitch(boost_row, variable=self.render_paths_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(boost_row, text="Performance boost", bg=CARD, fg=SUCCESS, font=(FONT_UI, 8, "bold")).pack(side="left", padx=(8, 0))
+
+            world_outer, world_body = self._card(controls, "Reduce building / world lag", padding=16)
+            world_outer.grid(row=0, column=1, sticky="nsew", padx=8)
+            tk.Label(world_body, text="Lower geometry, textures, MSAA and motion load.", bg=CARD, fg=MUTED, font=(FONT_UI, 9), wraplength=260, justify="left").pack(anchor="w", padx=16, pady=(12, 8))
+            vfx_row = tk.Frame(world_body, bg=CARD)
+            vfx_row.pack(fill="x", padx=16, pady=(0, 8))
+            ToggleSwitch(vfx_row, variable=self.vfx_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(vfx_row, text="World detail reducer", bg=CARD, fg=ACCENT_2, font=(FONT_UI, 8, "bold")).pack(side="left", padx=(8, 0))
+            ttk.Button(world_body, text="Activate Lag Rescue", style="Ghost.TButton", command=lambda: self.preset_var.set("Lag Rescue")).pack(anchor="w", padx=16, pady=(0, 12))
+            tk.Label(world_body, text="This does not remove buildings.", bg=CARD, fg=WARNING, font=(FONT_UI, 8, "bold")).pack(anchor="w", padx=16, pady=(0, 14))
+
+            visibility_outer, visibility_body = self._card(controls, "Visibility & lighting", padding=16)
+            visibility_outer.grid(row=0, column=2, sticky="nsew", padx=(8, 0))
+            bright_row = tk.Frame(visibility_body, bg=CARD)
+            bright_row.pack(fill="x", padx=16, pady=(12, 8))
+
+            def on_session_bright_toggle() -> None:
+                self._apply_bright_ui()
+                self._schedule_preview()
+
+            ToggleSwitch(bright_row, variable=self.bright_ui_var, command=on_session_bright_toggle).pack(side="left")
+            tk.Label(bright_row, text="Bright UI (app only)", bg=CARD, fg=WARNING, font=(FONT_UI, 8, "bold")).pack(side="left", padx=(8, 0))
+            tk.Label(visibility_body, text="FULLBRIGHT: NOT INCLUDED", bg=CARD, fg=ERROR, font=(FONT_UI, 10, "bold")).pack(anchor="w", padx=16, pady=(8, 4))
+            tk.Label(
+                visibility_body,
+                text="Changing Roblox world lighting or making walls transparent is exploit-style behavior. V2 only changes this app's contrast and safe local graphics settings.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8),
+                wraplength=260,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            banner_outer, banner_body = self._card(inner, padding=16)
+            banner_outer.pack(fill="x", pady=(16, 8))
+            tk.Label(
+                banner_body,
+                text="V2 SAFETY: NO INJECTION • NO MEMORY READS • NO ACCOUNT DATA EXTRACTION • NO FULLBRIGHT • NO ANTI-CHEAT BYPASS",
+                bg=CARD,
+                fg=ACCENT_2,
+                font=(FONT_UI, 9, "bold"),
+                wraplength=920,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(14, 14))
+
+        def _refresh_session(self, schedule_next: bool = True) -> None:
+            """Refresh safe OS-level session information every few seconds."""
+            try:
+                running_paths = self.core.running_player_paths()
+                snapshot = self.session_detector.snapshot(
+                    roblox_username=self.roblox_username_var.get(),
+                    installed_versions=len(self.versions),
+                    running_paths=running_paths,
+                )
+            except Exception as exc:  # noqa: BLE001
+                snapshot = self.session_detector.snapshot(
+                    roblox_username=self.roblox_username_var.get(),
+                    installed_versions=len(self.versions),
+                    running_paths=[],
+                    window_title="",
+                )
+                self.emit_log("warning", f"Session scan skipped: {exc}")
+
+            self.session_snapshot = snapshot
+            if hasattr(self, "session_status_label"):
+                self.session_status_label.configure(
+                    text="Roblox client detected" if snapshot.running else "Waiting for Roblox",
+                    fg=SUCCESS if snapshot.running else WARNING,
+                )
+            if hasattr(self, "session_notification_label"):
+                self.session_notification_label.configure(text=snapshot.notification)
+            if hasattr(self, "session_display_label"):
+                self.session_display_label.configure(text=f"Display name: {snapshot.display_username}")
+            for key, value in snapshot.rows():
+                label = self.session_labels.get(key)
+                if label is not None:
+                    label.configure(text=value)
+            if snapshot.running and not self._last_session_running:
+                self._toast(snapshot.notification, "success")
+                self.emit_log("info", snapshot.notification)
+            self._last_session_running = snapshot.running
+            if schedule_next:
+                self.after(5000, self._refresh_session)
+
+        def _show_session_notification(self) -> None:
+            snapshot = self.session_snapshot or self.session_detector.snapshot(
+                roblox_username=self.roblox_username_var.get(),
+                installed_versions=len(self.versions),
+                running_paths=self.core.running_player_paths(),
+            )
+            self._toast(snapshot.notification, "success")
+            self.emit_log("info", snapshot.notification)
+
+        def _on_username_changed(self, *_args: Any) -> None:
+            name = self.roblox_username_var.get().strip() or "Guest"
+            if hasattr(self, "session_display_label"):
+                self.session_display_label.configure(text=f"Display name: {name}")
+            if self.session_snapshot is not None:
+                self.session_snapshot.roblox_username = self.roblox_username_var.get().strip()
+                self.session_snapshot.notification = self.session_detector.snapshot(
+                    roblox_username=self.roblox_username_var.get(),
+                    installed_versions=len(self.versions),
+                    running_paths=[Path(p) for p in self.session_snapshot.running_paths],
+                    window_title=self.session_snapshot.active_window_title,
+                ).notification
 
         def _build_quick_setup(self, page: tk.Frame) -> None:
             inner = self._scrollable(page)
@@ -2640,6 +3014,7 @@ if HAS_TK:
 
         def _attach_traces(self) -> None:
             self.fps_entry_var.trace_add("write", self._on_fps_entry)
+            self.roblox_username_var.trace_add("write", self._on_username_changed)
             for variable in (
                 self.render_paths_var,
                 self.hidden_textures_var,
@@ -2761,6 +3136,8 @@ if HAS_TK:
                     self.stat_labels["FPS target"].configure(text=display)
                 if hasattr(self, "quick_fps_label"):
                     self.quick_fps_label.configure(text=display)
+                if hasattr(self, "session_fps_label"):
+                    self.session_fps_label.configure(text=display)
             finally:
                 self._syncing_fps = False
             self._schedule_preview()
@@ -2779,6 +3156,7 @@ if HAS_TK:
                 vfx_reducer=bool(self.vfx_var.get()),
                 notifications=bool(self.notifications_var.get()),
                 bright_ui=bool(self.bright_ui_var.get()),
+                roblox_username=self.roblox_username_var.get(),
                 preset=self.preset_var.get(),
                 renderer=self.renderer_var.get(),
                 graphics_quality=self.graphics_quality_var.get(),
@@ -3231,6 +3609,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--preview", action="store_true", help="print the generated FastFlag JSON and exit")
     parser.add_argument("--apply", action="store_true", help="apply saved settings without opening the GUI")
     parser.add_argument("--restore", action="store_true", help="restore managed settings and exit")
+    parser.add_argument(
+        "--session",
+        action="store_true",
+        help="print a safe OS-level Roblox session snapshot as JSON and exit",
+    )
     parser.add_argument("--no-gui", action="store_true", help="use console mode with --apply/--restore")
     parser.add_argument("--fps", type=int, help=f"set FPS target ({FPS_MIN}-{FPS_MAX})")
     parser.add_argument("--all-versions", action="store_true", help="apply to every detected version")
@@ -3252,6 +3635,31 @@ def main(argv: list[str] | None = None) -> int:
     if args.no_launch:
         settings.launch_after_apply = False
     settings.normalize_in_place()
+
+    if args.session:
+        detector = SessionDetector()
+        try:
+            versions = core.discover_versions()
+            running = core.running_player_paths()
+        except Exception as exc:  # noqa: BLE001
+            default_logger("warning", f"Session discovery limited: {exc}")
+            versions = []
+            running = []
+        snapshot = detector.snapshot(
+            roblox_username=settings.roblox_username,
+            installed_versions=len(versions),
+            running_paths=running,
+        )
+        payload = dataclasses.asdict(snapshot)
+        payload["safety"] = {
+            "injection": False,
+            "memoryReads": False,
+            "accountDataExtraction": False,
+            "fullbright": False,
+            "antiCheatBypass": False,
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 0
 
     if args.preview:
         print(core.preview(settings), end="")

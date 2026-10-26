@@ -14,8 +14,8 @@
   <rect x="60" y="158" width="340" height="50" rx="20" fill="#1c1117"/>
   <rect x="60" y="190" width="340" height="18" fill="#1c1117"/>
   <path d="M60 208h340" stroke="#ff2d3f" stroke-opacity=".3"/>
-  <text x="82" y="189" fill="#ff5a68" font-family="Segoe UI, Arial" font-size="13" font-weight="700">◆ ROPTIMER HUD</text>
-  <text x="318" y="189" fill="#4ef0a3" font-family="Segoe UI, Arial" font-size="9" font-weight="700">SEPARATE WINDOW</text>
+  <text x="82" y="189" fill="#ff5a68" font-family="Segoe UI, Arial" font-size="13" font-weight="700">◆ ROPTIMER HUD V2</text>
+  <text x="318" y="189" fill="#4ef0a3" font-family="Segoe UI, Arial" font-size="9" font-weight="700">NO INJECTION</text>
   <g font-family="Segoe UI, Arial">
     <text x="84" y="246" fill="#9b858d" font-size="11" font-weight="700">FPS TARGET</text><text x="342" y="246" fill="#ff5a68" font-size="16" font-weight="700">144</text>
     <path d="M84 260h292" stroke="#3a1b23"/>
@@ -27,14 +27,15 @@
     <path d="M84 404h292" stroke="#3a1b23"/>
     <text x="84" y="438" fill="#9b858d" font-size="11" font-weight="700">HUD REFRESH</text><text x="322" y="438" fill="#ff5a68" font-size="16" font-weight="700">60 Hz</text>
   </g>
-  <rect x="84" y="460" width="292" height="38" rx="9" fill="#161017" stroke="#3a1b23"/>
-  <text x="100" y="484" fill="#ffbf5e" font-family="Segoe UI, Arial" font-size="10" font-weight="700">PROFILE: SHOOTER / FPS • HIGH</text>
+  <rect x="84" y="454" width="292" height="48" rx="9" fill="#161017" stroke="#3a1b23"/>
+  <text x="100" y="474" fill="#ffbf5e" font-family="Segoe UI, Arial" font-size="10" font-weight="700">USER: RoptimerPlayer_01 (LOCAL)</text>
+  <text x="100" y="492" fill="#9b858d" font-family="Segoe UI, Arial" font-size="9" font-weight="700">PROFILE: SHOOTER / FPS • V2 SAFE MODE</text>
 
   <rect x="450" y="158" width="690" height="360" rx="20" fill="#0e0b0e" stroke="#3a1b23"/>
   <text x="480" y="198" fill="#fff" font-family="Segoe UI, Arial" font-size="18" font-weight="700">Why this is safe</text>
   <g font-family="Segoe UI, Arial" font-size="13">
     <circle cx="494" cy="238" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="243" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="243" fill="#c9b3ba">No DLL injection or process hooks</text>
-    <circle cx="494" cy="282" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="287" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="287" fill="#c9b3ba">No Roblox memory reads or writes</text>
+    <circle cx="494" cy="282" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="287" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="287" fill="#c9b3ba">No memory reads or Roblox account extraction</text>
     <circle cx="494" cy="326" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="331" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="331" fill="#c9b3ba">No full bright / x-ray / building removal</text>
     <circle cx="494" cy="370" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="375" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="375" fill="#c9b3ba">No anti-cheat bypass or stealth</text>
     <circle cx="494" cy="414" r="10" fill="#4ef0a3" opacity=".15"/><text x="490" y="419" fill="#4ef0a3" font-size="11" font-weight="700">✓</text><text x="518" y="419" fill="#c9b3ba">Uses normal TCP ping + optional system hints</text>

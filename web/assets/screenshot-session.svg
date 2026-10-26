@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#181015"/><stop offset="1" stop-color="#08070a"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d3f"/><stop offset="1" stop-color="#ff7a35"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="720" rx="22" fill="url(#bg)"/>
+  <circle cx="1080" cy="80" r="150" fill="#ff2d3f" opacity=".08" filter="url(#glow)"/>
+  <rect x="0" y="0" width="1200" height="66" fill="#121016"/><rect x="0" y="64" width="1200" height="2" fill="#ff2d3f" opacity=".35"/>
+  <text x="32" y="41" fill="#fff" font-family="Segoe UI, Arial" font-size="22" font-weight="700">Roptimzier V2</text>
+  <text x="220" y="40" fill="#8f7c84" font-family="Segoe UI, Arial" font-size="12">SAFE SESSION PANEL</text>
+  <rect x="1008" y="18" width="160" height="30" rx="8" fill="#ff2d3f" opacity=".15" stroke="#ff2d3f" stroke-opacity=".5"/>
+  <text x="1028" y="38" fill="#ff8b96" font-family="Segoe UI, Arial" font-size="11" font-weight="700">V2 • NO INJECTION</text>
+
+  <rect x="0" y="68" width="210" height="652" fill="#0d0b0f"/>
+  <text x="28" y="108" fill="#6e5c64" font-family="Segoe UI, Arial" font-size="10" font-weight="700" letter-spacing="2">WORKSPACE</text>
+  <g font-family="Segoe UI, Arial" font-size="13" font-weight="700">
+    <rect x="18" y="126" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="152" fill="#9d8a91">Dashboard</text>
+    <rect x="18" y="176" width="174" height="42" rx="10" fill="#2a141b"/><rect x="18" y="176" width="4" height="42" fill="#ff2d3f"/><text x="42" y="202" fill="#fff">Session</text>
+    <rect x="18" y="226" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="252" fill="#9d8a91">Quick Setup</text>
+    <rect x="18" y="276" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="302" fill="#9d8a91">Optimizer</text>
+    <rect x="18" y="326" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="352" fill="#9d8a91">Client Link</text>
+    <rect x="18" y="376" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="402" fill="#9d8a91">JSON Preview</text>
+    <rect x="18" y="426" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="452" fill="#9d8a91">Activity Log</text>
+    <rect x="18" y="476" width="174" height="42" rx="10" fill="#151117"/><text x="42" y="502" fill="#9d8a91">Safe Guide</text>
+  </g>
+
+  <text x="246" y="112" fill="#fff" font-family="Segoe UI, Arial" font-size="30" font-weight="700">Session</text>
+  <text x="246" y="138" fill="#9d8a91" font-family="Segoe UI, Arial" font-size="12">Safe client detection, local usernames and V2 readiness notifications.</text>
+
+  <!-- status card -->
+  <rect x="246" y="160" width="908" height="132" rx="18" fill="#1c131a" stroke="#3a1b23"/>
+  <text x="274" y="192" fill="#ff5a68" font-family="Segoe UI, Arial" font-size="10" font-weight="700" letter-spacing="2">SAFE SESSION STATUS</text>
+  <text x="274" y="228" fill="#4ef0a3" font-family="Segoe UI, Arial" font-size="22" font-weight="700">Roblox client detected</text>
+  <text x="274" y="256" fill="#c9b3ba" font-family="Segoe UI, Arial" font-size="11">Roptimer V2 is ready for your Roblox session — local settings only, no client injection.</text>
+  <rect x="274" y="268" width="128" height="14" rx="7" fill="#ff2d3f" opacity=".2"/>
+  <text x="274" y="279" fill="#ff8b96" font-family="Segoe UI, Arial" font-size="9" font-weight="700">READY NOTIFICATION</text>
+
+  <!-- identity + detection -->
+  <rect x="246" y="308" width="446" height="196" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="270" y="338" fill="#fff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">Identity (local only)</text>
+  <text x="270" y="362" fill="#95818a" font-family="Segoe UI, Arial" font-size="10">Roblox display name (typed by you)</text>
+  <rect x="270" y="372" width="398" height="34" rx="9" fill="#0d0b0f" stroke="#4a2630"/>
+  <text x="282" y="394" fill="#ff8b96" font-family="Consolas, monospace" font-size="12">RoptimerPlayer_01</text>
+  <text x="270" y="434" fill="#ff7a35" font-family="Segoe UI, Arial" font-size="10" font-weight="700">Local Windows user: Alex</text>
+  <text x="270" y="454" fill="#4ef0a3" font-family="Segoe UI, Arial" font-size="10" font-weight="700">Display name: RoptimerPlayer_01</text>
+  <text x="270" y="480" fill="#ffbf5e" font-family="Segoe UI, Arial" font-size="9">No Roblox account data, tokens, player lists or chat are read.</text>
+
+  <rect x="708" y="308" width="446" height="196" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="732" y="338" fill="#fff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">Client detection</text>
+  <g font-family="Segoe UI, Arial" font-size="10">
+    <text x="732" y="366" fill="#8e7a82">Session state</text><text x="1110" y="366" fill="#4ef0a3" text-anchor="end">Running</text>
+    <text x="732" y="390" fill="#8e7a82">Roblox version</text><text x="1110" y="390" fill="#ff8b96" text-anchor="end">version-8f3a…</text>
+    <text x="732" y="414" fill="#8e7a82">Installed versions</text><text x="1110" y="414" fill="#ff7a35" text-anchor="end">3</text>
+    <text x="732" y="438" fill="#8e7a82">Active window title</text><text x="1110" y="438" fill="#c9b3ba" text-anchor="end">Roblox</text>
+    <text x="732" y="462" fill="#8e7a82">Client path</text><text x="1110" y="462" fill="#c9b3ba" text-anchor="end">…\Versions\version-…</text>
+  </g>
+  <text x="732" y="488" fill="#6f5d64" font-family="Segoe UI, Arial" font-size="9">OS process paths + window titles only. No game memory.</text>
+
+  <!-- control cards -->
+  <rect x="246" y="520" width="290" height="164" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="270" y="548" fill="#fff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">FPS booster</text>
+  <text x="270" y="582" fill="#ff5a68" font-family="Segoe UI, Arial" font-size="34" font-weight="700">144</text><text x="334" y="582" fill="#8e7a82" font-family="Segoe UI, Arial" font-size="11">FPS target</text>
+  <rect x="270" y="602" width="50" height="28" rx="8" fill="#22161c" stroke="#4a2630"/><text x="286" y="621" fill="#c9b3ba" font-family="Segoe UI, Arial" font-size="10">60</text>
+  <rect x="328" y="602" width="50" height="28" rx="8" fill="#ff2d3f"/><text x="343" y="621" fill="#fff" font-family="Segoe UI, Arial" font-size="10">144</text>
+  <rect x="386" y="602" width="50" height="28" rx="8" fill="#22161c" stroke="#4a2630"/><text x="401" y="621" fill="#c9b3ba" font-family="Segoe UI, Arial" font-size="10">240</text>
+  <rect x="270" y="646" width="46" height="26" rx="13" fill="#ff2d3f"/><circle cx="303" cy="659" r="9" fill="#fff"/>
+  <text x="324" y="663" fill="#4ef0a3" font-family="Segoe UI, Arial" font-size="10" font-weight="700">BOOST ON</text>
+
+  <rect x="552" y="520" width="290" height="164" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="576" y="548" fill="#fff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">Reduce building lag</text>
+  <text x="576" y="572" fill="#95818a" font-family="Segoe UI, Arial" font-size="10">Lower geometry, textures, MSAA and motion.</text>
+  <rect x="576" y="590" width="46" height="26" rx="13" fill="#ff2d3f"/><circle cx="609" cy="603" r="9" fill="#fff"/>
+  <text x="630" y="607" fill="#ff7a35" font-family="Segoe UI, Arial" font-size="10" font-weight="700">WORLD DETAIL</text>
+  <rect x="576" y="632" width="150" height="32" rx="9" fill="#ff2d3f" opacity=".18" stroke="#ff2d3f"/>
+  <text x="594" y="653" fill="#ff8b96" font-family="Segoe UI, Arial" font-size="10" font-weight="700">Activate Lag Rescue</text>
+
+  <rect x="858" y="520" width="296" height="164" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="882" y="548" fill="#fff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">Visibility &amp; lighting</text>
+  <rect x="882" y="566" width="46" height="26" rx="13" fill="#ff2d3f"/><circle cx="915" cy="579" r="9" fill="#fff"/>
+  <text x="936" y="583" fill="#ffbf5e" font-family="Segoe UI, Arial" font-size="10" font-weight="700">BRIGHT UI (APP ONLY)</text>
+  <text x="882" y="620" fill="#ff5470" font-family="Segoe UI, Arial" font-size="13" font-weight="700">FULLBRIGHT: NOT INCLUDED</text>
+  <text x="882" y="646" fill="#95818a" font-family="Segoe UI, Arial" font-size="9">No game lighting changes or x-ray visuals.</text>
+</svg>

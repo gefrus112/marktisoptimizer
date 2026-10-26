@@ -29,8 +29,8 @@ APP_SOURCE = ROOT / "roblox_fps_optimizer.py"
 HUD_SOURCE = ROOT / "roptimer_hud.py"
 
 DEFAULT_HUD_SETTINGS = {
-    "app": "Roptimer HUD",
-    "version": 1,
+    "app": "Roptimer HUD V2",
+    "version": 2,
     "showFps": True,
     "showPing": True,
     "showCpu": True,
@@ -46,6 +46,10 @@ DEFAULT_HUD_SETTINGS = {
     "fpsTarget": 144,
     "laptopClass": "auto",
     "tier": "BALANCED",
+    "robloxUsername": "",
+    "showUsername": True,
+    "sessionNotification": True,
+    "sessionMode": "safe",
     "safety": {
         "injection": False,
         "memoryReads": False,
@@ -76,7 +80,15 @@ QUICK START
   3. Pick a preset. "Lag Rescue" uses the lowest safe graphics settings.
   4. Click "Apply Optimizations & Launch".
   5. Restart Roblox if it was already open.
-  6. Optional: run "Run HUD.bat" for the separate HUD window.
+  6. Optional: open the Session page to see safe OS-level client detection.
+  7. Optional: run "Run HUD.bat" for the separate HUD window.
+  8. Optional: run "py -3 Roptimzier.py --session" for a safe JSON snapshot.
+
+VERSION 2 SESSION PANEL
+  Detects a running Roblox client through normal OS process/window metadata,
+  shows a locally typed display name, and sends a safe readiness notification.
+  It does NOT inject into Roblox, read game memory, extract account usernames,
+  identify other players, or connect to a game server.
 
 SAFETY
   No DLL injection. No Roblox memory reads/writes. No full bright exploit.
