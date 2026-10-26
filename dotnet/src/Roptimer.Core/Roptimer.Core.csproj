@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Roptimer.Core</RootNamespace>
+    <AssemblyName>Roptimer.Core</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="feature-status.json" />
+    <EmbeddedResource Include="feature-status.json" LogicalName="Roptimer.Core.feature-status.json" />
+  </ItemGroup>
+</Project>

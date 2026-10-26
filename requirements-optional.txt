@@ -1,0 +1,3 @@
+# Optional: improves detection of the currently running RobloxPlayerBeta.exe.
+# The optimizer works without it by using registry paths and newest-version fallback.
+psutil>=5.9.8

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#171016"/><stop offset="1" stop-color="#09080b"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="18" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="720" rx="22" fill="url(#bg)"/>
+  <circle cx="1080" cy="100" r="160" fill="#7c5cff" opacity=".08" filter="url(#glow)"/>
+  <rect x="0" y="0" width="1200" height="66" fill="#121016"/>
+  <rect x="0" y="64" width="1200" height="2" fill="#7c5cff" opacity=".35"/>
+  <text x="32" y="41" fill="#fff" font-family="Segoe UI, Arial" font-size="22" font-weight="700">Roptimzier</text>
+  <text x="182" y="40" fill="#8f7c84" font-family="Segoe UI, Arial" font-size="12">PERFORMANCE CONTROL</text>
+  <rect x="1010" y="18" width="158" height="30" rx="8" fill="#7c5cff" opacity=".15" stroke="#7c5cff" stroke-opacity=".5"/>
+  <text x="1034" y="38" fill="#c4b5fd" font-family="Segoe UI, Arial" font-size="11" font-weight="700">SAFE MODE ON</text>
+
+  <rect x="0" y="68" width="210" height="652" fill="#0d0b0f"/>
+  <text x="28" y="108" fill="#6e5c64" font-family="Segoe UI, Arial" font-size="10" font-weight="700" letter-spacing="2">WORKSPACE</text>
+  <g font-family="Segoe UI, Arial" font-size="13" font-weight="700">
+    <rect x="18" y="126" width="174" height="44" rx="10" fill="#2a141b"/><rect x="18" y="126" width="4" height="44" fill="#7c5cff"/><text x="42" y="153" fill="#fff">Dashboard</text>
+    <rect x="18" y="180" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="207" fill="#9d8a91">Quick Setup</text>
+    <rect x="18" y="234" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="261" fill="#9d8a91">Optimizer</text>
+    <rect x="18" y="288" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="315" fill="#9d8a91">Client Link</text>
+    <rect x="18" y="342" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="369" fill="#9d8a91">JSON Preview</text>
+    <rect x="18" y="396" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="423" fill="#9d8a91">Activity Log</text>
+    <rect x="18" y="450" width="174" height="44" rx="10" fill="#151117"/><text x="42" y="477" fill="#9d8a91">Safe Guide</text>
+  </g>
+  <rect x="18" y="618" width="174" height="74" rx="12" fill="#101016" stroke="#243b30"/>
+  <text x="34" y="646" fill="#22d3ee" font-family="Segoe UI, Arial" font-size="11" font-weight="700">NO INJECTION</text>
+  <text x="34" y="666" fill="#8b7a81" font-family="Segoe UI, Arial" font-size="10">Local settings only</text>
+
+  <text x="250" y="112" fill="#fff" font-family="Segoe UI, Arial" font-size="30" font-weight="700">Dashboard</text>
+  <text x="250" y="138" fill="#9d8a91" font-family="Segoe UI, Arial" font-size="12">Performance without cheats, hacks, or unsafe client code.</text>
+
+  <rect x="250" y="164" width="910" height="180" rx="18" fill="#1c131a" stroke="#3a1b23"/>
+  <text x="278" y="202" fill="#a78bfa" font-family="Segoe UI, Arial" font-size="11" font-weight="700" letter-spacing="2">PERFORMANCE CONTROL</text>
+  <text x="278" y="242" fill="#fff" font-family="Segoe UI, Arial" font-size="27" font-weight="700">Tune Roblox rendering through reversible JSON.</text>
+  <text x="278" y="274" fill="#a89199" font-family="Segoe UI, Arial" font-size="13">Writes ClientAppSettings.json, backs up old files, syncs every version, and restores anytime.</text>
+  <rect x="278" y="294" width="150" height="36" rx="9" fill="url(#red)"/><text x="315" y="317" fill="#fff" font-family="Segoe UI, Arial" font-size="12" font-weight="700">Open Optimizer</text>
+  <rect x="442" y="294" width="110" height="36" rx="9" fill="#251a21" stroke="#4a2630"/><text x="470" y="317" fill="#c9b3ba" font-family="Segoe UI, Arial" font-size="12" font-weight="700">View JSON</text>
+
+  <g font-family="Segoe UI, Arial">
+    <rect x="250" y="366" width="212" height="122" rx="16" fill="#161116" stroke="#3a1b23"/><text x="272" y="396" fill="#8e7a82" font-size="10" font-weight="700">DETECTED CLIENTS</text><text x="272" y="440" fill="#a78bfa" font-size="34" font-weight="700">3</text><text x="272" y="466" fill="#6f5d64" font-size="10">version folders</text>
+    <rect x="482" y="366" width="212" height="122" rx="16" fill="#161116" stroke="#3a1b23"/><text x="504" y="396" fill="#8e7a82" font-size="10" font-weight="700">ACTIVE PROFILE</text><text x="504" y="440" fill="#22d3ee" font-size="30" font-weight="700">Lag Rescue</text><text x="504" y="466" fill="#6f5d64" font-size="10">lowest safe details</text>
+    <rect x="714" y="366" width="212" height="122" rx="16" fill="#161116" stroke="#3a1b23"/><text x="736" y="396" fill="#8e7a82" font-size="10" font-weight="700">FPS TARGET</text><text x="736" y="440" fill="#22d3ee" font-size="34" font-weight="700">144</text><text x="736" y="466" fill="#6f5d64" font-size="10">stable cap</text>
+    <rect x="946" y="366" width="214" height="122" rx="16" fill="#161116" stroke="#3a1b23"/><text x="968" y="396" fill="#8e7a82" font-size="10" font-weight="700">MANAGED FLAGS</text><text x="968" y="440" fill="#a78bfa" font-size="34" font-weight="700">12</text><text x="968" y="466" fill="#6f5d64" font-size="10">reversible keys</text>
+  </g>
+
+  <rect x="250" y="510" width="560" height="168" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="274" y="542" fill="#fff" font-family="Segoe UI, Arial" font-size="15" font-weight="700">Quick FPS presets</text>
+  <g font-family="Segoe UI, Arial" font-size="12" font-weight="700">
+    <rect x="274" y="562" width="66" height="38" rx="9" fill="#22161c" stroke="#4a2630"/><text x="296" y="586" fill="#c9b3ba">60</text>
+    <rect x="350" y="562" width="66" height="38" rx="9" fill="#22161c" stroke="#4a2630"/><text x="370" y="586" fill="#c9b3ba">120</text>
+    <rect x="426" y="562" width="66" height="38" rx="9" fill="#7c5cff"/><text x="446" y="586" fill="#fff">144</text>
+    <rect x="502" y="562" width="66" height="38" rx="9" fill="#22161c" stroke="#4a2630"/><text x="522" y="586" fill="#c9b3ba">165</text>
+    <rect x="578" y="562" width="66" height="38" rx="9" fill="#22161c" stroke="#4a2630"/><text x="598" y="586" fill="#c9b3ba">240</text>
+    <rect x="654" y="562" width="90" height="38" rx="9" fill="#22161c" stroke="#4a2630"/><text x="672" y="586" fill="#c9b3ba">MAX</text>
+  </g>
+  <rect x="274" y="620" width="470" height="34" rx="9" fill="#100d11" stroke="#3a1b23"/>
+  <rect x="274" y="620" width="330" height="34" rx="9" fill="url(#red)"/>
+  <text x="292" y="642" fill="#fff" font-family="Segoe UI, Arial" font-size="11" font-weight="700">Apply Optimizations &amp; Launch</text>
+
+  <rect x="830" y="510" width="330" height="168" rx="16" fill="#161116" stroke="#3a1b23"/>
+  <text x="854" y="542" fill="#fbbf24" font-family="Segoe UI, Arial" font-size="13" font-weight="700">Compatibility notice</text>
+  <text x="854" y="570" fill="#a89199" font-family="Segoe UI, Arial" font-size="11">Legacy FPS flags may be ignored by current</text>
+  <text x="854" y="590" fill="#a89199" font-family="Segoe UI, Arial" font-size="11">Roblox allowlisted clients. Use built-in</text>
+  <text x="854" y="610" fill="#a89199" font-family="Segoe UI, Arial" font-size="11">Maximum Framerate for the supported cap.</text>
+  <text x="854" y="642" fill="#ff7a95" font-family="Segoe UI, Arial" font-size="10" font-weight="700">ALLOWLIST AWARE</text>
+</svg>

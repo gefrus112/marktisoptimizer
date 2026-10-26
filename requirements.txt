@@ -1,0 +1,2 @@
+# No third-party runtime dependencies are required.
+# The app uses Python 3.10+ and the standard library (Tkinter, json, pathlib, etc.).

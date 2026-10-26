@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0c10"/><stop offset="0.55" stop-color="#0a080a"/><stop offset="1" stop-color="#180c10"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#7c5cff" stroke-opacity=".06" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1200" height="720" rx="22" fill="url(#wall)"/>
+  <rect width="1200" height="720" fill="url(#grid)"/>
+  <circle cx="980" cy="140" r="210" fill="#7c5cff" opacity=".06"/>
+  <text x="60" y="86" fill="#fff" font-family="Segoe UI, Arial" font-size="30" font-weight="700">Roptimer HUD</text>
+  <text x="60" y="114" fill="#a28b93" font-family="Segoe UI, Arial" font-size="13">Separate always-on-top window • not injected into Roblox</text>
+
+  <rect x="60" y="158" width="340" height="360" rx="20" fill="#100b0f" fill-opacity=".96" stroke="#7c5cff" stroke-opacity=".55" stroke-width="2"/>
+  <rect x="60" y="158" width="340" height="50" rx="20" fill="#1c1117"/>
+  <rect x="60" y="190" width="340" height="18" fill="#1c1117"/>
+  <path d="M60 208h340" stroke="#7c5cff" stroke-opacity=".3"/>
+  <text x="82" y="189" fill="#a78bfa" font-family="Segoe UI, Arial" font-size="13" font-weight="700">◆ ROPTIMER HUD V2</text>
+  <text x="318" y="189" fill="#22d3ee" font-family="Segoe UI, Arial" font-size="9" font-weight="700">NO INJECTION</text>
+  <g font-family="Segoe UI, Arial">
+    <text x="84" y="246" fill="#9b858d" font-size="11" font-weight="700">FPS TARGET</text><text x="342" y="246" fill="#a78bfa" font-size="16" font-weight="700">144</text>
+    <path d="M84 260h292" stroke="#3a1b23"/>
+    <text x="84" y="294" fill="#9b858d" font-size="11" font-weight="700">PING TO ROBLOX</text><text x="320" y="294" fill="#22d3ee" font-size="16" font-weight="700">38 ms</text>
+    <path d="M84 308h292" stroke="#3a1b23"/>
+    <text x="84" y="342" fill="#9b858d" font-size="11" font-weight="700">CPU HINT</text><text x="338" y="342" fill="#22d3ee" font-size="16" font-weight="700">21%</text>
+    <path d="M84 356h292" stroke="#3a1b23"/>
+    <text x="84" y="390" fill="#9b858d" font-size="11" font-weight="700">RAM HINT</text><text x="338" y="390" fill="#22d3ee" font-size="16" font-weight="700">46%</text>
+    <path d="M84 404h292" stroke="#3a1b23"/>
+    <text x="84" y="438" fill="#9b858d" font-size="11" font-weight="700">HUD REFRESH</text><text x="322" y="438" fill="#a78bfa" font-size="16" font-weight="700">60 Hz</text>
+  </g>
+  <rect x="84" y="454" width="292" height="48" rx="9" fill="#161017" stroke="#3a1b23"/>
+  <text x="100" y="474" fill="#fbbf24" font-family="Segoe UI, Arial" font-size="10" font-weight="700">USER: RoptimerPlayer_01 (LOCAL)</text>
+  <text x="100" y="492" fill="#9b858d" font-family="Segoe UI, Arial" font-size="9" font-weight="700">PROFILE: SHOOTER / FPS • V2 SAFE MODE</text>
+
+  <rect x="450" y="158" width="690" height="360" rx="20" fill="#0e0b0e" stroke="#3a1b23"/>
+  <text x="480" y="198" fill="#fff" font-family="Segoe UI, Arial" font-size="18" font-weight="700">Why this is safe</text>
+  <g font-family="Segoe UI, Arial" font-size="13">
+    <circle cx="494" cy="238" r="10" fill="#22d3ee" opacity=".15"/><text x="490" y="243" fill="#22d3ee" font-size="11" font-weight="700">✓</text><text x="518" y="243" fill="#c9b3ba">No DLL injection or process hooks</text>
+    <circle cx="494" cy="282" r="10" fill="#22d3ee" opacity=".15"/><text x="490" y="287" fill="#22d3ee" font-size="11" font-weight="700">✓</text><text x="518" y="287" fill="#c9b3ba">No memory reads or Roblox account extraction</text>
+    <circle cx="494" cy="326" r="10" fill="#22d3ee" opacity=".15"/><text x="490" y="331" fill="#22d3ee" font-size="11" font-weight="700">✓</text><text x="518" y="331" fill="#c9b3ba">No full bright / x-ray / building removal</text>
+    <circle cx="494" cy="370" r="10" fill="#22d3ee" opacity=".15"/><text x="490" y="375" fill="#22d3ee" font-size="11" font-weight="700">✓</text><text x="518" y="375" fill="#c9b3ba">No anti-cheat bypass or stealth</text>
+    <circle cx="494" cy="414" r="10" fill="#22d3ee" opacity=".15"/><text x="490" y="419" fill="#22d3ee" font-size="11" font-weight="700">✓</text><text x="518" y="419" fill="#c9b3ba">Uses normal TCP ping + optional system hints</text>
+  </g>
+  <rect x="480" y="452" width="630" height="40" rx="10" fill="#171017" stroke="#3a1b23"/>
+  <text x="500" y="477" fill="#c4b5fd" font-family="Segoe UI, Arial" font-size="11" font-weight="700">Real in-game FPS/ping: use Roblox Performance Stats / Shift+F5</text>
+
+  <rect x="60" y="548" width="1080" height="124" rx="18" fill="#130e12" stroke="#3a1b23"/>
+  <text x="88" y="582" fill="#fff" font-family="Segoe UI, Arial" font-size="16" font-weight="700">HUD notifications</text>
+  <rect x="88" y="598" width="310" height="52" rx="10" fill="#101b16" stroke="#164e63"/>
+  <text x="108" y="620" fill="#a5f3fc" font-family="Segoe UI, Arial" font-size="10" font-weight="700">PROFILE APPLIED</text>
+  <text x="108" y="638" fill="#67e8f9" font-family="Segoe UI, Arial" font-size="10">Restart Roblox to load settings.</text>
+  <rect x="414" y="598" width="310" height="52" rx="10" fill="#1d1510" stroke="#6a4a20"/>
+  <text x="434" y="620" fill="#ffd18a" font-family="Segoe UI, Arial" font-size="10" font-weight="700">PING SPIKE</text>
+  <text x="434" y="638" fill="#cba46f" font-family="Segoe UI, Arial" font-size="10">Try a wired connection.</text>
+  <rect x="740" y="598" width="370" height="52" rx="10" fill="#1a1014" stroke="#312e81"/>
+  <text x="760" y="620" fill="#c4b5fd" font-family="Segoe UI, Arial" font-size="10" font-weight="700">LAG RESCUE READY</text>
+  <text x="760" y="638" fill="#a5b4fc" font-family="Segoe UI, Arial" font-size="10">Lowest safe graphics profile selected.</text>
+</svg>

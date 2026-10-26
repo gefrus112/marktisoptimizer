@@ -1,0 +1,170 @@
+{
+  "product": "Roptimer Hub V3",
+  "version": "3.0.0",
+  "platform": ".NET 8 / WPF / Windows 10+",
+  "safety": {
+    "injection": false,
+    "memoryReads": false,
+    "memoryWrites": false,
+    "antiCheatBypass": false,
+    "fullbright": false,
+    "xray": false,
+    "buildingRemoval": false,
+    "robloxTelemetryDisable": false,
+    "appTelemetry": false
+  },
+  "features": [
+    {
+      "id": "fps-unlock",
+      "name": "Unlocking FPS",
+      "status": "Legacy / may be ignored",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntTaskSchedulerTargetFps",
+      "details": "Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings > Maximum Framerate for the supported cap up to 240 FPS."
+    },
+    {
+      "id": "texture-cache",
+      "name": "Texture and cache alterations",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntTextureQualityOverride",
+      "details": "Provides texture tiers 0-3 through the allowlisted texture override, plus a conservative cleaner for old Roblox/Roptimer log and temporary files. It does not perform aggressive in-memory cache garbage collection or touch game assets."
+    },
+    {
+      "id": "telemetry-disable",
+      "name": "Disable Roblox telemetry / Crashpad / Backtrace / screenshots",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Roptimer sends no analytics of its own, but it does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems."
+    },
+    {
+      "id": "graphics-tiers",
+      "name": "Extended graphic tiers",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntDebugFRMQualityLevelOverride",
+      "details": "Exposes quality values 0-21 through the allowlisted FRM quality override. Values above 10 use legacy/micro levels and may look different or be ignored as Roblox changes the client."
+    },
+    {
+      "id": "better-fps",
+      "name": "Better FPS / optimization modes",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "multiple allowlisted flags",
+      "details": "Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. All modes write reversible local JSON settings only."
+    },
+    {
+      "id": "building-lag",
+      "name": "Reduce building lag",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntCSGLevelOfDetailSwitchingDistance*",
+      "details": "Reduces geometry LOD distance, grass distance, textures, MSAA and motion. It does not remove buildings, change collision, or alter gameplay geometry."
+    },
+    {
+      "id": "session",
+      "name": "Session detection",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Detects running Roblox processes and OS window titles only. The Roblox display name is typed locally; no account data, player list, chat, game state, or memory is read."
+    },
+    {
+      "id": "bootstrapper",
+      "name": "Safe bootstrapper / CLI",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "RoptimerBoost.exe can preview, apply, restore, inspect a session, clean old cache files, launch Roblox through roblox://, and open the desktop app. It never injects a DLL."
+    },
+    {
+      "id": "dll-injector",
+      "name": "DLL injector / process hooks",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No process injection, DLL loading, renderer hooks, memory patching, or executable modification, even when described as optimization only."
+    },
+    {
+      "id": "exploit-visuals",
+      "name": "Fullbright / x-ray / building removal",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No exploit-style visuals, world lighting changes, transparent walls, collision edits, or building deletion."
+    },
+    {
+      "id": "dotnet-app",
+      "name": "C# .NET 8 WPF app",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Dependency-free WPF desktop app with a Bubblestrap-inspired settings layout, custom shield icon, blue Lumina theme, and local-settings-only bootstrapper."
+    },
+    {
+      "id": "settings-tab",
+      "name": "Settings tab",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Interactive website settings tab for theme, optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, and generated CLI commands."
+    },
+    {
+      "id": "blue-ui",
+      "name": "Blue Lumina interface",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Blue/purple/cyan website and app theme inspired by the provided Lumina Hub reference. No green neon status dots."
+    },
+    {
+      "id": "bootstrapper-exe",
+      "name": "Windows EXE build",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "GitHub Actions builds Roptimer.exe and RoptimerBoost.exe on windows-latest. RoptimerBoost.exe open launches the desktop app; bootstrap applies safe settings first."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Roblox FastFlag allowlist announcement",
+      "url": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"
+    },
+    {
+      "title": "Roblox QualityLevel enum",
+      "url": "https://create.roblox.com/docs/reference/engine/enums/QualityLevel"
+    },
+    {
+      "title": "Allowlisted Roblox FastFlags guide (0-21 FRM levels)",
+      "url": "https://github.com/dyokism/sober-fastflags"
+    },
+    {
+      "title": "Roblox graphics quality help",
+      "url": "https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality"
+    },
+    {
+      "title": "Bubblestrap WPF layout reference",
+      "url": "https://github.com/ItzBloxxy/Bubblestrap"
+    },
+    {
+      "title": "Bloxstrap original project",
+      "url": "https://github.com/bloxstraplabs/bloxstrap"
+    }
+  ]
+}
