@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#040405" />
+  <title>Roptimer — lost in the starfield</title>
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
+  <link rel="stylesheet" href="assets/sirius.css" />
+  <style>
+    body { display:grid; place-items:center; min-height:100vh; padding:24px; text-align:center; }
+    .lost { max-width:680px; padding:44px; border:1px solid var(--line); border-radius:22px; background:rgba(8,8,10,.86); box-shadow:var(--shadow); }
+    .lost .mark { width:70px; height:70px; margin:0 auto 22px; display:grid; place-items:center; border-radius:20px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); font-family:var(--serif); font-size:36px; font-weight:900; }
+    .lost h1 { margin:0 0 10px; font-family:var(--serif); font-size:clamp(38px,7vw,68px); font-weight:400; letter-spacing:-.06em; }
+    .lost p { margin:0 auto 24px; max-width:520px; color:var(--muted); line-height:1.75; }
+    .lost code { color:var(--accent-2); font-family:var(--mono); }
+  </style>
+</head>
+<body>
+  <main class="lost">
+    <div class="mark" aria-hidden="true">R</div>
+    <h1>Lost in the starfield.</h1>
+    <p>That page drifted out of orbit. Jump back to <code>Roptimer Hub</code> and continue with downloads, docs, or the safe Script Hub preview.</p>
+    <a class="button primary" href="./index.html">Return to Roptimer</a>
+  </main>
+</body>
+</html>

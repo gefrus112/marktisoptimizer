@@ -46,3 +46,11 @@ Local reversible `ClientAppSettings.json` writes only. No DLL injection, process
 ## Release binaries
 
 The Windows EXEs are published on the [v3.0.0-windows release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows).
+
+## Website and macOS companion
+
+This WPF app is Windows-only. The repository root also contains the V3.2 Sirius-style dark static website at `web/index.html` with Download, Docs, and Scripts tabs, GitHub Pages deployment, a command palette, animated starfield, and a Python/Tkinter macOS companion.
+
+The macOS companion is packaged by `build_downloads.py` and by `.github/workflows/build-macos.yml`. It writes the same reversible local `ClientAppSettings.json` settings and never injects code into Roblox. See `docs/MAC.md`, `docs/CLI.md`, and `docs/SCRIPT_HUB.md` in the repository root.
+
+The website Script Hub is a local UI preview only; it is not a Roblox script executor.

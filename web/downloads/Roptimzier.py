@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Roptimzier V3 — Roblox FPS & Performance Optimizer
+Roptimer Hub V3.1 — Roblox FPS & Performance Optimizer
 ==================================================
 
 A single-file, dependency-free Python/Tkinter desktop utility that writes a
 SAFE, reversible ``ClientAppSettings.json`` performance profile to Roblox
-Windows installations.
+Windows installations and macOS app bundles.
 
 Version 2 adds a safe Session panel: it detects a running Roblox client through
 normal OS process/window metadata, shows a locally entered username, and sends
@@ -18,13 +18,14 @@ and auto-selected performance modes. It still writes only local JSON settings:
 there is no DLL injector, even for optimization.
 
 What this app DOES:
-  * Finds ``%LOCALAPPDATA%\\Roblox\\Versions\\version-*`` folders.
+  * Finds Windows ``%LOCALAPPDATA%\\Roblox\\Versions\\version-*`` folders.
+  * Finds the macOS ``/Applications/Roblox.app/Contents/MacOS`` settings folder.
   * Finds common Program Files installations and the registered client path.
   * Creates ``ClientSettings`` and writes ``ClientAppSettings.json``.
   * Uses current Roblox-allowlisted rendering flags where possible.
   * Optionally writes the legacy ``DFIntTaskSchedulerTargetFps`` flag.
   * Backs up existing JSON files and can restore the previous state.
-  * Can mirror the profile to every detected Windows client version.
+  * Can mirror the profile to every detected Windows or macOS client location.
   * Launches Roblox through its normal ``roblox://`` protocol.
 
 What this app DOES NOT DO:
@@ -67,6 +68,7 @@ import os
 import platform
 import queue
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -102,10 +104,10 @@ except Exception as exc:  # pragma: no cover - headless systems
 # App constants and visual language
 # ---------------------------------------------------------------------------
 
-APP_TITLE = "Roptimzier V3 — Lumina Roblox Performance Hub"
-APP_VERSION = "3.0.0"
+APP_TITLE = "Roptimer Hub V3.1 — Sirius Roblox Performance Hub"
+APP_VERSION = "3.1.0"
 APP_SLUG = "RobloxFpsOptimizer"
-BRAND_NAME = "ROPTIMER HUB"
+BRAND_NAME = "ROPTIMER HUB V3.1"
 
 
 def app_resource_path(relative: str) -> Path:
@@ -188,11 +190,16 @@ ALLOWLISTED_MANAGED_FLAGS: frozenset[str] = frozenset(
 )
 MANAGED_FLAGS: frozenset[str] = ALLOWLISTED_MANAGED_FLAGS | {LEGACY_FPS_FLAG}
 
+MACOS_CLIENT_ROOTS = (
+    Path("/Applications/Roblox.app/Contents/MacOS"),
+    Path.home() / "Applications" / "Roblox.app" / "Contents" / "MacOS",
+)
+MACOS_PLAYER_EXECUTABLES = ("RobloxPlayer", "RobloxPlayerBeta")
 PLAYER_EXECUTABLES = (
     "RobloxPlayerBeta.exe",
     "RobloxPlayer.exe",
     "RobloxPlayerLauncher.exe",
-)
+) + MACOS_PLAYER_EXECUTABLES
 
 TARGET_SCOPES = (
     "Active version + shared profile",
@@ -508,7 +515,7 @@ def default_logger(level: str, message: str) -> None:
 
 @dataclasses.dataclass
 class RobloxVersion:
-    """A detected Windows Roblox player installation."""
+    """A detected Windows or macOS Roblox player installation."""
 
     path: Path
     executable: Path
@@ -558,7 +565,7 @@ class SessionSnapshot:
         title = self.active_window_title or "Not exposed by Windows"
         return [
             ("Session state", "Roblox client running" if self.running else "Waiting for Roblox"),
-            ("Local Windows user", self.local_username or "Unknown"),
+            ("Local user", self.local_username or "Unknown"),
             ("Display name", self.display_username),
             ("Roblox version", self.version_hint),
             ("Installed versions", str(self.installed_versions)),
@@ -621,12 +628,12 @@ class SessionDetector:
         display = name or local or "your"
         if paths:
             notification = (
-                f"Roptimer V2 is ready for {display}'s Roblox session — "
+                f"Roptimer V3.1 is ready for {display}'s Roblox session — "
                 "local settings only, no client injection."
             )
         else:
             notification = (
-                "Roptimer V2 is ready. Launch Roblox to use your local performance profile."
+                "Roptimer V3.1 is ready. Launch Roblox to use your local performance profile."
             )
         return SessionSnapshot(
             running=bool(paths),
@@ -839,11 +846,17 @@ def is_windows() -> bool:
     return os.name == "nt" or platform.system().lower() == "windows"
 
 
+def is_macos() -> bool:
+    return sys.platform == "darwin" or platform.system().lower() == "darwin"
+
+
 def get_local_appdata() -> Path:
     """Return the Roblox-local AppData root. Env var is for self-tests."""
     override = os.getenv("RFO_LOCALAPPDATA")
     if override:
         return Path(override).expanduser()
+    if is_macos():
+        return Path.home() / "Library" / "Application Support"
     local = os.getenv("LOCALAPPDATA")
     if local:
         return Path(local).expanduser()
@@ -855,6 +868,8 @@ def get_appdata_dir() -> Path:
     override = os.getenv("RFO_APPDATA")
     if override:
         base = Path(override).expanduser()
+    elif is_macos():
+        base = Path.home() / "Library" / "Application Support"
     else:
         roaming = os.getenv("APPDATA")
         base = Path(roaming).expanduser() if roaming else Path.home() / ".config"
@@ -951,6 +966,12 @@ class SafeCacheCleaner:
             self.state_root / "logs",
             Path(tempfile.gettempdir()) / "Roblox",
         ]
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
+            roots.extend([
+                Path.home() / "Library" / "Logs" / "Roblox",
+                Path.home() / "Library" / "Application Support" / "Roblox" / "logs",
+                MACOS_CLIENT_ROOTS[0] / "logs",
+            ])
         versions = self.local_appdata / "Roblox" / "Versions"
         if versions.is_dir():
             roots.extend(folder / "logs" for folder in versions.glob("version-*"))
@@ -1112,6 +1133,14 @@ class OptimizerCore:
     # -- discovery ---------------------------------------------------------
 
     def roblox_root(self) -> Path:
+        """Return the platform-specific Roblox client settings root."""
+        # A test/custom override wins on every OS so headless self-tests and
+        # user-selected roots stay deterministic on macOS too.
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
+            for root in MACOS_CLIENT_ROOTS:
+                if root.is_dir():
+                    return root
+            return MACOS_CLIENT_ROOTS[0]
         return self.local_appdata / "Roblox"
 
     def shared_profile_path(self) -> Path:
@@ -1121,6 +1150,8 @@ class OptimizerCore:
     def version_roots(self) -> list[Path]:
         """Return trusted roots containing version-* folders."""
         candidates: list[Path] = [self.roblox_root() / "Versions"]
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
+            candidates.extend(MACOS_CLIENT_ROOTS)
         for env_name in ("ProgramFiles(x86)", "ProgramFiles", "PROGRAMFILES"):
             value = os.getenv(env_name)
             if value:
@@ -1180,7 +1211,7 @@ class OptimizerCore:
         return roots
 
     def discover_versions(self) -> list[RobloxVersion]:
-        """Find every plausible Windows Roblox Player version directory."""
+        """Find every plausible Windows or macOS Roblox Player settings directory."""
         folders: list[Path] = []
         seen: set[str] = set()
         for root in self.version_roots():
@@ -1222,24 +1253,25 @@ class OptimizerCore:
         versions.sort(key=lambda v: v.modified, reverse=True)
         return versions
 
-    @staticmethod
-    def _looks_like_version_folder(path: Path) -> bool:
+    def _looks_like_version_folder(self, path: Path) -> bool:
         try:
-            return path.is_dir() and any(path.glob("RobloxPlayer*.exe"))
+            return path.is_dir() and self._find_player_executable(path) is not None
         except OSError:
             return False
 
-    @staticmethod
-    def _find_player_executable(folder: Path) -> Path | None:
+    def _find_player_executable(self, folder: Path) -> Path | None:
         for name in PLAYER_EXECUTABLES:
             candidate = folder / name
             if candidate.is_file():
                 return candidate
-        try:
-            matches = sorted(folder.glob("RobloxPlayer*.exe"))
-            return matches[0] if matches else None
-        except OSError:
-            return None
+        for pattern in ("RobloxPlayer*.exe", "RobloxPlayer*"):
+            try:
+                matches = sorted(p for p in folder.glob(pattern) if p.is_file())
+                if matches:
+                    return matches[0]
+            except OSError:
+                continue
+        return None
 
     def running_player_paths(self) -> list[Path]:
         """Optional psutil-based running-process lookup (psutil not required)."""
@@ -1434,6 +1466,9 @@ class OptimizerCore:
             resolved = path
         # Only allow writing under AppData/Program Files/registry/custom Roblox roots.
         allowed_parents: list[Path] = [self.roblox_root(), self.local_appdata]
+        if is_macos():
+            allowed_parents.extend(MACOS_CLIENT_ROOTS)
+            allowed_parents.append(Path("/Applications/Roblox.app/Contents"))
         for env_name in ("ProgramFiles(x86)", "ProgramFiles"):
             if os.getenv(env_name):
                 allowed_parents.append(Path(str(os.getenv(env_name))))
@@ -1623,10 +1658,33 @@ class OptimizerCore:
 
     # -- launching ---------------------------------------------------------
 
+    def _launch_roblox_macos(self) -> None:
+        """Launch Roblox on macOS through public URL/app commands only."""
+        commands = [["open", "roblox://"], ["open", "-a", "Roblox"]]
+        for command in commands:
+            try:
+                completed = subprocess.run(
+                    command,
+                    check=False,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=8,
+                )
+                if completed.returncode == 0:
+                    self.logger("success", f"Roblox launch requested through: {' '.join(command)}")
+                    return
+            except (OSError, subprocess.SubprocessError) as exc:
+                self.logger("warning", f"macOS launch unavailable ({exc}); trying the next method.")
+        webbrowser.open(ROBLOX_HOME_URL)
+        self.logger("info", "Opened the Roblox website. Choose an experience to launch the client.")
+
     def launch_roblox(self, versions: list[RobloxVersion] | None = None) -> None:
         """Launch Roblox using its registered protocol; never injects code."""
+        if is_macos():
+            self._launch_roblox_macos()
+            return
         if not is_windows():
-            raise OptimizerError("Roblox launching is only available on Windows.")
+            raise OptimizerError("Roblox launching is only available on Windows or macOS.")
         try:
             os.startfile("roblox://")  # type: ignore[attr-defined]
             self.logger("success", "Roblox launch requested through the roblox:// protocol.")
@@ -1723,7 +1781,7 @@ def run_self_test() -> int:
         assert "no client injection" in snapshot.notification.lower()
         assert snapshot.rows()[0] == ("Session state", "Roblox client running")
 
-        # V3 extended tiers, optimization modes, feature catalog and cache quarantine.
+        # V3.1 extended tiers, optimization modes, feature catalog, cache quarantine, macOS roots.
         tier_settings = OptimizerSettings(
             fps_target=144,
             graphics_tier=21,
@@ -1746,10 +1804,12 @@ def run_self_test() -> int:
         cache_report = cache.report(7)
         assert cache_report["olderThanDays"] == 7
         assert "ClientAppSettings" in cache_report["safety"]
+        assert MACOS_CLIENT_ROOTS[0].as_posix().endswith("Roblox.app/Contents/MacOS")
+        assert "RobloxPlayer" in PLAYER_EXECUTABLES
 
         print(
             f"SELF-TEST OK: {len(versions)} versions, {len(result.profile_paths)} profiles, "
-            f"{len(flags)} flags, V2 session=safe, V3 tiers/modes/catalog/cache=safe."
+            f"{len(flags)} flags, V3.1 session=safe, V3.1 tiers/modes/catalog/cache/mac=safe."
         )
         return 0
 
@@ -2133,8 +2193,8 @@ if HAS_TK:
             self._badge(badges, "ALLOWLIST AWARE", ACCENT_2).pack(side="left", padx=5)
             self.platform_badge = self._badge(
                 badges,
-                "WINDOWS" if is_windows() else f"{platform.system().upper()} / PREVIEW",
-                SUCCESS if is_windows() else WARNING,
+                "WINDOWS" if is_windows() else ("MACOS / COMPANION" if is_macos() else f"{platform.system().upper()} / PREVIEW"),
+                SUCCESS if (is_windows() or is_macos()) else WARNING,
             )
             self.platform_badge.pack(side="left", padx=5)
 
@@ -2305,7 +2365,7 @@ if HAS_TK:
                 body,
                 text=(
                     "The app writes a reversible ClientAppSettings.json, backs up the previous file, "
-                    "and can sync it to every detected Windows Roblox version. It never injects a DLL, "
+                    "and can sync it to every detected Windows or macOS Roblox client. It never injects a DLL, "
                     "edits memory, or changes Roblox executables."
                 ),
                 bg=CARD,
@@ -2446,7 +2506,7 @@ if HAS_TK:
             self.session_status_label.pack(anchor="w", padx=18, pady=(14, 4))
             self.session_notification_label = tk.Label(
                 status_body,
-                text="Roptimer V2 is ready. Launch Roblox to use your local performance profile.",
+                text="Roptimer V3.1 is ready. Launch Roblox to use your local performance profile.",
                 bg=CARD,
                 fg=MUTED,
                 font=(FONT_UI, 9),
@@ -2808,7 +2868,7 @@ if HAS_TK:
             ).pack(anchor="w", padx=16, pady=(0, 14))
 
             # Client sync.
-            sync_body = feature_card(0, 2, "C", "Client Sync", "Any detected Windows Roblox version.", ACCENT_2)
+            sync_body = feature_card(0, 2, "C", "Client Sync", "Any detected Windows or macOS Roblox client.", ACCENT_2)
             sync_row = tk.Frame(sync_body, bg=CARD)
             sync_row.pack(fill="x", padx=16, pady=(14, 6))
             ToggleSwitch(sync_row, variable=self.watch_var, command=self._schedule_preview).pack(side="left")
@@ -3138,7 +3198,7 @@ if HAS_TK:
             self._section_title(
                 inner,
                 "Client Link",
-                "Connect the JSON profile to any detected Windows Roblox version — safely, through files.",
+                "Connect the JSON profile to any detected Windows or macOS Roblox client — safely, through files.",
             )
 
             toolbar = tk.Frame(inner, bg=BG)
@@ -3186,11 +3246,11 @@ if HAS_TK:
             tk.Label(
                 info_body,
                 text=(
-                    "The app scans %LOCALAPPDATA%\\Roblox\\Versions\\version-*, common Program Files "
+                    "On Windows the app scans %LOCALAPPDATA%\\Roblox\\Versions\\version-*, common Program Files "
                     "installations, the registered client executable, optional running-process paths, "
-                    "and your custom folder. Each selected version gets its own ClientSettings\\"
-                    "ClientAppSettings.json. A shared profile can also be written so new versions "
-                    "pick up the same settings where supported."
+                    "and your custom folder. On macOS it scans /Applications/Roblox.app/Contents/MacOS. "
+                    "Each selected location gets its own ClientSettings/ClientAppSettings.json. A shared "
+                    "profile can also be written so new versions pick up the same settings where supported."
                 ),
                 bg=CARD,
                 fg=MUTED,
@@ -4258,11 +4318,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.build_info:
         print(json.dumps({
-            "product": "Roptimer Hub V3",
+            "product": "Roptimer Hub V3.1",
             "pythonApp": APP_VERSION,
             "dotnetApp": "3.0.0",
-            "platform": "Windows 10+ / Python 3.10+ / .NET 8",
-            "safety": {"injection": False, "memoryReads": False, "telemetryDisable": False, "antiCheatBypass": False}
+            "platform": "Windows 10+ / macOS 11+ (Python companion) / .NET 8",
+            "safety": {"injection": False, "memoryReads": False, "telemetryDisable": False, "antiCheatBypass": False, "gameScriptExecution": False}
         }, indent=2, ensure_ascii=False))
         return 0
     if args.cache_report or args.cache_clean:

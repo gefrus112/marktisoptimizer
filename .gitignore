@@ -19,6 +19,9 @@ build/
 dist/
 *.spec
 *.manifest
+Roptimer.iconset/
+Roptimer.icns
+mac-artifact/
 
 # Local app state and backups (should never be committed)
 state.json

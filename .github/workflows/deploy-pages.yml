@@ -1,0 +1,92 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - arena/ebd36b53-robloxclinetbooster
+    paths:
+      - "web/**"
+      - "index.html"
+      - "404.html"
+      - ".nojekyll"
+      - "build_website.py"
+      - "build_downloads.py"
+      - "build_screenshots.py"
+      - "feature-status.json"
+      - "docs/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.pages_check.outputs.deploy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Regenerate screenshots, website, and downloads
+        run: |
+          python build_screenshots.py
+          python build_downloads.py
+          python build_website.py --check
+
+      - name: Confirm Pages entry files
+        run: |
+          test -f web/index.html
+          test -f web/.nojekyll
+          test -f web/404.html
+          test -f index.html
+          test -f .nojekyll
+
+      - name: Check Pages build type
+        id: pages_check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          build_type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || true)
+          if [ "$build_type" = "workflow" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "Pages source is GitHub Actions; deployment enabled."
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Pages source is '${build_type:-unknown}'. The root index.html fallback will serve the site; skipping Actions deployment."
+          fi
+
+      - name: Configure Pages
+        if: steps.pages_check.outputs.deploy == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: steps.pages_check.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+  deploy:
+    if: needs.build.outputs.deploy == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
