@@ -8,6 +8,14 @@ public sealed class FlagRow
     public string Notes { get; set; } = "";
 }
 
+public sealed class AllowlistRow
+{
+    public string Category { get; set; } = "";
+    public string Flag { get; set; } = "";
+    public string Status { get; set; } = "";
+    public string Notes { get; set; } = "";
+}
+
 public sealed class FeatureRow
 {
     public string Name { get; set; } = "";

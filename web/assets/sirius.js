@@ -1,4 +1,4 @@
-/* Roptimer Hub V3.1 — safe static website interactions. No eval, no remote code. */
+/* Roptimer Hub V3.2 — safe static website interactions. No eval, no remote code. */
 (function () {
   "use strict";
 
@@ -196,6 +196,39 @@
 
   renderFeatures();
   renderSources();
+
+  /* --------------------------------------------------------------------- */
+  /* Canonical FastFlag allowlist                                           */
+  /* --------------------------------------------------------------------- */
+
+  var allowlist = { categories: [], legacyNotInAllowlist: [] };
+  try {
+    allowlist = JSON.parse(($("#fastflagAllowlist") && $("#fastflagAllowlist").textContent) || "{}");
+  } catch (error) {
+    allowlist = { categories: [], legacyNotInAllowlist: [] };
+  }
+  var allowlistFlags = [];
+  (allowlist.categories || []).forEach(function (group) {
+    (group.flags || []).forEach(function (flag) { allowlistFlags.push(flag); });
+  });
+
+  function renderAllowlist() {
+    var container = $("#allowlistCards");
+    if (!container) return;
+    var groups = Array.isArray(allowlist.categories) ? allowlist.categories : [];
+    container.innerHTML = groups.map(function (group) {
+      var flags = Array.isArray(group.flags) ? group.flags : [];
+      return '<article class="allowlist-card" data-category="' + escapeHtml(group.name || "Category") + '">' +
+        '<div class="allowlist-head"><span class="allowlist-count">' + flags.length + ' flags</span>' +
+        '<h4>' + escapeHtml(group.name || "Category") + '</h4></div>' +
+        '<div class="allowlist-flags">' + flags.map(function (flag) {
+          return '<span class="allowlist-flag"><code>' + escapeHtml(flag) + '</code></span>';
+        }).join("") + '</div>' +
+        '</article>';
+    }).join("");
+  }
+
+  renderAllowlist();
 
   /* --------------------------------------------------------------------- */
   /* Settings / command builder                                             */
@@ -768,6 +801,13 @@
       run: function () { openExternal(URLS.pages); }
     },
     {
+      title: "View FastFlag allowlist",
+      hint: "18 allowlisted Geometry, Rendering, and User Interface flags",
+      icon: "✓",
+      keywords: "allowlist fastflags geometry rendering user interface official flags",
+      run: function () { activateTab("docs"); scrollToAnchor("fastflag-allowlist"); }
+    },
+    {
       title: "Jump to Safety",
       hint: "Read what Roptimer refuses to implement",
       icon: "!",
@@ -925,6 +965,8 @@
     featureCount: (catalog.features || []).length,
     sourceCount: (catalog.sources || []).length,
     commandCount: commands.length,
+    allowlistFlagCount: allowlistFlags.length,
+    allowlistCategoryCount: (allowlist.categories || []).length,
     activeTab: function () {
       var active = $(".tab-button.active");
       return active ? active.getAttribute("data-tab") : "download";

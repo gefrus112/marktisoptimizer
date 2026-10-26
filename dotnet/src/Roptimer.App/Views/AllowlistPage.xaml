@@ -1,0 +1,44 @@
+<Page x:Class="Roptimer.App.Views.AllowlistPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d" d:DesignHeight="620" d:DesignWidth="850"
+      Background="Transparent" Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0,8,24">
+            <TextBlock Text="FastFlag allowlist" Style="{StaticResource TitleText}" />
+            <TextBlock x:Name="CountText" Text="18 allowlisted flags" Style="{StaticResource MutedText}" Margin="0,6,0,6" />
+            <TextBlock Text="Only these local ClientAppSettings.json keys are recognized as allowlisted managed flags. Roptimer preserves unrelated keys, backs up existing files, and never writes telemetry, exploit, or anti-cheat flags." Style="{StaticResource MutedText}" Margin="0,0,0,14" />
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="1.45*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,12">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="ALLOWLISTED FLAGS" Style="{StaticResource SectionText}" Margin="0,0,0,10" />
+                        <DataGrid x:Name="AllowlistGrid" AutoGenerateColumns="False" IsReadOnly="True" Height="390">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="1*" />
+                                <DataGridTextColumn Header="Flag" Binding="{Binding Flag}" Width="2.4*" />
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="0.9*" />
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="1.8*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="CANONICAL JSON" Style="{StaticResource SectionText}" />
+                        <TextBox x:Name="AllowlistJson" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="330" Margin="0,10,0,0" FontSize="10" />
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="Refresh" Click="Refresh_Click" />
+                            <Button Content="Copy JSON" Click="Copy_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <Border Style="{StaticResource Card}">
+                <TextBlock Style="{StaticResource MutedText}" Text="Legacy: DFIntTaskSchedulerTargetFps is tracked separately and is not part of this allowlist. Source: Roblox DevForum, Allowlist for local client configuration via Fast Flags." />
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

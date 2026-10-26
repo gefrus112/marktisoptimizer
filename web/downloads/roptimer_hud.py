@@ -56,8 +56,8 @@ except Exception as exc:  # pragma: no cover - headless systems
     HAS_TK = False
     TK_IMPORT_ERROR = exc
 
-APP_NAME = "ROPTIMER HUD V3.1"
-APP_VERSION = "3.1.0"
+APP_NAME = "ROPTIMER HUD V3.2"
+APP_VERSION = "3.2.0"
 SETTINGS_FILE = "hud-settings.json"
 
 
@@ -426,7 +426,7 @@ if HAS_TK:
             self.after(200, self._drain_queue)
             self.after(1000, self._tick)
             if self.settings.sessionNotification:
-                self._notify("Roptimer V3.1 is ready — local profile only, no client injection.")
+                self._notify("Roptimer V3.2 is ready — local profile only, no client injection.")
             else:
                 self._notify("HUD ready. No Roblox process is being touched.")
 
@@ -446,7 +446,7 @@ if HAS_TK:
 
             brand = tk.Label(
                 title,
-                text="◆ ROPTIMER HUD V3.1",
+                text="◆ ROPTIMER HUD V3.2",
                 bg=PANEL_2,
                 fg=accent,
                 font=("Segoe UI", 9, "bold"),
@@ -766,7 +766,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         description="ROPTIMER HUD — safe separate performance window for Roblox settings.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {APP_VERSION}")
-    parser.add_argument("--features", action="store_true", help="print the shared V3.1 feature catalog and exit")
+    parser.add_argument("--features", action="store_true", help="print the shared V3.2 feature catalog and exit")
     parser.add_argument("--build-info", action="store_true", help="print build and safety information and exit")
     parser.add_argument("--settings", help="path to hud-settings.json")
     parser.add_argument("--self-test", action="store_true", help="run headless tests and exit")

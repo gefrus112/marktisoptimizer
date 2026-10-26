@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="feature-status.json" />
+    <None Remove="fastflags-allowlist.json" />
     <EmbeddedResource Include="feature-status.json" LogicalName="Roptimer.Core.feature-status.json" />
+    <EmbeddedResource Include="fastflags-allowlist.json" LogicalName="Roptimer.Core.fastflags-allowlist.json" />
   </ItemGroup>
 </Project>

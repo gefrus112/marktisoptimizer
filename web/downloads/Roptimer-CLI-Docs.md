@@ -16,6 +16,7 @@ RoptimerBoost.exe bootstrap --launch
 RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
 RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
 RoptimerBoost.exe restore
+RoptimerBoost.exe allowlist
 ```
 
 ### macOS
@@ -27,6 +28,7 @@ Download `Roptimer-Mac-Companion.zip` or `Roptimer-Mac.zip` from the [macOS rele
 ./Roptimer\ Boost.command --preview --mode "Reduce building lag" --tier 21 --texture 0
 ./Roptimer\ Boost.command --apply --mode "Better FPS" --fps 144 --all-versions
 ./Roptimer\ Boost.command --restore
+./Roptimer\ Boost.command --allowlist
 ```
 
 If you use the portable Python package, the equivalent command is:
@@ -48,6 +50,7 @@ python3 roblox_fps_optimizer.py --preview --mode "Reduce building lag" --tier 21
 | `restore` | Restores the managed keys from the recorded pre-apply state, or removes an optimizer-only file. |
 | `session` | Prints safe OS-level session metadata. No account, game, chat, or memory data is read. |
 | `features` | Prints the shared implemented / legacy / rejected feature catalog. |
+| `allowlist` / `--allowlist` | Prints the canonical 18-flag Geometry, Rendering, and User Interface FastFlag allowlist. |
 | `tiers` | Prints graphics tiers 0–21 and texture tiers 0–3. |
 | `modes` | Prints the available optimization modes. |
 | `cache-report --days 7` | Lists old log/temp files that could be quarantined. |
@@ -101,11 +104,11 @@ python3 roblox_fps_optimizer.py --preview --mode "Reduce building lag" --tier 21
 
 ## Safety notes
 
-- Only allowlisted rendering, geometry, UI, and texture keys are managed.
+- Only the canonical 18 allowlisted rendering, geometry, UI, and texture keys are managed. Run `allowlist` / `--allowlist` to inspect them.
 - Existing unrelated keys in `ClientAppSettings.json` are preserved.
 - A timestamped backup is made before each write.
 - No telemetry/Crashpad/Backtrace disabling flags are written.
 - No fullbright, x-ray, building removal, anti-cheat bypass, or gameplay automation.
 - The Script Hub is a **local UI preview** system. It does not execute scripts inside Roblox.
 
-See also `HOW_IT_WORKS.md`, `MAC.md`, and `SCRIPT_HUB.md`.
+See also `HOW_IT_WORKS.md`, `FASTFLAG_ALLOWLIST.md`, `MAC.md`, and `SCRIPT_HUB.md`.

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
             ["Dashboard"] = () => new DashboardPage(),
             ["Boost"] = () => new BoostPage(),
             ["FastFlags"] = () => new FastFlagsPage(),
+            ["Allowlist"] = () => new AllowlistPage(),
             ["Session"] = () => new SessionPage(),
             ["Settings"] = () => new SettingsPage(),
             ["Safety"] = () => new SafetyPage(),

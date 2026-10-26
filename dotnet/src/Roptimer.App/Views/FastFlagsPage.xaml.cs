@@ -24,9 +24,18 @@ public partial class FastFlagsPage : Page
             Notes = pair.Key switch
             {
                 "DFIntDebugFRMQualityLevelOverride" => "Extended graphics tier 0-21",
-                "DFIntTextureQualityOverride" => "Texture tier 0-3",
+                "DFIntTextureQualityOverride" or "DFFlagTextureQualityOverrideEnabled" => "Texture tier override 0-3",
                 "FIntFRMMaxGrassDistance" or "FIntFRMMinGrassDistance" => "Safe grass draw distance reduction",
-                "DFIntCSGLevelOfDetailSwitchingDistance" => "Geometry LOD only; no building removal",
+                "DFIntCSGLevelOfDetailSwitchingDistance" or
+                "DFIntCSGLevelOfDetailSwitchingDistanceL12" or
+                "DFIntCSGLevelOfDetailSwitchingDistanceL23" or
+                "DFIntCSGLevelOfDetailSwitchingDistanceL34" => "Geometry LOD only; no building removal",
+                "FFlagDebugGraphicsPreferD3D11" or "FFlagDebugGraphicsPreferVulkan" or "FFlagDebugGraphicsPreferOpenGL" => "Mutually exclusive renderer preference",
+                "DFFlagDisableDPIScale" => "Local DPI scaling override",
+                "FFlagDebugSkyGray" => "Neutral sky debug rendering",
+                "DFFlagDebugPauseVoxelizer" => "Voxel/lighting workload reduction",
+                "FFlagHandleAltEnterFullscreenManually" => "Manual Alt+Enter fullscreen behavior",
+                "FIntGrassMovementReducedMotionFactor" => "Reduced grass motion / UI category",
                 _ => "Local reversible JSON setting"
             }
         }).ToList();

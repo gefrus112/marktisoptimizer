@@ -8,7 +8,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="4,0,8,24">
             <TextBlock Text="Safety" Style="{StaticResource TitleText}" />
-            <TextBlock Text="A clear audit of what is implemented, what is legacy, and what is intentionally rejected." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
+            <TextBlock Text="A clear audit of what is implemented, what is legacy, and what is intentionally rejected. Only 18 canonical allowlisted Geometry, Rendering, and User Interface FastFlags are recognized as managed local keys." Style="{StaticResource MutedText}" Margin="0,6,0,14" />
             <Grid Margin="0,0,0,12">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,0"><StackPanel><TextBlock Text="NO INJECTION" Foreground="{DynamicResource Accent2Brush}" FontWeight="Bold"/><TextBlock Text="No DLL loading, process hooks, renderer hooks, memory patching, or executable edits." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel></Border>

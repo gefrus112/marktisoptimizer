@@ -399,6 +399,68 @@ def starfield_svg() -> str:
     return svg_doc("Roptimer 100x starfield website screenshot", "".join(b))
 
 
+
+def allowlist_svg() -> str:
+    b: list[str] = [window(40, 40, 1120, 640, "Roptimer — FastFlag allowlist")]
+    b.append(rect(40, 88, 220, 592, "#08080a"))
+    b.append(line(260, 88, 260, 680, BORDER))
+    nav = ["Overview", "How it works", "Boost CLI", "Allowlist", "Settings", "Safety"]
+    for i, label in enumerate(nav):
+        y = 112 + i * 44
+        if label == "Allowlist":
+            b.append(rect(56, y, 188, 34, "#17171d", 8))
+        b.append(txt(70, y + 22, label, 12, TEXT if label == "Allowlist" else MUTED, 700 if label == "Allowlist" else 400))
+    b.append(txt(290, 132, "FastFlag allowlist", 30, TEXT, 400, "Georgia, serif"))
+    b.append(txt(290, 160, "18 local ClientAppSettings.json keys · 3 categories · official allowlist", 13, MUTED))
+    b.append(rect(1030, 118, 100, 30, "#101014", 999))
+    b.append(txt(1080, 138, "18 FLAGS", 10, AMBER, 800, anchor="middle"))
+    cards = [
+        ("GEOMETRY", ACCENT_2, 290, [
+            "DFIntCSGLevelOfDetailSwitchingDistance",
+            "DFIntCSGLevelOfDetailSwitchingDistanceL12",
+            "DFIntCSGLevelOfDetailSwitchingDistanceL23",
+            "DFIntCSGLevelOfDetailSwitchingDistanceL34",
+        ]),
+        ("RENDERING", ACCENT, 650, [
+            "FFlagHandleAltEnterFullscreenManually",
+            "DFFlagTextureQualityOverrideEnabled",
+            "DFIntTextureQualityOverride",
+            "FIntDebugForceMSAASamples",
+            "DFFlagDisableDPIScale",
+            "FFlagDebugGraphicsPreferD3D11",
+            "FFlagDebugSkyGray",
+            "DFFlagDebugPauseVoxelizer",
+            "DFIntDebugFRMQualityLevelOverride",
+            "FIntFRMMaxGrassDistance",
+            "FIntFRMMinGrassDistance",
+            "FFlagDebugGraphicsPreferVulkan",
+            "FFlagDebugGraphicsPreferOpenGL",
+        ]),
+        ("USER INTERFACE", AMBER, 1010, [
+            "FIntGrassMovementReducedMotionFactor",
+        ]),
+    ]
+    # Two-column layout: geometry+UI left, rendering right.
+    b.append(rect(290, 190, 360, 250, PANEL, 14, BORDER))
+    b.append(txt(310, 220, "GEOMETRY", 11, ACCENT_2, 800, letter=1.6))
+    for i, flag in enumerate(cards[0][3]):
+        b.append(rect(310, 236 + i * 45, 320, 34, "#070709", 8, BORDER))
+        b.append(txt(320, 258 + i * 45, flag, 10.5, TEXT, 400, "SFMono-Regular, Consolas, monospace"))
+    b.append(rect(290, 455, 360, 110, PANEL, 14, BORDER))
+    b.append(txt(310, 485, "USER INTERFACE", 11, AMBER, 800, letter=1.6))
+    b.append(rect(310, 500, 320, 34, "#070709", 8, BORDER))
+    b.append(txt(320, 522, "FIntGrassMovementReducedMotionFactor", 10.5, TEXT, 400, "SFMono-Regular, Consolas, monospace"))
+    b.append(rect(670, 190, 460, 375, PANEL, 14, BORDER))
+    b.append(txt(690, 220, "RENDERING", 11, ACCENT, 800, letter=1.6))
+    for i, flag in enumerate(cards[1][3]):
+        b.append(rect(690, 236 + i * 24, 420, 19, "#070709", 5, BORDER))
+        b.append(txt(698, 250 + i * 24, flag, 9.6, TEXT, 400, "SFMono-Regular, Consolas, monospace"))
+    b.append(rect(290, 580, 840, 60, "#070709", 12, BORDER))
+    b.append(txt(310, 605, "Legacy: DFIntTaskSchedulerTargetFps is NOT allowlisted", 12, MUTED, 700))
+    b.append(txt(310, 625, "No telemetry, Crashpad/Backtrace, fullbright, x-ray, building removal, anti-cheat bypass, or game script execution flags.", 10, DIM))
+    return svg_doc("Roptimer FastFlag allowlist screenshot", "".join(b))
+
+
 def build() -> None:
     ASSETS.mkdir(parents=True, exist_ok=True)
     outputs = {
@@ -409,6 +471,7 @@ def build() -> None:
         "sirius-mac.svg": mac_svg(),
         "sirius-command-palette.svg": command_palette_svg(),
         "sirius-starfield.svg": starfield_svg(),
+        "sirius-allowlist.svg": allowlist_svg(),
     }
     for name, content in outputs.items():
         (ASSETS / name).write_text(content, encoding="utf-8")

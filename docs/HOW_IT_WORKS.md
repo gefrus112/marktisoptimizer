@@ -31,7 +31,17 @@ It also accepts a user-selected custom folder. macOS updates can replace this fo
 
 ## 2. Generate a safe profile
 
-Roptimer only writes a fixed set of managed keys. Examples:
+Roptimer only writes keys from the canonical [`fastflags-allowlist.json`](../fastflags-allowlist.json). The full allowlist has **18** flags in three categories:
+
+| Category | Flags |
+| --- | --- |
+| Geometry | `DFIntCSGLevelOfDetailSwitchingDistance`, `DFIntCSGLevelOfDetailSwitchingDistanceL12`, `DFIntCSGLevelOfDetailSwitchingDistanceL23`, `DFIntCSGLevelOfDetailSwitchingDistanceL34` |
+| Rendering | `FFlagHandleAltEnterFullscreenManually`, `DFFlagTextureQualityOverrideEnabled`, `DFIntTextureQualityOverride`, `FIntDebugForceMSAASamples`, `DFFlagDisableDPIScale`, `FFlagDebugGraphicsPreferD3D11`, `FFlagDebugSkyGray`, `DFFlagDebugPauseVoxelizer`, `DFIntDebugFRMQualityLevelOverride`, `FIntFRMMaxGrassDistance`, `FIntFRMMinGrassDistance`, `FFlagDebugGraphicsPreferVulkan`, `FFlagDebugGraphicsPreferOpenGL` |
+| User Interface | `FIntGrassMovementReducedMotionFactor` |
+
+`DFIntTaskSchedulerTargetFps` is tracked separately as a legacy compatibility flag and is **not** part of this allowlist.
+
+Examples of flags Roptimer writes by default:
 
 | Setting | Flag | Effect |
 | --- | --- | --- |
@@ -88,4 +98,4 @@ Lowering graphics can improve frame time, but it cannot fix server lag, network 
 - No fullbright, x-ray, building removal, collision edits, or anti-cheat bypass.
 - No gameplay automation.
 
-The website’s Script Hub is a local UI/scripting preview only; it does not send code into Roblox.
+The website’s Script Hub is a local UI/scripting preview only; it does not send code into Roblox. See `FASTFLAG_ALLOWLIST.md` for the complete canonical list and safety boundaries.

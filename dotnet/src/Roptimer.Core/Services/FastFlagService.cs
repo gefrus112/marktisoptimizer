@@ -4,27 +4,9 @@ public sealed class FastFlagService
 {
     public const string LegacyFpsFlag = "DFIntTaskSchedulerTargetFps";
 
-    public static readonly IReadOnlySet<string> AllowlistedManagedFlags = new HashSet<string>(StringComparer.Ordinal)
-    {
-        "DFIntCSGLevelOfDetailSwitchingDistance",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL12",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL23",
-        "DFIntCSGLevelOfDetailSwitchingDistanceL34",
-        "FFlagHandleAltEnterFullscreenManually",
-        "DFFlagTextureQualityOverrideEnabled",
-        "DFIntTextureQualityOverride",
-        "FIntDebugForceMSAASamples",
-        "DFFlagDisableDPIScale",
-        "FFlagDebugGraphicsPreferD3D11",
-        "FFlagDebugSkyGray",
-        "DFFlagDebugPauseVoxelizer",
-        "DFIntDebugFRMQualityLevelOverride",
-        "FIntFRMMaxGrassDistance",
-        "FIntFRMMinGrassDistance",
-        "FFlagDebugGraphicsPreferVulkan",
-        "FFlagDebugGraphicsPreferOpenGL",
-        "FIntGrassMovementReducedMotionFactor"
-    };
+    // The canonical grouped allowlist is embedded from fastflags-allowlist.json.
+    public static readonly FastFlagAllowlist Allowlist = FastFlagAllowlist.Load();
+    public static readonly IReadOnlySet<string> AllowlistedManagedFlags = Allowlist.Flags;
 
     public static readonly IReadOnlySet<string> ManagedFlags =
         new HashSet<string>(AllowlistedManagedFlags.Append(LegacyFpsFlag), StringComparer.Ordinal);

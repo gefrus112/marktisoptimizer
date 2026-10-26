@@ -1,4 +1,4 @@
-/* Roptimer Hub V3.1 — Sirius-inspired dark website */
+/* Roptimer Hub V3.2 — Sirius-inspired dark website */
 :root {
   --bg: #040405;
   --bg-soft: #08080a;
@@ -731,3 +731,16 @@ body.focus-mode::before { opacity: 0; }
   #starfield, .cursor-glow, .live-pill i, .glow-word { animation: none !important; }
   .js .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
+
+/* FastFlag allowlist cards */
+.allowlist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+.allowlist-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #08080a; }
+.allowlist-head { padding: 16px 18px 13px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, rgba(156,140,255,.1), transparent); }
+.allowlist-card[data-category="Geometry"] .allowlist-head { background: linear-gradient(135deg, rgba(114,199,255,.1), transparent); }
+.allowlist-card[data-category="User Interface"] .allowlist-head { background: linear-gradient(135deg, rgba(242,182,93,.1), transparent); }
+.allowlist-count { display: inline-block; margin-bottom: 8px; color: var(--amber); font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.allowlist-head h4 { margin: 0; font-family: var(--serif); font-size: 23px; font-weight: 400; letter-spacing: -.03em; }
+.allowlist-flags { display: flex; flex-direction: column; gap: 8px; padding: 16px 14px 18px; }
+.allowlist-flag { padding: 9px 10px; border: 1px solid var(--line-soft); border-radius: 9px; background: #050507; overflow-x: auto; }
+.allowlist-flag code { color: #d9d5e8; font-family: var(--mono); font-size: 10px; white-space: nowrap; }
+@media (max-width: 1100px) { .allowlist-grid { grid-template-columns: 1fr; } }

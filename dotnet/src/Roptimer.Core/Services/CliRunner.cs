@@ -2,7 +2,7 @@ namespace Roptimer.Core.Services;
 
 public static class CliRunner
 {
-    private const string Version = "3.0.0";
+    private const string Version = "3.2.0";
 
     public static int Run(string[] args)
     {
@@ -59,6 +59,9 @@ public static class CliRunner
                 case "features":
                     Console.WriteLine(catalog.AsJson());
                     return 0;
+                case "allowlist":
+                    Console.WriteLine(FastFlagService.Allowlist.AsJson());
+                    return 0;
                 case "settings":
                     Console.WriteLine(Json.Serialize(store.Load()));
                     return 0;
@@ -74,13 +77,14 @@ public static class CliRunner
                 case "build-info":
                     Console.WriteLine(Json.Serialize(new
                     {
-                        product = "Roptimer Hub V3",
+                        product = "Roptimer Hub V3.2",
                         version = Version,
                         framework = ".NET 8",
                         ui = "WPF",
                         platform = "Windows 10+ x64",
                         cli = "RoptimerBoost.exe",
-                        safety = new { injection = false, memoryReads = false, telemetryDisable = false, antiCheatBypass = false }
+                        allowlist = new { categories = FastFlagService.Allowlist.CategoryCount, flags = FastFlagService.Allowlist.FlagCount },
+                        safety = new { injection = false, memoryReads = false, telemetryDisable = false, antiCheatBypass = false, gameScriptExecution = false, allowlistOnly = true }
                     }));
                     return 0;
                 default:
@@ -291,7 +295,7 @@ public static class CliRunner
     private static void PrintHelp()
     {
         Console.WriteLine("""
-RoptimerBoost 3.0.0 — safe CLI/bootstrapper for Roptimer Hub V3
+RoptimerBoost 3.2.0 — safe CLI/bootstrapper for Roptimer Hub V3.2
 
 USAGE
   RoptimerBoost.exe <command> [options]
@@ -306,6 +310,7 @@ COMMANDS
   modes                             List safe optimization modes
   tiers                             List graphics tiers 0-21 and texture tiers 0-3
   features                          Print the feature status/safety catalog
+  allowlist                         Print the canonical FastFlag allowlist
   settings                          Print current Roptimer settings
   cache-report [--days 7]           Report old log/temp files that could be quarantined
   cache-clean [--days 7] [--force]  Quarantine old log/temp files (dry run without --force)

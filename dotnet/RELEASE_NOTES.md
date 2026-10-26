@@ -1,6 +1,6 @@
-# Roptimer Hub V3 — Windows build
+# Roptimer Hub V3.2 — Windows build
 
-This release contains the C#/.NET 8 WPF desktop app and the safe Boost CLI.
+This release contains the C#/.NET 8 WPF desktop app, the safe Boost CLI, and the canonical 18-flag FastFlag allowlist.
 
 ## Files
 
@@ -20,9 +20,10 @@ RoptimerBoost.exe open
 RoptimerBoost.exe bootstrap --launch
 RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
 RoptimerBoost.exe restore
+RoptimerBoost.exe allowlist
 RoptimerBoost.exe self-test
 ```
 
 ## Safety boundaries
 
-Local reversible `ClientAppSettings.json` writes only. No DLL injection, process hooks, memory reads/writes, Roblox telemetry disabling, Crashpad/Backtrace changes, fullbright, x-ray, building removal, anti-cheat bypass, or automation. `DFIntTaskSchedulerTargetFps` is legacy and may be ignored by current allowlisted clients.
+Local reversible `ClientAppSettings.json` writes only. The app and CLI use the canonical 18-flag Geometry, Rendering, and User Interface allowlist. No DLL injection, process hooks, memory reads/writes, Roblox telemetry disabling, Crashpad/Backtrace changes, fullbright, x-ray, building removal, anti-cheat bypass, or automation. `DFIntTaskSchedulerTargetFps` is legacy and may be ignored by current allowlisted clients.
