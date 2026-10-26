@@ -49,7 +49,7 @@ The Windows EXEs are published on the [v3.0.0-windows release](https://github.co
 
 ## Website and macOS companion
 
-This WPF app is Windows-only. The repository root also contains a Sirius-style dark static website at `web/index.html` with Download, Docs, and Scripts tabs, plus a Python/Tkinter macOS companion.
+This WPF app is Windows-only. The repository root also contains the V3.2 Sirius-style dark static website at `web/index.html` with Download, Docs, and Scripts tabs, GitHub Pages deployment, a command palette, animated starfield, and a Python/Tkinter macOS companion.
 
 The macOS companion is packaged by `build_downloads.py` and by `.github/workflows/build-macos.yml`. It writes the same reversible local `ClientAppSettings.json` settings and never injects code into Roblox. See `docs/MAC.md`, `docs/CLI.md`, and `docs/SCRIPT_HUB.md` in the repository root.
 

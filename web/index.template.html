@@ -4,21 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#040405" />
-  <meta name="description" content="Roptimer Hub V3.1 — a serious, safe Roblox performance settings tool for Windows and macOS. Download EXEs, read CLI docs, and preview the local Script Hub." />
+  <meta name="description" content="Roptimer Hub V3.2 — a 100× cooler Sirius-dark website for safe Roblox performance settings, Windows and macOS downloads, Boost CLI docs, and a local Script Hub preview." />
   <title>Roptimer — Serious performance tooling.</title>
   <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
   <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/icons/roptimzier-shield.png" />
+  <link rel="manifest" href="site.webmanifest" />
   <link rel="stylesheet" href="assets/sirius.css" />
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Roptimer home">
       <span class="brand-mark" aria-hidden="true">R</span>
       <span class="brand-name">Roptimer</span>
-      <span class="brand-version">V3.1</span>
+      <span class="brand-version">V3.2</span>
     </a>
 
     <nav class="menu" id="primaryMenu" aria-label="Primary navigation">
@@ -47,6 +51,7 @@
       <a class="icon-link" href="downloads/Roptimer-CLI-Docs.md" aria-label="CLI docs" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h6"/></svg>
       </a>
+      <button class="command-trigger" id="commandTrigger" type="button" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K /"><span aria-hidden="true">⌘</span> K</button>
       <a class="get-button" href="#download"><span class="diamond" aria-hidden="true">◆</span> Get Roptimer</a>
       <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle menu" aria-controls="primaryMenu">☰</button>
     </div>
@@ -55,8 +60,8 @@
   <main id="top">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="eyebrow">Roptimer Hub V3.1 · safe local performance tooling</div>
-        <h1 id="hero-title">Serious performance<br /><em>for every player.</em></h1>
+        <div class="eyebrow">Roptimer Hub V3.2 · 100× cooler site engine</div>
+        <h1 id="hero-title">Serious <span class="glow-word">performance</span><br /><em>for every player.</em></h1>
         <p>
           A dark, focused control center for reversible Roblox settings. Download the Windows EXE app from GitHub,
           use the macOS companion, read the Boost CLI docs, and preview an original Script Hub — without an executor,
@@ -65,6 +70,11 @@
         <div class="hero-actions">
           <a class="button primary" href="#download" data-route="download">Start with Roptimer <span aria-hidden="true">→</span></a>
           <a class="button ghost" href="#docs" data-route="docs">Read the docs</a>
+          <button class="button ghost" id="heroCommandButton" type="button">Open command palette <kbd>Ctrl K</kbd></button>
+        </div>
+        <div class="hero-badges">
+          <span class="hundred-x">◆ 100× cooler</span>
+          <span class="live-pill"><i aria-hidden="true"></i> GitHub Pages deployment ready</span>
         </div>
         <div class="hero-meta">
           <span>Windows EXE on GitHub</span>
@@ -86,7 +96,7 @@
 <span class="ok">✓</span> restore available
 
 <span class="prompt">$</span> <span class="cmd">./Roptimer\ Boost.command --self-test</span>
-<span class="ok">✓</span> V3.1 session=safe, tiers/modes/catalog/cache/mac=safe.</div>
+<span class="ok">✓</span> V3.2 site=safe, session=safe, tiers/modes/catalog/cache/mac=safe.</div>
           <div class="terminal-footer">
             <div><b>0</b>injected DLLs</div>
             <div><b>21</b>graphics tiers</div>
@@ -97,10 +107,10 @@
     </section>
 
     <section class="stat-band" aria-label="Project facts">
-      <div class="stat"><strong>3</strong><span>main tabs</span></div>
-      <div class="stat"><strong>14</strong><span>managed flags</span></div>
-      <div class="stat"><strong>0</strong><span>game scripts executed</span></div>
-      <div class="stat"><strong>100%</strong><span>reversible JSON</span></div>
+      <div class="stat"><strong data-count="3">3</strong><span>main tabs</span></div>
+      <div class="stat"><strong data-count="14">14</strong><span>managed flags</span></div>
+      <div class="stat"><strong data-count="0">0</strong><span>game scripts executed</span></div>
+      <div class="stat"><strong data-count="100" data-suffix="×">100×</strong><span>cooler site engine</span></div>
     </section>
 
     <div class="tab-shell" id="tab-shell">
@@ -386,9 +396,9 @@ RoptimerBoost.exe self-test</pre></div>
         <div class="section-head" style="margin-top:48px">
           <div>
             <h2 style="font-size:36px">Screenshots</h2>
-            <p>Original SVG previews of the new dark website, CLI docs, Script Hub, loading GUI, and macOS companion.</p>
+            <p>Original SVG previews of the dark website, CLI docs, Script Hub, loading GUI, macOS companion, command palette, and 100× starfield engine.</p>
           </div>
-          <span class="tag amber">5 previews</span>
+          <span class="tag amber">7 previews</span>
         </div>
         <div class="screenshot-gallery">
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Roptimer dark Download tab screenshot" data-caption="Download tab — Windows and macOS cards in the Sirius-style dark layout."><img src="assets/sirius-download.svg" alt="Roptimer dark Download tab screenshot" /><span><strong>01 · Download</strong>Windows EXE and macOS companion cards.</span></button>
@@ -396,14 +406,16 @@ RoptimerBoost.exe self-test</pre></div>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-script-hub.svg" data-alt="Roptimer Script Hub screenshot" data-caption="Script Hub — local Luau-inspired UI recipes and code editor."><img src="assets/sirius-script-hub.svg" alt="Roptimer Script Hub screenshot" /><span><strong>03 · Script Hub</strong>Our own script cards and code panel.</span></button>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-loading-gui.svg" data-alt="Roptimer loading GUI preview screenshot" data-caption="Loading GUI — Sirius/Rayfield-like local loading screen preview."><img src="assets/sirius-loading-gui.svg" alt="Roptimer loading GUI preview screenshot" /><span><strong>04 · Loading GUI</strong>GUI loading scripting preview, local only.</span></button>
           <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-mac.svg" data-alt="Roptimer macOS companion screenshot" data-caption="macOS companion — .app launcher and Boost.command terminal."><img src="assets/sirius-mac.svg" alt="Roptimer macOS companion screenshot" /><span><strong>05 · macOS</strong>Mac companion window and safe CLI output.</span></button>
+          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Roptimer command palette screenshot" data-caption="Command palette — searchable actions for downloads, docs, scripts, and CLI commands."><img src="assets/sirius-command-palette.svg" alt="Roptimer command palette screenshot" /><span><strong>06 · Command palette</strong>Searchable 100× navigation overlay.</span></button>
+          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Roptimer starfield website screenshot" data-caption="100× starfield engine — animated canvas, cursor spotlight, counters, and reveal effects."><img src="assets/sirius-starfield.svg" alt="Roptimer starfield website screenshot" /><span><strong>07 · 100× starfield</strong>Animated canvas and spotlight system.</span></button>
         </div>
       </section>
     </div>
   </main>
 
   <footer class="site-footer">
-    <div><strong>Roptimer Hub V3.1</strong><br />Safe local Roblox performance settings for Windows and macOS. No green neon dots.</div>
-    <div><a href="__REPO__" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">Windows release</a> · <a href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">macOS release</a> · <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a></div>
+    <div><strong>Roptimer Hub V3.2</strong><br />Safe local Roblox performance settings for Windows and macOS. 100× cooler, still no green neon dots.</div>
+    <div><a href="__REPO__" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">Windows release</a> · <a href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">macOS release</a> · <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> · <a href="downloads/Roptimer-Pages-Help.md" download>Pages help</a></div>
   </footer>
 
   <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot preview">
@@ -411,6 +423,22 @@ RoptimerBoost.exe self-test</pre></div>
     <div style="text-align:center">
       <img id="lightboxImage" src="" alt="" />
       <p id="lightboxCaption" style="color:var(--muted);font-size:12px;max-width:760px;margin:14px auto 0;line-height:1.6"></p>
+    </div>
+  </div>
+
+  <div class="command-palette" id="commandPalette" hidden role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="command-card" role="document">
+      <div class="command-top">
+        <span class="command-mark" aria-hidden="true">◆</span>
+        <input id="commandSearch" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command, tab, download, or docs topic…" aria-label="Search commands" />
+        <kbd>Esc</kbd>
+      </div>
+      <div class="command-results" id="commandResults" role="listbox" aria-label="Command results"></div>
+      <div class="command-footer">
+        <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> run</span>
+        <span><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> open</span>
+      </div>
     </div>
   </div>
 

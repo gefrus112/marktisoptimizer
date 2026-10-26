@@ -1,4 +1,4 @@
-ROPTIMER HUB V3.1 — safe Roblox performance settings
+ROPTIMER HUB V3.2 — safe Roblox performance settings
 =====================================================
 
 WHAT IS INCLUDED
@@ -12,11 +12,22 @@ WHAT IS INCLUDED
   hud-settings.json        Default HUD preferences
   feature-status.json      Implemented / legacy / rejected feature catalog
   assets/                  Shield app, HUD, and website icons
-  docs/                    CLI, how-it-works, macOS, and Script Hub docs
+  docs/                    CLI, how-it-works, macOS, Pages, and Script Hub docs
+  index.html               Root GitHub Pages fallback entry
+  404.html / .nojekyll     Static Pages support files
+  web/                     Primary GitHub Pages artifact with 100x FX
   Run Roptimer.bat         Windows launcher for the WPF app
   RoptimerBoost.bat        Windows launcher for the Boost CLI
   Run Roptimzier.bat       Windows launcher for the legacy Python app
   Run HUD.bat              Windows launcher for the HUD
+
+GITHUB PAGES
+  The website is deployed from web/ by .github/workflows/deploy-pages.yml.
+  Set Pages source to "GitHub Actions", or keep legacy main / / and use the
+  generated root index.html fallback. Run:
+    python3 build_website.py
+    python3 build_website.py --check
+  See docs/PAGES.md for troubleshooting if README.md appears instead.
 
 REQUIREMENTS
   Windows 10/11 + .NET 8 Desktop Runtime for the C#/.NET EXE files

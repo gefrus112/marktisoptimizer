@@ -1,7 +1,7 @@
 {
-  "product": "Roptimer Hub V3.1",
-  "version": "3.1.0",
-  "platform": ".NET 8 / WPF / Windows 10+ and Python/Tkinter / macOS 11+ companion",
+  "product": "Roptimer Hub V3.2",
+  "version": "3.2.0",
+  "platform": ".NET 8 / WPF / Windows 10+, Python/Tkinter / macOS 11+ companion, and static GitHub Pages website",
   "safety": {
     "injection": false,
     "memoryReads": false,
@@ -152,12 +152,12 @@
     },
     {
       "id": "sirius-website",
-      "name": "Sirius-style dark website",
+      "name": "Sirius-style dark website, 100× edition",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Rebuilds the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, Windows/macOS download cards, and no green neon dots."
+      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, and no green neon dots."
     },
     {
       "id": "cli-docs",
@@ -166,7 +166,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Adds a complete CLI reference, performance guide, local JSON/backup explanation, macOS setup guide, downloadable markdown docs, and a docs tab with generated commands."
+      "details": "Adds a complete CLI reference, performance guide, local JSON/backup explanation, macOS setup guide, GitHub Pages help, downloadable markdown docs, and a docs tab with generated commands."
     },
     {
       "id": "script-hub",
@@ -175,7 +175,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Original Luau-inspired local UI recipe catalog with code cards, screenshots, and a Run preview button. It is not a Roblox executor and never sends code to a game."
+      "details": "Original Luau-inspired local UI recipe catalog with code cards, seven screenshots, a Run preview button, and command-palette actions. It is not a Roblox executor and never sends code to a game."
     },
     {
       "id": "loading-gui",
@@ -185,6 +185,42 @@
       "safe": true,
       "flag": null,
       "details": "A local HTML/CSS/JavaScript loading GUI preview with steps, progress bar, and Sirius/Rayfield-like menu styling. No loadstring, game services, remote code, or executor APIs."
+    },
+    {
+      "id": "github-pages-workflow",
+      "name": "GitHub Pages Actions deployment",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, uploads web/ as a Pages artifact, and deploys with actions/deploy-pages@v4. Pages source can be set to GitHub Actions instead of README-based legacy publishing."
+    },
+    {
+      "id": "website-generator-v2",
+      "name": "Root fallback + website validator",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "build_website.py now generates web/index.html, a root index.html fallback, .nojekyll, 404 pages, site.webmanifest, robots.txt, and sitemap.xml. Its --check mode validates placeholders, local references, embedded JSON, and manifest output."
+    },
+    {
+      "id": "command-palette",
+      "name": "Searchable command palette",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 13 actions for tabs, generated CLI commands, downloads, releases, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution."
+    },
+    {
+      "id": "starfield-fx",
+      "name": "100× animated starfield and spotlight FX",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual."
     },
     {
       "id": "game-script-executor",
@@ -228,6 +264,10 @@
     {
       "title": "Bloxstrap original project",
       "url": "https://github.com/bloxstraplabs/bloxstrap"
+    },
+    {
+      "title": "GitHub Pages custom workflows documentation",
+      "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
     }
   ]
 }

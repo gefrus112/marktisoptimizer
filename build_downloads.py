@@ -2,7 +2,14 @@
 """Build the downloadable Roptimer Hub V3.1 packages used by web/index.html.
 
 Outputs:
+    index.html
+    404.html
+    .nojekyll
     web/index.html
+    web/404.html
+    web/.nojekyll
+    web/site.webmanifest
+    web/downloads/Roptimer-Pages-Help.md
     web/downloads/Roptimer-DotNet-Source.zip
     web/downloads/Roptimzier-Windows.zip
     web/downloads/Roptimer-Mac.zip
@@ -12,6 +19,7 @@ Outputs:
     web/downloads/Roptimer-How-It-Works.md
     web/downloads/Roptimer-Script-Hub.md
     web/downloads/Roptimer-Mac-README.md
+    web/downloads/Roptimer-Pages-Help.md
     web/downloads/feature-status.json
     web/downloads/Roptimzier.py
     web/downloads/roptimer_hud.py
@@ -78,7 +86,7 @@ DEFAULT_HUD_SETTINGS = {
     },
 }
 
-README_TEXT = """ROPTIMER HUB V3.1 — safe Roblox performance settings
+README_TEXT = """ROPTIMER HUB V3.2 — safe Roblox performance settings
 =====================================================
 
 WHAT IS INCLUDED
@@ -92,11 +100,22 @@ WHAT IS INCLUDED
   hud-settings.json        Default HUD preferences
   feature-status.json      Implemented / legacy / rejected feature catalog
   assets/                  Shield app, HUD, and website icons
-  docs/                    CLI, how-it-works, macOS, and Script Hub docs
+  docs/                    CLI, how-it-works, macOS, Pages, and Script Hub docs
+  index.html               Root GitHub Pages fallback entry
+  404.html / .nojekyll     Static Pages support files
+  web/                     Primary GitHub Pages artifact with 100x FX
   Run Roptimer.bat         Windows launcher for the WPF app
   RoptimerBoost.bat        Windows launcher for the Boost CLI
   Run Roptimzier.bat       Windows launcher for the legacy Python app
   Run HUD.bat              Windows launcher for the HUD
+
+GITHUB PAGES
+  The website is deployed from web/ by .github/workflows/deploy-pages.yml.
+  Set Pages source to "GitHub Actions", or keep legacy main / / and use the
+  generated root index.html fallback. Run:
+    python3 build_website.py
+    python3 build_website.py --check
+  See docs/PAGES.md for troubleshooting if README.md appears instead.
 
 REQUIREMENTS
   Windows 10/11 + .NET 8 Desktop Runtime for the C#/.NET EXE files
@@ -245,6 +264,7 @@ def copy_docs_to_downloads() -> None:
         DOCS / "SCRIPT_HUB.md": DOWNLOADS / "Roptimer-Script-Hub.md",
         DOCS / "MAC.md": DOWNLOADS / "Roptimer-Mac-README.md",
         DOCS / "MAC_RELEASE_NOTES.md": DOWNLOADS / "Roptimer-Mac-Release-Notes.md",
+        DOCS / "PAGES.md": DOWNLOADS / "Roptimer-Pages-Help.md",
     }
     for source, destination in mappings.items():
         if source.is_file():
@@ -292,6 +312,15 @@ def build_dotnet_source_zip() -> Path:
             ROOT / "requirements-optional.txt",
             ROOT / ".github/workflows/build-windows.yml",
             ROOT / ".github/workflows/build-macos.yml",
+            ROOT / ".github/workflows/deploy-pages.yml",
+            ROOT / "index.html",
+            ROOT / "404.html",
+            ROOT / ".nojekyll",
+            WEB / ".nojekyll",
+            WEB / "404.html",
+            WEB / "site.webmanifest",
+            WEB / "robots.txt",
+            WEB / "sitemap.xml",
             WEB / "index.template.html",
             WEB / "index.html",
             WEB / "assets/sirius.css",
@@ -377,6 +406,7 @@ def build_mac_zip(zip_path: Path, root_name: str, settings_copy: Path) -> Path:
             DOCS / "HOW_IT_WORKS.md": "Roptimer-How-It-Works.md",
             DOCS / "SCRIPT_HUB.md": "Roptimer-Script-Hub.md",
             DOCS / "MAC.md": "Roptimer-Mac-README.md",
+            DOCS / "PAGES.md": "Roptimer-Pages-Help.md",
         }
         for source, name in doc_names.items():
             if source.is_file():
@@ -458,6 +488,7 @@ def build() -> None:
         archive.write(hud_bat, "Roptimzier-Windows/Run HUD.bat")
         archive.write(ROOT / "feature-status.json", "Roptimzier-Windows/feature-status.json")
         archive.write(DOTNET / "README.md", "Roptimzier-Windows/Roptimer-DotNet-README.md")
+        archive.write(DOCS / "PAGES.md", "Roptimzier-Windows/Roptimer-Pages-Help.md")
         archive.write(source_zip, "Roptimzier-Windows/Roptimer-DotNet-Source.zip")
         archive.write(DOTNET / "RoptimerBoost.bat", "Roptimzier-Windows/RoptimerBoost.bat")
         archive.write(DOTNET / "Roptimer Boost Commands.txt", "Roptimzier-Windows/Roptimer-Boost-Commands.txt")
@@ -472,7 +503,7 @@ def build() -> None:
     print(f"Built {source_zip} ({source_zip.stat().st_size:,} bytes)")
     for path in mac_outputs[:2]:
         print(f"Built {path} ({path.stat().st_size:,} bytes)")
-    print("Generated website, source package, macOS packages, docs, and Python copies.")
+    print("Generated website, root Pages fallback, source package, macOS packages, docs, and Python copies.")
 
 
 if __name__ == "__main__":

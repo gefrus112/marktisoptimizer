@@ -128,7 +128,7 @@ def download_svg() -> str:
     b.append(txt(1000, 50, "GitHub", 13, MUTED, 700))
     b.append(rect(1080, 28, 90, 36, "#141418", 10, BORDER))
     b.append(txt(1125, 51, "Get Roptimer", 11, TEXT, 700, anchor="middle"))
-    b.append(txt(70, 180, "ROPTIMER HUB V3.1", 12, AMBER, 800, letter=2.5))
+    b.append(txt(70, 180, "ROPTIMER HUB V3.2 · 100× COOLER", 12, AMBER, 800, letter=2.5))
     b.append(txt(70, 260, "Serious performance", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
     b.append(txt(70, 326, "for every player.", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
     b.append(txt(72, 380, "Safe local Roblox settings for Windows and macOS.", 17, MUTED))
@@ -301,6 +301,104 @@ def mac_svg() -> str:
     return svg_doc("Roptimer macOS companion screenshot", "".join(b))
 
 
+
+def command_palette_svg() -> str:
+    b: list[str] = []
+    # Dimmed website behind the palette.
+    b.append(rect(0, 0, 1200, 86, "#070708", 0, BORDER))
+    b.append(rect(34, 26, 34, 34, ACCENT, 10))
+    b.append(txt(51, 50, "R", 21, TEXT, 900, "Georgia, serif", "middle"))
+    b.append(txt(82, 50, "Roptimer", 17, TEXT, 700))
+    b.append(txt(190, 50, "Download", 13, TEXT, 700))
+    b.append(txt(280, 50, "Docs", 13, MUTED, 700))
+    b.append(txt(340, 50, "Scripts", 13, MUTED, 700))
+    b.append(rect(1020, 28, 140, 36, "#141418", 10, BORDER))
+    b.append(txt(1090, 51, "Ctrl K  ◆", 11, TEXT, 700, anchor="middle"))
+    b.append(txt(70, 190, "ROPTIMER HUB V3.2 · 100× COOLER SITE ENGINE", 12, AMBER, 800, letter=2.2))
+    b.append(txt(70, 270, "Serious performance", 58, TEXT, 400, "Georgia, serif"))
+    b.append(txt(70, 336, "for every player.", 58, TEXT, 400, "Georgia, serif"))
+    b.append(txt(72, 390, "Search downloads, docs, scripts, and CLI commands from anywhere.", 17, MUTED))
+    b.append(rect(70, 430, 190, 46, "#141418", 10, BORDER))
+    b.append(txt(165, 459, "Start with Roptimer", 13, TEXT, 700, anchor="middle"))
+    b.append(rect(70, 500, 230, 30, "#101014", 999))
+    b.append(txt(185, 520, "100× cooler  ·  Pages ready", 11, MUTED, 700, anchor="middle"))
+    # Overlay.
+    b.append(rect(0, 86, 1200, 634, "#020203", opacity=.68))
+    b.append(rect(245, 145, 710, 430, PANEL, 18, BORDER))
+    b.append(rect(245, 145, 710, 58, PANEL_2, 18))
+    b.append(rect(245, 195, 710, 8, PANEL_2))
+    b.append(txt(272, 181, "◆", 15, AMBER, 800))
+    b.append(rect(302, 160, 540, 30, "#070709", 8, BORDER))
+    b.append(txt(318, 180, "Type a command, tab, download, or docs topic...", 13, MUTED))
+    b.append(rect(875, 160, 56, 30, "#111116", 8, BORDER))
+    b.append(txt(903, 180, "Esc", 10, DIM, 700, anchor="middle"))
+    rows = [
+        ("01", "Go to Download", "Windows EXE, macOS app, source ZIP, and checksums"),
+        ("02", "Go to Docs & How it works", "Local JSON, backups, CLI, settings builder, and safety"),
+        (">_", "Copy Windows Boost command", "Copy the generated RoptimerBoost.exe apply command"),
+        ("03", "Go to Scripts", "Script Hub, loading GUI preview, and screenshots"),
+        ("◐", "Toggle focus mode", "Hide the animated starfield and cursor spotlight"),
+    ]
+    for i, (icon, title, hint) in enumerate(rows):
+        y = 218 + i * 62
+        if i == 0:
+            b.append(rect(260, y, 680, 54, "#17171d", 10, BORDER))
+        b.append(rect(272, y + 10, 34, 34, "#0a0a0d", 8, BORDER))
+        b.append(txt(289, y + 33, icon, 11, ACCENT_2, 800, "SFMono-Regular, monospace", "middle"))
+        b.append(txt(320, y + 25, title, 13, TEXT, 700))
+        b.append(txt(320, y + 43, hint, 11, MUTED))
+        b.append(txt(920, y + 33, "↵", 12, DIM, 700, anchor="middle"))
+    b.append(rect(245, 528, 710, 47, "#08080a", 0, BORDER))
+    b.append(txt(270, 557, "↑ ↓ navigate     ↵ run     / or Ctrl+K open", 11, DIM, 700))
+    b.append(txt(935, 557, "13 commands", 10, AMBER, 700, anchor="end"))
+    return svg_doc("Roptimer command palette screenshot", "".join(b))
+
+
+def starfield_svg() -> str:
+    b: list[str] = []
+    b.append(rect(0, 0, 1200, 86, "#070708", 0, BORDER))
+    b.append(rect(34, 26, 34, 34, ACCENT, 10))
+    b.append(txt(51, 50, "R", 21, TEXT, 900, "Georgia, serif", "middle"))
+    b.append(txt(82, 50, "Roptimer", 17, TEXT, 700))
+    b.append(txt(190, 50, "Download", 13, TEXT, 700))
+    b.append(txt(280, 50, "Docs", 13, MUTED, 700))
+    b.append(txt(340, 50, "Scripts", 13, MUTED, 700))
+    b.append(rect(1040, 28, 120, 36, "#141418", 10, BORDER))
+    b.append(txt(1100, 51, "◆ 100× mode", 10, TEXT, 700, anchor="middle"))
+    # Cursor glow + orbit system.
+    b.append(circle(930, 330, 260, "url(#grad)", .9))
+    for r in (90, 150, 215):
+        b.append(circle(930, 330, r, "none", .55, BORDER, 1))
+    b.append(circle(930, 330, 62, "url(#grad)", 1, ACCENT, 2))
+    b.append(txt(930, 348, "R", 44, TEXT, 900, "Georgia, serif", "middle"))
+    b.append(circle(790, 190, 4, ACCENT_2, 1))
+    b.append(circle(1090, 470, 3, AMBER, 1))
+    b.append(circle(1085, 205, 2, "#ffffff", .8))
+    b.append(line(790, 190, 930, 330, BORDER, 1, .6))
+    b.append(line(930, 330, 1090, 470, BORDER, 1, .6))
+    b.append(txt(70, 180, "V3.2 · ANIMATED STARFIELD ENGINE", 12, AMBER, 800, letter=2.4))
+    b.append(txt(70, 260, "Serious", 72, TEXT, 400, "Georgia, serif"))
+    b.append(txt(70, 338, "performance.", 72, TEXT, 400, "Georgia, serif"))
+    b.append(txt(72, 390, "Canvas starfield, cursor spotlight, counters, and scroll reveals.", 17, MUTED))
+    b.append(txt(72, 420, "Still zero game script execution and no green neon dots.", 15, MUTED))
+    b.append(rect(70, 460, 190, 46, ACCENT, 10))
+    b.append(txt(165, 489, "Open command palette", 12, TEXT, 800, anchor="middle"))
+    b.append(rect(274, 460, 140, 46, "#141418", 10, BORDER))
+    b.append(txt(344, 489, "Read the docs", 12, TEXT, 700, anchor="middle"))
+    b.append(rect(70, 540, 150, 32, "#101014", 999))
+    b.append(txt(145, 561, "◆ 100× cooler", 11, TEXT, 800, anchor="middle"))
+    b.append(rect(232, 540, 210, 32, "#101014", 999))
+    b.append(txt(337, 561, "● GitHub Pages ready", 11, TEXT, 800, anchor="middle"))
+    # Animated stat counters.
+    b.append(line(0, 620, 1200, 620, BORDER))
+    stats = [("3", "main tabs"), ("14", "managed flags"), ("0", "game scripts run"), ("100×", "cooler engine")]
+    for i, (value, label) in enumerate(stats):
+        x = 70 + i * 285
+        b.append(txt(x, 665, value, 34, TEXT, 400, "Georgia, serif"))
+        b.append(txt(x, 690, label, 10, MUTED, 800, letter=1.4))
+    return svg_doc("Roptimer 100x starfield website screenshot", "".join(b))
+
+
 def build() -> None:
     ASSETS.mkdir(parents=True, exist_ok=True)
     outputs = {
@@ -309,6 +407,8 @@ def build() -> None:
         "sirius-script-hub.svg": script_hub_svg(),
         "sirius-loading-gui.svg": loading_gui_svg(),
         "sirius-mac.svg": mac_svg(),
+        "sirius-command-palette.svg": command_palette_svg(),
+        "sirius-starfield.svg": starfield_svg(),
     }
     for name, content in outputs.items():
         (ASSETS / name).write_text(content, encoding="utf-8")
