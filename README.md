@@ -12,7 +12,11 @@ A **safe, performance-only** Roblox Windows client settings utility written in o
 | --- | --- |
 | `roblox_fps_optimizer.py` | Complete single-file Tkinter desktop app, core logic, CLI, and self-tests |
 | `roptimer_hud.py` | Safe separate always-on-top ROPTIMER HUD window (FPS target, ping, CPU/RAM hints, notifications) |
-| `web/index.html` | Red-themed offline **ROPTIMER** website: downloads, device lab, profile builder, game lab, HUD settings, safety FAQ |
+| `web/index.html` | Red-themed offline **ROPTIMER** download portal with Download / Features / Screenshots / Safety tabs |
+| `web/assets/` | SVG screenshots, favicon, website icon, Python-app icon, HUD icon, PNG and ICO exports |
+| `web/downloads/` | Downloadable `Roptimzier.py`, `roptimer_hud.py`, `hud-settings.json`, and `Roptimzier-Windows.zip` |
+| `assets/` | Icon copies used by the source Python apps at runtime |
+| `build_downloads.py` | Regenerates `web/downloads/` and the Windows ZIP package after code or icon changes |
 | `requirements.txt` | Runtime dependencies (none required) |
 | `requirements-optional.txt` | Optional `psutil` for process detection and HUD CPU/RAM hints |
 
@@ -38,19 +42,27 @@ python -m pip install -r requirements-optional.txt
 ```powershell
 python -m pip install pyinstaller
 pyinstaller --noconfirm --onefile --windowed ^
-  --name "Roblox FPS Optimizer" roblox_fps_optimizer.py
+  --name "Roptimzier" ^
+  --icon assets\roptimzier-app.ico ^
+  --add-data "assets\roptimzier-app.ico;assets" ^
+  roblox_fps_optimizer.py
 ```
 
-The executable will be in `dist\`. Because the app has no data files, no PyInstaller spec is required.
+The executable will be in `dist\`. The `--add-data` option embeds the custom app icon so the window title bar uses it. For the HUD, use `--icon assets\roptimer-hud.ico` and add `assets\roptimer-hud.ico;assets`.
 
 ---
 
 ## Desktop app features
 
-- Modern dark gaming UI using the requested `#1e1e24` panel color and neon violet/blue accents.
-- Sidebar navigation: **Dashboard, Optimizer, Client Link, JSON Preview, Activity Log, Safe Guide**.
+- Modern dark gaming UI using the requested `#1e1e24` panel color and neon accents, now with custom red app icons.
+- Sidebar navigation: **Dashboard, Quick Setup, Optimizer, Client Link, JSON Preview, Activity Log, Safe Guide**.
+- **Quick Setup** page with big switches for FPS target, Performance Boost, Lag Rescue, VFX / world detail reducer, notifications, Bright UI and client sync.
+- **Lag Rescue** preset: one click for the lowest safe graphics settings when a game stutters.
+- **VFX reducer**: lowers safe graphics load with allowlisted quality/texture/MSAA/motion flags. It does not remove buildings, add full bright, or create x-ray vision.
+- **Bright UI**: high-contrast app theme only; it never changes Roblox world lighting.
+- **Notifications**: in-app toast messages for apply, restore, sync and auto-sync events.
 - FPS slider and exact input from **60** to **9999**.
-- Quick presets: 60, 120, 144, 165, 240, and 9999/MAX.
+- Quick presets: 60, 120, 144, 165, 240, 9999/MAX, plus **Lag Rescue**.
 - Toggle switches for:
   - **Optimize Rendering Paths**
   - **Lower Hidden Textures**
@@ -146,7 +158,7 @@ Settings are read when Roblox starts. **Close and reopen Roblox after applying.*
 
 ## ROPTIMER website and Roptimer HUD
 
-The website is now a full red/black **ROPTIMER** landing and performance lab for the **Roptimzier** app.
+The website is now a **download portal**, not a web app. It uses a red/black ROPTIMER theme and focuses on one job: helping you download Roptimzier.
 
 Open `web/index.html` directly in a browser, or serve it locally:
 
@@ -158,13 +170,19 @@ Then visit `http://localhost:8000`.
 
 ### Website features
 
-- Animated red grid, particles, glow rings, scanlines, glitch title, parallax monitor, reveal animations, ripple buttons and scroll progress.
-- Direct downloads for `roblox_fps_optimizer.py`, `roptimer_hud.py`, generated `ClientAppSettings.json`, `hud-settings.json`, and a game test plan.
-- **Device Lab**: reads privacy-safe browser hints such as CPU threads, memory hint, WebGL GPU string, connection info, screen size, battery presence, and an estimated display refresh rate. You can manually choose school laptop, ultrabook, gaming laptop, or desktop.
-- **Profile Builder**: FPS slider, graphics/texture dropdowns, rendering toggles and a live JSON preview.
-- **Game Lab**: offline test plans for roleplay, combat, shooter, open-world, obby, and simulator-style Roblox experiences. It does not connect to a game or read live game data.
-- **HUD Settings**: choose FPS target display, ping, CPU/RAM hints, notifications, low-FPS reminders, ping-spike alerts, corner position, opacity, red accent, and game profile.
-- **Safety FAQ**: clearly states that no injector, exploit, memory reader, anti-cheat bypass, stealth, or gameplay automation is included.
+- Four tabs: **Download, Features, Screenshots, Safety**.
+- Animated red grid, particles, glow rings, scanlines, glitch title, parallax app card, reveal animations, ripple buttons, ticker and scroll progress.
+- Real icon assets: website favicon, website icon, Python-app icon and HUD icon (SVG, PNG and ICO).
+- Three SVG screenshot-style UI previews: Dashboard, Quick Setup and Roptimer HUD.
+- Download buttons for the complete Windows ZIP, `Roptimzier.py`, `roptimer_hud.py`, and `hud-settings.json`.
+- Feature cards for FPS target, Performance Boost, Lag Rescue, VFX reducer, notifications, Bright UI, separate HUD, client sync, and one-click restore.
+- Safety FAQ that clearly states: no injector, no full bright exploit, no building removal, no x-ray, no memory edits, no anti-cheat bypass, and no gameplay automation.
+
+Regenerate the download package after changing the Python apps or icons:
+
+```bash
+python build_downloads.py
+```
 
 ### Roptimer HUD
 

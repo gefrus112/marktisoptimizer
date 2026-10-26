@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#181015"/><stop offset="1" stop-color="#08070a"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d3f"/><stop offset="1" stop-color="#ff7a35"/></linearGradient>
+  </defs>
+  <rect width="1200" height="720" rx="22" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="66" fill="#121016"/><rect x="0" y="64" width="1200" height="2" fill="#ff2d3f" opacity=".35"/>
+  <text x="32" y="41" fill="#fff" font-family="Segoe UI, Arial" font-size="22" font-weight="700">Roptimzier</text>
+  <text x="182" y="40" fill="#8f7c84" font-family="Segoe UI, Arial" font-size="12">QUICK SETUP</text>
+
+  <text x="46" y="112" fill="#fff" font-family="Segoe UI, Arial" font-size="30" font-weight="700">Quick Setup</text>
+  <text x="46" y="138" fill="#9d8a91" font-family="Segoe UI, Arial" font-size="12">Big switches for FPS, boost, lag rescue and notifications.</text>
+
+  <g font-family="Segoe UI, Arial">
+    <rect x="46" y="166" width="352" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="82" cy="202" r="18" fill="#ff2d3f" opacity=".16"/><text x="75" y="208" fill="#ff5a68" font-size="16" font-weight="700">F</text>
+    <text x="112" y="200" fill="#fff" font-size="16" font-weight="700">FPS target</text><text x="112" y="222" fill="#95818a" font-size="10">60 – 9999 • stable cap recommended</text>
+    <text x="72" y="266" fill="#ff7a35" font-size="38" font-weight="700">144</text><text x="150" y="266" fill="#8c7880" font-size="12">FPS</text>
+    <rect x="252" y="240" width="116" height="34" rx="9" fill="#0f0c10" stroke="#4a2630"/><text x="278" y="262" fill="#ff8b96" font-size="12" font-weight="700">Edit cap</text>
+
+    <rect x="418" y="166" width="352" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="454" cy="202" r="18" fill="#ff7a35" opacity=".16"/><text x="448" y="208" fill="#ff9a4a" font-size="16" font-weight="700">B</text>
+    <text x="484" y="200" fill="#fff" font-size="16" font-weight="700">Performance boost</text><text x="484" y="222" fill="#95818a" font-size="10">Allowlisted rendering paths</text>
+    <rect x="690" y="190" width="52" height="28" rx="14" fill="#ff2d3f"/><circle cx="729" cy="204" r="10" fill="#fff"/>
+    <text x="444" y="266" fill="#4ef0a3" font-size="12" font-weight="700">ENABLED</text><text x="444" y="290" fill="#6f5d64" font-size="10">No DLL injection</text>
+
+    <rect x="790" y="166" width="364" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="826" cy="202" r="18" fill="#ffbf5e" opacity=".16"/><text x="820" y="208" fill="#ffbf5e" font-size="16" font-weight="700">L</text>
+    <text x="856" y="200" fill="#fff" font-size="16" font-weight="700">Lag rescue</text><text x="856" y="222" fill="#95818a" font-size="10">One-click lowest safe settings</text>
+    <rect x="1058" y="190" width="52" height="28" rx="14" fill="#ff2d3f"/><circle cx="1097" cy="204" r="10" fill="#fff"/>
+    <text x="816" y="266" fill="#ffbf5e" font-size="12" font-weight="700">IF THE GAME LAGS</text><text x="816" y="290" fill="#6f5d64" font-size="10">Textures • grass • MSAA • LOD</text>
+
+    <rect x="46" y="338" width="352" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="82" cy="374" r="18" fill="#ff2d3f" opacity=".16"/><text x="75" y="380" fill="#ff5a68" font-size="16" font-weight="700">V</text>
+    <text x="112" y="372" fill="#fff" font-size="16" font-weight="700">VFX / world detail</text><text x="112" y="394" fill="#95818a" font-size="10">Reduce visual load safely</text>
+    <rect x="322" y="362" width="52" height="28" rx="14" fill="#ff2d3f"/><circle cx="361" cy="376" r="10" fill="#fff"/>
+    <text x="72" y="438" fill="#ff7a35" font-size="12" font-weight="700">NO GAME LIGHTING HACKS</text><text x="72" y="462" fill="#6f5d64" font-size="10">No full bright exploit</text>
+
+    <rect x="418" y="338" width="352" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="454" cy="374" r="18" fill="#4ef0a3" opacity=".14"/><text x="448" y="380" fill="#4ef0a3" font-size="16" font-weight="700">N</text>
+    <text x="484" y="372" fill="#fff" font-size="16" font-weight="700">Notifications</text><text x="484" y="394" fill="#95818a" font-size="10">In-app toasts and status log</text>
+    <rect x="694" y="362" width="52" height="28" rx="14" fill="#ff2d3f"/><circle cx="733" cy="376" r="10" fill="#fff"/>
+    <text x="444" y="438" fill="#4ef0a3" font-size="12" font-weight="700">ENABLED</text><text x="444" y="462" fill="#6f5d64" font-size="10">Apply, restore, auto-sync</text>
+
+    <rect x="790" y="338" width="364" height="152" rx="16" fill="#1a1118" stroke="#3a1b23"/>
+    <circle cx="826" cy="374" r="18" fill="#ff7a35" opacity=".16"/><text x="820" y="380" fill="#ff9a4a" font-size="16" font-weight="700">C</text>
+    <text x="856" y="372" fill="#fff" font-size="16" font-weight="700">Client sync</text><text x="856" y="394" fill="#95818a" font-size="10">Any Windows Roblox version</text>
+    <rect x="1062" y="362" width="52" height="28" rx="14" fill="#ff2d3f"/><circle cx="1101" cy="376" r="10" fill="#fff"/>
+    <text x="816" y="438" fill="#ff7a35" font-size="12" font-weight="700">AUTO-DETECT ON</text><text x="816" y="462" fill="#6f5d64" font-size="10">Shared + version folders</text>
+  </g>
+
+  <rect x="46" y="512" width="1108" height="160" rx="18" fill="#140f14" stroke="#3a1b23"/>
+  <text x="74" y="546" fill="#fff" font-family="Segoe UI, Arial" font-size="16" font-weight="700">Generated settings</text>
+  <rect x="74" y="564" width="1052" height="84" rx="12" fill="#0b090c" stroke="#351a22"/>
+  <text x="96" y="592" fill="#ff7a35" font-family="Consolas, monospace" font-size="12">"DFIntTaskSchedulerTargetFps": "144",</text>
+  <text x="96" y="614" fill="#ff7a35" font-family="Consolas, monospace" font-size="12">"DFIntDebugFRMQualityLevelOverride": "1",</text>
+  <text x="96" y="636" fill="#4ef0a3" font-family="Consolas, monospace" font-size="12">"DFFlagTextureQualityOverrideEnabled": "True"</text>
+  <rect x="962" y="536" width="164" height="40" rx="10" fill="url(#red)"/>
+  <text x="988" y="561" fill="#fff" font-family="Segoe UI, Arial" font-size="12" font-weight="700">Apply &amp; Launch</text>
+</svg>

@@ -91,9 +91,20 @@ except Exception as exc:  # pragma: no cover - headless systems
 # App constants and visual language
 # ---------------------------------------------------------------------------
 
-APP_TITLE = "Roblox FPS & Performance Optimizer"
-APP_VERSION = "1.0.0"
+APP_TITLE = "Roptimzier — Roblox FPS & Performance Optimizer"
+APP_VERSION = "1.2.0"
 APP_SLUG = "RobloxFpsOptimizer"
+BRAND_NAME = "ROPTIMZIER"
+
+
+def app_resource_path(relative: str) -> Path:
+    """Resolve assets next to the script or inside a PyInstaller bundle."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(str(getattr(sys, "_MEIPASS"))) / relative
+    return Path(__file__).resolve().parent / relative
+
+
+APP_ICON_PATH = app_resource_path("assets/roptimzier-app.ico")
 CLIENT_SETTINGS_FILE = "ClientAppSettings.json"
 LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps"
 MAX_NATIVE_FPS = 240
@@ -220,10 +231,25 @@ GEOMETRY_PRESETS = {
     "Performance": ("100", "75", "100", "150"),
     "Balanced": ("2000", "1000", "1500", "2500"),
     "Visual": ("10000", "10000", "10000", "10000"),
+    "Lag Rescue": ("50", "30", "40", "60"),
     "Custom": ("1000", "600", "800", "1200"),
 }
 
 PRESET_VALUES: dict[str, dict[str, Any]] = {
+    "Lag Rescue": {
+        "fps_target": 60,
+        "optimize_rendering": True,
+        "lower_textures": True,
+        "reduce_grass_motion": True,
+        "renderer": "Automatic (recommended)",
+        "graphics_quality": "Ultra low",
+        "texture_quality": "Low (best performance)",
+        "msaa": "1x / off",
+        "grass_motion": "Still",
+        "vfx_reducer": True,
+        "notifications": True,
+        "bright_ui": False,
+    },
     "Performance": {
         "fps_target": 144,
         "optimize_rendering": True,
@@ -234,6 +260,9 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "texture_quality": "Low (best performance)",
         "msaa": "1x / off",
         "grass_motion": "Still",
+        "vfx_reducer": True,
+        "notifications": True,
+        "bright_ui": False,
     },
     "Balanced": {
         "fps_target": 144,
@@ -245,6 +274,9 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "texture_quality": "Medium",
         "msaa": "2x",
         "grass_motion": "Reduced",
+        "vfx_reducer": False,
+        "notifications": True,
+        "bright_ui": False,
     },
     "Visual": {
         "fps_target": 240,
@@ -256,6 +288,9 @@ PRESET_VALUES: dict[str, dict[str, Any]] = {
         "texture_quality": "High",
         "msaa": "4x",
         "grass_motion": "Default",
+        "vfx_reducer": False,
+        "notifications": True,
+        "bright_ui": False,
     },
 }
 
@@ -318,6 +353,9 @@ class OptimizerSettings:
     optimize_rendering: bool = True
     lower_textures: bool = True
     reduce_grass_motion: bool = True
+    vfx_reducer: bool = True
+    notifications: bool = True
+    bright_ui: bool = False
     preset: str = "Performance"
     renderer: str = "Automatic (recommended)"
     graphics_quality: str = "Ultra low"
@@ -367,6 +405,9 @@ class OptimizerSettings:
             "optimize_rendering",
             "lower_textures",
             "reduce_grass_motion",
+            "vfx_reducer",
+            "notifications",
+            "bright_ui",
             "shared_profile",
             "watch_versions",
             "launch_after_apply",
@@ -813,6 +854,17 @@ class OptimizerCore:
         if grass is not None:
             flags["FIntGrassMovementReducedMotionFactor"] = grass
 
+        # "VFX / world detail reducer": a safe graphics-load reduction. It uses
+        # allowlisted quality/texture/anti-aliasing/motion keys. It does NOT
+        # remove buildings, change game lighting, create x-ray/fullbright, or
+        # alter gameplay geometry.
+        if settings.vfx_reducer:
+            flags["DFIntDebugFRMQualityLevelOverride"] = "1"
+            flags["DFFlagTextureQualityOverrideEnabled"] = "True"
+            flags["DFIntTextureQualityOverride"] = "1"
+            flags["FIntDebugForceMSAASamples"] = "1"
+            flags["FIntGrassMovementReducedMotionFactor"] = "0"
+
         unknown = set(flags) - MANAGED_FLAGS
         if unknown:
             raise OptimizerError(f"Refusing to write unmanaged flags: {sorted(unknown)}")
@@ -836,6 +888,11 @@ class OptimizerCore:
             )
         if settings.renderer == "Vulkan (modern GPU)":
             notes.append("Vulkan is experimental on some GPUs; switch to Automatic if Roblox crashes.")
+        if settings.bright_ui:
+            notes.append(
+                "Bright UI changes this app's contrast only. It does not add full bright, "
+                "x-ray, building removal, or game-lighting changes."
+            )
         return notes
 
     # -- target resolution -------------------------------------------------
@@ -1358,7 +1415,8 @@ if HAS_TK:
 
         NAV_ITEMS = (
             ("Dashboard", "◆"),
-            ("Optimizer", "⚡"),
+            ("Quick Setup", "⚡"),
+            ("Optimizer", "⚙"),
             ("Client Link", "⇄"),
             ("JSON Preview", "{ }"),
             ("Activity Log", "≡"),
@@ -1391,10 +1449,16 @@ if HAS_TK:
             self.minsize(980, 680)
             self.configure(bg=BG)
             configure_styles(self)
+            try:
+                if APP_ICON_PATH.is_file():
+                    self.iconbitmap(default=str(APP_ICON_PATH))
+            except (tk.TclError, OSError):
+                pass
             self._center_window()
             self._init_variables(settings)
             self._build_ui()
             self._attach_traces()
+            self.after(50, self._apply_bright_ui)
             self.protocol("WM_DELETE_WINDOW", self._on_close)
             self.after(100, self._drain_queues)
             self.after(250, self._initial_scan)
@@ -1417,6 +1481,9 @@ if HAS_TK:
             self.render_paths_var = tk.BooleanVar(value=settings.optimize_rendering)
             self.hidden_textures_var = tk.BooleanVar(value=settings.lower_textures)
             self.grass_var = tk.BooleanVar(value=settings.reduce_grass_motion)
+            self.vfx_var = tk.BooleanVar(value=settings.vfx_reducer)
+            self.notifications_var = tk.BooleanVar(value=settings.notifications)
+            self.bright_ui_var = tk.BooleanVar(value=settings.bright_ui)
             self.preset_var = tk.StringVar(value=settings.preset)
             self.renderer_var = tk.StringVar(value=settings.renderer)
             self.graphics_quality_var = tk.StringVar(value=settings.graphics_quality)
@@ -1453,6 +1520,7 @@ if HAS_TK:
                 self.pages[name] = page
 
             self._build_dashboard(self.pages["Dashboard"])
+            self._build_quick_setup(self.pages["Quick Setup"])
             self._build_optimizer(self.pages["Optimizer"])
             self._build_client_link(self.pages["Client Link"])
             self._build_json_preview(self.pages["JSON Preview"])
@@ -1780,6 +1848,195 @@ if HAS_TK:
             log_card.pack(fill="both", expand=True, pady=(16, 8))
             self.compact_log = self._make_log_text(log_body, height=7)
             self.compact_log.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+
+        def _build_quick_setup(self, page: tk.Frame) -> None:
+            inner = self._scrollable(page)
+            self._section_title(
+                inner,
+                "Quick Setup",
+                "Big, simple switches for FPS, boost, lag rescue, VFX load, notifications and client sync.",
+            )
+
+            grid = tk.Frame(inner, bg=BG)
+            grid.pack(fill="x")
+            for col in range(3):
+                grid.grid_columnconfigure(col, weight=1, uniform="quick")
+
+            def feature_card(col: int, row: int, badge: str, title: str, subtitle: str, accent: str) -> tk.Frame:
+                outer, body = self._card(grid, padding=16)
+                outer.grid(row=row, column=col, sticky="nsew", padx=(0 if col == 0 else 10, 0), pady=(0, 10))
+                head = tk.Frame(body, bg=CARD)
+                head.pack(fill="x")
+                mark = tk.Label(
+                    head,
+                    text=badge,
+                    bg=accent,
+                    fg="white",
+                    font=(FONT_UI, 10, "bold"),
+                    width=3,
+                    pady=5,
+                )
+                mark.pack(side="left")
+                text = tk.Frame(head, bg=CARD)
+                text.pack(side="left", padx=(10, 0), fill="x", expand=True)
+                tk.Label(text, text=title, bg=CARD, fg=TEXT, font=(FONT_UI, 11, "bold")).pack(anchor="w")
+                tk.Label(
+                    text,
+                    text=subtitle,
+                    bg=CARD,
+                    fg=MUTED,
+                    font=(FONT_UI, 8),
+                    wraplength=230,
+                    justify="left",
+                ).pack(anchor="w", pady=(2, 0))
+                return body
+
+            # FPS target.
+            fps_body = feature_card(0, 0, "F", "FPS target", "Stable cap beats huge numbers.", ACCENT)
+            self.quick_fps_label = tk.Label(
+                fps_body,
+                text="144 FPS",
+                bg=CARD,
+                fg=ACCENT_2,
+                font=(FONT_UI, 24, "bold"),
+            )
+            self.quick_fps_label.pack(anchor="w", padx=16, pady=(12, 6))
+            chips = tk.Frame(fps_body, bg=CARD)
+            chips.pack(anchor="w", padx=16, pady=(0, 14))
+            for value in (60, 120, 144, 240):
+                tk.Button(
+                    chips,
+                    text=str(value),
+                    bg=FIELD,
+                    fg=ACCENT_2,
+                    activebackground=ACCENT,
+                    activeforeground="white",
+                    bd=0,
+                    relief="flat",
+                    font=(FONT_UI, 8, "bold"),
+                    padx=8,
+                    pady=5,
+                    cursor="hand2",
+                    command=lambda v=value: self._set_fps(v),
+                ).pack(side="left", padx=(0, 5))
+
+            # Performance boost.
+            boost_body = feature_card(1, 0, "B", "Performance Boost", "Allowlisted rendering paths only.", ACCENT_2)
+            toggle_row = tk.Frame(boost_body, bg=CARD)
+            toggle_row.pack(fill="x", padx=16, pady=(14, 6))
+            ToggleSwitch(toggle_row, variable=self.render_paths_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(toggle_row, text="Enabled", bg=CARD, fg=SUCCESS, font=(FONT_UI, 9, "bold")).pack(side="left", padx=(8, 0))
+            tk.Label(
+                boost_body,
+                text="No DLL injection • no memory edits",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8),
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            # Lag rescue.
+            lag_body = feature_card(2, 0, "L", "Lag Rescue", "One click for the lowest safe settings.", WARNING)
+            tk.Label(
+                lag_body,
+                text="Use when a game stutters heavily.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 9),
+                wraplength=240,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(12, 8))
+            ttk.Button(
+                lag_body,
+                text="Activate Lag Rescue",
+                style="Accent.TButton",
+                command=lambda: self.preset_var.set("Lag Rescue"),
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            # VFX / world detail reducer.
+            vfx_body = feature_card(0, 1, "V", "VFX / World Detail", "Reduce visual load safely.", ACCENT)
+            vfx_row = tk.Frame(vfx_body, bg=CARD)
+            vfx_row.pack(fill="x", padx=16, pady=(14, 6))
+            ToggleSwitch(vfx_row, variable=self.vfx_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(vfx_row, text="Reducer", bg=CARD, fg=ACCENT_2, font=(FONT_UI, 9, "bold")).pack(side="left", padx=(8, 0))
+            tk.Label(
+                vfx_body,
+                text="No full bright • no x-ray • no building removal",
+                bg=CARD,
+                fg=WARNING,
+                font=(FONT_UI, 8),
+                wraplength=240,
+                justify="left",
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            # Notifications.
+            note_body = feature_card(1, 1, "N", "Notifications", "In-app toasts and status log.", SUCCESS)
+            note_row = tk.Frame(note_body, bg=CARD)
+            note_row.pack(fill="x", padx=16, pady=(14, 6))
+            ToggleSwitch(note_row, variable=self.notifications_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(note_row, text="Toasts", bg=CARD, fg=SUCCESS, font=(FONT_UI, 9, "bold")).pack(side="left", padx=(8, 0))
+            tk.Label(
+                note_body,
+                text="Apply, restore and auto-sync alerts.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8),
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            # Bright UI (app only).
+            bright_body = feature_card(2, 1, "U", "Bright UI", "App contrast only, not game lighting.", WARNING)
+            bright_row = tk.Frame(bright_body, bg=CARD)
+            bright_row.pack(fill="x", padx=16, pady=(14, 6))
+
+            def on_bright_toggle() -> None:
+                self._apply_bright_ui()
+                self._schedule_preview()
+
+            ToggleSwitch(bright_row, variable=self.bright_ui_var, command=on_bright_toggle).pack(side="left")
+            tk.Label(bright_row, text="App only", bg=CARD, fg=WARNING, font=(FONT_UI, 9, "bold")).pack(side="left", padx=(8, 0))
+            tk.Label(
+                bright_body,
+                text="Does not change Roblox world brightness.",
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 8),
+            ).pack(anchor="w", padx=16, pady=(0, 14))
+
+            # Client sync.
+            sync_body = feature_card(0, 2, "C", "Client Sync", "Any detected Windows Roblox version.", ACCENT_2)
+            sync_row = tk.Frame(sync_body, bg=CARD)
+            sync_row.pack(fill="x", padx=16, pady=(14, 6))
+            ToggleSwitch(sync_row, variable=self.watch_var, command=self._schedule_preview).pack(side="left")
+            tk.Label(sync_row, text="Auto", bg=CARD, fg=ACCENT_2, font=(FONT_UI, 9, "bold")).pack(side="left", padx=(8, 0))
+            ttk.Button(
+                sync_body,
+                text="Sync all versions now",
+                style="Ghost.TButton",
+                command=self._sync_now,
+            ).pack(anchor="w", padx=16, pady=(2, 14))
+
+            # Safe content note spanning two columns.
+            outer, body = self._card(grid, padding=18)
+            outer.grid(row=2, column=1, columnspan=2, sticky="nsew", padx=(10, 0), pady=(0, 10))
+            tk.Label(
+                body,
+                text="PERFORMANCE, NOT EXPLOITS",
+                bg=CARD,
+                fg=ACCENT_2,
+                font=(FONT_UI, 9, "bold"),
+            ).pack(anchor="w", padx=18, pady=(16, 6))
+            tk.Label(
+                body,
+                text=(
+                    "This app writes reversible JSON settings and runs a separate HUD. It cannot make "
+                    "walls transparent, remove buildings, add full bright lighting, automate gameplay, "
+                    "or bypass anti-cheat. Those features are intentionally not included."
+                ),
+                bg=CARD,
+                fg=MUTED,
+                font=(FONT_UI, 9),
+                wraplength=540,
+                justify="left",
+            ).pack(anchor="w", padx=18, pady=(0, 16))
 
         def _build_optimizer(self, page: tk.Frame) -> None:
             inner = self._scrollable(page)
@@ -2316,12 +2573,80 @@ if HAS_TK:
 
         # -- state / events -------------------------------------------------
 
+        def _apply_bright_ui(self) -> None:
+            """High-contrast APP theme only. Never changes Roblox lighting."""
+            enabled = bool(self.bright_ui_var.get())
+            style = ttk.Style(self)
+            if enabled:
+                self.configure(bg="#050507")
+                style.configure("Accent.TButton", background="#ff4b57", foreground="#ffffff")
+                style.map(
+                    "Accent.TButton",
+                    background=[("active", "#ff6b76"), ("disabled", "#56506b")],
+                    foreground=[("disabled", "#d0cbe0")],
+                )
+            else:
+                self.configure(bg=BG)
+                style.configure("Accent.TButton", background=ACCENT, foreground="#0b0913")
+                style.map(
+                    "Accent.TButton",
+                    background=[("active", ACCENT_HOVER), ("disabled", "#56506b")],
+                    foreground=[("disabled", "#d0cbe0")],
+                )
+
+        def _toast(self, message: str, level: str = "info") -> None:
+            """Show a small in-app notification when notifications are enabled."""
+            if not hasattr(self, "notifications_var") or not self.notifications_var.get():
+                return
+            color = {
+                "info": ACCENT_2,
+                "success": SUCCESS,
+                "warning": WARNING,
+                "error": ERROR,
+            }.get(level, ACCENT_2)
+            toast = tk.Toplevel(self)
+            toast.overrideredirect(True)
+            try:
+                toast.attributes("-topmost", True)
+                toast.attributes("-alpha", 0.96)
+            except tk.TclError:
+                pass
+            frame = tk.Frame(toast, bg=FIELD, bd=1, relief="solid")
+            frame.pack(fill="both", expand=True)
+            tk.Label(
+                frame,
+                text="ROPTIMZIER",
+                bg=FIELD,
+                fg=color,
+                font=(FONT_UI, 8, "bold"),
+            ).pack(anchor="w", padx=12, pady=(9, 0))
+            tk.Label(
+                frame,
+                text=message,
+                bg=FIELD,
+                fg=TEXT,
+                font=(FONT_UI, 9),
+                wraplength=280,
+                justify="left",
+            ).pack(anchor="w", padx=12, pady=(2, 10))
+            try:
+                self.update_idletasks()
+                x = self.winfo_x() + self.winfo_width() - 320
+                y = self.winfo_y() + self.winfo_height() - 130
+                toast.geometry(f"300x70+{max(0, x)}+{max(0, y)}")
+            except tk.TclError:
+                pass
+            toast.after(3600, toast.destroy)
+
         def _attach_traces(self) -> None:
             self.fps_entry_var.trace_add("write", self._on_fps_entry)
             for variable in (
                 self.render_paths_var,
                 self.hidden_textures_var,
                 self.grass_var,
+                self.vfx_var,
+                self.notifications_var,
+                self.bright_ui_var,
                 self.legacy_var,
                 self.renderer_var,
                 self.graphics_quality_var,
@@ -2358,6 +2683,9 @@ if HAS_TK:
                             "optimize_rendering": self.render_paths_var,
                             "lower_textures": self.hidden_textures_var,
                             "reduce_grass_motion": self.grass_var,
+                            "vfx_reducer": self.vfx_var,
+                            "notifications": self.notifications_var,
+                            "bright_ui": self.bright_ui_var,
                         }
                         if key in mapping:
                             mapping[key].set(bool(value))
@@ -2431,6 +2759,8 @@ if HAS_TK:
                     self.fps_note.configure(text=note)
                 if "FPS target" in self.stat_labels:
                     self.stat_labels["FPS target"].configure(text=display)
+                if hasattr(self, "quick_fps_label"):
+                    self.quick_fps_label.configure(text=display)
             finally:
                 self._syncing_fps = False
             self._schedule_preview()
@@ -2446,6 +2776,9 @@ if HAS_TK:
                 optimize_rendering=bool(self.render_paths_var.get()),
                 lower_textures=bool(self.hidden_textures_var.get()),
                 reduce_grass_motion=bool(self.grass_var.get()),
+                vfx_reducer=bool(self.vfx_var.get()),
+                notifications=bool(self.notifications_var.get()),
+                bright_ui=bool(self.bright_ui_var.get()),
                 preset=self.preset_var.get(),
                 renderer=self.renderer_var.get(),
                 graphics_quality=self.graphics_quality_var.get(),
@@ -2646,6 +2979,7 @@ if HAS_TK:
                             "success",
                             f"Auto-synced the performance profile to {len(new)} new Roblox version(s).",
                         )
+                        self._toast(f"Auto-synced {len(new)} new Roblox version(s).", "success")
                     self.known_version_paths.update(str(v.path) for v in fresh)
                     self.versions = fresh
                     self.core.update_synced_versions(fresh)
@@ -2682,6 +3016,7 @@ if HAS_TK:
                     f"Applied {len(result.flags)} managed flags to {len(result.profile_paths)} profile location(s).",
                 )
                 self.emit_log("info", "Restart Roblox if it was already open. Settings are read at launch.")
+                self.ui_queue.put(lambda: self._toast("Optimizations applied. Restart Roblox if needed.", "success"))
                 self.ui_queue.put(self._refresh_versions)
                 self.ui_queue.put(self._refresh_preview)
 
@@ -2700,6 +3035,7 @@ if HAS_TK:
                     "success",
                     f"Synced {len(result.flags)} flags to {len(result.profile_paths)} location(s).",
                 )
+                self.ui_queue.put(lambda: self._toast("All Roblox versions synced.", "success"))
                 self.ui_queue.put(self._refresh_versions)
 
             self._run_task(task)
@@ -2718,6 +3054,7 @@ if HAS_TK:
             def task() -> None:
                 count = self.core.restore()
                 self.emit_log("success", f"Restored {count} profile location(s) to their previous state.")
+                self.ui_queue.put(lambda: self._toast("Stock settings restored.", "success"))
                 self.ui_queue.put(self._refresh_versions)
 
             self._run_task(task)
@@ -2742,6 +3079,7 @@ if HAS_TK:
             def task() -> None:
                 result = self.core.apply(settings, launch=False, profile_paths=paths, update_settings=False)
                 self.emit_log("success", f"Applied profile to {len(result.profile_paths)} selected location(s).")
+                self.ui_queue.put(lambda: self._toast("Selected versions updated.", "success"))
                 self.ui_queue.put(self._refresh_versions)
 
             self._run_task(task)

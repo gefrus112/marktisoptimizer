@@ -56,8 +56,18 @@ except Exception as exc:  # pragma: no cover - headless systems
     TK_IMPORT_ERROR = exc
 
 APP_NAME = "ROPTIMER HUD"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 SETTINGS_FILE = "hud-settings.json"
+
+
+def app_resource_path(relative: str) -> Path:
+    """Resolve assets next to the script or inside a PyInstaller bundle."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(str(getattr(sys, "_MEIPASS"))) / relative
+    return Path(__file__).resolve().parent / relative
+
+
+APP_ICON_PATH = app_resource_path("assets/roptimer-hud.ico")
 STATS_GUIDE_URL = "https://create.roblox.com/docs/performance-optimization/identify"
 PING_HOST = "www.roblox.com"
 PING_PORT = 443
@@ -350,6 +360,11 @@ if HAS_TK:
             self.title(APP_NAME)
             self.configure(bg=BG)
             self.resizable(False, False)
+            try:
+                if APP_ICON_PATH.is_file():
+                    self.iconbitmap(default=str(APP_ICON_PATH))
+            except (tk.TclError, OSError):
+                pass
             try:
                 self.overrideredirect(True)
                 self.attributes("-topmost", True)

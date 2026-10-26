@@ -4,21 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#ff2d3f" />
-  <meta name="description" content="ROPTIMER — download Roptimzier, a safe Roblox performance optimizer and HUD companion. No injector, no exploits, no memory edits." />
-  <title>ROPTIMER — Roptimzier Performance Lab</title>
+  <meta name="description" content="ROPTIMER — download Roptimzier, the safe Roblox performance optimizer with a separate HUD. No injector, no exploits, no memory edits." />
+  <title>ROPTIMER — Download Roptimzier</title>
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
+  <link rel="icon" href="assets/icons/roptimer-web.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icons/roptimer-web.png" />
   <style>
     :root {
-      --bg: #08080b;
-      --bg-2: #0e0b0f;
-      --panel: #141116;
-      --panel-2: #1a1218;
+      --bg: #08070a;
+      --bg-2: #100b0f;
+      --panel: #151016;
+      --panel-2: #1c1219;
       --card: #1b1319;
-      --field: #0d0b0f;
+      --field: #0c0a0d;
       --border: rgba(255, 74, 90, .22);
-      --border-strong: rgba(255, 74, 90, .5);
-      --text: #fff5f5;
-      --muted: #b9a7ad;
-      --dim: #7c6b72;
+      --border-strong: rgba(255, 74, 90, .55);
+      --text: #fff4f5;
+      --muted: #b8a5ac;
+      --dim: #77636b;
       --accent: #ff2d3f;
       --accent-2: #ff7a35;
       --accent-3: #ff003c;
@@ -26,95 +29,63 @@
       --warning: #ffc35c;
       --danger: #ff5470;
       --radius: 18px;
-      --shadow: 0 22px 70px rgba(0, 0, 0, .55);
-      --glow: 0 0 28px rgba(255, 45, 63, .35);
+      --shadow: 0 24px 80px rgba(0, 0, 0, .6);
+      --glow: 0 0 32px rgba(255, 45, 63, .35);
       font-family: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color-scheme: dark;
       scroll-behavior: smooth;
     }
-
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
     body { overflow-x: hidden; }
     a { color: var(--accent-2); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    button, input, select, textarea { font: inherit; }
+    button, input, select { font: inherit; }
     button { cursor: pointer; }
     ::selection { background: var(--accent); color: white; }
 
-    /* Ambient FX */
-    #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .58; }
-    .grid-bg {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,45,63,.055) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,45,63,.055) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 50% 20%, black, transparent 78%);
-    }
-    .scanlines {
-      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .12;
-      background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(255,255,255,.08) 4px);
-      mix-blend-mode: overlay;
-    }
-    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none; opacity: .28; }
-    .orb.one { width: 420px; height: 420px; background: #ff003c; top: -160px; left: -120px; animation: float1 14s ease-in-out infinite; }
-    .orb.two { width: 360px; height: 360px; background: #ff6a00; bottom: -160px; right: -100px; animation: float2 16s ease-in-out infinite; }
-    @keyframes float1 { 50% { transform: translate(80px, 60px) scale(1.15); } }
-    @keyframes float2 { 50% { transform: translate(-90px, -50px) scale(1.1); } }
+    #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5; }
+    .grid-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(255,45,63,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,45,63,.055) 1px, transparent 1px); background-size: 46px 46px; mask-image: radial-gradient(circle at 50% 15%, black, transparent 80%); }
+    .scanlines { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .12; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(255,255,255,.08) 4px); mix-blend-mode: overlay; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none; opacity: .25; }
+    .orb.one { width: 420px; height: 420px; background: #ff003c; top: -180px; left: -120px; animation: float1 15s ease-in-out infinite; }
+    .orb.two { width: 380px; height: 380px; background: #ff6a00; bottom: -180px; right: -120px; animation: float2 17s ease-in-out infinite; }
+    @keyframes float1 { 50% { transform: translate(90px, 70px) scale(1.12); } }
+    @keyframes float2 { 50% { transform: translate(-90px, -60px) scale(1.12); } }
+    .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); z-index: 60; box-shadow: 0 0 14px var(--accent); }
 
-    /* Nav */
-    .nav {
-      position: sticky; top: 0; z-index: 40;
-      height: 74px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5vw; background: rgba(8,8,11,.78); backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--border);
-    }
-    .brand { display: flex; align-items: center; gap: 11px; color: var(--text); text-decoration: none; }
+    .nav { position: sticky; top: 0; z-index: 40; height: 74px; display: flex; align-items: center; justify-content: space-between; padding: 0 5vw; background: rgba(8,7,10,.8); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
     .brand:hover { text-decoration: none; }
-    .brand-cube {
-      width: 38px; height: 38px; display: grid; place-items: center; font-weight: 950;
-      background: linear-gradient(135deg, var(--accent), #8d001b); color: white;
-      border: 1px solid rgba(255,255,255,.18); box-shadow: var(--glow);
-      clip-path: polygon(10% 0, 100% 0, 100% 78%, 88% 100%, 0 100%, 0 14%);
-    }
+    .brand img { width: 40px; height: 40px; border-radius: 11px; box-shadow: var(--glow); }
     .brand strong { display: block; letter-spacing: .16em; font-size: 14px; }
     .brand small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .12em; margin-top: 2px; }
-    .nav-links { display: flex; align-items: center; gap: 22px; }
-    .nav-links a { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
     .nav-links a:hover, .nav-links a.active { color: var(--text); text-decoration: none; }
     .nav-download { border: 1px solid var(--border-strong); padding: 10px 15px; border-radius: 10px; color: white; background: rgba(255,45,63,.12); font-weight: 900; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
     .nav-download:hover { text-decoration: none; background: var(--accent); box-shadow: var(--glow); }
-    .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); z-index: 60; box-shadow: 0 0 14px var(--accent); }
 
     main { position: relative; z-index: 2; }
-    .section { padding: 92px 5vw; max-width: 1280px; margin: 0 auto; }
-    .section-head { margin-bottom: 34px; max-width: 780px; }
-    .eyebrow { color: var(--accent); font-size: 10px; font-weight: 950; letter-spacing: .24em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-    .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--accent); box-shadow: var(--glow); }
-    .section-head h2 { margin: 14px 0 10px; font-size: clamp(28px, 4.6vw, 52px); line-height: 1.02; letter-spacing: -.055em; }
-    .section-head p { color: var(--muted); font-size: 14px; line-height: 1.75; margin: 0; }
-
-    /* Hero */
-    .hero { min-height: calc(100vh - 74px); display: flex; align-items: center; padding: 60px 5vw 90px; position: relative; }
-    .hero-inner { width: 100%; max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px; align-items: center; }
-    .hero-badge { display: inline-flex; gap: 8px; align-items: center; border: 1px solid var(--border); background: rgba(255,45,63,.07); padding: 8px 13px; border-radius: 999px; color: #ffd8dc; font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 0 5vw; }
+    .hero { min-height: calc(100vh - 74px); display: grid; grid-template-columns: 1.08fr .92fr; gap: 48px; align-items: center; padding: 60px 5vw 70px; max-width: 1280px; margin: 0 auto; }
+    .hero-badge { display: inline-flex; gap: 9px; align-items: center; border: 1px solid var(--border); background: rgba(255,45,63,.07); padding: 8px 13px; border-radius: 999px; color: #ffd8dc; font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
     .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 12px var(--success); animation: pulse 1.6s infinite; }
     @keyframes pulse { 50% { opacity: .35; transform: scale(.75); } }
-    .hero h1 { margin: 22px 0 16px; font-size: clamp(52px, 9vw, 122px); line-height: .83; letter-spacing: -.085em; font-weight: 950; }
-    .glitch { position: relative; display: inline-block; color: white; text-shadow: 0 0 30px rgba(255,45,63,.5); }
-    .glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: .7; }
-    .glitch::before { color: var(--accent); transform: translate(-3px, 1px); clip-path: inset(10% 0 58% 0); animation: glitchA 2.8s infinite steps(2); }
-    .glitch::after { color: var(--accent-2); transform: translate(3px, -1px); clip-path: inset(62% 0 12% 0); animation: glitchB 3.4s infinite steps(2); }
-    @keyframes glitchA { 0%, 90% { transform: translate(-3px,1px); } 92% { transform: translate(6px,-2px); } 96% { transform: translate(-8px,2px); } }
+    .hero h1 { margin: 22px 0 16px; font-size: clamp(54px, 8.5vw, 116px); line-height: .83; letter-spacing: -.085em; font-weight: 950; }
+    .glitch { position: relative; display: inline-block; color: white; text-shadow: 0 0 32px rgba(255,45,63,.55); }
+    .glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: .68; }
+    .glitch::before { color: var(--accent); transform: translate(-3px, 1px); clip-path: inset(8% 0 60% 0); animation: glitchA 2.8s infinite steps(2); }
+    .glitch::after { color: var(--accent-2); transform: translate(3px, -1px); clip-path: inset(62% 0 10% 0); animation: glitchB 3.4s infinite steps(2); }
+    @keyframes glitchA { 0%, 90% { transform: translate(-3px,1px); } 92% { transform: translate(7px,-2px); } 96% { transform: translate(-8px,2px); } }
     @keyframes glitchB { 0%, 88% { transform: translate(3px,-1px); } 90% { transform: translate(-7px,2px); } 94% { transform: translate(8px,-1px); } }
-    .hero .lede { color: #d2c1c7; font-size: clamp(14px, 1.6vw, 18px); line-height: 1.75; max-width: 650px; }
+    .hero .lede { color: #d1bec5; font-size: clamp(14px, 1.6vw, 18px); line-height: 1.75; max-width: 650px; }
     .hero .lede strong { color: white; }
     .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
     .btn { appearance: none; border: 1px solid var(--border); border-radius: 12px; padding: 13px 18px; background: var(--panel); color: var(--text); font-weight: 900; font-size: 12px; letter-spacing: .04em; position: relative; overflow: hidden; transition: .2s ease; }
     .btn:hover { transform: translateY(-2px); border-color: var(--border-strong); text-decoration: none; }
     .btn.primary { background: linear-gradient(135deg, var(--accent), #b60024); border-color: transparent; color: white; box-shadow: var(--glow); }
-    .btn.primary:hover { box-shadow: 0 0 42px rgba(255,45,63,.6); }
+    .btn.primary:hover { box-shadow: 0 0 46px rgba(255,45,63,.6); }
     .btn.ghost { background: rgba(255,255,255,.025); }
     .btn.small { padding: 9px 12px; font-size: 10px; border-radius: 9px; }
     .btn.block { width: 100%; text-align: center; }
@@ -125,33 +96,37 @@
     .trust-row span { display: flex; align-items: center; gap: 7px; }
     .trust-row b { color: var(--success); }
 
-    .hero-visual { position: relative; min-height: 460px; display: grid; place-items: center; }
-    .glow-ring { position: absolute; width: 390px; height: 390px; border-radius: 50%; border: 1px solid rgba(255,45,63,.22); box-shadow: inset 0 0 80px rgba(255,45,63,.08), 0 0 90px rgba(255,45,63,.15); animation: spin 22s linear infinite; }
-    .glow-ring::before, .glow-ring::after { content: ""; position: absolute; inset: 36px; border-radius: 50%; border: 1px dashed rgba(255,122,53,.22); }
-    .glow-ring::after { inset: 78px; border-style: solid; border-color: rgba(255,45,63,.2); }
+    .hero-visual { position: relative; min-height: 480px; display: grid; place-items: center; }
+    .glow-ring { position: absolute; width: 410px; height: 410px; border-radius: 50%; border: 1px solid rgba(255,45,63,.22); box-shadow: inset 0 0 90px rgba(255,45,63,.09), 0 0 90px rgba(255,45,63,.14); animation: spin 24s linear infinite; }
+    .glow-ring::before, .glow-ring::after { content: ""; position: absolute; inset: 40px; border-radius: 50%; border: 1px dashed rgba(255,122,53,.22); }
+    .glow-ring::after { inset: 84px; border-style: solid; border-color: rgba(255,45,63,.2); }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .device-monitor { position: relative; width: min(100%, 430px); background: linear-gradient(160deg, rgba(34,20,27,.96), rgba(13,10,13,.96)); border: 1px solid var(--border-strong); border-radius: 22px; padding: 20px; box-shadow: var(--shadow), var(--glow); transform: perspective(900px) rotateY(-7deg) rotateX(3deg); }
-    .monitor-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
-    .monitor-top strong { letter-spacing: .14em; font-size: 12px; }
-    .monitor-top span { color: var(--success); font-size: 10px; font-weight: 900; }
-    .monitor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
-    .metric { background: rgba(255,255,255,.025); border: 1px solid var(--border); border-radius: 13px; padding: 14px; }
-    .metric label { display: block; color: var(--muted); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; font-weight: 900; }
-    .metric b { display: block; font-size: 25px; margin-top: 6px; letter-spacing: -.04em; }
-    .metric b.red { color: var(--accent); }
-    .metric b.orange { color: var(--accent-2); }
-    .metric b.green { color: var(--success); }
-    .bars { margin-top: 16px; display: grid; gap: 8px; }
-    .bar-row { display: grid; grid-template-columns: 62px 1fr 38px; gap: 9px; align-items: center; font-size: 10px; color: var(--muted); }
+    .app-showcase { position: relative; width: min(100%, 440px); background: linear-gradient(160deg, rgba(34,20,27,.97), rgba(13,10,13,.97)); border: 1px solid var(--border-strong); border-radius: 24px; padding: 22px; box-shadow: var(--shadow), var(--glow); transform: perspective(900px) rotateY(-7deg) rotateX(3deg); }
+    .showcase-top { display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+    .showcase-top img { width: 68px; height: 68px; border-radius: 17px; }
+    .showcase-top strong { display: block; font-size: 18px; letter-spacing: -.02em; }
+    .showcase-top span { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .showcase-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+    .showcase-metric { background: rgba(255,255,255,.025); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .showcase-metric label { display: block; color: var(--muted); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; font-weight: 900; }
+    .showcase-metric b { display: block; font-size: 22px; margin-top: 5px; }
+    .showcase-metric b.red { color: var(--accent); }
+    .showcase-metric b.orange { color: var(--accent-2); }
+    .showcase-metric b.green { color: var(--success); }
+    .showcase-bars { margin-top: 16px; display: grid; gap: 8px; }
+    .bar-row { display: grid; grid-template-columns: 64px 1fr 34px; gap: 8px; align-items: center; font-size: 9px; color: var(--muted); }
     .bar { height: 8px; background: #09080a; border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
     .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: inherit; animation: barPulse 3s ease-in-out infinite; }
     @keyframes barPulse { 50% { filter: brightness(1.4); transform: scaleX(.96); transform-origin: left; } }
-    .monitor-foot { display: flex; justify-content: space-between; margin-top: 16px; color: var(--dim); font-size: 9px; letter-spacing: .08em; }
-    .floating-chip { position: absolute; border: 1px solid var(--border-strong); background: rgba(20,12,16,.92); border-radius: 12px; padding: 10px 13px; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; box-shadow: var(--shadow); animation: floatChip 5s ease-in-out infinite; }
+    .showcase-foot { display: flex; justify-content: space-between; margin-top: 16px; color: var(--dim); font-size: 8px; letter-spacing: .1em; }
+    .floating-chip { position: absolute; border: 1px solid var(--border-strong); background: rgba(20,12,16,.94); border-radius: 12px; padding: 10px 13px; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; box-shadow: var(--shadow); animation: floatChip 5s ease-in-out infinite; }
     .floating-chip.one { top: 12%; left: -2%; }
-    .floating-chip.two { bottom: 14%; right: -3%; animation-delay: -2.2s; }
+    .floating-chip.two { bottom: 13%; right: -3%; animation-delay: -2.2s; }
+    .floating-chip.three { top: 46%; right: -8%; animation-delay: -3.4s; }
     @keyframes floatChip { 50% { transform: translateY(-14px); } }
-    .scroll-cue { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); color: var(--dim); font-size: 9px; letter-spacing: .28em; text-transform: uppercase; }
+    .icon-row { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+    .icon-pill { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.02); border-radius: 999px; padding: 6px 11px 6px 6px; font-size: 9px; color: var(--muted); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .icon-pill img { width: 26px; height: 26px; border-radius: 7px; }
 
     .ticker { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,45,63,.045); overflow: hidden; white-space: nowrap; }
     .ticker-track { display: inline-block; padding: 12px 0; animation: ticker 28s linear infinite; }
@@ -159,145 +134,76 @@
     .ticker b { color: var(--accent); }
     @keyframes ticker { to { transform: translateX(-50%); } }
 
-    /* Cards and grids */
-    .grid { display: grid; gap: 16px; }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tabs-section { padding: 84px 0 100px; }
+    .section-head { margin-bottom: 28px; max-width: 780px; }
+    .eyebrow { color: var(--accent); font-size: 10px; font-weight: 950; letter-spacing: .24em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--accent); box-shadow: var(--glow); }
+    .section-head h2 { margin: 14px 0 10px; font-size: clamp(28px, 4.6vw, 50px); line-height: 1.02; letter-spacing: -.055em; }
+    .section-head p { color: var(--muted); font-size: 14px; line-height: 1.75; margin: 0; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+    .tab { appearance: none; border: 1px solid var(--border); background: var(--field); color: var(--muted); padding: 11px 16px; border-radius: 11px; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; transition: .2s ease; }
+    .tab:hover { color: var(--text); border-color: var(--border-strong); }
+    .tab.active { background: linear-gradient(135deg, var(--accent), #b60024); color: white; border-color: transparent; box-shadow: var(--glow); }
+    .tab-panel { display: none; animation: fade .25s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
     .card { background: linear-gradient(165deg, rgba(31,19,25,.96), rgba(15,11,14,.96)); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
     .card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .5; }
     .card h3 { margin: 0 0 8px; font-size: 17px; letter-spacing: -.02em; }
     .card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
-    .card .icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,45,63,.12); border: 1px solid var(--border); color: var(--accent); font-size: 19px; margin-bottom: 16px; }
     .tag { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: rgba(255,45,63,.07); color: #ffc7ce; border-radius: 999px; padding: 5px 9px; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
     .tag.green { color: var(--success); border-color: rgba(78,240,163,.25); background: rgba(78,240,163,.06); }
     .tag.orange { color: var(--warning); border-color: rgba(255,195,92,.25); background: rgba(255,195,92,.06); }
-    .reveal { opacity: 0; transform: translateY(24px); transition: .7s cubic-bezier(.2,.8,.2,1); }
+    .reveal { opacity: 0; transform: translateY(22px); transition: .7s cubic-bezier(.2,.8,.2,1); }
     .reveal.visible { opacity: 1; transform: none; }
 
-    /* Download */
-    .download-card { display: flex; flex-direction: column; min-height: 280px; }
-    .download-card .file { margin-top: 14px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; color: var(--accent-2); background: var(--field); border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; word-break: break-all; }
-    .download-card .actions { margin-top: auto; padding-top: 18px; display: grid; gap: 9px; }
-    .download-note { margin-top: 16px; border-left: 3px solid var(--warning); background: rgba(255,195,92,.06); color: #ffdca8; padding: 13px 15px; border-radius: 0 12px 12px 0; font-size: 11px; line-height: 1.65; }
+    .download-layout { display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; }
+    .download-hero { display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: start; }
+    .download-hero img { width: 110px; height: 110px; border-radius: 24px; box-shadow: var(--glow); }
+    .download-hero h3 { font-size: 28px; margin: 0 0 6px; letter-spacing: -.04em; }
+    .download-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+    .download-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .file-list { display: grid; gap: 10px; margin-top: 18px; }
+    .file-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; border: 1px solid var(--border); background: var(--field); border-radius: 12px; padding: 11px 13px; }
+    .file-row code { color: var(--accent-2); font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; word-break: break-all; }
+    .file-row span { color: var(--dim); font-size: 9px; }
+    .changelog { display: grid; gap: 9px; margin-top: 14px; }
+    .changelog div { color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .changelog b { color: var(--success); }
+    .icon-showcase { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+    .icon-box { border: 1px solid var(--border); background: var(--field); border-radius: 14px; padding: 14px 10px; text-align: center; }
+    .icon-box img { width: 54px; height: 54px; border-radius: 12px; margin-bottom: 9px; }
+    .icon-box span { display: block; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .safety-mini { margin-top: 16px; border-left: 3px solid var(--success); background: rgba(78,240,163,.06); color: #bdffdd; padding: 12px 14px; border-radius: 0 12px 12px 0; font-size: 10px; line-height: 1.6; }
 
-    /* Safety */
-    .safety-wrap { display: grid; grid-template-columns: .85fr 1.15fr; gap: 18px; align-items: stretch; }
-    .safety-hero { background: radial-gradient(circle at 20% 10%, rgba(255,45,63,.3), transparent 45%), linear-gradient(160deg, #241016, #100c0f); }
-    .safety-hero h3 { font-size: clamp(24px, 3vw, 38px); line-height: 1.08; letter-spacing: -.045em; margin: 16px 0 14px; }
-    .safety-hero p { color: #d8c5cb; font-size: 13px; line-height: 1.8; }
-    .ban-meter { margin-top: 24px; }
-    .ban-meter .label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
-    .ban-meter .track { height: 10px; margin-top: 8px; border-radius: 999px; background: #09080a; border: 1px solid var(--border); overflow: hidden; }
-    .ban-meter .track i { display: block; height: 100%; width: 12%; background: linear-gradient(90deg, var(--success), var(--accent)); border-radius: inherit; }
-    .safety-list { display: grid; gap: 10px; }
-    .safety-item { display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.018); }
-    .safety-item .mark { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: rgba(78,240,163,.1); color: var(--success); font-weight: 900; }
-    .safety-item strong { display: block; font-size: 12px; }
-    .safety-item small { display: block; color: var(--muted); font-size: 10px; line-height: 1.55; margin-top: 3px; }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .feature-card { min-height: 190px; display: flex; flex-direction: column; }
+    .feature-icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: rgba(255,45,63,.12); border: 1px solid var(--border); color: var(--accent); font-size: 17px; font-weight: 900; margin-bottom: 15px; }
+    .feature-card h3 { margin: 0 0 7px; font-size: 15px; }
+    .feature-card p { font-size: 11px; }
+    .feature-card .tag { margin-top: auto; align-self: flex-start; }
+    .no-cheat-card { background: radial-gradient(circle at 15% 10%, rgba(255,45,63,.28), transparent 45%), linear-gradient(160deg, #261017, #100c0f); }
+    .no-cheat-card h3 { font-size: clamp(22px, 3vw, 34px); line-height: 1.1; letter-spacing: -.045em; margin: 14px 0 12px; }
 
-    /* Device lab */
-    .lab { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; }
-    .scan-panel { min-height: 320px; }
-    .scan-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 18px; }
-    .scan-head h3 { margin: 0; font-size: 18px; }
-    .scan-head p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
-    .stat-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
-    .stat-box { border: 1px solid var(--border); background: var(--field); border-radius: 12px; padding: 13px; min-height: 84px; }
-    .stat-box label { display: block; color: var(--dim); font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
-    .stat-box b { display: block; margin-top: 9px; font-size: 15px; line-height: 1.25; word-break: break-word; }
-    .stat-box b.red { color: var(--accent); }
-    .scan-line { margin-top: 16px; height: 5px; border-radius: 999px; background: #09080a; border: 1px solid var(--border); overflow: hidden; }
-    .scan-line i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .7s ease; }
-    .scan-status { margin-top: 10px; color: var(--muted); font-size: 10px; min-height: 16px; }
-    .recommend { display: flex; flex-direction: column; }
-    .tier-ring { width: 168px; height: 168px; border-radius: 50%; margin: 14px auto 18px; display: grid; place-items: center; position: relative; background: conic-gradient(var(--accent) 0deg, var(--accent-2) 0deg, #21161b 0deg); box-shadow: 0 0 50px rgba(255,45,63,.18); }
-    .tier-ring::before { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); }
-    .tier-ring .inner { position: relative; text-align: center; }
-    .tier-ring .inner b { display: block; font-size: 30px; letter-spacing: -.05em; }
-    .tier-ring .inner span { color: var(--muted); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
-    .rec-list { display: grid; gap: 8px; }
-    .rec-item { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.055); padding: 9px 0; font-size: 11px; }
-    .rec-item span { color: var(--muted); }
-    .rec-item b { color: var(--text); }
-    .field { margin-bottom: 14px; }
-    .field:last-child { margin-bottom: 0; }
-    .field label { display: block; color: var(--muted); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 7px; }
-    input[type="number"], input[type="text"], input[type="range"], select, textarea { width: 100%; background: var(--field); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 11px; outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(255,45,63,.12); }
-    input[type="range"] { padding: 0; accent-color: var(--accent); }
-    .range-row { display: flex; gap: 12px; align-items: center; }
-    .range-row output { min-width: 74px; text-align: center; font-weight: 900; color: var(--accent); }
+    .screenshot-layout { display: grid; grid-template-columns: 1fr 260px; gap: 18px; }
+    .screenshot-stage { border: 1px solid var(--border); border-radius: var(--radius); background: #09080b; padding: 14px; box-shadow: var(--shadow); }
+    .screenshot-stage img { width: 100%; display: block; border-radius: 12px; border: 1px solid var(--border); background: #0d0b0e; }
+    .screenshot-caption { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 12px; }
+    .screenshot-caption strong { font-size: 13px; }
+    .screenshot-caption p { margin: 3px 0 0; font-size: 10px; color: var(--muted); }
+    .screenshot-nav { display: flex; gap: 8px; }
+    .screenshot-thumbs { display: grid; gap: 10px; }
+    .thumb { appearance: none; border: 1px solid var(--border); background: var(--field); border-radius: 13px; padding: 8px; text-align: left; color: var(--muted); transition: .2s ease; }
+    .thumb img { width: 100%; display: block; border-radius: 8px; margin-bottom: 7px; }
+    .thumb span { display: block; font-size: 10px; font-weight: 800; }
+    .thumb.active { border-color: var(--border-strong); box-shadow: var(--glow); color: var(--text); }
+    .screenshot-note { border: 1px solid var(--border); border-radius: 13px; padding: 13px; background: var(--field); color: var(--muted); font-size: 10px; line-height: 1.6; }
 
-    /* Profile builder */
-    .builder { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.055); }
-    .toggle-row:last-of-type { border-bottom: 0; }
-    .toggle-copy strong { display: block; font-size: 12px; }
-    .toggle-copy small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; line-height: 1.45; }
-    .switch { position: relative; width: 46px; height: 26px; flex: 0 0 auto; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .switch span { position: absolute; inset: 0; background: #3a2a30; border-radius: 999px; transition: .2s; }
-    .switch span::before { content: ""; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #d8c9ce; border-radius: 50%; transition: .2s; }
-    .switch input:checked + span { background: var(--accent); box-shadow: 0 0 18px rgba(255,45,63,.4); }
-    .switch input:checked + span::before { transform: translateX(20px); background: white; }
-    .code-wrap { display: flex; flex-direction: column; min-height: 100%; }
-    pre { margin: 0; background: #08070a; border: 1px solid var(--border); border-radius: 13px; padding: 16px; overflow: auto; min-height: 300px; max-height: 420px; color: #f0dfe3; font: 11px/1.65 "Cascadia Mono", Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
-    .json-key { color: var(--accent-2); }
-    .json-value { color: var(--success); }
-    .json-legacy { color: var(--warning); }
-    .code-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-    .code-toolbar .spacer { flex: 1; }
-    .flag-count { color: var(--muted); font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-
-    /* Game lab */
-    .game-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-    .game-card { border: 1px solid var(--border); background: linear-gradient(150deg, rgba(35,18,24,.9), rgba(13,10,13,.9)); border-radius: 15px; padding: 16px; cursor: pointer; transition: .2s ease; position: relative; overflow: hidden; }
-    .game-card::after { content: ""; position: absolute; width: 80px; height: 80px; border-radius: 50%; background: var(--accent); filter: blur(50px); opacity: .08; top: -40px; right: -30px; }
-    .game-card:hover, .game-card.selected { transform: translateY(-3px); border-color: var(--border-strong); box-shadow: var(--glow); }
-    .game-card.selected { background: linear-gradient(150deg, rgba(70,20,30,.9), rgba(20,10,14,.9)); }
-    .game-card .game-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(255,45,63,.13); border: 1px solid var(--border); color: var(--accent); font-weight: 900; margin-bottom: 12px; }
-    .game-card h4 { margin: 0 0 6px; font-size: 13px; }
-    .game-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
-    .game-card .mini-stats { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .test-panel { margin-top: 18px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
-    .chart { height: 240px; display: flex; align-items: end; gap: 7px; padding: 18px 10px 10px; border-bottom: 1px solid var(--border); position: relative; }
-    .chart::before { content: "OFFLINE SIMULATION — NOT A LIVE GAME BENCHMARK"; position: absolute; top: 4px; left: 10px; color: var(--dim); font-size: 8px; letter-spacing: .14em; }
-    .chart .bar-col { flex: 1; height: 100%; display: flex; align-items: end; }
-    .chart .bar-col i { display: block; width: 100%; min-height: 4px; background: linear-gradient(180deg, var(--accent-2), var(--accent)); border-radius: 5px 5px 0 0; transition: height .6s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 14px rgba(255,45,63,.2); }
-    .chart-labels { display: flex; justify-content: space-between; color: var(--dim); font-size: 8px; letter-spacing: .1em; margin-top: 8px; }
-    .test-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 14px; }
-    .test-result { border: 1px solid var(--border); border-radius: 11px; padding: 12px; background: var(--field); }
-    .test-result label { display: block; color: var(--dim); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
-    .test-result b { display: block; margin-top: 6px; font-size: 19px; color: var(--accent); }
-    .checklist { display: grid; gap: 8px; }
-    .checklist div { display: flex; gap: 9px; color: var(--muted); font-size: 10px; line-height: 1.5; }
-    .checklist div::before { content: "✓"; color: var(--success); font-weight: 900; }
-
-    /* HUD settings */
-    .hud-layout { display: grid; grid-template-columns: .85fr 1.15fr; gap: 18px; }
-    .hud-form .grid-2 { gap: 0 14px; }
-    .hud-preview-shell { min-height: 430px; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(circle at 50% 30%, rgba(255,45,63,.12), transparent 55%), #09080b; position: relative; overflow: hidden; display: grid; place-items: center; }
-    .hud-preview-shell::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,45,63,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,45,63,.04) 1px, transparent 1px); background-size: 26px 26px; }
-    .hud-window { position: relative; width: 290px; background: rgba(15,10,13,.94); border: 1px solid var(--border-strong); border-radius: 14px; box-shadow: var(--shadow), var(--glow); transition: .2s ease; }
-    .hud-window.tl { position: absolute; top: 20px; left: 20px; }
-    .hud-window.tr { position: absolute; top: 20px; right: 20px; }
-    .hud-window.bl { position: absolute; bottom: 20px; left: 20px; }
-    .hud-window.br { position: absolute; bottom: 20px; right: 20px; }
-    .hud-title { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--border); }
-    .hud-title strong { font-size: 10px; letter-spacing: .16em; }
-    .hud-title span { color: var(--success); font-size: 8px; font-weight: 900; }
-    .hud-body { padding: 12px 13px; display: grid; gap: 9px; }
-    .hud-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,.05); padding-bottom: 8px; }
-    .hud-row:last-child { border-bottom: 0; padding-bottom: 0; }
-    .hud-row span { color: var(--muted); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
-    .hud-row b { font-size: 14px; color: var(--accent); font-family: "Cascadia Mono", Consolas, monospace; }
-    .hud-note { color: var(--dim); font-size: 8px; line-height: 1.5; margin-top: 4px; }
-    .hud-toast { margin: 0 13px 13px; padding: 9px 10px; border-radius: 9px; background: rgba(78,240,163,.08); border: 1px solid rgba(78,240,163,.22); color: #bfffe1; font-size: 9px; line-height: 1.45; }
-    .hud-toast.hidden { display: none; }
-    .demo-stamp { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); color: var(--warning); font-size: 8px; letter-spacing: .18em; font-weight: 900; }
-
-    /* FAQ */
     details { border: 1px solid var(--border); border-radius: 13px; background: var(--card); margin-bottom: 10px; overflow: hidden; }
     summary { cursor: pointer; padding: 16px 18px; font-weight: 900; font-size: 12px; list-style: none; }
     summary::-webkit-details-marker { display: none; }
@@ -305,37 +211,36 @@
     details[open] summary::after { content: "−"; }
     details p { margin: 0; padding: 0 18px 18px; color: var(--muted); font-size: 11px; line-height: 1.7; }
 
-    /* Footer / toasts */
-    footer { border-top: 1px solid var(--border); padding: 40px 5vw; color: var(--dim); font-size: 10px; position: relative; z-index: 2; }
-    .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    footer { border-top: 1px solid var(--border); padding: 38px 5vw; color: var(--dim); font-size: 10px; position: relative; z-index: 2; }
+    .footer-inner { max-width: 1240px; margin: 0 auto; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 80; display: grid; gap: 9px; width: min(340px, calc(100vw - 40px)); }
     .toast { border: 1px solid var(--border-strong); border-left: 4px solid var(--accent); background: rgba(20,12,16,.97); padding: 12px 14px; border-radius: 11px; box-shadow: var(--shadow); font-size: 11px; line-height: 1.5; animation: toastIn .25s ease; }
     .toast.success { border-left-color: var(--success); }
-    .toast.warning { border-left-color: var(--warning); }
     @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } }
     #toTop { position: fixed; right: 20px; bottom: 88px; z-index: 70; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); display: none; box-shadow: var(--shadow); }
     #toTop.show { display: block; }
 
     @media (max-width: 1050px) {
-      .hero-inner, .safety-wrap, .lab, .builder, .hud-layout, .test-panel { grid-template-columns: 1fr; }
-      .hero-visual { min-height: 420px; }
+      .hero { grid-template-columns: 1fr; padding-top: 50px; }
+      .hero-visual { min-height: 440px; }
+      .download-layout, .screenshot-layout { grid-template-columns: 1fr; }
       .grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .game-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .nav-links { display: none; }
+      .screenshot-thumbs { grid-template-columns: repeat(3, 1fr); }
     }
-    @media (max-width: 680px) {
-      .section { padding: 70px 20px; }
-      .hero { padding: 50px 20px 80px; }
-      .hero h1 { font-size: clamp(48px, 16vw, 78px); }
-      .grid-2, .grid-3, .grid-4, .game-grid, .stat-grid { grid-template-columns: 1fr; }
+    @media (max-width: 720px) {
       .nav { padding: 0 18px; }
+      .nav-links { display: none; }
       .brand small { display: none; }
-      .hero-visual { min-height: 360px; }
-      .device-monitor { transform: none; }
-      .glow-ring { width: 300px; height: 300px; }
-      .test-results { grid-template-columns: 1fr; }
-      .hud-preview-shell { min-height: 380px; }
-      .hud-window { width: 250px; }
+      .wrap { padding: 0 20px; }
+      .hero { padding: 48px 20px 70px; }
+      .hero h1 { font-size: clamp(48px, 16vw, 78px); }
+      .download-hero { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .icon-showcase { grid-template-columns: repeat(3, 1fr); }
+      .screenshot-thumbs { grid-template-columns: 1fr; }
+      .app-showcase { transform: none; }
+      .glow-ring { width: 320px; height: 320px; }
+      .tabs-section { padding: 64px 0 80px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
@@ -353,357 +258,224 @@
 
   <header class="nav">
     <a class="brand" href="#top">
-      <span class="brand-cube">R</span>
-      <span><strong>ROPTIMER</strong><small>Roptimzier performance lab</small></span>
+      <img src="assets/icons/roptimer-web.png" alt="ROPTIMER website icon" />
+      <span><strong>ROPTIMER</strong><small>Download Roptimzier</small></span>
     </a>
     <nav class="nav-links">
       <a href="#download" class="active">Download</a>
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
       <a href="#safety">Safety</a>
-      <a href="#device">Device Lab</a>
-      <a href="#builder">Profile</a>
-      <a href="#games">Game Lab</a>
-      <a href="#hud">HUD</a>
     </nav>
-    <a class="nav-download" href="../roblox_fps_optimizer.py" download>Get Roptimzier ↓</a>
+    <a class="nav-download" href="downloads/Roptimzier-Windows.zip" download>Get the ZIP ↓</a>
   </header>
 
   <main>
     <section class="hero" id="top">
-      <div class="hero-inner">
-        <div class="hero-copy">
-          <div class="hero-badge"><span class="pulse"></span> Performance only • no injector included</div>
-          <h1><span class="glitch" data-text="ROPTIMZIER">ROPTIMZIER</span></h1>
-          <p class="lede">
-            A red-hot <strong>Roblox performance workspace</strong> that builds safe local settings,
-            detects the kind of machine you are on, and previews a clean FPS / ping HUD.
-            Download the Python optimizer, choose a game profile, and test a plan before you play.
-          </p>
-          <div class="hero-actions">
-            <a class="btn primary ripple-btn" href="../roblox_fps_optimizer.py" download>Download the Python optimizer <span class="arrow">↓</span></a>
-            <a class="btn ghost ripple-btn" href="#device">Scan my laptop</a>
-            <a class="btn ghost ripple-btn" href="#safety">Is it safe?</a>
-          </div>
-          <div class="trust-row">
-            <span><b>✓</b> No DLL injection</span>
-            <span><b>✓</b> No memory edits</span>
-            <span><b>✓</b> No anti-cheat bypass</span>
-            <span><b>✓</b> Reversible JSON</span>
-          </div>
+      <div class="hero-copy">
+        <div class="hero-badge"><span class="pulse"></span> 100× cleaner download experience</div>
+        <h1><span class="glitch" data-text="ROPTIMZIER">ROPTIMZIER</span></h1>
+        <p class="lede">
+          Download the <strong>safe Roblox performance optimizer</strong> for Windows. One clean app for FPS targets,
+          performance boost, lag rescue, VFX load reduction, notifications, and client settings sync — with a real
+          app icon, website icon, HUD companion, and screenshot previews.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary ripple-btn" href="downloads/Roptimzier-Windows.zip" download>Download Windows package <span class="arrow">↓</span></a>
+          <a class="btn ghost ripple-btn" href="#screenshots">View screenshots</a>
+          <a class="btn ghost ripple-btn" href="#features">See features</a>
         </div>
-        <div class="hero-visual" id="heroVisual">
-          <div class="glow-ring" aria-hidden="true"></div>
-          <div class="floating-chip one">Local JSON only</div>
-          <div class="floating-chip two">Allowlist aware</div>
-          <div class="device-monitor" id="heroMonitor">
-            <div class="monitor-top"><strong>ROPTIMER // DEVICE SIGNAL</strong><span>● READY</span></div>
-            <div class="monitor-grid">
-              <div class="metric"><label>CPU threads</label><b data-count="8">0</b></div>
-              <div class="metric"><label>Memory hint</label><b data-count="16" data-suffix=" GB">0</b></div>
-              <div class="metric"><label>FPS target</label><b class="red" data-count="144">0</b></div>
-              <div class="metric"><label>Ping demo</label><b class="green" data-count="38" data-suffix=" ms">0</b></div>
-            </div>
-            <div class="bars">
-              <div class="bar-row"><span>Render</span><div class="bar"><i style="width:72%"></i></div><span>72%</span></div>
-              <div class="bar-row"><span>Network</span><div class="bar"><i style="width:44%"></i></div><span>44%</span></div>
-              <div class="bar-row"><span>Stability</span><div class="bar"><i style="width:91%"></i></div><span>91%</span></div>
-            </div>
-            <div class="monitor-foot"><span>SAFE MODE</span><span>NO GAME CONNECTION</span></div>
-          </div>
+        <div class="trust-row">
+          <span><b>✓</b> No injector</span>
+          <span><b>✓</b> No exploits</span>
+          <span><b>✓</b> No memory edits</span>
+          <span><b>✓</b> Reversible JSON</span>
+        </div>
+        <div class="icon-row">
+          <div class="icon-pill"><img src="assets/icons/roptimer-web.png" alt="Website icon" /> Website icon</div>
+          <div class="icon-pill"><img src="assets/icons/roptimzier-app.png" alt="Python app icon" /> Python app icon</div>
+          <div class="icon-pill"><img src="assets/icons/roptimer-hud.png" alt="HUD icon" /> HUD icon</div>
         </div>
       </div>
-      <div class="scroll-cue">Scroll to explore ↓</div>
+
+      <div class="hero-visual" id="heroVisual">
+        <div class="glow-ring" aria-hidden="true"></div>
+        <div class="floating-chip one">Local JSON only</div>
+        <div class="floating-chip two">Any Windows version</div>
+        <div class="floating-chip three">Restore button</div>
+        <div class="app-showcase" id="appShowcase">
+          <div class="showcase-top">
+            <img src="assets/icons/roptimzier-app.png" alt="Roptimzier Python app icon" />
+            <div><strong>Roptimzier Optimizer</strong><span>Python 3.10+ • Windows • Tkinter</span></div>
+          </div>
+          <div class="showcase-grid">
+            <div class="showcase-metric"><label>FPS target</label><b class="red" data-count="144">0</b></div>
+            <div class="showcase-metric"><label>Versions</label><b class="orange" data-count="3">0</b></div>
+            <div class="showcase-metric"><label>Profiles</label><b class="green" data-count="4">0</b></div>
+            <div class="showcase-metric"><label>Restore</label><b class="green">1 click</b></div>
+          </div>
+          <div class="showcase-bars">
+            <div class="bar-row"><span>Boost</span><div class="bar"><i style="width:88%"></i></div><span>88%</span></div>
+            <div class="bar-row"><span>Lag rescue</span><div class="bar"><i style="width:96%"></i></div><span>96%</span></div>
+            <div class="bar-row"><span>Safety</span><div class="bar"><i style="width:100%"></i></div><span>MAX</span></div>
+          </div>
+          <div class="showcase-foot"><span>SETTINGS MANAGER</span><span>NO GAME INJECTION</span></div>
+        </div>
+      </div>
     </section>
 
     <div class="ticker" aria-hidden="true">
-      <div class="ticker-track" id="tickerTrack">
-        <span><b>ROPTIMER</b> Performance lab</span><span>Settings files, not exploits</span><span><b>Laptop aware</b> presets</span><span>Game profile testing</span><span>FPS / ping HUD preview</span><span><b>Restore</b> anytime</span>
-        <span><b>ROPTIMER</b> Performance lab</span><span>Settings files, not exploits</span><span><b>Laptop aware</b> presets</span><span>Game profile testing</span><span>FPS / ping HUD preview</span><span><b>Restore</b> anytime</span>
+      <div class="ticker-track">
+        <span><b>ROPTIMZIER</b> download portal</span><span>Real app icons</span><span>Feature screenshots</span><span>Lag Rescue mode</span><span>FPS + notifications</span><span>Separate HUD</span><span>Reversible settings</span>
+        <span><b>ROPTIMZIER</b> download portal</span><span>Real app icons</span><span>Feature screenshots</span><span>Lag Rescue mode</span><span>FPS + notifications</span><span>Separate HUD</span><span>Reversible settings</span>
       </div>
     </div>
 
-    <!-- Download -->
-    <section class="section" id="download">
-      <div class="section-head reveal">
-        <div class="eyebrow">Downloads</div>
-        <h2>Get the tools. Keep it clean.</h2>
-        <p>Three separate pieces: the optimizer, an optional always-on-top HUD, and a settings file generated by this page. Nothing is hidden inside Roblox.</p>
-      </div>
-      <div class="grid grid-3">
-        <article class="card download-card reveal">
-          <div class="icon">PY</div>
-          <span class="tag">Main app</span>
-          <h3 style="margin-top:14px">Roptimzier Optimizer</h3>
-          <p>The single-file Tkinter app that finds Windows Roblox version folders, writes <code>ClientAppSettings.json</code>, backs up, restores, and can launch Roblox normally.</p>
-          <div class="file">roblox_fps_optimizer.py</div>
-          <div class="actions">
-            <a class="btn primary block ripple-btn" href="../roblox_fps_optimizer.py" download>Download optimizer.py</a>
-            <a class="btn ghost block" href="../README.md" target="_blank" rel="noreferrer">Read setup guide</a>
-          </div>
-        </article>
-        <article class="card download-card reveal">
-          <div class="icon">HUD</div>
-          <span class="tag orange">Companion</span>
-          <h3 style="margin-top:14px">Roptimer HUD</h3>
-          <p>A separate always-on-top Python window showing your FPS target, a real network ping test, CPU/RAM hints, and notifications. It never attaches to the Roblox process.</p>
-          <div class="file">roptimer_hud.py</div>
-          <div class="actions">
-            <a class="btn primary block ripple-btn" href="../roptimer_hud.py" download>Download HUD.py</a>
-            <button class="btn ghost block" id="downloadHudSettingsTop">Download HUD settings</button>
-          </div>
-        </article>
-        <article class="card download-card reveal">
-          <div class="icon">{}</div>
-          <span class="tag green">Generated here</span>
-          <h3 style="margin-top:14px">Your performance profile</h3>
-          <p>Build a safe JSON profile below and download it directly. The Python optimizer can merge these same keys into every detected Roblox version.</p>
-          <div class="file">ClientAppSettings.json</div>
-          <div class="actions">
-            <a class="btn primary block ripple-btn" href="#builder">Open profile builder</a>
-            <button class="btn ghost block" id="downloadFlagsTop">Download generated JSON</button>
-          </div>
-        </article>
-      </div>
-      <div class="download-note">
-        <strong>About “injectors”:</strong> this project does not include one. Injecting DLLs, reading game memory, hiding from anti-cheat, or automating gameplay is outside what we will build. The HUD is a normal desktop window, and the optimizer only writes local configuration files.
-      </div>
-    </section>
-
-    <!-- Safety -->
-    <section class="section" id="safety">
-      <div class="section-head reveal">
-        <div class="eyebrow">Safety first</div>
-        <h2>Will Roblox think this is an exploit?</h2>
-        <p>No third-party software can promise “never banned.” What we can do is avoid the behaviors that look like exploits: no injection, no stealth, no memory access, no network manipulation, and no gameplay automation.</p>
-      </div>
-      <div class="safety-wrap">
-        <article class="card safety-hero reveal">
-          <span class="tag green">Designed to stay in bounds</span>
-          <h3>Built like a settings manager, not a cheat tool.</h3>
-          <p>ROPTIMER writes a plain JSON file inside Roblox’s own <code>ClientSettings</code> folder, keeps backups, and gives you a one-click restore. Roblox controls which FastFlags it accepts; unsupported keys are simply ignored.</p>
-          <div class="ban-meter">
-            <div class="label"><span>Exploit-style behavior</span><b>None included</b></div>
-            <div class="track"><i></i></div>
-          </div>
-        </article>
-        <div class="card reveal">
-          <div class="safety-list">
-            <div class="safety-item"><div class="mark">✓</div><div><strong>No process injection</strong><small>No DLLs, hooks, handles into Roblox memory, or code running inside the client.</small></div></div>
-            <div class="safety-item"><div class="mark">✓</div><div><strong>No ban evasion</strong><small>No stealth, anti-detection, spoofing, or circumvention of the FastFlag allowlist.</small></div></div>
-            <div class="safety-item"><div class="mark">✓</div><div><strong>No gameplay automation</strong><small>No aimbots, macros, teleports, speed changes, or script execution in experiences.</small></div></div>
-            <div class="safety-item"><div class="mark">✓</div><div><strong>Reversible</strong><small>Backups are created before writes. Restore removes only the flags managed by this tool.</small></div></div>
-            <div class="safety-item"><div class="mark">i</div><div><strong>Use official stats for real FPS/ping</strong><small>Roblox documents built-in Performance Stats and Debug Stats overlays. The HUD below is a separate demo/companion, not a memory reader.</small></div></div>
-          </div>
-          <p style="margin-top:16px">
-            Official references:
-            <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noreferrer">FastFlag allowlist</a> ·
-            <a href="https://create.roblox.com/docs/performance-optimization/identify" target="_blank" rel="noreferrer">Performance stats guide</a> ·
-            <a href="https://en.help.roblox.com/hc/en-us/articles/203314150-How-to-Reduce-Lag-and-Speed-Up-Play" target="_blank" rel="noreferrer">Reduce lag help</a>
-          </p>
+    <section class="tabs-section" id="download">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">Download center</div>
+          <h2>Everything in one tab.</h2>
+          <p>This page is a download portal, not a web app. Download the package, view features and screenshots, then use the desktop app to safely write local Roblox settings.</p>
         </div>
-      </div>
-    </section>
 
-    <!-- Device Lab -->
-    <section class="section" id="device">
-      <div class="section-head reveal">
-        <div class="eyebrow">Device Lab</div>
-        <h2>Detects the type of machine you’re using.</h2>
-        <p>The browser can only see privacy-safe hints, not your exact laptop model. Scan those hints here, then choose your device class manually for the most accurate recommendation.</p>
-      </div>
-      <div class="lab">
-        <article class="card scan-panel reveal">
-          <div class="scan-head">
-            <div><h3>Browser hardware scan</h3><p>No upload. Results stay on this page.</p></div>
-            <button class="btn primary ripple-btn" id="scanDevice">Scan device</button>
-          </div>
-          <div class="stat-grid">
-            <div class="stat-box"><label>CPU threads</label><b id="statCores">—</b></div>
-            <div class="stat-box"><label>Memory hint</label><b id="statMemory">—</b></div>
-            <div class="stat-box"><label>Display estimate</label><b id="statHz">—</b></div>
-            <div class="stat-box"><label>GPU hint</label><b id="statGpu">Not exposed</b></div>
-            <div class="stat-box"><label>Connection</label><b id="statNetwork">—</b></div>
-            <div class="stat-box"><label>Screen</label><b id="statScreen">—</b></div>
-          </div>
-          <div class="scan-line"><i id="scanProgress"></i></div>
-          <div class="scan-status" id="scanStatus">Ready. Click “Scan device” to read browser-visible hints.</div>
-        </article>
-        <aside class="card recommend reveal">
-          <span class="tag">Recommended tier</span>
-          <div class="tier-ring" id="tierRing"><div class="inner"><b id="tierName">BALANCED</b><span id="tierSub">waiting for scan</span></div></div>
-          <div class="field">
-            <label for="laptopClass">I’m using</label>
-            <select id="laptopClass">
-              <option value="auto">Auto detect</option>
-              <option value="school">School / low-end laptop</option>
-              <option value="ultrabook">Ultrabook / integrated GPU</option>
-              <option value="gaming">Gaming laptop</option>
-              <option value="desktop">Desktop / high-end PC</option>
-            </select>
-          </div>
-          <div class="rec-list">
-            <div class="rec-item"><span>Suggested FPS cap</span><b id="recFps">144 FPS</b></div>
-            <div class="rec-item"><span>Graphics preset</span><b id="recQuality">Low</b></div>
-            <div class="rec-item"><span>Renderer</span><b id="recRenderer">Automatic</b></div>
-            <div class="rec-item"><span>HUD alerts</span><b id="recAlerts">Low FPS + ping spikes</b></div>
-          </div>
-          <button class="btn primary block" id="applyRecommendation" style="margin-top:16px">Apply to HUD settings</button>
-        </aside>
-      </div>
-    </section>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="download" role="tab" aria-selected="true">↓ Download</button>
+          <button class="tab" data-tab="features" role="tab" aria-selected="false">⚡ Features</button>
+          <button class="tab" data-tab="screenshots" role="tab" aria-selected="false">▣ Screenshots</button>
+          <button class="tab" data-tab="safety" role="tab" aria-selected="false">✓ Safety</button>
+        </div>
 
-    <!-- Profile Builder -->
-    <section class="section" id="builder">
-      <div class="section-head reveal">
-        <div class="eyebrow">Profile builder</div>
-        <h2>Make the safe JSON profile.</h2>
-        <p>This mirrors the desktop optimizer’s managed keys. Current Roblox clients may ignore the legacy FPS flag; the rendering keys are selected from the published allowlist.</p>
-      </div>
-      <div class="builder">
-        <article class="card reveal">
-          <div class="field">
-            <label for="profilePreset">Performance preset</label>
-            <select id="profilePreset">
-              <option value="Performance">Performance</option>
-              <option value="Balanced">Balanced</option>
-              <option value="Visual">Visual</option>
-              <option value="Custom">Custom</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="fpsRange">FPS target <span id="fpsLabel">144</span></label>
-            <div class="range-row"><input id="fpsRange" type="range" min="60" max="9999" value="144" /><input id="fpsNumber" type="number" min="60" max="9999" value="144" style="max-width:100px" /></div>
-          </div>
-          <div class="field">
-            <label for="graphicsQuality">Graphics quality</label>
-            <select id="graphicsQuality"><option>Automatic</option><option>Ultra low</option><option>Low</option><option>Medium</option><option>High</option><option>Ultra</option></select>
-          </div>
-          <div class="field">
-            <label for="textureQuality">Texture quality</label>
-            <select id="textureQuality"><option>Automatic</option><option>Low (best performance)</option><option>Medium</option><option>High</option></select>
-          </div>
-          <div class="toggle-row"><div class="toggle-copy"><strong>Optimize Rendering Paths</strong><small>Allowlisted LOD and voxel-lighting flags.</small></div><label class="switch"><input type="checkbox" id="renderPaths" checked /><span></span></label></div>
-          <div class="toggle-row"><div class="toggle-copy"><strong>Lower Hidden Textures</strong><small>Limits texture resolution to reduce VRAM pressure.</small></div><label class="switch"><input type="checkbox" id="hiddenTextures" checked /><span></span></label></div>
-          <div class="toggle-row"><div class="toggle-copy"><strong>Reduce grass motion</strong><small>Uses the allowlisted reduced-motion factor.</small></div><label class="switch"><input type="checkbox" id="grassMotion" checked /><span></span></label></div>
-          <div class="toggle-row"><div class="toggle-copy"><strong>Write legacy FPS flag</strong><small>DFIntTaskSchedulerTargetFps — may be ignored by current clients.</small></div><label class="switch"><input type="checkbox" id="legacyFps" checked /><span></span></label></div>
-          <p style="margin-top:14px;color:var(--warning);font-size:10px;line-height:1.6">9999 is an uncapped ceiling, not 9999 real FPS. Prefer a stable cap that matches your display.</p>
-        </article>
-        <article class="card code-wrap reveal">
-          <div class="code-toolbar">
-            <button class="btn small primary" id="copyFlags">Copy JSON</button>
-            <button class="btn small" id="downloadFlags">Download JSON</button>
-            <span class="spacer"></span>
-            <span class="flag-count" id="flagCount">0 managed flags</span>
-          </div>
-          <pre id="flagPreview" aria-label="Generated ClientAppSettings JSON"></pre>
-        </article>
-      </div>
-    </section>
+        <!-- DOWNLOAD PANEL -->
+        <section class="tab-panel active" id="panel-download" role="tabpanel">
+          <div class="download-layout">
+            <article class="card reveal">
+              <div class="download-hero">
+                <img src="assets/icons/roptimzier-app.png" alt="Roptimzier app icon" />
+                <div>
+                  <span class="tag green">Recommended download</span>
+                  <h3 style="margin-top:10px">Roptimzier Windows Package</h3>
+                  <p>One ZIP with the Python optimizer, HUD, icons, default settings, README and Windows launchers.</p>
+                  <div class="download-meta">
+                    <span class="tag">Windows 10 / 11</span>
+                    <span class="tag">Python 3.10+</span>
+                    <span class="tag orange">No installer needed</span>
+                    <span class="tag green">v1.2.0</span>
+                  </div>
+                  <div class="download-actions">
+                    <a class="btn primary ripple-btn" href="downloads/Roptimzier-Windows.zip" download>Download ZIP ↓</a>
+                    <a class="btn ghost" href="downloads/Roptimzier.py" download>Download Roptimzier.py</a>
+                    <a class="btn ghost" href="downloads/roptimer_hud.py" download>Download HUD.py</a>
+                    <a class="btn ghost" href="downloads/hud-settings.json" download>Download HUD settings</a>
+                  </div>
+                </div>
+              </div>
+              <div class="file-list">
+                <div class="file-row"><div><code>Roptimzier-Windows.zip</code><br /><span>Complete package with launchers and icons</span></div><a class="btn small" href="downloads/Roptimzier-Windows.zip" download>ZIP</a></div>
+                <div class="file-row"><div><code>Roptimzier.py</code><br /><span>Main single-file Tkinter optimizer</span></div><a class="btn small" href="downloads/Roptimzier.py" download>PY</a></div>
+                <div class="file-row"><div><code>roptimer_hud.py</code><br /><span>Optional separate always-on-top HUD</span></div><a class="btn small" href="downloads/roptimer_hud.py" download>PY</a></div>
+                <div class="file-row"><div><code>hud-settings.json</code><br /><span>Default HUD preferences</span></div><a class="btn small" href="downloads/hud-settings.json" download>JSON</a></div>
+              </div>
+            </article>
 
-    <!-- Game Lab -->
-    <section class="section" id="games">
-      <div class="section-head reveal">
-        <div class="eyebrow">Game Lab</div>
-        <h2>Test a plan for different Roblox games.</h2>
-        <p>Pick a game genre to generate an offline test plan. This does not connect to a live Roblox server or read an experience’s memory — it helps you choose settings and know what to check in-game.</p>
-      </div>
-      <div class="game-grid" id="gameGrid">
-        <article class="game-card selected reveal" data-key="roleplay"><div class="game-icon">RP</div><h4>Roleplay / social</h4><p>Brookhaven-style maps, avatars, houses and lots of textures.</p><div class="mini-stats"><span class="tag">Textures</span><span class="tag orange">Crowds</span></div></article>
-        <article class="game-card reveal" data-key="combat"><div class="game-icon">PVP</div><h4>Combat / fighting</h4><p>Blox Fruits-style abilities, effects and fast camera movement.</p><div class="mini-stats"><span class="tag">Effects</span><span class="tag orange">Input feel</span></div></article>
-        <article class="game-card reveal" data-key="fps"><div class="game-icon">FPS</div><h4>Shooter / FPS</h4><p>Arsenal-style aiming, rapid movement and high-refresh displays.</p><div class="mini-stats"><span class="tag">FPS cap</span><span class="tag orange">Ping</span></div></article>
-        <article class="game-card reveal" data-key="openworld"><div class="game-icon">OW</div><h4>Open world / vehicles</h4><p>Jailbreak-style long draw distance and moving vehicles.</p><div class="mini-stats"><span class="tag">LOD</span><span class="tag orange">Stability</span></div></article>
-        <article class="game-card reveal" data-key="obby"><div class="game-icon">OB</div><h4>Obby / platformer</h4><p>Tower of Hell-style timing and clear visibility.</p><div class="mini-stats"><span class="tag">Frame time</span><span class="tag orange">Clarity</span></div></article>
-        <article class="game-card reveal" data-key="simulator"><div class="game-icon">SIM</div><h4>Simulator / grinding</h4><p>Long sessions with repeated effects and many objects.</p><div class="mini-stats"><span class="tag">Memory</span><span class="tag orange">Heat</span></div></article>
-      </div>
-      <div class="test-panel">
-        <article class="card reveal">
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
-            <div><h3 id="testTitle" style="margin:0">Roleplay / social test plan</h3><p style="margin-top:4px" id="testSub">Texture-heavy social worlds.</p></div>
-            <div style="display:flex;gap:8px"><button class="btn primary small ripple-btn" id="runTest">Run offline test</button><button class="btn small" id="downloadTestPlan">Download plan</button></div>
+            <aside class="card reveal">
+              <span class="tag">Icons included</span>
+              <h3 style="margin-top:14px">Not a lonely “P”.</h3>
+              <p>The package ships custom red/black icons for the website, Python app, and HUD companion.</p>
+              <div class="icon-showcase">
+                <div class="icon-box"><img src="assets/icons/roptimer-web.png" alt="Website icon" /><span>Website</span></div>
+                <div class="icon-box"><img src="assets/icons/roptimzier-app.png" alt="Python app icon" /><span>App</span></div>
+                <div class="icon-box"><img src="assets/icons/roptimer-hud.png" alt="HUD icon" /><span>HUD</span></div>
+              </div>
+              <div class="changelog" style="margin-top:20px">
+                <div><b>v1.2.0</b> — Quick Setup page, Lag Rescue preset, VFX reducer, notifications, bright app UI, custom icons.</div>
+                <div><b>v1.1.0</b> — ROPTIMER red website, device lab, game lab, HUD settings.</div>
+                <div><b>v1.0.0</b> — Safe reversible ClientAppSettings.json optimizer.</div>
+              </div>
+              <div class="safety-mini"><strong>Safe by design:</strong> no injector, no full bright exploit, no building removal, no x-ray, no memory edits, no anti-cheat bypass.</div>
+            </aside>
           </div>
-          <div class="chart" id="chart"><div class="bar-col"><i style="height:30%"></i></div><div class="bar-col"><i style="height:42%"></i></div><div class="bar-col"><i style="height:38%"></i></div><div class="bar-col"><i style="height:55%"></i></div><div class="bar-col"><i style="height:48%"></i></div><div class="bar-col"><i style="height:62%"></i></div><div class="bar-col"><i style="height:58%"></i></div><div class="bar-col"><i style="height:70%"></i></div><div class="bar-col"><i style="height:66%"></i></div><div class="bar-col"><i style="height:74%"></i></div></div>
-          <div class="chart-labels"><span>WARM-UP</span><span>LOAD</span><span>COMBAT</span><span>TRAVEL</span><span>END</span></div>
-        </article>
-        <article class="card reveal">
-          <div class="test-results">
-            <div class="test-result"><label>Plan score</label><b id="testScore">—</b></div>
-            <div class="test-result"><label>Target FPS</label><b id="testFps">—</b></div>
-            <div class="test-result"><label>Ping check</label><b id="testPing">—</b></div>
-          </div>
-          <div class="checklist" id="testChecklist">
-            <div>Choose a profile above that matches your device tier.</div>
-            <div>Apply with the Python optimizer, then restart Roblox.</div>
-            <div>Use Roblox’s built-in stats to compare real FPS and ping.</div>
-            <div>If the game looks too flat, move Graphics Quality up one step.</div>
-          </div>
-          <p style="margin-top:14px;color:var(--dim);font-size:9px;line-height:1.6">The chart uses generated demo values for planning. It is not a live benchmark and does not measure a Roblox server.</p>
-        </article>
-      </div>
-    </section>
+        </section>
 
-    <!-- HUD Settings -->
-    <section class="section" id="hud">
-      <div class="section-head reveal">
-        <div class="eyebrow">HUD settings</div>
-        <h2>Pick what you want to see.</h2>
-        <p>Configure FPS target display, ping, CPU/RAM hints, notifications, corner position, transparency, and red accent intensity. Download the generated settings for the separate Roptimer HUD.</p>
-      </div>
-      <div class="hud-layout">
-        <article class="card hud-form reveal">
-          <div class="grid-2">
-            <div class="toggle-row"><div class="toggle-copy"><strong>Show FPS target</strong><small>Your chosen cap, not a memory-read FPS.</small></div><label class="switch"><input type="checkbox" id="hudShowFps" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Show ping</strong><small>Network latency to Roblox endpoint.</small></div><label class="switch"><input type="checkbox" id="hudShowPing" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Show CPU</strong><small>Optional psutil system CPU hint.</small></div><label class="switch"><input type="checkbox" id="hudShowCpu" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Show RAM</strong><small>Optional psutil memory hint.</small></div><label class="switch"><input type="checkbox" id="hudShowRam" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Notifications</strong><small>In-HUD status and event toasts.</small></div><label class="switch"><input type="checkbox" id="hudNotifications" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Low-FPS alert</strong><small>Reminds you to check built-in stats.</small></div><label class="switch"><input type="checkbox" id="hudLowFpsAlert" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Ping spike alert</strong><small>Triggers on high measured latency.</small></div><label class="switch"><input type="checkbox" id="hudPingAlert" checked /><span></span></label></div>
-            <div class="toggle-row"><div class="toggle-copy"><strong>Auto game profile</strong><small>Uses your last Game Lab choice.</small></div><label class="switch"><input type="checkbox" id="hudAutoProfile" checked /><span></span></label></div>
+        <!-- FEATURES PANEL -->
+        <section class="tab-panel" id="panel-features" role="tabpanel">
+          <div class="grid grid-2" style="margin-bottom:16px">
+            <article class="card no-cheat-card reveal">
+              <span class="tag green">Performance only</span>
+              <h3>Boost your settings. Don’t break the rules.</h3>
+              <p>Roptimzier gives you clear switches that write local JSON settings. It does not attach a DLL to Roblox, read game memory, remove buildings, add full bright lighting, or automate gameplay.</p>
+            </article>
+            <article class="card reveal">
+              <div class="feature-icon">⇄</div>
+              <h3>Client sync, not injection</h3>
+              <p>Detects any installed Windows Roblox version folder and can write the same reversible profile to all of them. It uses normal files only.</p>
+              <span class="tag" style="margin-top:14px">No process injection</span>
+            </article>
           </div>
-          <div class="grid-2" style="margin-top:10px">
-            <div class="field"><label for="hudPosition">Corner</label><select id="hudPosition"><option value="tl">Top left</option><option value="tr">Top right</option><option value="bl">Bottom left</option><option value="br">Bottom right</option></select></div>
-            <div class="field"><label for="hudOpacity">Opacity <span id="opacityLabel">94%</span></label><input id="hudOpacity" type="range" min="55" max="100" value="94" /></div>
-            <div class="field"><label for="hudAccent">Red accent</label><select id="hudAccent"><option value="#ff2d3f">Inferno red</option><option value="#ff003c">Crimson</option><option value="#ff5a1f">Magma orange</option><option value="#e6005c">Neon rose</option></select></div>
-            <div class="field"><label for="hudGameProfile">Game profile</label><select id="hudGameProfile"><option value="roleplay">Roleplay / social</option><option value="combat">Combat / fighting</option><option value="fps">Shooter / FPS</option><option value="openworld">Open world</option><option value="obby">Obby</option><option value="simulator">Simulator</option></select></div>
+          <div class="grid grid-4">
+            <article class="card feature-card reveal"><div class="feature-icon">F</div><h3>FPS target</h3><p>Choose 60–9999, with stable presets and a clear warning that 9999 is a ceiling, not real FPS.</p><span class="tag">Slider + presets</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">B</div><h3>Performance boost</h3><p>Uses allowlisted geometry and voxel-lighting flags to reduce rendering work safely.</p><span class="tag green">Reversible</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">L</div><h3>Lag Rescue</h3><p>One click loads the lowest safe graphics profile when a game lags too much.</p><span class="tag orange">Emergency preset</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">V</div><h3>VFX / world detail</h3><p>Lowers texture, anti-aliasing, grass motion and quality load without removing buildings or changing lighting.</p><span class="tag">No exploit visuals</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">N</div><h3>Notifications</h3><p>In-app toasts and a full status log for apply, restore, sync and warnings.</p><span class="tag green">On by default</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">U</div><h3>Bright UI</h3><p>High-contrast app theme only. It never changes Roblox world brightness or gives full bright vision.</p><span class="tag orange">App only</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">H</div><h3>Separate HUD</h3><p>Optional always-on-top window for FPS target, ping, CPU/RAM hints and alerts.</p><span class="tag">Separate window</span></article>
+            <article class="card feature-card reveal"><div class="feature-icon">R</div><h3>One-click restore</h3><p>Backs up old JSON, preserves unrelated flags, and restores previous managed values.</p><span class="tag green">Safe rollback</span></article>
           </div>
-          <button class="btn primary block ripple-btn" id="downloadHudSettings">Download hud-settings.json</button>
-          <p style="margin-top:12px;color:var(--dim);font-size:9px;line-height:1.6">For real in-game FPS/ping, use Roblox’s own Performance Stats or Debug Stats overlay. The HUD is a separate window and does not inject into Roblox.</p>
-        </article>
-        <div class="hud-preview-shell reveal">
-          <div class="demo-stamp">LIVE HUD PREVIEW — DEMO VALUES</div>
-          <div class="hud-window tl" id="hudWindow">
-            <div class="hud-title"><strong>ROPTIMER HUD</strong><span>● SEPARATE WINDOW</span></div>
-            <div class="hud-body">
-              <div class="hud-row" data-hud-row="fps"><span>FPS target</span><b id="previewFps">144</b></div>
-              <div class="hud-row" data-hud-row="ping"><span>Ping demo</span><b id="previewPing">38 ms</b></div>
-              <div class="hud-row" data-hud-row="cpu"><span>CPU hint</span><b id="previewCpu">21%</b></div>
-              <div class="hud-row" data-hud-row="ram"><span>RAM hint</span><b id="previewRam">46%</b></div>
-              <div class="hud-note">Real in-game stats: Roblox Performance Stats / Shift+F5. No memory reads.</div>
+        </section>
+
+        <!-- SCREENSHOTS PANEL -->
+        <section class="tab-panel" id="panel-screenshots" role="tabpanel">
+          <div class="screenshot-layout">
+            <article class="card reveal">
+              <div class="screenshot-stage">
+                <img id="screenshotMain" src="assets/screenshot-dashboard.svg" alt="Roptimzier dashboard UI preview" />
+                <div class="screenshot-caption">
+                  <div><strong id="screenshotTitle">Dashboard</strong><p id="screenshotDesc">Version detection, profiles, FPS target and recent activity.</p></div>
+                  <div class="screenshot-nav"><button class="btn small" id="prevShot">←</button><button class="btn small" id="nextShot">→</button></div>
+                </div>
+              </div>
+            </article>
+            <aside class="reveal">
+              <div class="screenshot-thumbs">
+                <button class="thumb active" data-shot="0"><img src="assets/screenshot-dashboard.svg" alt="Dashboard screenshot" /><span>01 · Dashboard</span></button>
+                <button class="thumb" data-shot="1"><img src="assets/screenshot-optimizer.svg" alt="Quick Setup screenshot" /><span>02 · Quick Setup</span></button>
+                <button class="thumb" data-shot="2"><img src="assets/screenshot-hud.svg" alt="HUD screenshot" /><span>03 · HUD</span></button>
+              </div>
+              <div class="screenshot-note" style="margin-top:12px">Screenshots are stylized UI previews of the downloadable app and HUD. They show the layout and feature switches; no live Roblox game is connected.</div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- SAFETY PANEL -->
+        <section class="tab-panel" id="panel-safety" role="tabpanel">
+          <div class="grid grid-2">
+            <article class="card reveal">
+              <div class="eyebrow">Safety</div>
+              <h3 style="margin-top:14px;font-size:24px;letter-spacing:-.04em">No “hardware ban” promises. No exploit tricks.</h3>
+              <p>No third-party software can guarantee how Roblox will treat it. Roptimzier avoids exploit-style behavior: no injection, no memory reads, no anti-cheat bypass, no hidden files, no gameplay automation.</p>
+              <div class="safety-mini" style="margin-top:16px">For real in-game FPS and ping, use Roblox’s built-in Performance Stats / Debug Stats. The HUD is a separate window and does not read Roblox memory.</div>
+              <p style="margin-top:14px">
+                <a href="https://create.roblox.com/docs/performance-optimization/identify" target="_blank" rel="noreferrer">Official performance stats guide →</a><br />
+                <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noreferrer">Official FastFlag allowlist →</a>
+              </p>
+            </article>
+            <div class="reveal">
+              <details open><summary>Is this an injector?</summary><p>No. The app writes a local <code>ClientAppSettings.json</code> file. It does not inject code into Roblox, hook the renderer, or attach to the game process.</p></details>
+              <details><summary>Can it remove buildings or add full bright?</summary><p>No. Those are exploit-style visual changes. The VFX reducer only lowers safe graphics quality settings such as textures, anti-aliasing and grass motion.</p></details>
+              <details><summary>Will the legacy FPS flag always work?</summary><p>No. Current Roblox clients may ignore <code>DFIntTaskSchedulerTargetFps</code> because of the local FastFlag allowlist. Use Roblox Settings → Maximum Framerate for the supported FPS cap.</p></details>
+              <details><summary>Can I undo the changes?</summary><p>Yes. The optimizer backs up existing JSON and has a Restore button that removes only the flags it manages.</p></details>
+              <details><summary>Does the website connect to my games?</summary><p>No. This website only offers downloads, features and screenshots. It does not join experiences, read game data, or contact game servers.</p></details>
             </div>
-            <div class="hud-toast" id="hudToast">Profile ready. Restart Roblox after applying settings.</div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="section" id="faq">
-      <div class="section-head reveal">
-        <div class="eyebrow">FAQ</div>
-        <h2>Straight answers.</h2>
-      </div>
-      <div class="reveal">
-        <details open><summary>Can you guarantee Roblox won’t ban me?</summary><p>No. Nobody can guarantee how Roblox will treat any third-party software. ROPTIMER avoids exploit-style behavior by design: no injection, no memory edits, no anti-cheat bypass, and no automation. It only writes local JSON settings and runs a separate window. Always follow Roblox’s Terms of Use.</p></details>
-        <details><summary>Is the FPS flag an exploit?</summary><p><code>DFIntTaskSchedulerTargetFps</code> is a legacy local FastFlag. Roblox’s current local allowlist omits it, so modern clients normally ignore it. The app labels it clearly and recommends Roblox’s official Maximum Framerate setting. We do not attempt to bypass the allowlist.</p></details>
-        <details><summary>Can the HUD show real in-game FPS?</summary><p>The website HUD preview uses demo values. The downloadable HUD shows your FPS target and actual network ping, but it does not read Roblox’s frame loop. Use Roblox’s built-in Performance Stats / Debug Stats for real in-game FPS and server ping.</p></details>
-        <details><summary>Why is there no injector?</summary><p>Because injectors, memory patchers, and anti-detection tools cross the line from performance tuning into exploitation. This project is a performance settings manager only.</p></details>
-        <details><summary>Does the website connect to Roblox games?</summary><p>No. The Game Lab creates offline test plans and profile suggestions. It does not join games, contact game servers, or read live game data.</p></details>
+        </section>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="footer-inner">
-      <div><strong style="color:var(--text);letter-spacing:.14em">ROPTIMER</strong> · Roptimzier performance lab · Static, offline, dependency-free website.</div>
+      <div><strong style="color:var(--text);letter-spacing:.14em">ROPTIMER</strong> · Roptimzier download portal · Static, offline, dependency-free.</div>
       <div>Performance settings only. Not affiliated with Roblox Corporation.</div>
     </div>
   </footer>
@@ -718,33 +490,12 @@
     const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
     const reduceMotion = (() => { try { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (_) { return false; } })();
 
-    const GAME_PROFILES = {
-      roleplay: { title: "Roleplay / social test plan", sub: "Texture-heavy social worlds with many avatars.", fps: 120, quality: "Low", bias: .82, notes: ["Lower textures before lowering draw distance.", "Watch memory in crowded servers.", "Raise quality one step if avatars look too blurry."] },
-      combat: { title: "Combat / fighting test plan", sub: "Ability effects, particles and fast camera movement.", fps: 144, quality: "Ultra low", bias: .88, notes: ["Prioritize stable frame time over visuals.", "Use a cap your GPU can actually sustain.", "Check ping during ability-heavy fights."] },
-      fps: { title: "Shooter / FPS test plan", sub: "Aiming, rapid movement and high-refresh displays.", fps: 240, quality: "Ultra low", bias: .92, notes: ["Match the cap to your display refresh rate.", "Avoid 9999 unless you are only benchmarking.", "Use a wired connection when possible."] },
-      openworld: { title: "Open world / vehicles test plan", sub: "Long sight lines, vehicles and geometry LOD changes.", fps: 144, quality: "Low", bias: .84, notes: ["Keep geometry LOD optimization enabled.", "Watch for stutter while driving.", "Prefer a stable 120/144 cap over spikes."] },
-      obby: { title: "Obby / platformer test plan", sub: "Precise jumps and clear visibility.", fps: 144, quality: "Medium", bias: .9, notes: ["Keep the image clear enough to read obstacles.", "Lower effects before lowering texture clarity.", "Check frame-time consistency, not just average FPS."] },
-      simulator: { title: "Simulator / grinding test plan", sub: "Long sessions, repeated effects and many objects.", fps: 120, quality: "Low", bias: .8, notes: ["Use a moderate cap to reduce heat.", "Enable notifications for long-session reminders.", "Restart Roblox if memory grows over time."] }
-    };
-    const QUALITY = { "Automatic": null, "Ultra low": "1", "Low": "2", "Medium": "3", "High": "6", "Ultra": "10" };
-    const TEXTURE = { "Automatic": null, "Low (best performance)": "1", "Medium": "2", "High": "3" };
-    const GEOMETRY = { Performance: ["100","75","100","150"], Balanced: ["2000","1000","1500","2500"], Visual: ["10000","10000","10000","10000"], Custom: ["1000","600","800","1200"] };
-    const PRESETS = {
-      Performance: { fps: 144, quality: "Ultra low", texture: "Low (best performance)", render: true, hidden: true, grass: true },
-      Balanced: { fps: 144, quality: "Low", texture: "Medium", render: true, hidden: true, grass: true },
-      Visual: { fps: 240, quality: "High", texture: "High", render: false, hidden: false, grass: false }
-    };
-
-    const state = {
-      device: { cores: 0, memory: 0, hz: 60, gpu: "", network: "", screen: "", laptop: false, manual: "auto", tier: "BALANCED", recommendedFps: 144, recommendedQuality: "Low" },
-      game: "roleplay",
-      hud: {
-        showFps: true, showPing: true, showCpu: true, showRam: true,
-        notifications: true, lowFpsAlert: true, pingAlert: true, autoProfile: true,
-        position: "tl", opacity: .94, accent: "#ff2d3f", gameProfile: "roleplay",
-        fpsTarget: 144, laptopClass: "auto", tier: "BALANCED"
-      }
-    };
+    const SHOTS = [
+      { src: "assets/screenshot-dashboard.svg", alt: "Roptimzier dashboard UI preview", title: "Dashboard", desc: "Version detection, profiles, FPS target and recent activity." },
+      { src: "assets/screenshot-optimizer.svg", alt: "Roptimzier Quick Setup UI preview", title: "Quick Setup", desc: "FPS, boost, lag rescue, VFX reducer, notifications and client sync." },
+      { src: "assets/screenshot-hud.svg", alt: "Roptimer HUD UI preview", title: "Roptimer HUD", desc: "Separate always-on-top window for FPS target, ping and notifications." }
+    ];
+    let shotIndex = 0;
 
     function notify(message, type = "") {
       const stack = $("toastStack");
@@ -757,332 +508,28 @@
       window.setTimeout(() => el.remove(), 3600);
     }
 
-    function downloadBlob(filename, content, type = "application/json") {
-      try {
-        const blob = new Blob([content], { type });
-        const url = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(blob) : null;
-        if (!url) throw new Error("object URL unavailable");
-        const link = document.createElement("a");
-        link.href = url; link.download = filename;
-        document.body.appendChild(link); link.click(); link.remove();
-        if (window.URL.revokeObjectURL) window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-        notify(`${filename} downloaded`, "success");
-      } catch (err) {
-        notify(`Download unavailable in this browser: ${err.message}`, "warning");
-      }
-    }
-
-    function clampFps(value, fallback = 144) {
-      const n = Number.parseInt(String(value || fallback), 10);
-      return Math.max(60, Math.min(9999, Number.isFinite(n) ? n : fallback));
-    }
-
-    function hudSettingsJson() {
-      return JSON.stringify({
-        app: "Roptimer HUD",
-        version: 1,
-        showFps: state.hud.showFps,
-        showPing: state.hud.showPing,
-        showCpu: state.hud.showCpu,
-        showRam: state.hud.showRam,
-        notifications: state.hud.notifications,
-        lowFpsAlert: state.hud.lowFpsAlert,
-        pingAlert: state.hud.pingAlert,
-        autoProfile: state.hud.autoProfile,
-        position: state.hud.position,
-        opacity: state.hud.opacity,
-        accent: state.hud.accent,
-        gameProfile: state.hud.gameProfile,
-        fpsTarget: state.hud.fpsTarget,
-        laptopClass: state.device.manual,
-        tier: state.device.tier,
-        safety: { injection: false, memoryReads: false, antiCheatBypass: false, automation: false }
-      }, null, 2) + "\n";
-    }
-
-    function saveHudState() {
-      try { localStorage.setItem("roptimer.hud", JSON.stringify(state.hud)); } catch (_) {}
-      try { localStorage.setItem("roptimer.device", JSON.stringify(state.device)); } catch (_) {}
-    }
-
-    function loadHudState() {
-      try {
-        const hud = JSON.parse(localStorage.getItem("roptimer.hud") || "null");
-        if (hud && typeof hud === "object") Object.assign(state.hud, hud);
-        const device = JSON.parse(localStorage.getItem("roptimer.device") || "null");
-        if (device && typeof device === "object") Object.assign(state.device, device);
-      } catch (_) {}
-    }
-
-    // ------------------------- Profile builder -------------------------
-    function buildFlags() {
-      const fps = clampFps($("fpsNumber").value);
-      const preset = $("profilePreset").value in GEOMETRY ? $("profilePreset").value : "Custom";
-      const flags = {};
-      if ($("legacyFps").checked) flags["DFIntTaskSchedulerTargetFps"] = String(fps);
-      if ($("renderPaths").checked) {
-        const lod = GEOMETRY[preset];
-        flags["DFIntCSGLevelOfDetailSwitchingDistance"] = lod[0];
-        flags["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = lod[1];
-        flags["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = lod[2];
-        flags["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = lod[3];
-        flags["DFFlagDebugPauseVoxelizer"] = "True";
-        flags["FFlagHandleAltEnterFullscreenManually"] = "True";
-      }
-      const quality = QUALITY[$("graphicsQuality").value];
-      if (quality) flags["DFIntDebugFRMQualityLevelOverride"] = quality;
-      let texture = TEXTURE[$("textureQuality").value];
-      if ($("hiddenTextures").checked && !texture) texture = "1";
-      if (texture) { flags["DFFlagTextureQualityOverrideEnabled"] = "True"; flags["DFIntTextureQualityOverride"] = texture; }
-      if ($("grassMotion").checked) flags["FIntGrassMovementReducedMotionFactor"] = "0";
-      const msaa = preset === "Performance" ? "1" : preset === "Balanced" ? "2" : preset === "Visual" ? "4" : "1";
-      if ($("renderPaths").checked) flags["FIntDebugForceMSAASamples"] = msaa;
-      return Object.fromEntries(Object.entries(flags).sort(([a], [b]) => a.localeCompare(b)));
-    }
-
-    function renderFlags() {
-      const flags = buildFlags();
-      const text = JSON.stringify(flags, null, 2);
-      const html = text.split("\n").map((line) => {
-        const safe = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        if (safe.includes("DFIntTaskSchedulerTargetFps")) return `<span class="json-legacy">${safe}</span>`;
-        if (safe.includes('":')) { const cut = safe.indexOf('":') + 1; return `<span class="json-key">${safe.slice(0, cut)}</span><span class="json-value">${safe.slice(cut)}</span>`; }
-        return safe;
-      }).join("\n");
-      $("flagPreview").innerHTML = html;
-      $("flagCount").textContent = `${Object.keys(flags).length} managed flags`;
-      $("fpsLabel").textContent = String(clampFps($("fpsNumber").value));
-      state.hud.fpsTarget = clampFps($("fpsNumber").value);
-      return JSON.stringify(flags, null, 2) + "\n";
-    }
-
-    function setFps(value, markCustom = true) {
-      const fps = clampFps(value);
-      $("fpsRange").value = String(fps);
-      $("fpsNumber").value = String(fps);
-      if (markCustom && $("profilePreset").value !== "Custom") $("profilePreset").value = "Custom";
-      renderFlags();
-    }
-
-    function applyProfilePreset(name) {
-      const p = PRESETS[name];
-      if (!p) return;
-      setFps(p.fps, false);
-      $("graphicsQuality").value = p.quality;
-      $("textureQuality").value = p.texture;
-      $("renderPaths").checked = p.render;
-      $("hiddenTextures").checked = p.hidden;
-      $("grassMotion").checked = p.grass;
-      renderFlags();
-    }
-
-    // ------------------------- Device lab -------------------------
-    function estimateRefresh() {
-      return new Promise((resolve) => {
-        if (reduceMotion || !window.requestAnimationFrame) return resolve(60);
-        let frames = 0;
-        const start = (window.performance && performance.now) ? performance.now() : Date.now();
-        function tick(now) {
-          frames += 1;
-          const t = now || ((window.performance && performance.now) ? performance.now() : Date.now());
-          if (t - start < 900) window.requestAnimationFrame(tick);
-          else resolve(Math.max(30, Math.min(360, Math.round(frames * 1000 / (t - start)))));
-        }
-        window.requestAnimationFrame(tick);
+    function showTab(name) {
+      $$(".tab").forEach((tab) => {
+        const active = tab.dataset.tab === name;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
       });
+      $$(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === `panel-${name}`));
+      $$(".reveal").forEach((el) => el.classList.add("visible"));
+      const section = $("download");
+      if (section) window.scrollTo({ top: section.offsetTop - 90, behavior: reduceMotion ? "auto" : "smooth" });
     }
 
-    function gpuHint() {
-      try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        if (!gl) return "Not exposed";
-        const ext = gl.getExtension("WEBGL_debug_renderer_info");
-        if (!ext) return "WebGL available";
-        return String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || "Unknown GPU");
-      } catch (_) { return "Not exposed"; }
+    function showShot(index) {
+      shotIndex = (index + SHOTS.length) % SHOTS.length;
+      const shot = SHOTS[shotIndex];
+      $("screenshotMain").src = shot.src;
+      $("screenshotMain").alt = shot.alt;
+      $("screenshotTitle").textContent = shot.title;
+      $("screenshotDesc").textContent = shot.desc;
+      $$(".thumb").forEach((thumb, i) => thumb.classList.toggle("active", i === shotIndex));
     }
 
-    function computeTier() {
-      const manual = state.device.manual;
-      if (manual !== "auto") {
-        if (manual === "school") return "LOW";
-        if (manual === "ultrabook") return "BALANCED";
-        if (manual === "gaming") return "HIGH";
-        if (manual === "desktop") return "EXTREME";
-      }
-      const cores = state.device.cores || 4;
-      const memory = state.device.memory || 4;
-      const gpu = (state.device.gpu || "").toLowerCase();
-      const weakGpu = gpu.includes("intel") || gpu.includes("uhd") || gpu.includes("vega") || gpu.includes("mali") || gpu.includes("adreno");
-      const saveData = (state.device.network || "").includes("save");
-      let score = 0;
-      score += cores >= 8 ? 2 : cores >= 6 ? 1 : 0;
-      score += memory >= 8 ? 2 : memory >= 4 ? 1 : 0;
-      score += state.device.hz >= 120 ? 2 : state.device.hz >= 75 ? 1 : 0;
-      score += weakGpu ? 0 : 1;
-      if (saveData) score -= 2;
-      if (score >= 6) return "EXTREME";
-      if (score >= 4) return "HIGH";
-      if (score >= 2) return "BALANCED";
-      return "LOW";
-    }
-
-    function recommendationFor(tier) {
-      const hz = state.device.hz || 60;
-      if (tier === "LOW") return { fps: Math.min(60, hz || 60), quality: "Ultra low", renderer: "Direct3D 11", alerts: "Low FPS + heat" };
-      if (tier === "BALANCED") return { fps: Math.min(120, hz || 60), quality: "Low", renderer: "Automatic", alerts: "Low FPS + ping spikes" };
-      if (tier === "HIGH") return { fps: Math.min(144, hz || 60), quality: "Low", renderer: "Automatic", alerts: "Ping spikes" };
-      return { fps: Math.min(240, hz || 60), quality: "Medium", renderer: "Automatic", alerts: "Ping spikes" };
-    }
-
-    function renderRecommendation() {
-      const tier = computeTier();
-      const rec = recommendationFor(tier);
-      state.device.tier = tier;
-      state.device.recommendedFps = Math.max(60, Math.min(240, rec.fps));
-      state.device.recommendedQuality = rec.quality;
-      state.hud.tier = tier;
-      $("tierName").textContent = tier;
-      $("tierSub").textContent = state.device.manual === "auto" ? "browser hints" : "manual class";
-      const degrees = { LOW: 70, BALANCED: 150, HIGH: 235, EXTREME: 330 }[tier] || 150;
-      $("tierRing").style.background = `conic-gradient(var(--accent) 0deg, var(--accent-2) ${degrees}deg, #21161b ${degrees}deg)`;
-      $("recFps").textContent = `${state.device.recommendedFps} FPS`;
-      $("recQuality").textContent = rec.quality;
-      $("recRenderer").textContent = rec.renderer;
-      $("recAlerts").textContent = rec.alerts;
-      saveHudState();
-    }
-
-    async function scanDevice() {
-      $("scanStatus").textContent = "Reading browser-visible hardware hints…";
-      $("scanProgress").style.width = "18%";
-      const nav = window.navigator || {};
-      state.device.cores = Number(nav.hardwareConcurrency || 0);
-      state.device.memory = Number(nav.deviceMemory || 0);
-      state.device.gpu = gpuHint();
-      const conn = nav.connection || nav.mozConnection || nav.webkitConnection || {};
-      state.device.network = [conn.effectiveType, conn.downlink ? `${conn.downlink}Mb/s` : "", conn.rtt ? `${conn.rtt}ms RTT` : "", conn.saveData ? "save-data" : ""].filter(Boolean).join(" · ") || "Not exposed";
-      const scr = window.screen || {};
-      state.device.screen = scr.width && scr.height ? `${scr.width}×${scr.height} @ ${window.devicePixelRatio || 1}x` : "Not exposed";
-      $("scanProgress").style.width = "55%";
-      try {
-        if (nav.getBattery) {
-          const battery = await nav.getBattery();
-          state.device.laptop = true;
-          state.device.network += (state.device.network ? " · " : "") + `battery ${Math.round((battery.level || 0) * 100)}%`;
-        }
-      } catch (_) {}
-      state.device.hz = await estimateRefresh();
-      $("statCores").textContent = state.device.cores ? `${state.device.cores} threads` : "Not exposed";
-      $("statMemory").textContent = state.device.memory ? `${state.device.memory} GB hint` : "Not exposed";
-      $("statHz").textContent = `${state.device.hz} Hz est.`;
-      $("statGpu").textContent = state.device.gpu.length > 30 ? state.device.gpu.slice(0, 29) + "…" : state.device.gpu;
-      $("statNetwork").textContent = state.device.network || "Not exposed";
-      $("statScreen").textContent = state.device.screen;
-      $("scanProgress").style.width = "100%";
-      $("scanStatus").textContent = state.device.laptop ? "Battery detected — likely a laptop. Browser hints are approximate." : "Scan complete. Browser hints are approximate; choose a manual class if needed.";
-      renderRecommendation();
-      notify("Device scan complete", "success");
-    }
-
-    // ------------------------- Game lab -------------------------
-    function gamePlanJson() {
-      const profile = GAME_PROFILES[state.game];
-      const tier = computeTier();
-      const rec = recommendationFor(tier);
-      return JSON.stringify({
-        site: "ROPTIMER",
-        type: "offline_game_test_plan",
-        gameProfile: state.game,
-        title: profile.title,
-        deviceTier: tier,
-        recommendedFps: Math.min(profile.fps, rec.fps),
-        recommendedQuality: rec.quality,
-        notes: profile.notes,
-        safety: { connectsToGame: false, readsGameMemory: false, injection: false },
-        realStats: "Use Roblox Performance Stats / Debug Stats for live FPS and ping."
-      }, null, 2) + "\n";
-    }
-
-    function renderGameTest(animated = true) {
-      const profile = GAME_PROFILES[state.game];
-      const tier = computeTier();
-      const rec = recommendationFor(tier);
-      const target = Math.max(60, Math.min(profile.fps, rec.fps));
-      const bias = profile.bias * (tier === "LOW" ? .84 : tier === "BALANCED" ? .94 : tier === "HIGH" ? 1.02 : 1.1);
-      $("testTitle").textContent = profile.title;
-      $("testSub").textContent = profile.sub;
-      $("testFps").textContent = `${target}`;
-      $("testScore").textContent = `${Math.max(40, Math.min(99, Math.round(bias * 94)))}/100`;
-      $("testPing").textContent = "check";
-      $("testChecklist").innerHTML = [
-        `Use a ${target} FPS cap and ${rec.quality} graphics for this ${tier.toLowerCase()} device.`,
-        ...profile.notes,
-        "Apply with the Python optimizer, then restart Roblox before testing.",
-        "Compare real FPS/ping with Roblox’s built-in stats overlay."
-      ].map((x) => `<div>${x}</div>`).join("");
-      const bars = $$("#chart .bar-col i");
-      bars.forEach((bar, i) => {
-        const wave = Math.sin((i + 1) * .9) * 12;
-        const value = Math.max(18, Math.min(96, 45 + bias * 34 + wave - i * 1.2));
-        if (animated && !reduceMotion) {
-          bar.style.height = "4%";
-          window.setTimeout(() => { bar.style.height = `${value}%`; }, i * 45);
-        } else bar.style.height = `${value}%`;
-      });
-      state.hud.gameProfile = state.game;
-      saveHudState();
-    }
-
-    // ------------------------- HUD settings -------------------------
-    function renderHudControls() {
-      const map = {
-        hudShowFps: "showFps", hudShowPing: "showPing", hudShowCpu: "showCpu", hudShowRam: "showRam",
-        hudNotifications: "notifications", hudLowFpsAlert: "lowFpsAlert", hudPingAlert: "pingAlert", hudAutoProfile: "autoProfile"
-      };
-      Object.entries(map).forEach(([id, key]) => { const el = $(id); if (el) el.checked = Boolean(state.hud[key]); });
-      $("hudPosition").value = state.hud.position || "tl";
-      $("hudOpacity").value = String(Math.round((state.hud.opacity || .94) * 100));
-      $("hudAccent").value = state.hud.accent || "#ff2d3f";
-      $("hudGameProfile").value = state.hud.gameProfile || state.game;
-      $("laptopClass").value = state.device.manual || "auto";
-      $("opacityLabel").textContent = `${Math.round((state.hud.opacity || .94) * 100)}%`;
-      renderHudPreview();
-    }
-
-    function renderHudPreview() {
-      const win = $("hudWindow");
-      if (!win) return;
-      win.className = `hud-window ${state.hud.position || "tl"}`;
-      win.style.opacity = String(state.hud.opacity || .94);
-      win.style.borderColor = state.hud.accent || "#ff2d3f";
-      document.documentElement.style.setProperty("--accent", state.hud.accent || "#ff2d3f");
-      $$("[data-hud-row]").forEach((row) => {
-        const key = row.getAttribute("data-hud-row");
-        const visible = key === "fps" ? state.hud.showFps : key === "ping" ? state.hud.showPing : key === "cpu" ? state.hud.showCpu : state.hud.showRam;
-        row.style.display = visible ? "flex" : "none";
-      });
-      $("hudToast").classList.toggle("hidden", !state.hud.notifications);
-      $("previewFps").textContent = String(state.hud.fpsTarget || 144);
-    }
-
-    function bindHudControls() {
-      const map = {
-        hudShowFps: "showFps", hudShowPing: "showPing", hudShowCpu: "showCpu", hudShowRam: "showRam",
-        hudNotifications: "notifications", hudLowFpsAlert: "lowFpsAlert", hudPingAlert: "pingAlert", hudAutoProfile: "autoProfile"
-      };
-      Object.entries(map).forEach(([id, key]) => {
-        $(id).addEventListener("change", (e) => { state.hud[key] = e.target.checked; renderHudPreview(); saveHudState(); });
-      });
-      $("hudPosition").addEventListener("change", (e) => { state.hud.position = e.target.value; renderHudPreview(); saveHudState(); });
-      $("hudOpacity").addEventListener("input", (e) => { state.hud.opacity = Number(e.target.value) / 100; $("opacityLabel").textContent = `${e.target.value}%`; renderHudPreview(); saveHudState(); });
-      $("hudAccent").addEventListener("change", (e) => { state.hud.accent = e.target.value; renderHudPreview(); saveHudState(); });
-      $("hudGameProfile").addEventListener("change", (e) => { state.hud.gameProfile = e.target.value; state.game = e.target.value; $$(".game-card").forEach(c => c.classList.toggle("selected", c.dataset.key === state.game)); renderGameTest(false); saveHudState(); });
-      $("laptopClass").addEventListener("change", (e) => { state.device.manual = e.target.value; renderRecommendation(); renderGameTest(false); });
-    }
-
-    // ------------------------- Effects -------------------------
     function initParticles() {
       const canvas = $("fx");
       if (!canvas || reduceMotion) return;
@@ -1115,20 +562,19 @@
       if (!("IntersectionObserver" in window)) { items.forEach(i => i.classList.add("visible")); return; }
       const io = new IntersectionObserver((entries) => {
         entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("visible"); io.unobserve(entry.target); } });
-      }, { threshold: .12 });
+      }, { threshold: .1 });
       items.forEach(i => io.observe(i));
     }
 
     function initCounters() {
       $$("[data-count]").forEach((el) => {
         const target = Number(el.dataset.count || 0);
-        const suffix = el.dataset.suffix || "";
-        if (reduceMotion) { el.textContent = target + suffix; return; }
+        if (reduceMotion) { el.textContent = target; return; }
         let current = 0; const steps = 28; const inc = target / steps;
         const timer = window.setInterval(() => {
           current += inc;
-          if (current >= target) { el.textContent = target + suffix; window.clearInterval(timer); }
-          else el.textContent = Math.round(current) + suffix;
+          if (current >= target) { el.textContent = target; window.clearInterval(timer); }
+          else el.textContent = Math.round(current);
         }, 35);
       });
     }
@@ -1174,76 +620,34 @@
 
     function initParallax() {
       const visual = $("heroVisual");
-      const monitor = $("heroMonitor");
-      if (!visual || !monitor || reduceMotion) return;
+      const card = $("appShowcase");
+      if (!visual || !card || reduceMotion) return;
       visual.addEventListener("mousemove", (e) => {
         const rect = visual.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width - .5;
         const y = (e.clientY - rect.top) / rect.height - .5;
-        monitor.style.transform = `perspective(900px) rotateY(${-7 + x * 8}deg) rotateX(${3 - y * 6}deg) translateY(${y * -8}px)`;
+        card.style.transform = `perspective(900px) rotateY(${-7 + x * 8}deg) rotateX(${3 - y * 6}deg) translateY(${y * -8}px)`;
       });
-      visual.addEventListener("mouseleave", () => { monitor.style.transform = "perspective(900px) rotateY(-7deg) rotateX(3deg)"; });
+      visual.addEventListener("mouseleave", () => { card.style.transform = "perspective(900px) rotateY(-7deg) rotateX(3deg)"; });
     }
 
-    function initDemoNumbers() {
-      if (reduceMotion) return;
-      window.setInterval(() => {
-        $("previewPing").textContent = `${28 + Math.floor(Math.random() * 42)} ms`;
-        $("previewCpu").textContent = `${12 + Math.floor(Math.random() * 35)}%`;
-        $("previewRam").textContent = `${38 + Math.floor(Math.random() * 24)}%`;
-      }, 1600);
-    }
-
-    // ------------------------- Wire up -------------------------
     function init() {
-      loadHudState();
-      renderHudControls();
-      bindHudControls();
-      renderRecommendation();
-
-      $("profilePreset").addEventListener("change", (e) => { if (PRESETS[e.target.value]) applyProfilePreset(e.target.value); });
-      ["fpsRange", "fpsNumber"].forEach(id => $(id).addEventListener("input", (e) => setFps(e.target.value)));
-      ["graphicsQuality", "textureQuality", "renderPaths", "hiddenTextures", "grassMotion", "legacyFps"].forEach(id => {
-        $(id).addEventListener("change", () => { if ($("profilePreset").value !== "Custom") $("profilePreset").value = "Custom"; renderFlags(); });
-      });
-      $("copyFlags").addEventListener("click", async () => {
-        const text = renderFlags();
-        try { await navigator.clipboard.writeText(text); notify("JSON copied", "success"); }
-        catch (_) { notify("Clipboard unavailable — use Download JSON", "warning"); }
-      });
-      $("downloadFlags").addEventListener("click", () => downloadBlob("ClientAppSettings.json", renderFlags()));
-      $("downloadFlagsTop").addEventListener("click", () => downloadBlob("ClientAppSettings.json", renderFlags()));
-      $("downloadHudSettings").addEventListener("click", () => { state.hud.fpsTarget = clampFps($("fpsNumber").value); downloadBlob("hud-settings.json", hudSettingsJson()); });
-      $("downloadHudSettingsTop").addEventListener("click", () => { state.hud.fpsTarget = clampFps($("fpsNumber").value); downloadBlob("hud-settings.json", hudSettingsJson()); });
-      $("scanDevice").addEventListener("click", scanDevice);
-      $("applyRecommendation").addEventListener("click", () => {
-        setFps(state.device.recommendedFps);
-        $("graphicsQuality").value = state.device.recommendedQuality;
-        state.hud.fpsTarget = state.device.recommendedFps;
-        renderHudPreview(); saveHudState();
-        notify("Recommendation applied to profile and HUD", "success");
-      });
-      $("gameGrid").addEventListener("click", (e) => {
-        const card = e.target.closest(".game-card");
-        if (!card) return;
-        state.game = card.dataset.key;
-        $$(".game-card").forEach(c => c.classList.toggle("selected", c === card));
-        $("hudGameProfile").value = state.game;
-        renderGameTest(true);
-      });
-      $("runTest").addEventListener("click", () => { renderGameTest(true); notify("Offline test plan generated", "success"); });
-      $("downloadTestPlan").addEventListener("click", () => downloadBlob("roptimer-game-test-plan.json", gamePlanJson()));
-
-      applyProfilePreset("Performance");
-      renderFlags();
-      renderGameTest(false);
+      $$(".tab").forEach((tab) => tab.addEventListener("click", () => showTab(tab.dataset.tab)));
+      $$(".nav-links a").forEach((link) => link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const name = link.getAttribute("href").slice(1);
+        if (["download", "features", "screenshots", "safety"].includes(name)) showTab(name);
+      }));
+      $("prevShot").addEventListener("click", () => showShot(shotIndex - 1));
+      $("nextShot").addEventListener("click", () => showShot(shotIndex + 1));
+      $$(".thumb").forEach((thumb) => thumb.addEventListener("click", () => showShot(Number(thumb.dataset.shot))));
+      $$("[download]").forEach((link) => link.addEventListener("click", () => notify("Download started. Check your Downloads folder.", "success")));
       initParticles();
       initReveal();
       initCounters();
       initScrollFx();
       initRipples();
       initParallax();
-      initDemoNumbers();
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
