@@ -966,7 +966,7 @@ class SafeCacheCleaner:
             self.state_root / "logs",
             Path(tempfile.gettempdir()) / "Roblox",
         ]
-        if is_macos():
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
             roots.extend([
                 Path.home() / "Library" / "Logs" / "Roblox",
                 Path.home() / "Library" / "Application Support" / "Roblox" / "logs",
@@ -1134,7 +1134,9 @@ class OptimizerCore:
 
     def roblox_root(self) -> Path:
         """Return the platform-specific Roblox client settings root."""
-        if is_macos():
+        # A test/custom override wins on every OS so headless self-tests and
+        # user-selected roots stay deterministic on macOS too.
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
             for root in MACOS_CLIENT_ROOTS:
                 if root.is_dir():
                     return root
@@ -1148,7 +1150,7 @@ class OptimizerCore:
     def version_roots(self) -> list[Path]:
         """Return trusted roots containing version-* folders."""
         candidates: list[Path] = [self.roblox_root() / "Versions"]
-        if is_macos():
+        if is_macos() and not os.getenv("RFO_LOCALAPPDATA"):
             candidates.extend(MACOS_CLIENT_ROOTS)
         for env_name in ("ProgramFiles(x86)", "ProgramFiles", "PROGRAMFILES"):
             value = os.getenv(env_name)
