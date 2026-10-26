@@ -85,6 +85,8 @@ SHA256SUMS.txt
 
 GitHub Actions runs the same build on `windows-latest` when the `.NET` source or workflow changes, and uploads the Windows package as an artifact.
 
+Release binaries are hosted on the [v3.0.0-windows release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows); the website links directly to `Roptimer.exe`, `RoptimerBoost.exe`, and `Roptimer-Windows-x64.zip`.
+
 ---
 
 ## Boost CLI commands

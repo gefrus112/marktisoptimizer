@@ -42,3 +42,7 @@ RoptimerBoost.exe self-test
 Local reversible `ClientAppSettings.json` writes only. No DLL injection, process hooks, memory reads/writes, Roblox telemetry disabling, Crashpad/Backtrace changes, fullbright, x-ray, building removal, anti-cheat bypass, or gameplay automation.
 
 `DFIntTaskSchedulerTargetFps` is included only as a legacy compatibility flag; current allowlisted Roblox clients may ignore it. Use Roblox Settings > Maximum Framerate for the supported FPS cap. Extended graphics tiers 0–21 use the allowlisted `DFIntDebugFRMQualityLevelOverride` flag and may change as Roblox updates the client.
+
+## Release binaries
+
+The Windows EXEs are published on the [v3.0.0-windows release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows).
