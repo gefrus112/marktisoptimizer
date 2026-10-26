@@ -1,0 +1,109 @@
+name: Build macOS companion
+
+on:
+  push:
+    paths:
+      - "roblox_fps_optimizer.py"
+      - "roptimer_hud.py"
+      - "feature-status.json"
+      - "requirements*.txt"
+      - "mac/**"
+      - "docs/**"
+      - "web/**"
+      - ".github/workflows/build-macos.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      RELEASE_TAG: v3.1.0-mac
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+          python -m pip install -r requirements-optional.txt
+
+      - name: Build macOS icon
+        run: |
+          mkdir -p Roptimer.iconset
+          for size in 16 32 128 256 512; do
+            sips -z "$size" "$size" assets/roptimzier-shield.png --out "Roptimer.iconset/icon_${size}x${size}.png"
+            double=$((size * 2))
+            sips -z "$double" "$double" assets/roptimzier-shield.png --out "Roptimer.iconset/icon_${size}x${size}@2x.png"
+          done
+          iconutil -c icns Roptimer.iconset -o Roptimer.icns
+
+      - name: Self-test Python optimizer
+        run: python roblox_fps_optimizer.py --self-test
+
+      - name: Build Roptimer.app
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onedir \
+            --name "Roptimer" \
+            --icon Roptimer.icns \
+            --add-data "feature-status.json:." \
+            --add-data "assets/roptimzier-shield.png:assets" \
+            roblox_fps_optimizer.py
+
+      - name: Build roptimer-boost CLI
+        run: |
+          pyinstaller --noconfirm --clean --console --onefile \
+            --name "roptimer-boost" \
+            --add-data "feature-status.json:." \
+            roblox_fps_optimizer.py
+
+      - name: Package macOS ZIP
+        run: |
+          mkdir -p mac-artifact/Roptimer-Mac/docs
+          cp -R dist/Roptimer.app mac-artifact/Roptimer-Mac/
+          cp dist/roptimer-boost mac-artifact/Roptimer-Mac/
+          cp mac/*.command mac-artifact/Roptimer-Mac/
+          cp docs/*.md mac-artifact/Roptimer-Mac/docs/
+          cp feature-status.json mac-artifact/Roptimer-Mac/
+          cp README.md mac-artifact/Roptimer-Mac/
+          cp -R assets mac-artifact/Roptimer-Mac/assets
+          cp docs/MAC.md mac-artifact/Roptimer-Mac/README-MAC.md
+          cd mac-artifact
+          zip -r -y Roptimer-Mac.zip Roptimer-Mac
+          shasum -a 256 Roptimer-Mac.zip > Roptimer-Mac.zip.sha256
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roptimer-Mac
+          path: |
+            mac-artifact/Roptimer-Mac.zip
+            mac-artifact/Roptimer-Mac.zip.sha256
+
+      - name: Publish macOS release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="$RELEASE_TAG"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "Roptimer V3.1 macOS companion" \
+              --notes-file docs/MAC_RELEASE_NOTES.md
+          fi
+          gh release upload "$TAG" \
+            mac-artifact/Roptimer-Mac.zip \
+            mac-artifact/Roptimer-Mac.zip.sha256 \
+            web/downloads/Roptimer-Mac-Companion.zip \
+            web/downloads/Roptimer-Mac-Companion.zip.sha256 \
+            web/downloads/Roptimer-CLI-Docs.md \
+            web/downloads/Roptimer-Mac-README.md \
+            web/downloads/Roptimer-Script-Hub.md \
+            --clobber

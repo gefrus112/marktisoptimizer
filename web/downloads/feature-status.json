@@ -1,7 +1,7 @@
 {
-  "product": "Roptimer Hub V3",
-  "version": "3.0.0",
-  "platform": ".NET 8 / WPF / Windows 10+",
+  "product": "Roptimer Hub V3.1",
+  "version": "3.1.0",
+  "platform": ".NET 8 / WPF / Windows 10+ and Python/Tkinter / macOS 11+ companion",
   "safety": {
     "injection": false,
     "memoryReads": false,
@@ -11,7 +11,8 @@
     "xray": false,
     "buildingRemoval": false,
     "robloxTelemetryDisable": false,
-    "appTelemetry": false
+    "appTelemetry": false,
+    "gameScriptExecution": false
   },
   "features": [
     {
@@ -84,7 +85,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "RoptimerBoost.exe can preview, apply, restore, inspect a session, clean old cache files, launch Roblox through roblox://, and open the desktop app. It never injects a DLL."
+      "details": "RoptimerBoost.exe and Roptimer Boost.command can preview, apply, restore, inspect a session, clean old cache files, launch Roblox through its normal URL scheme, and open the desktop app. Neither injects a DLL."
     },
     {
       "id": "dll-injector",
@@ -120,16 +121,16 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Interactive website settings tab for theme, optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, and generated CLI commands."
+      "details": "Interactive website settings builder for optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, and generated Windows/macOS CLI commands."
     },
     {
       "id": "blue-ui",
-      "name": "Blue Lumina interface",
+      "name": "Blue Lumina desktop interface",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Blue/purple/cyan website and app theme inspired by the provided Lumina Hub reference. No green neon status dots."
+      "details": "Blue/purple/cyan desktop app theme inspired by the provided Lumina Hub reference. No green neon status dots."
     },
     {
       "id": "bootstrapper-exe",
@@ -139,6 +140,60 @@
       "safe": true,
       "flag": null,
       "details": "GitHub Actions builds Roptimer.exe and RoptimerBoost.exe on windows-latest. RoptimerBoost.exe open launches the desktop app; bootstrap applies safe settings first."
+    },
+    {
+      "id": "mac-companion",
+      "name": "macOS companion downloads",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds an unsigned Python/Tkinter macOS package with .command launchers, a .app terminal launcher, Mac path discovery for /Applications/Roblox.app/Contents/MacOS/ClientSettings, CLI parity, docs, and a macOS build workflow."
+    },
+    {
+      "id": "sirius-website",
+      "name": "Sirius-style dark website",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Rebuilds the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, Windows/macOS download cards, and no green neon dots."
+    },
+    {
+      "id": "cli-docs",
+      "name": "CLI and how-it-works docs",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds a complete CLI reference, performance guide, local JSON/backup explanation, macOS setup guide, downloadable markdown docs, and a docs tab with generated commands."
+    },
+    {
+      "id": "script-hub",
+      "name": "Roptimer Script Hub",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Original Luau-inspired local UI recipe catalog with code cards, screenshots, and a Run preview button. It is not a Roblox executor and never sends code to a game."
+    },
+    {
+      "id": "loading-gui",
+      "name": "GUI loading script preview",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "A local HTML/CSS/JavaScript loading GUI preview with steps, progress bar, and Sirius/Rayfield-like menu styling. No loadstring, game services, remote code, or executor APIs."
+    },
+    {
+      "id": "game-script-executor",
+      "name": "Roblox game script executor / exploit loader",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No game script execution, loadstring, executor API, remote script hub, process attachment, or anti-cheat bypass. The Script Hub is strictly a local UI/documentation preview."
     }
   ],
   "sources": [
@@ -157,6 +212,14 @@
     {
       "title": "Roblox graphics quality help",
       "url": "https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality"
+    },
+    {
+      "title": "ClientAppSettings.json folder locations, including macOS",
+      "url": "https://devforum.roblox.com/t/fast-flags-clientappsettingsjson-folder-locations-for-most-os-eg-windows-macos-android-and-ios/3180597"
+    },
+    {
+      "title": "Roblox built-in performance stats",
+      "url": "https://create.roblox.com/docs/performance-optimization/identify"
     },
     {
       "title": "Bubblestrap WPF layout reference",
