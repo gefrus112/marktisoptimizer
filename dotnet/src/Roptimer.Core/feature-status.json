@@ -1,7 +1,7 @@
 {
-  "product": "Roptimer Hub V3.2",
-  "version": "3.2.0",
-  "platform": ".NET 8 / WPF / Windows 10+, Python/Tkinter / macOS 11+ companion, and static GitHub Pages website",
+  "product": "Roptimer Hub V4",
+  "version": "4.0.0",
+  "platform": "Rust + Tauri v2 / Windows 10+ (single-file client); .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with vendored Three.js",
   "safety": {
     "injection": false,
     "memoryReads": false,
@@ -240,6 +240,60 @@
       "safe": false,
       "flag": null,
       "details": "No game script execution, loadstring, executor API, remote script hub, process attachment, or anti-cheat bypass. The Script Hub is strictly a local UI/documentation preview."
+    },
+    {
+      "id": "rust-tauri-client",
+      "name": "Rust + Tauri v2 Windows client",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Rebuilt the desktop app as a single, lightweight Rust + Tauri v2 executable (Roptimer-Rust-x64.exe) that embeds the same glowing Three.js web UI. Uses the built-in WebView2 runtime, no Electron/Chromium bundle."
+    },
+    {
+      "id": "roblox-detect-on-launch",
+      "name": "Roblox detection on first launch",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear in the main Client tab."
+    },
+    {
+      "id": "windows-only-client-tab",
+      "name": "Windows-only main Client tab",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The website and app put a Client tab first. Its allowlist manager is explicitly Windows-only; the macOS companion is a separate legacy tool and does not include the Windows client allowlist manager."
+    },
+    {
+      "id": "allowlist-feature-improvements",
+      "name": "Allowlist features: what each flag improves",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "18 allowlisted keys",
+      "details": "The canonical allowlist now ships categoryDescriptions and per-flag flagFeatures (feature name, value hint, and what it improves) for all 18 Geometry, Rendering, and User Interface flags. The Client and Allowlist tabs render these details."
+    },
+    {
+      "id": "vendored-threejs-website",
+      "name": "Glowing Three.js website (offline, no CDN)",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable."
+    },
+    {
+      "id": "rust-safe-apply-restore",
+      "name": "Rust safe apply/restore with backups",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "allowlisted keys only",
+      "details": "Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."
     }
   ],
   "sources": [

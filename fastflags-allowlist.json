@@ -1,9 +1,23 @@
 {
   "product": "Roptimer Hub",
-  "version": "3.2.0",
-  "allowlistVersion": 1,
-  "description": "Canonical list of Roblox local ClientAppSettings.json FastFlags that Roptimer may recognize, preserve, back up, and restore. Only these rendering, geometry, and UI keys are allowlisted for local management. The legacy FPS flag is tracked separately and is not part of this allowlist.",
+  "version": "4.0.0",
+  "edition": "Rust + Tauri Windows Client",
+  "allowlistVersion": 2,
+  "platform": "windows",
+  "windowsOnly": true,
+  "description": "Canonical list of Roblox local ClientAppSettings.json FastFlags that the Roptimer Windows client may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.",
   "source": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569",
+  "client": {
+    "name": "Roptimer",
+    "framework": "Rust + Tauri v2",
+    "webview": "Microsoft Edge WebView2 (Windows)",
+    "executable": "Roptimer-Rust-x64.exe",
+    "architecture": "x86_64 (64-bit)",
+    "minOS": "Windows 10 version 1803 or newer",
+    "singleFile": true,
+    "detectsRobloxOnLaunch": true,
+    "target": "ClientAppSettings.json"
+  },
   "safety": {
     "localJsonOnly": true,
     "injection": false,
@@ -48,6 +62,133 @@
       ]
     }
   ],
+  "categoryDescriptions": {
+    "Geometry": {
+      "summary": "Level-of-detail (LOD) switching distances for CSG / solid geometry.",
+      "improves": "Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce 'building lag' — it never deletes buildings, changes collisions, or edits gameplay geometry.",
+      "accent": "blue"
+    },
+    "Rendering": {
+      "summary": "Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.",
+      "improves": "The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.",
+      "accent": "violet"
+    },
+    "User Interface": {
+      "summary": "Client-side motion / environmental detail reduction.",
+      "improves": "Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.",
+      "accent": "amber"
+    }
+  },
+  "flagFeatures": {
+    "DFIntCSGLevelOfDetailSwitchingDistance": {
+      "feature": "Base LOD distance",
+      "category": "Geometry",
+      "valueHint": "Distance in studs; lower = switch sooner",
+      "improves": "Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places."
+    },
+    "DFIntCSGLevelOfDetailSwitchingDistanceL12": {
+      "feature": "LOD tier 1 to 2 distance",
+      "category": "Geometry",
+      "valueHint": "Distance in studs",
+      "improves": "Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner."
+    },
+    "DFIntCSGLevelOfDetailSwitchingDistanceL23": {
+      "feature": "LOD tier 2 to 3 distance",
+      "category": "Geometry",
+      "valueHint": "Distance in studs",
+      "improves": "Fine-tunes the second downgrade for far-away geometry detail."
+    },
+    "DFIntCSGLevelOfDetailSwitchingDistanceL34": {
+      "feature": "LOD tier 3 to 4 distance",
+      "category": "Geometry",
+      "valueHint": "Distance in studs",
+      "improves": "Fine-tunes the final downgrade so the most distant geometry costs less to draw."
+    },
+    "FFlagHandleAltEnterFullscreenManually": {
+      "feature": "Manual Alt+Enter fullscreen",
+      "category": "Rendering",
+      "valueHint": "true / false",
+      "improves": "Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset."
+    },
+    "DFFlagTextureQualityOverrideEnabled": {
+      "feature": "Texture override switch",
+      "category": "Rendering",
+      "valueHint": "true / false",
+      "improves": "Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play."
+    },
+    "DFIntTextureQualityOverride": {
+      "feature": "Texture quality tier",
+      "category": "Rendering",
+      "valueHint": "0-3 (lower = fewer texture bytes)",
+      "improves": "Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS."
+    },
+    "FIntDebugForceMSAASamples": {
+      "feature": "Force MSAA sample count",
+      "category": "Rendering",
+      "valueHint": "1, 2, 4 (lower = faster)",
+      "improves": "Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions."
+    },
+    "DFFlagDisableDPIScale": {
+      "feature": "Disable DPI scaling",
+      "category": "Rendering",
+      "valueHint": "true / false",
+      "improves": "Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead."
+    },
+    "FFlagDebugGraphicsPreferD3D11": {
+      "feature": "Prefer Direct3D 11",
+      "category": "Rendering",
+      "valueHint": "true / false (mutually exclusive)",
+      "improves": "Selects the D3D11 renderer for stability on older GPUs."
+    },
+    "FFlagDebugSkyGray": {
+      "feature": "Neutral gray sky",
+      "category": "Rendering",
+      "valueHint": "true / false",
+      "improves": "Replaces the detailed sky with a flat color to save fill-rate."
+    },
+    "DFFlagDebugPauseVoxelizer": {
+      "feature": "Pause voxelizer",
+      "category": "Rendering",
+      "valueHint": "true / false",
+      "improves": "Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places."
+    },
+    "DFIntDebugFRMQualityLevelOverride": {
+      "feature": "FRM quality level",
+      "category": "Rendering",
+      "valueHint": "0-21 (values above 10 are legacy/micro levels)",
+      "improves": "Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing."
+    },
+    "FIntFRMMaxGrassDistance": {
+      "feature": "Max grass draw distance",
+      "category": "Rendering",
+      "valueHint": "Distance in studs; lower = less grass",
+      "improves": "Limits how far grass is drawn so distant grass stops costing GPU time."
+    },
+    "FIntFRMMinGrassDistance": {
+      "feature": "Min grass detail distance",
+      "category": "Rendering",
+      "valueHint": "Distance in studs",
+      "improves": "Controls how close grass must be before full detail is used."
+    },
+    "FFlagDebugGraphicsPreferVulkan": {
+      "feature": "Prefer Vulkan",
+      "category": "Rendering",
+      "valueHint": "true / false (mutually exclusive)",
+      "improves": "Selects the Vulkan renderer where supported as a lower-overhead graphics path."
+    },
+    "FFlagDebugGraphicsPreferOpenGL": {
+      "feature": "Prefer OpenGL",
+      "category": "Rendering",
+      "valueHint": "true / false (mutually exclusive)",
+      "improves": "Selects the OpenGL renderer where supported (legacy GPUs)."
+    },
+    "FIntGrassMovementReducedMotionFactor": {
+      "feature": "Reduced grass motion",
+      "category": "User Interface",
+      "valueHint": "0-100 (higher = less movement)",
+      "improves": "Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene."
+    }
+  },
   "legacyNotInAllowlist": [
     "DFIntTaskSchedulerTargetFps"
   ],

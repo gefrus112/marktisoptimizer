@@ -1,10 +1,19 @@
-# Roptimer Hub V3.2
+# Roptimer Hub V4
 
-**Serious, safe Roblox performance tooling — now with a 100× cooler GitHub Pages website.**
+**A single, lightweight Rust + Tauri v2 Windows client and a glowing Three.js website for safe, reversible Roblox performance settings.**
 
-`V3.2` is the website/generator release. The Windows app and macOS companion remain the safe V3.1 tools; the portal, docs, deployment, and visual system have been rebuilt.
+`V4` rebuilds the desktop app in **Rust + Tauri v2** and ships it as one small
+Windows 64-bit `.exe` that uses the WebView2 runtime already on Windows 10/11.
+On **first launch it detects whether Roblox is installed** (read-only). The
+website and the app share one UI whose main tab is the **Windows-only Client**,
+showing the **18 Roblox-allowlisted FastFlags** in Geometry, Rendering, and User
+Interface — each with what it improves.
 
-> **GitHub Pages is fixed.** It no longer serves `README.md` as the homepage. The site is now a real `index.html`, generated both at the repository root and in `web/`, and deployed by GitHub Actions.
+> **GitHub Pages is fixed and working.** The live site is served from the
+> generated root `index.html` (legacy `main /` source). The Three.js scene now
+> uses **vendored, relative ES-module imports** — no CDN, no import map — so it
+> loads offline and on GitHub Pages. `python3 build_website.py --check` validates
+> the whole thing.
 
 ---
 
@@ -13,286 +22,137 @@
 | | |
 | --- | --- |
 | **Live website** | <https://gefrus112.github.io/robloxclinetbooster/> |
-| **Windows EXE release** | [v3.0.0-windows](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows) |
-| **macOS release** | [v3.1.0-mac](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac) |
-| **Pages troubleshooting** | [`docs/PAGES.md`](docs/PAGES.md) |
+| **Windows 64-bit exe (Rust + Tauri, V4)** | [Roptimer-Rust-x64.exe](https://github.com/gefrus112/robloxclinetbooster/releases/download/v4.0.0-windows-rust/Roptimer-Rust-x64.exe) · [release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v4.0.0-windows-rust) |
+| **Windows .NET EXE (legacy)** | [v3.0.0-windows](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows) |
+| **macOS companion (legacy)** | [v3.1.0-mac](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac) |
+| **Rust + Tauri guide** | [`docs/RUST_TAURI.md`](docs/RUST_TAURI.md) · [`rust/README.md`](rust/README.md) |
 | **FastFlag allowlist** | [`docs/FASTFLAG_ALLOWLIST.md`](docs/FASTFLAG_ALLOWLIST.md) · [`fastflags-allowlist.json`](fastflags-allowlist.json) |
-| **CLI reference** | [`docs/CLI.md`](docs/CLI.md) |
-| **How it works** | [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md) |
-| **Script Hub safety** | [`docs/SCRIPT_HUB.md`](docs/SCRIPT_HUB.md) |
+| **Pages troubleshooting** | [`docs/PAGES.md`](docs/PAGES.md) |
+| **CLI / how it works** | [`docs/CLI.md`](docs/CLI.md) · [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md) |
 
 ---
 
-## What was wrong with GitHub Pages
+## V4 highlights
 
-The Pages setting was still `legacy` with source `main / /`. Because the repository had no root `index.html`, GitHub Pages rendered `README.md` as the site index.
+### Rust + Tauri v2 single-file Windows client
 
-V3.2 fixes this three ways:
+- `Roptimer-Rust-x64.exe` — one lightweight executable, no Electron/Chromium
+  bundle, no .NET runtime, no Node at runtime (uses system WebView2).
+- **Detects Roblox on first launch** by scanning standard Windows version
+  folders — read-only, no process attach, no memory reads, no launching Roblox.
+  The result appears in the Client tab with a Re-scan button.
+- Safe `apply_settings` / `restore_settings` Rust commands: allowlisted keys
+  only, timestamped backups, unrelated keys preserved.
+- The **same web UI** as the website (vendored Three.js glow). See
+  [`docs/RUST_TAURI.md`](docs/RUST_TAURI.md).
 
-1. **GitHub Actions deployment** — `.github/workflows/deploy-pages.yml` uploads `web/` as the Pages artifact.
-2. **Root fallback** — `build_website.py` generates a real root `index.html`, `404.html`, and `.nojekyll`.
-3. **Validation** — `python3 build_website.py --check` verifies placeholders, local links, embedded JSON, manifest, and output files.
+> The user also suggested **Go + Wails** as an alternative. The `web/` frontend
+> is framework-agnostic and can be reused by a Wails `embed.FS` build.
 
-Set Pages source to **GitHub Actions** in repository settings, or keep legacy `main / /` and rely on the root fallback. Full instructions are in [`docs/PAGES.md`](docs/PAGES.md).
+### New glowing website layout (Three.js)
+
+- New near-black **nebula** layout with a vendored Three.js 0.169.0 scene:
+  glowing shield, orbiting rings, particles, and UnrealBloom — all offline.
+- **Main tab = Client** (Windows-only). Then Allowlist, Downloads, Docs.
+- The **allowlist** (Geometry / Rendering / User Interface) is server-rendered
+  into the HTML with a "what it improves" note per flag, so it is visible even
+  without JavaScript.
+- Command palette, cursor glow, scroll reveals, reduced-motion + focus mode,
+  custom 404, manifest, robots.txt, sitemap. **No green neon dots.**
+
+### Windows-only allowlist / not for Mac
+
+The Client tab and its FastFlag allowlist manager are **Windows-only**. The
+macOS companion is a separate legacy Python/Tkinter tool and does not include
+this feature. See [`docs/MAC.md`](docs/MAC.md).
 
 ---
 
-## Website
+## The 18 Roblox-allowlisted FastFlags
 
-The site is a near-black, starfield-style Sirius interface with no green neon dots.
+Stored in [`fastflags-allowlist.json`](fastflags-allowlist.json) — the single
+source of truth used by the Rust client, the website, the .NET core, and the
+Python/CLI tools.
 
-### Three main tabs
+- **Geometry (4):** CSG level-of-detail switching distances — safe "reduce
+  building lag" (LOD), never deletes buildings.
+- **Rendering (13):** texture quality/override, MSAA, DPI scale, D3D11/Vulkan/
+  OpenGL preference, gray sky, voxelizer pause, FRM quality level, grass
+  distance.
+- **User Interface (1):** reduced grass motion.
 
-1. **Download** — Windows EXE/app links, macOS app/companion links, source ZIP, checksums, docs, and setup notes.
-2. **Docs & How it works** — local JSON/backup/restore explanation, Windows and macOS Boost CLI commands, the canonical FastFlag allowlist, settings/command builder, feature status, sources, and safety.
-3. **Scripts** — the original Roptimer Script Hub with Luau-inspired local UI recipes, a Sirius/Rayfield-like loading GUI preview, copyable code cards, and eight SVG screenshots.
+Each flag now has a `flagFeatures` entry (feature name, value hint, what it
+improves); each category has a `categoryDescriptions` entry. The legacy
+`DFIntTaskSchedulerTargetFps` is tracked separately and is **not** written.
+See [`docs/FASTFLAG_ALLOWLIST.md`](docs/FASTFLAG_ALLOWLIST.md).
 
-### 100× cooler V3.2 effects
+---
 
-- Animated `<canvas>` starfield.
-- Cursor-follow spotlight.
-- Searchable command palette (`Ctrl/Cmd + K` or `/`).
-- Animated gradient headline and live Pages badge.
-- Count-up statistics and staggered scroll reveals.
-- Focus mode and reduced-motion support.
-- Custom 404, web manifest, robots.txt, and sitemap.
-- Eight original SVG screenshots generated by `build_screenshots.py`.
+## Safety boundaries (unchanged)
 
-The Script Hub remains a **local website/desktop UI preview only** — not a Roblox executor, `loadstring`, injector, or exploit loader.
+Roptimer is a **performance tool, not a hacking toolbox**. It uses only local,
+reversible `ClientAppSettings.json` writes with timestamped backups, preserves
+unrelated keys, restores managed keys, and reads OS-level install metadata only.
 
-## FastFlag allowlist
+**Never:** DLL injection, process hooks, memory reads/writes, executable
+patching, account-data extraction, telemetry/Crashpad/Backtrace disabling,
+screenshot/report disabling, anti-cheat bypass, gameplay automation, fullbright/
+x-ray, building removal, executor APIs, `loadstring`, remote exploit hubs, or
+game script execution. "Reduce building lag" = safe LOD/texture/grass/graphics
+reduction. The Script Hub is a **local UI/documentation preview only**.
 
-The canonical allowlist lives in [`fastflags-allowlist.json`](fastflags-allowlist.json) and contains exactly **18** Roblox local `ClientAppSettings.json` flags:
+---
 
-- **Geometry** — 4 CSG LOD switching distance flags.
-- **Rendering** — 13 rendering, texture, MSAA, DPI, sky/voxel, FRM quality, grass distance, and renderer preference flags.
-- **User Interface** — `FIntGrassMovementReducedMotionFactor`.
-
-`DFIntTaskSchedulerTargetFps` is a separate legacy compatibility flag and is **not** allowlisted. Telemetry/Crashpad/Backtrace suppression, fullbright, x-ray, building removal, anti-cheat bypass, and game script execution are rejected.
-
-Inspect it with:
+## Build & validate
 
 ```bash
-python3 roblox_fps_optimizer.py --allowlist
-RoptimerBoost.exe allowlist
-./Roptimer\ Boost.command --allowlist
-```
-
-The website Docs tab, the C# CLI, the Python CLI, and the WPF **Allowlist** page all read the same catalog.
-
----
-
-## Generate and preview the website
-
-```bash
-python3 build_screenshots.py
+# Website (generates web/index.html + root index.html fallback)
 python3 build_website.py
 python3 build_website.py --check
-python3 -m http.server 8000 --directory web
-```
 
-Open <http://localhost:8000>.
-
-To preview the root fallback:
-
-```bash
-python3 -m http.server 8001
-```
-
-Open <http://localhost:8001/index.html>.
-
-`build_downloads.py` calls `build_website.py`, so running it also refreshes the root Pages entry:
-
-```bash
+# Downloads / packages + sync allowlist + Tauri frontend
 python3 build_downloads.py
-```
 
----
+# Rust + Tauri frontend + Windows exe
+python3 build_tauri_frontend.py
+python3 build_tauri_frontend.py --check
+cd rust/src-tauri && cargo build --release
 
-## Deploy GitHub Pages
-
-The README-as-homepage bug is fixed for the current legacy setting (`main / /`) by the generated root `index.html`. After this branch is merged, GitHub Pages serves the website directly.
-
-For **Actions-based deployment**, a repository admin must make a one-time change:
-
-> **Settings → Pages → Build and deployment → Source → GitHub Actions**
-
-The available automation token cannot change that setting (`403 Resource not accessible by integration`); it needs an admin PAT or the GitHub UI. The deploy workflow detects this: if Pages is still legacy, it regenerates and validates the site, skips the Actions deploy, and the root fallback still publishes correctly. If Pages is set to GitHub Actions, it uploads `web/` and deploys automatically.
-
-Admin-token equivalent, if available:
-
-```bash
-gh api repos/gefrus112/robloxclinetbooster/pages \
-  -X PUT \
-  --field build_type=workflow \
-  --field source.branch=main \
-  --field source.path=/
-```
-
-Pushing changes to `web/**`, `index.html`, `build_website.py`, `build_downloads.py`, `build_screenshots.py`, `feature-status.json`, `docs/**`, or `.github/workflows/deploy-pages.yml` triggers the workflow. It regenerates screenshots, downloads, and HTML, then validates the site.
-
-Check the latest deployment:
-
-```bash
-gh run list --workflow deploy-pages.yml --limit 5
-gh api repos/gefrus112/robloxclinetbooster/pages \
-  --jq '{status,build_type,html_url,source}'
-```
-
----
-
-## Downloads
-
-### Windows
-
-The C#/.NET 8 WPF desktop app and Boost CLI are on [v3.0.0-windows](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows):
-
-- `Roptimer.exe`
-- `RoptimerBoost.exe`
-- `Roptimer-Windows-x64.zip`
-- source ZIP and support files
-
-Requires the .NET 8 Desktop Runtime.
-
-### macOS
-
-The unsigned native `Roptimer.app` build and portable Python companion are on [v3.1.0-mac](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac):
-
-- `Roptimer-Mac.zip`
-- `Roptimer-Mac-Companion.zip`
-- SHA256 checksums and docs
-
-The macOS companion targets:
-
-```text
-/Applications/Roblox.app/Contents/MacOS/ClientSettings/ClientAppSettings.json
-```
-
-Right-click → Open on first launch. Roblox updates may replace this folder; re-run `apply` after an update. See [`docs/MAC.md`](docs/MAC.md).
-
----
-
-## Desktop apps
-
-### C#/.NET 8 WPF app
-
-`dotnet/Roptimer.sln` contains:
-
-- `Roptimer.App` — `Roptimer.exe`
-- `Roptimer.Core` — FastFlags, settings, discovery, backups, session, cache, feature catalog, CLI runner, self-test
-- `Roptimer.Cli` — `RoptimerBoost.exe`
-
-Pages: Dashboard, Boost, FastFlags, Session, Settings, Safety, About.
-
-### Python companions
-
-- `roblox_fps_optimizer.py` — cross-platform Windows/macOS optimizer with reversible local JSON writes.
-- `roptimer_hud.py` — optional always-on-top HUD.
-- `mac/` — macOS `.command` launchers and `.app` bundle metadata.
-- `.github/workflows/build-macos.yml` — builds `Roptimer.app` and `roptimer-boost` on `macos-latest`.
-
----
-
-## Boost CLI
-
-### Windows
-
-```powershell
-RoptimerBoost.exe open
-RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
-RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
-RoptimerBoost.exe restore
-RoptimerBoost.exe self-test
-```
-
-### macOS / portable Python
-
-```bash
-./Roptimer\ Boost.command --preview
-./Roptimer\ Boost.command --apply --mode "Reduce building lag" --graphics-tier 21 --texture-tier 0 --no-launch
-./Roptimer\ Boost.command --restore
+# Self-tests
 python3 roblox_fps_optimizer.py --self-test
-```
-
-Full reference: [`docs/CLI.md`](docs/CLI.md).
-
----
-
-## Safety
-
-Roptimer writes reversible `ClientAppSettings.json` files, keeps timestamped backups, and can restore managed keys.
-
-It does **not** provide:
-
-- DLL injection or process hooks.
-- Game memory reads/writes.
-- Roblox account/chat/player extraction.
-- Crashpad, Backtrace, telemetry, or screenshot-report disabling.
-- Fullbright, x-ray, building removal, or anti-cheat bypass.
-- Gameplay automation.
-- Roblox game script execution, `loadstring`, executor APIs, or remote exploit hubs.
-
-The Script Hub is a local UI preview. For real in-game FPS and ping, use Roblox’s built-in Performance Stats / Debug Stats.
-
----
-
-## Validation
-
-```bash
-python3 roblox_fps_optimizer.py --self-test
-python3 roblox_fps_optimizer.py --allowlist
 python3 roptimer_hud.py --self-test
-python3 build_screenshots.py
-python3 build_website.py
-python3 build_website.py --check
-python3 build_downloads.py
 ```
 
-The website generator checks:
+### CI workflows
 
-- Unresolved `__PLACEHOLDER__` values.
-- Missing local assets in `web/index.html`, `index.html`, `web/404.html`, and `404.html`.
-- Embedded feature catalog JSON.
-- `site.webmanifest` JSON.
-- `.nojekyll`, 404 pages, and root fallback path rewriting.
-
----
-
-## Repository map
-
-| Path | Purpose |
+| Workflow | Purpose |
 | --- | --- |
-| `index.html` | Root GitHub Pages fallback entry |
-| `404.html` | Root custom 404 |
-| `.nojekyll` | Disables Jekyll at repository root |
-| `web/` | Primary Pages artifact |
-| `web/index.template.html` | Website source template |
-| `web/assets/sirius.css` | Dark visual system and V3.2 effects |
-| `web/assets/sirius.js` | Tabs, command builder, Script Hub, command palette, starfield |
-| `web/assets/sirius-*.svg` | Seven generated screenshots |
-| `build_website.py` | Website generator and `--check` validator |
-| `build_screenshots.py` | SVG screenshot generator |
-| `build_downloads.py` | Full package/download generator |
-| `docs/PAGES.md` | Pages deployment and troubleshooting |
-| `docs/FASTFLAG_ALLOWLIST.md` | Full canonical allowlist guide |
-| `docs/CLI.md` | Boost CLI reference |
-| `docs/HOW_IT_WORKS.md` | Local JSON/backup/restore explanation |
-| `docs/MAC.md` | macOS setup |
-| `docs/SCRIPT_HUB.md` | Safe Script Hub boundaries |
-| `fastflags-allowlist.json` | Canonical 18-flag Geometry / Rendering / User Interface allowlist |
-| `feature-status.json` | Shared implemented / legacy / rejected feature catalog |
-| `dotnet/` | C#/.NET 8 Windows app |
-| `mac/` | macOS launcher sources |
-| `.github/workflows/` | Windows build, macOS build, and Pages deployment |
+| `build-rust-tauri.yml` | Build the single-file Windows x64 exe on `windows-latest`, publish release asset |
+| `build-windows.yml` | Legacy .NET 8 WPF build |
+| `build-macos.yml` | Legacy macOS companion build |
+| `deploy-pages.yml` | Regenerate + validate the GitHub Pages site |
 
 ---
 
-## Sources
+## Project layout
 
-- Roblox FastFlag allowlist — <https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569>
-- Roblox QualityLevel enum — <https://create.roblox.com/docs/reference/engine/enums/QualityLevel>
-- macOS `ClientAppSettings.json` location — <https://devforum.roblox.com/t/fast-flags-clientappsettingsjson-folder-locations-for-most-os-eg-windows-macos-android-and-ios/3180597>
-- Roblox performance stats — <https://create.roblox.com/docs/performance-optimization/identify>
-- GitHub Pages custom workflows — <https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages>
-- Bubblestrap layout reference — <https://github.com/ItzBloxxy/Bubblestrap>
-- Bloxstrap original project — <https://github.com/bloxstraplabs/bloxstrap>
+```
+fastflags-allowlist.json     canonical 18-flag allowlist + feature descriptions
+feature-status.json          implemented / legacy / rejected feature catalog
+web/                         generated website (also the Tauri UI source)
+  index.template.html        V4 layout (Client main tab)
+  assets/nebula.*            CSS + interactions
+  assets/three-scene.js      vendored Three.js scene (relative ES modules)
+  assets/desktop.js          Tauri bridge (no-op on the website)
+  assets/vendor/three/       vendored Three.js 0.169.0 (MIT)
+rust/                        Rust + Tauri v2 app (single-file Windows exe)
+  src-tauri/                 Rust crate + config + commands
+  frontend/                  GENERATED static UI (from web/)
+build_website.py             site generator + validator
+build_tauri_frontend.py      assembles rust/frontend/ from web/
+build_downloads.py           packages, docs, allowlist sync
+dotnet/                      legacy C#/.NET 8 app + Boost CLI
+roblox_fps_optimizer.py      legacy cross-platform Python optimizer
+roptimer_hud.py              legacy session HUD
+docs/                        all guides
+```

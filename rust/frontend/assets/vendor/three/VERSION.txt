@@ -1,0 +1,3 @@
+three.js 0.169.0
+https://threejs.org/
+MIT License — see LICENSE.txt

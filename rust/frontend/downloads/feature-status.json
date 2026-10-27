@@ -1,0 +1,337 @@
+{
+  "product": "Roptimer Hub V4",
+  "version": "4.0.0",
+  "platform": "Rust + Tauri v2 / Windows 10+ (single-file client); .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with vendored Three.js",
+  "safety": {
+    "injection": false,
+    "memoryReads": false,
+    "memoryWrites": false,
+    "antiCheatBypass": false,
+    "fullbright": false,
+    "xray": false,
+    "buildingRemoval": false,
+    "robloxTelemetryDisable": false,
+    "appTelemetry": false,
+    "gameScriptExecution": false,
+    "allowlistOnly": true
+  },
+  "features": [
+    {
+      "id": "fps-unlock",
+      "name": "Unlocking FPS",
+      "status": "Legacy / may be ignored",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntTaskSchedulerTargetFps",
+      "details": "Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings > Maximum Framerate for the supported cap up to 240 FPS."
+    },
+    {
+      "id": "texture-cache",
+      "name": "Texture and cache alterations",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntTextureQualityOverride",
+      "details": "Provides texture tiers 0-3 through the allowlisted texture override, plus a conservative cleaner for old Roblox/Roptimer log and temporary files. It does not perform aggressive in-memory cache garbage collection or touch game assets."
+    },
+    {
+      "id": "telemetry-disable",
+      "name": "Disable Roblox telemetry / Crashpad / Backtrace / screenshots",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Roptimer sends no analytics of its own, but it does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems."
+    },
+    {
+      "id": "graphics-tiers",
+      "name": "Extended graphic tiers",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntDebugFRMQualityLevelOverride",
+      "details": "Exposes quality values 0-21 through the allowlisted FRM quality override. Values above 10 use legacy/micro levels and may look different or be ignored as Roblox changes the client."
+    },
+    {
+      "id": "better-fps",
+      "name": "Better FPS / optimization modes",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "multiple allowlisted flags",
+      "details": "Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. All modes write reversible local JSON settings only."
+    },
+    {
+      "id": "building-lag",
+      "name": "Reduce building lag",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "DFIntCSGLevelOfDetailSwitchingDistance*",
+      "details": "Reduces geometry LOD distance, grass distance, textures, MSAA and motion. It does not remove buildings, change collision, or alter gameplay geometry."
+    },
+    {
+      "id": "session",
+      "name": "Session detection",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Detects running Roblox processes and OS window titles only. The Roblox display name is typed locally; no account data, player list, chat, game state, or memory is read."
+    },
+    {
+      "id": "bootstrapper",
+      "name": "Safe bootstrapper / CLI",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "RoptimerBoost.exe and Roptimer Boost.command can preview, apply, restore, inspect a session, clean old cache files, print the canonical FastFlag allowlist, launch Roblox through its normal URL scheme, and open the desktop app. Neither injects a DLL."
+    },
+    {
+      "id": "dll-injector",
+      "name": "DLL injector / process hooks",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No process injection, DLL loading, renderer hooks, memory patching, or executable modification, even when described as optimization only."
+    },
+    {
+      "id": "exploit-visuals",
+      "name": "Fullbright / x-ray / building removal",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No exploit-style visuals, world lighting changes, transparent walls, collision edits, or building deletion."
+    },
+    {
+      "id": "dotnet-app",
+      "name": "C# .NET 8 WPF app",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Dependency-free WPF desktop app with a Bubblestrap-inspired settings layout, custom shield icon, blue Lumina theme, and local-settings-only bootstrapper."
+    },
+    {
+      "id": "settings-tab",
+      "name": "Settings tab",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Interactive website settings builder for optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, generated Windows/macOS CLI commands, and the embedded FastFlag allowlist docs section."
+    },
+    {
+      "id": "blue-ui",
+      "name": "Blue Lumina desktop interface",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Blue/purple/cyan desktop app theme inspired by the provided Lumina Hub reference. No green neon status dots."
+    },
+    {
+      "id": "bootstrapper-exe",
+      "name": "Windows EXE build",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "GitHub Actions builds Roptimer.exe and RoptimerBoost.exe on windows-latest. RoptimerBoost.exe open launches the desktop app; bootstrap applies safe settings first."
+    },
+    {
+      "id": "mac-companion",
+      "name": "macOS companion downloads",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds an unsigned Python/Tkinter macOS package with .command launchers, a .app terminal launcher, Mac path discovery for /Applications/Roblox.app/Contents/MacOS/ClientSettings, CLI parity, canonical allowlist files, docs, and a macOS build workflow."
+    },
+    {
+      "id": "sirius-website",
+      "name": "Sirius-style dark website, 100× edition",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, FastFlag allowlist docs, and no green neon dots."
+    },
+    {
+      "id": "cli-docs",
+      "name": "CLI and how-it-works docs",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds a complete CLI reference, performance guide, canonical FastFlag allowlist guide, local JSON/backup explanation, macOS setup guide, GitHub Pages help, downloadable markdown docs, and a docs tab with generated commands."
+    },
+    {
+      "id": "script-hub",
+      "name": "Roptimer Script Hub",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Original Luau-inspired local UI recipe catalog with code cards, eight screenshots, a Run preview button, and command-palette actions. It is not a Roblox executor and never sends code to a game."
+    },
+    {
+      "id": "loading-gui",
+      "name": "GUI loading script preview",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "A local HTML/CSS/JavaScript loading GUI preview with steps, progress bar, and Sirius/Rayfield-like menu styling. No loadstring, game services, remote code, or executor APIs."
+    },
+    {
+      "id": "github-pages-workflow",
+      "name": "GitHub Pages Actions deployment",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, checks the current Pages build type, and deploys web/ with actions/deploy-pages@v4 when source is GitHub Actions. If source stays legacy, it skips deployment and the committed root index.html fallback serves the site instead of README.md."
+    },
+    {
+      "id": "website-generator-v2",
+      "name": "Root fallback + website validator",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "build_website.py now generates web/index.html, a root index.html fallback, .nojekyll, 404 pages, site.webmanifest, robots.txt, sitemap.xml, and embeds both the feature catalog and canonical FastFlag allowlist. Its --check mode validates placeholders, local references, JSON, manifest, and allowlist output."
+    },
+    {
+      "id": "command-palette",
+      "name": "Searchable command palette",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 14 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution."
+    },
+    {
+      "id": "starfield-fx",
+      "name": "100× animated starfield and spotlight FX",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual."
+    },
+    {
+      "id": "fastflag-allowlist",
+      "name": "Canonical FastFlag allowlist",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "18 allowlisted keys",
+      "details": "Adds fastflags-allowlist.json as the single source of truth for 18 Roblox local ClientAppSettings.json flags in Geometry, Rendering, and User Interface categories. Python and .NET load/validate the same list, the CLI exposes it with --allowlist/allowlist, the website Docs tab renders it, and the WPF app has a dedicated Allowlist page. The legacy FPS flag is explicitly excluded, and telemetry/exploit/anti-cheat flags are rejected."
+    },
+    {
+      "id": "game-script-executor",
+      "name": "Roblox game script executor / exploit loader",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "No game script execution, loadstring, executor API, remote script hub, process attachment, or anti-cheat bypass. The Script Hub is strictly a local UI/documentation preview."
+    },
+    {
+      "id": "rust-tauri-client",
+      "name": "Rust + Tauri v2 Windows client",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Rebuilt the desktop app as a single, lightweight Rust + Tauri v2 executable (Roptimer-Rust-x64.exe) that embeds the same glowing Three.js web UI. Uses the built-in WebView2 runtime, no Electron/Chromium bundle."
+    },
+    {
+      "id": "roblox-detect-on-launch",
+      "name": "Roblox detection on first launch",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear in the main Client tab."
+    },
+    {
+      "id": "windows-only-client-tab",
+      "name": "Windows-only main Client tab",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The website and app put a Client tab first. Its allowlist manager is explicitly Windows-only; the macOS companion is a separate legacy tool and does not include the Windows client allowlist manager."
+    },
+    {
+      "id": "allowlist-feature-improvements",
+      "name": "Allowlist features: what each flag improves",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": "18 allowlisted keys",
+      "details": "The canonical allowlist now ships categoryDescriptions and per-flag flagFeatures (feature name, value hint, and what it improves) for all 18 Geometry, Rendering, and User Interface flags. The Client and Allowlist tabs render these details."
+    },
+    {
+      "id": "vendored-threejs-website",
+      "name": "Glowing Three.js website (offline, no CDN)",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable."
+    },
+    {
+      "id": "rust-safe-apply-restore",
+      "name": "Rust safe apply/restore with backups",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "allowlisted keys only",
+      "details": "Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Roblox FastFlag allowlist announcement",
+      "url": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"
+    },
+    {
+      "title": "Roblox QualityLevel enum",
+      "url": "https://create.roblox.com/docs/reference/engine/enums/QualityLevel"
+    },
+    {
+      "title": "Allowlisted Roblox FastFlags guide (0-21 FRM levels)",
+      "url": "https://github.com/dyokism/sober-fastflags"
+    },
+    {
+      "title": "Roblox graphics quality help",
+      "url": "https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality"
+    },
+    {
+      "title": "ClientAppSettings.json folder locations, including macOS",
+      "url": "https://devforum.roblox.com/t/fast-flags-clientappsettingsjson-folder-locations-for-most-os-eg-windows-macos-android-and-ios/3180597"
+    },
+    {
+      "title": "Roblox built-in performance stats",
+      "url": "https://create.roblox.com/docs/performance-optimization/identify"
+    },
+    {
+      "title": "Bubblestrap WPF layout reference",
+      "url": "https://github.com/ItzBloxxy/Bubblestrap"
+    },
+    {
+      "title": "Bloxstrap original project",
+      "url": "https://github.com/bloxstraplabs/bloxstrap"
+    },
+    {
+      "title": "GitHub Pages custom workflows documentation",
+      "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
+    }
+  ]
+}

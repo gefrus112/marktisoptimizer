@@ -1,0 +1,95 @@
+name: Build Rust + Tauri Windows client
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - arena/48fc7138-robloxclinetbooster
+      - arena/f2b9b777-robloxclinetbooster
+    paths:
+      - "rust/**"
+      - "web/**"
+      - "fastflags-allowlist.json"
+      - "feature-status.json"
+      - "build_website.py"
+      - "build_tauri_frontend.py"
+      - "docs/**"
+      - ".github/workflows/build-rust-tauri.yml"
+      - ".github/workflows/release-upload-rust.flag"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rust-tauri
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('rust/src-tauri/Cargo.toml') }}
+
+      - name: Generate website and Tauri frontend (static, vendored Three.js)
+        run: |
+          python build_website.py
+          python build_website.py --check
+          python build_tauri_frontend.py
+          python build_tauri_frontend.py --check
+
+      # A plain `cargo build --release` embeds the static frontend via the
+      # generate_context! macro and produces a single, lightweight .exe that
+      # uses the WebView2 runtime already present on Windows 10/11. No Node,
+      # npm, or JS bundler is required.
+      - name: Build release executable
+        working-directory: rust/src-tauri
+        run: cargo build --release
+
+      - name: Stage single-file Windows executable + checksum
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path rust/artifacts | Out-Null
+          Copy-Item rust/src-tauri/target/release/roptimer.exe rust/artifacts/Roptimer-Rust-x64.exe
+          $hash = (Get-FileHash rust/artifacts/Roptimer-Rust-x64.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  Roptimer-Rust-x64.exe" | Out-File -Encoding ascii rust/artifacts/Roptimer-Rust-x64.exe.sha256
+          Get-ChildItem rust/artifacts | Format-Table Name,Length
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roptimer-Rust-x64
+          path: rust/artifacts/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $flag = ".github/workflows/release-upload-rust.flag"
+          if (-not (Test-Path $flag)) { Write-Host "No release flag; skipping release upload."; exit 0 }
+          $tag = (Get-Content $flag -Raw).Trim()
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "Roptimer $tag — Rust + Tauri Windows client" --notes "Single-file, lightweight Rust + Tauri v2 Windows client. On first launch it detects whether Roblox is installed and manages only Roblox-allowlisted, reversible ClientAppSettings.json settings."
+          }
+          gh release upload $tag rust/artifacts/Roptimer-Rust-x64.exe rust/artifacts/Roptimer-Rust-x64.exe.sha256 --clobber
