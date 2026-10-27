@@ -45,6 +45,7 @@ DOWNLOADS = WEB / "downloads"
 ICONS = WEB / "assets" / "icons"
 ASSETS = ROOT / "assets"
 DOTNET = ROOT / "dotnet"
+RUST = ROOT / "rust"
 DOCS = ROOT / "docs"
 MAC = ROOT / "mac"
 
@@ -230,6 +231,11 @@ def generate_website() -> None:
     subprocess.run([sys.executable, str(ROOT / "build_website.py")], cwd=str(ROOT), check=True)
 
 
+def generate_tauri_frontend() -> None:
+    """Assemble rust/frontend/ (the Tauri app UI) from the generated website."""
+    subprocess.run([sys.executable, str(ROOT / "build_tauri_frontend.py")], cwd=str(ROOT), check=True)
+
+
 def copy_assets_to_root() -> None:
     """Keep a root assets/ folder so the source apps can load icons directly."""
     ASSETS.mkdir(exist_ok=True)
@@ -283,11 +289,12 @@ def copy_docs_to_downloads() -> None:
 
 
 def sync_feature_catalog() -> None:
-    """Keep the C# core and website copies in sync with the root catalog."""
+    """Keep the C# core, website, and Tauri frontend copies in sync with the root catalog."""
     source = ROOT / "feature-status.json"
     targets = [
         DOTNET / "src" / "Roptimer.Core" / "feature-status.json",
         DOWNLOADS / "feature-status.json",
+        RUST / "frontend" / "downloads" / "feature-status.json",
     ]
     for target in targets:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -295,11 +302,12 @@ def sync_feature_catalog() -> None:
 
 
 def sync_fastflag_allowlist() -> None:
-    """Keep the C# core, website, and download copies in sync with the root allowlist."""
+    """Keep the C# core, website, downloads, and Tauri frontend in sync with the root allowlist."""
     source = ROOT / "fastflags-allowlist.json"
     targets = [
         DOTNET / "src" / "Roptimer.Core" / "fastflags-allowlist.json",
         DOWNLOADS / "fastflags-allowlist.json",
+        RUST / "frontend" / "downloads" / "fastflags-allowlist.json",
     ]
     for target in targets:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -327,15 +335,32 @@ def build_dotnet_source_zip() -> Path:
             ROOT / "feature-status.json",
             ROOT / "fastflags-allowlist.json",
             ROOT / "README.md",
+            ROOT / "THIRD_PARTY_NOTICES.md",
             ROOT / "build_downloads.py",
             ROOT / "build_website.py",
             ROOT / "build_screenshots.py",
+            ROOT / "build_tauri_frontend.py",
+            WEB / "index.template.html",
+            WEB / "assets/nebula.css",
+            WEB / "assets/nebula.js",
+            WEB / "assets/three-scene.js",
+            WEB / "assets/desktop.js",
+            RUST / "src-tauri/Cargo.toml",
+            RUST / "src-tauri/build.rs",
+            RUST / "src-tauri/tauri.conf.json",
+            RUST / "src-tauri/capabilities/default.json",
+            RUST / "src-tauri/src/lib.rs",
+            RUST / "src-tauri/src/main.rs",
+            RUST / "src-tauri/src/detect.rs",
+            RUST / "src-tauri/src/settings.rs",
+            RUST / "README.md",
             ROOT / "roblox_fps_optimizer.py",
             ROOT / "roptimer_hud.py",
             ROOT / "requirements.txt",
             ROOT / "requirements-optional.txt",
             ROOT / ".github/workflows/build-windows.yml",
             ROOT / ".github/workflows/build-macos.yml",
+            ROOT / ".github/workflows/build-rust-tauri.yml",
             ROOT / ".github/workflows/deploy-pages.yml",
             ROOT / "index.html",
             ROOT / "404.html",
@@ -345,7 +370,6 @@ def build_dotnet_source_zip() -> Path:
             WEB / "site.webmanifest",
             WEB / "robots.txt",
             WEB / "sitemap.xml",
-            WEB / "index.template.html",
             WEB / "index.html",
             WEB / "assets/sirius.css",
             WEB / "assets/sirius.js",
@@ -357,6 +381,10 @@ def build_dotnet_source_zip() -> Path:
             ICONS / "roptimzier-shield.ico",
             ICONS / "favicon.ico",
             *sorted(WEB.glob("assets/sirius-*.svg")),
+            *sorted((WEB / "assets" / "vendor" / "three").rglob("*.js")),
+            WEB / "assets" / "vendor" / "three" / "LICENSE.txt",
+            WEB / "assets" / "vendor" / "three" / "VERSION.txt",
+            *sorted((RUST / "src-tauri" / "icons").glob("*")),
             *sorted(DOCS.glob("*.md")),
             *sorted(MAC.iterdir()),
         ]
@@ -463,11 +491,12 @@ def build_mac_packages(settings_copy: Path) -> list[Path]:
 def build() -> None:
     DOWNLOADS.mkdir(parents=True, exist_ok=True)
     generate_website()
+    generate_tauri_frontend()
     copy_assets_to_root()
     copy_dotnet_support_files()
+    copy_docs_to_downloads()
     sync_feature_catalog()
     sync_fastflag_allowlist()
-    copy_docs_to_downloads()
     source_zip = build_dotnet_source_zip()
 
     app_copy = DOWNLOADS / "Roptimzier.py"

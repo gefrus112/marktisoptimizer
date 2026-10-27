@@ -51,3 +51,8 @@ Thumbs.db
 dotnet/**/bin/
 dotnet/**/obj/
 dotnet/artifacts/
+
+# Rust / Tauri build outputs
+rust/src-tauri/target/
+rust/src-tauri/gen/
+rust/artifacts/

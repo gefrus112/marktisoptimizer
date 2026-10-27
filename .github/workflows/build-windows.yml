@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - arena/48fc7138-robloxclinetbooster
+      - arena/f2b9b777-robloxclinetbooster
     paths:
       - "dotnet/**"
       - "feature-status.json"

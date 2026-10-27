@@ -1,0 +1,24 @@
+{
+  "name": "Roptimer — Windows client for safe Roblox performance",
+  "short_name": "Roptimer",
+  "description": "Rust + Tauri Windows client, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags with what each improves.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#030307",
+  "theme_color": "#030307",
+  "icons": [
+    {
+      "src": "assets/icons/roptimzier-shield.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/roptimer-web.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

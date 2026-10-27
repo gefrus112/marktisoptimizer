@@ -1,12 +1,12 @@
 {
-  "name": "Roptimer Hub — Serious performance tooling.",
+  "name": "Roptimer — Windows client for safe Roblox performance",
   "short_name": "Roptimer",
-  "description": "Safe local Roblox performance settings, downloads, CLI docs, and a local Script Hub preview.",
+  "description": "Rust + Tauri Windows client, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags with what each improves.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#040405",
-  "theme_color": "#040405",
+  "background_color": "#030307",
+  "theme_color": "#030307",
   "icons": [
     {
       "src": "assets/icons/roptimzier-shield.png",

@@ -3,463 +3,418 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#040405" />
-  <meta name="description" content="Roptimer Hub V3.2 — a 100× cooler Sirius-dark website for safe Roblox performance settings, Windows and macOS downloads, the canonical FastFlag allowlist, Boost CLI docs, and a local Script Hub preview." />
-  <title>Roptimer — Serious performance tooling.</title>
+  <meta name="theme-color" content="#030307" />
+  <meta name="description" content="Roptimer — a lightweight Rust + Tauri Windows client and a glowing Three.js site for safe, reversible Roblox performance settings. The main Client tab shows the 18 Roblox-allowlisted FastFlags in Geometry, Rendering, and User Interface, with what each improves." />
+  <title>Roptimer — Windows client for safe Roblox performance</title>
   <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
   <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/icons/roptimzier-shield.png" />
   <link rel="manifest" href="site.webmanifest" />
-  <link rel="stylesheet" href="assets/sirius.css" />
-  <script>document.documentElement.classList.add('js');</script>
+  <link rel="stylesheet" href="assets/nebula.css" />
+  <script>document.documentElement.classList.add('js'); window.ROPTIMER_WEB_BASE=".";</script>
 </head>
 <body>
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
-  <canvas id="starfield" aria-hidden="true"></canvas>
+  <canvas id="three-canvas" aria-hidden="true"></canvas>
+  <div class="scene-veil" aria-hidden="true"></div>
   <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Roptimer home">
       <span class="brand-mark" aria-hidden="true">R</span>
       <span class="brand-name">Roptimer</span>
-      <span class="brand-version">V3.2</span>
+      <span class="brand-version">V__VERSION__</span>
     </a>
 
     <nav class="menu" id="primaryMenu" aria-label="Primary navigation">
-      <a class="menu-link active" href="#download" data-route="download">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
-        Download
+      <a class="menu-link active" href="#client" data-route="client">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+        Client
       </a>
-      <a class="menu-link" href="#docs" data-route="docs">
+      <a class="menu-link" href="#allowlist" data-route="allowlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>
+        Allowlist
+      </a>
+      <a class="menu-link" href="#downloads" data-route="downloads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+        Downloads
+      </a>
+      <a class="menu-link" href="#docs" data-route="docs" data-anchor="how-it-works">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg>
         Docs
-      </a>
-      <a class="menu-link" href="#scripts" data-route="scripts">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 8-4 4 4 4m8-8 4 4-4 4M14 5l-4 14"/></svg>
-        Scripts
-      </a>
-      <a class="menu-link" href="#how-it-works" data-route="docs" data-anchor="how-it-works">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg>
-        How it works
       </a>
     </nav>
 
     <div class="header-actions">
-      <a class="icon-link" href="__REPO__" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+      <a class="icon-link" href="__REPO__" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" data-external>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 19c-4.5 1.5-4.5-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.7 4.7 0 0 0-1.3-3.2 4.4 4.4 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.4 4.4 0 0 0-.1 3.2A4.7 4.7 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
       </a>
-      <a class="icon-link" href="downloads/Roptimer-CLI-Docs.md" aria-label="CLI docs" download>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h6"/></svg>
-      </a>
-      <button class="command-trigger" id="commandTrigger" type="button" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K /"><span aria-hidden="true">⌘</span> K</button>
-      <a class="get-button" href="#download"><span class="diamond" aria-hidden="true">◆</span> Get Roptimer</a>
+      <button class="command-trigger" id="commandTrigger" type="button" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K /"><span aria-hidden="true">◆</span> K</button>
+      <a class="get-button" href="#downloads" data-route="downloads" data-jump="download-win"><span class="diamond" aria-hidden="true">◆</span> Get the Windows app</a>
       <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle menu" aria-controls="primaryMenu">☰</button>
     </div>
   </header>
 
-  <main id="top">
+  <main id="top" class="max">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="eyebrow">Roptimer Hub V3.2 · 100× cooler site engine</div>
-        <h1 id="hero-title">Serious <span class="glow-word">performance</span><br /><em>for every player.</em></h1>
+        <div class="eyebrow">Rust + Tauri v2 · single-file Windows client</div>
+        <h1 id="hero-title">Serious <span class="gradient">performance</span><br /><em>for the Windows client.</em></h1>
         <p>
-          A dark, focused control center for reversible Roblox settings. Download the Windows EXE app from GitHub,
-          use the macOS companion, read the Boost CLI docs, and preview an original Script Hub — without an executor,
-          DLL injector, memory editor, or exploit loader.
+          Roptimer is a small, lightweight desktop app built with Rust + Tauri. It opens to a single
+          <strong>Client</strong> tab, checks whether Roblox is installed on first launch, and shows only the
+          FastFlags Roblox actually allows — Geometry, Rendering, and User Interface — with exactly what each one improves.
+          Reversible local settings only. No injector, no memory edits, no exploits.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="#download" data-route="download">Start with Roptimer <span aria-hidden="true">→</span></a>
-          <a class="button ghost" href="#docs" data-route="docs">Read the docs</a>
-          <button class="button ghost" id="heroCommandButton" type="button">Open command palette <kbd>Ctrl K</kbd></button>
+          <a class="button primary" href="__RELEASE_RUST_EXE__" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+          <a class="button ghost" href="#client" data-route="client" data-jump="detectPanel">See the Client tab</a>
+          <button class="button ghost" id="heroCommandButton" type="button">Commands <kbd>Ctrl K</kbd></button>
         </div>
         <div class="hero-badges">
-          <span class="hundred-x">◆ 100× cooler</span>
-          <span class="live-pill"><i aria-hidden="true"></i> GitHub Pages deployment ready</span>
-        </div>
-        <div class="hero-meta">
-          <span>Windows EXE on GitHub</span>
-          <span>macOS companion downloads</span>
-          <span>No green neon dots</span>
+          <span class="live"><i aria-hidden="true"></i> Three.js glow</span>
+          <span>One .exe · no install</span>
+          <span>Windows 10/11 · 64-bit</span>
+          <span>18 allowlisted flags</span>
         </div>
       </div>
 
       <div class="hero-visual" aria-hidden="true">
-        <div class="terminal-window">
-          <div class="terminal-head">
-            <span class="dot red"></span><span class="dot amber"></span><span class="dot blue"></span>
-            <span class="terminal-title">roptimer — boost preview</span>
+        <div class="orbit-card">
+          <div class="orbit-head">
+            <strong>roptimer — client</strong>
+            <span class="dot"></span>
           </div>
-          <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">RoptimerBoost.exe preview --mode "Reduce building lag"</span>
-<span class="comment"># 14 managed flags · local ClientAppSettings.json only</span>
-<span class="ok">✓</span> backup created before write
-<span class="ok">✓</span> unrelated keys preserved
-<span class="ok">✓</span> restore available
-
-<span class="prompt">$</span> <span class="cmd">./Roptimer\ Boost.command --self-test</span>
-<span class="ok">✓</span> V3.2 site=safe, session=safe, tiers/modes/catalog/cache/mac=safe.</div>
-          <div class="terminal-footer">
-            <div><b>0</b>injected DLLs</div>
-            <div><b>21</b>graphics tiers</div>
-            <div><b>2</b>desktop platforms</div>
+          <div class="orbit-stats">
+            <div class="orbit-stat"><b>18</b><span>allowlisted flags</span></div>
+            <div class="orbit-stat"><b>3</b><span>feature groups</span></div>
+            <div class="orbit-stat"><b>0</b><span>injected DLLs</span></div>
+          </div>
+          <div class="orbit-code"><span class="prompt">$</span> <span class="cmd">Roptimer.exe --first-run</span>
+<span class="ok">✓</span> detecting Roblox installation...
+<span class="ok">✓</span> ClientAppSettings.json discovered
+<span class="ok">✓</span> allowlist: Geometry · Rendering · UI</div>
+          <div class="orbit-foot">
+            <span>Rust + Tauri</span><span>WebView2</span><span>local JSON</span><span>reversible</span>
           </div>
         </div>
       </div>
     </section>
 
     <section class="stat-band" aria-label="Project facts">
-      <div class="stat"><strong data-count="3">3</strong><span>main tabs</span></div>
-      <div class="stat"><strong data-count="14">14</strong><span>managed flags</span></div>
-      <div class="stat"><strong data-count="0">0</strong><span>game scripts executed</span></div>
-      <div class="stat"><strong data-count="100" data-suffix="×">100×</strong><span>cooler site engine</span></div>
+      <div><strong data-count="18">18</strong><span>Roblox-allowed flags</span></div>
+      <div><strong data-count="3">3</strong><span>feature groups</span></div>
+      <div><strong data-count="1" data-suffix="">1</strong><span>lightweight .exe</span></div>
+      <div><strong data-count="0">0</strong><span>game scripts executed</span></div>
+      <div><strong data-count="100" data-suffix="%">100%</strong><span>reversible settings</span></div>
     </section>
 
     <div class="tab-shell" id="tab-shell">
       <div class="tab-bar" role="tablist" aria-label="Roptimer sections">
-        <button class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="panel-download" data-tab="download"><span>01</span> Download</button>
-        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-docs" data-tab="docs"><span>02</span> Docs &amp; How it works</button>
-        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-scripts" data-tab="scripts"><span>03</span> Scripts</button>
+        <button class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="panel-client" data-tab="client"><span>01</span> Client</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-allowlist" data-tab="allowlist"><span>02</span> Allowlist</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-downloads" data-tab="downloads"><span>03</span> Downloads</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-docs" data-tab="docs"><span>04</span> Docs</button>
       </div>
 
-      <!-- DOWNLOAD -->
-      <section class="tab-panel active" id="panel-download" role="tabpanel">
+      <!-- ============ CLIENT (main tab) ============ -->
+      <section class="tab-panel active" id="panel-client" role="tabpanel">
         <div class="section-head">
           <div>
-            <h2>Download</h2>
-            <p>Get the Windows EXE app from GitHub and the macOS companion package. Every download is hosted on GitHub Releases or generated from this repository.</p>
+            <span class="panel-label">Windows client · main tab</span>
+            <h2>The Client</h2>
+            <p>The first thing Roptimer does on launch is detect your Roblox installation. Everything below is Windows-only and works on a local, reversible <code>ClientAppSettings.json</code>.</p>
           </div>
-          <span class="tag amber">Unsigned Mac build · right-click Open</span>
+          <span class="tag violet">Windows only · not for Mac</span>
         </div>
 
-        <div class="platform-grid">
-          <article class="platform-card">
-            <div class="platform-top">
-              <span class="platform-kicker">WINDOWS · GITHUB RELEASE</span>
-              <span class="platform-icon" aria-hidden="true">⊞</span>
-            </div>
-            <h3>Roptimer.exe</h3>
-            <p>The C#/.NET 8 WPF desktop app with Dashboard, Boost, FastFlags, Session, Settings, Safety, and About pages. Requires the .NET 8 Desktop Runtime.</p>
-            <ul class="asset-list">
-              <li><span>Full Windows package · ZIP</span><a href="__RELEASE_ZIP__" data-download>Download</a></li>
-              <li><span>Desktop app · EXE</span><a href="__RELEASE_EXE__" data-download>Download</a></li>
-              <li><span>Boost CLI · EXE</span><a href="__RELEASE_CLI__" data-download>Download</a></li>
-              <li><span>.NET source package</span><a href="__SOURCE_ZIP__" download>Download</a></li>
-            </ul>
-            <div class="download-actions">
-              <a class="button primary" href="__RELEASE_ZIP__" data-download>Download for Windows</a>
-              <a class="button" href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">All Windows assets</a>
-              <a class="button ghost" href="downloads/Install-DotNet8-DesktopRuntime.bat" download>.NET 8 helper</a>
-            </div>
-            <div class="notice"><strong>Windows note:</strong> The EXEs are framework-dependent single-file builds. Install the .NET 8 Desktop Runtime once, then run <code>RoptimerBoost.exe open</code> to launch the app.</div>
-          </article>
+        <div class="client-grid">
+          <div class="panel client-panel">
+            <h3>Roblox detection on first run</h3>
+            <p>On first open, the app scans the normal Roblox version folders and reports what it found. Read-only: it never attaches to a process, reads memory, or launches anything.</p>
 
-          <article class="platform-card mac">
-            <div class="platform-top">
-              <span class="platform-kicker">MACOS · PYTHON/TKINTER COMPANION</span>
-              <span class="platform-icon" aria-hidden="true">⌘</span>
+            <div id="detectPanel" class="detect-card" data-state="idle">
+              <div class="detect-icon" aria-hidden="true">⊞</div>
+              <div class="detect-body">
+                <strong id="detectTitle">Runs when you open the Windows app</strong>
+                <p id="detectText">Download the single-file Windows client below. On first launch it checks whether Roblox is installed and lists the version folders and ClientAppSettings.json files it can safely manage.</p>
+                <div id="detectMeta" class="detect-meta"></div>
+              </div>
             </div>
-            <h3>Roptimer Mac</h3>
-            <p>An unsigned local companion with a <code>.app</code> terminal launcher, <code>.command</code> scripts, Boost CLI parity, and macOS Roblox settings discovery.</p>
+
+            <div class="windows-ribbon">
+              <span class="badge-icon" aria-hidden="true">⊞</span>
+              <span>This Client tab and its FastFlag allowlist are features of the <strong>Windows app only</strong>. The macOS companion is a separate, legacy Python tool and does not include the Windows client allowlist manager.</span>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric"><b>18</b><span>allowlisted keys</span></div>
+              <div class="metric"><b>3</b><span>ROBLOX groups</span></div>
+              <div class="metric"><b>0</b><span>memory reads</span></div>
+              <div class="metric"><b>0</b><span>executor APIs</span></div>
+            </div>
+          </div>
+
+          <div class="panel client-panel">
+            <h3>Safe settings builder</h3>
+            <p>Preview the exact command the Boost CLI would run. All generated keys are taken from the Roblox allowlist below — nothing else is ever written.</p>
+
+            <div class="control">
+              <label for="modeSelect">Optimization mode <b id="modeValue">Reduce building lag</b></label>
+              <select id="modeSelect">
+                <option>Reduce building lag</option>
+                <option>Better FPS</option>
+                <option>Balanced</option>
+                <option>Maximum performance</option>
+                <option>Visual quality</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="tierRange">Graphics tier <b id="tierValue">21</b></label>
+              <input id="tierRange" type="range" min="1" max="21" value="21" />
+            </div>
+            <div class="control">
+              <label for="textureRange">Texture tier <b id="textureValue">0</b></label>
+              <input id="textureRange" type="range" min="0" max="3" value="0" />
+            </div>
+            <div class="control">
+              <label for="fpsRange">FPS target (legacy) <b id="fpsValue">144</b></label>
+              <input id="fpsRange" type="range" min="60" max="240" step="1" value="144" />
+            </div>
+            <div class="toggle-row"><span>Legacy FPS flag (may be ignored)</span><label class="switch"><input type="checkbox" id="legacyToggle" checked /><span class="slider"></span></label></div>
+            <div class="toggle-row"><span>Target all detected versions</span><label class="switch"><input type="checkbox" id="allVersionsToggle" checked /><span class="slider"></span></label></div>
+            <div class="toggle-row"><span>Reduce VFX / world detail</span><label class="switch"><input type="checkbox" id="vfxToggle" checked /><span class="slider"></span></label></div>
+
+            <div class="code-card" style="margin-top:16px"><pre id="generatedCommand">RoptimerBoost.exe apply --mode "Reduce building lag" --tier 21 --texture 0 --no-launch</pre></div>
+            <div class="inline-actions">
+              <button class="button ghost small" type="button" data-copy-target="generatedCommand">Copy command</button>
+              <button class="button ghost small" id="resetSettings" type="button">Reset</button>
+              <button class="button small" id="downloadSettings" type="button">Save profile</button>
+              <button class="button primary small is-desktop-only" id="applySettings" type="button">Apply safely</button>
+              <button class="button ghost small is-desktop-only" id="restoreSettings" type="button">Restore</button>
+            </div>
+            <pre id="settingsPreview" class="settings-preview" hidden></pre>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:38px">
+          <div>
+            <h2>What Roblox allows</h2>
+            <p>Only these <strong>__FLAG_COUNT__</strong> local <code>ClientAppSettings.json</code> keys are on Roblox's allowlist. Roptimer groups them into <strong>__CATEGORY_COUNT__</strong> feature groups and shows what each one improves. Unrelated keys are always preserved.</p>
+          </div>
+          <a class="button ghost small" href="#allowlist" data-route="allowlist" data-jump="fastflag-allowlist">Full allowlist →</a>
+        </div>
+        <div class="allowlist-grid" id="clientAllowlistCards">__ALLOWLIST_CARDS__</div>
+      </section>
+
+      <!-- ============ ALLOWLIST ============ -->
+      <section class="tab-panel" id="panel-allowlist" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">Windows client · FastFlag allowlist</span>
+            <h2 id="fastflag-allowlist">The allowlist</h2>
+            <p>The canonical list of Roblox-allowed local FastFlags. <span id="allowlistSummary">__FLAG_COUNT__ flags · Windows client only</span>. Each card lists the feature and what it improves. The legacy <code>DFIntTaskSchedulerTargetFps</code> is tracked separately and is not part of this allowlist.</p>
+          </div>
+          <span class="tag blue">Geometry · Rendering · UI</span>
+        </div>
+
+        <div class="allowlist-toolbar">
+          <button class="button ghost small" id="copyAllowlist" type="button">Copy JSON</button>
+          <button class="button ghost small" id="downloadAllowlist" type="button">Download JSON</button>
+          <a class="button ghost small" href="downloads/Roptimer-FastFlag-Allowlist.md" download>Allowlist guide</a>
+          <a class="button ghost small" href="__REPO__/blob/main/docs/FASTFLAG_ALLOWLIST.md" data-external>Source &amp; safety notes</a>
+        </div>
+
+        <div class="allowlist-grid" id="allowlistCards">__ALLOWLIST_CARDS__</div>
+
+        <div class="notice" style="margin-top:22px">
+          <strong>Windows-only feature.</strong> This allowlist manager lives in the Rust + Tauri Windows client. Telemetry/Crashpad/Backtrace disabling, screenshot-report flags, fullbright/x-ray, building removal, and anti-cheat bypass flags are deliberately rejected.
+        </div>
+      </section>
+
+      <!-- ============ DOWNLOADS ============ -->
+      <section class="tab-panel" id="panel-downloads" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">Get the app</span>
+            <h2>Downloads</h2>
+            <p>One small Windows executable built with Rust + Tauri v2. It uses the WebView2 runtime already present on Windows 10/11 — nothing else to install.</p>
+          </div>
+          <span class="tag amber">64-bit · single .exe</span>
+        </div>
+
+        <div class="download-grid">
+          <div class="panel" id="download-win">
+            <span class="panel-label">Windows · Rust + Tauri v2 (recommended)</span>
+            <h3>Roptimer.exe</h3>
+            <p>The new single-file Windows client. Opens to the Client tab, detects Roblox on first launch, and manages only allowlisted local settings with timestamped backups. Requires the Microsoft Edge WebView2 runtime (built into Windows 10/11).</p>
             <ul class="asset-list">
-              <li><span>Packaged Mac app · ZIP</span><a href="__RELEASE_MAC_ZIP__" data-download>Download</a></li>
-              <li><span>Portable Python companion · ZIP</span><a href="__RELEASE_MAC_COMPANION_ZIP__" data-download>Download</a></li>
-              <li><span>macOS setup guide</span><a href="downloads/Roptimer-Mac-README.md" download>Download</a></li>
-              <li><span>SHA256 checksum</span><a href="__RELEASE_MAC_SHA__" data-download>Download</a></li>
+              <li><span>Windows 64-bit · portable .exe</span><a href="__RELEASE_RUST_EXE__" data-external>Download</a></li>
+              <li><span>Windows installer · .msi / setup</span><a href="__RELEASE_PAGE_RUST__" data-external>Release page</a></li>
+              <li><span>SHA256 checksum</span><a href="__RELEASE_PAGE_RUST__" data-external>View</a></li>
             </ul>
-            <div class="download-actions">
-              <a class="button primary" href="__RELEASE_MAC_ZIP__" data-download>Download for macOS</a>
-              <a class="button" href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">Mac release page</a>
-              <a class="button ghost" href="downloads/Roptimer-Mac-Companion.zip" download>Portable ZIP</a>
+            <div class="inline-actions" style="margin-top:16px">
+              <a class="button primary" href="__RELEASE_RUST_EXE__" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+              <a class="button ghost small" href="__RELEASE_PAGE_RUST__" data-external>All Windows assets</a>
             </div>
-            <div class="notice"><strong>macOS note:</strong> Requires Python 3.10+ with Tkinter for the portable companion. Roptimer targets <code>/Applications/Roblox.app/Contents/MacOS/ClientSettings</code>. Roblox updates may replace this folder; re-apply after an update.</div>
-          </article>
+          </div>
+
+          <div class="panel">
+            <span class="panel-label">Windows · legacy .NET build</span>
+            <h3>Roptimer (.NET 8)</h3>
+            <p>The earlier C# / WPF desktop app. Kept for reference and for users who already have the .NET 8 Desktop Runtime. The Rust client is the recommended, lighter download.</p>
+            <ul class="asset-list">
+              <li><span>Full Windows package · ZIP</span><a href="__RELEASE_ZIP__" data-external>Download</a></li>
+              <li><span>Desktop app · EXE</span><a href="__RELEASE_EXE__" data-external>Download</a></li>
+              <li><span>Boost CLI · EXE</span><a href="__RELEASE_CLI__" data-external>Download</a></li>
+              <li><span>.NET source package</span><a href="downloads/Roptimer-DotNet-Source.zip" download>Download</a></li>
+            </ul>
+            <div class="inline-actions" style="margin-top:16px">
+              <a class="button ghost small" href="__RELEASE_PAGE_WINDOWS__" data-external>.NET release page</a>
+              <a class="button ghost small" href="downloads/Install-DotNet8-DesktopRuntime.bat" download>.NET 8 helper</a>
+            </div>
+          </div>
         </div>
 
         <div class="mini-grid">
-          <article class="mini-card">
-            <span class="num">01 / DOCS</span>
+          <div class="mini-card">
+            <span class="num">MACOS · LEGACY</span>
+            <h4>macOS companion</h4>
+            <p>A separate Python/Tkinter tool with its own downloads. It is not the Windows Client and does not include the Windows FastFlag allowlist manager.</p>
+            <a href="__RELEASE_MAC_ZIP__" data-external>Mac release →</a>
+          </div>
+          <div class="mini-card">
+            <span class="num">CLI DOCS</span>
             <h4>Boost CLI reference</h4>
-            <p>Full Windows and macOS command list, performance flags, examples, and restore workflow.</p>
-            <a href="downloads/Roptimer-CLI-Docs.md" download>Download CLI docs →</a>
-          </article>
-          <article class="mini-card">
-            <span class="num">02 / SOURCE</span>
+            <p>Safe commands to preview, apply, and restore allowlisted performance settings on Windows.</p>
+            <a href="downloads/Roptimer-CLI-Docs.md" download>Read the guide →</a>
+          </div>
+          <div class="mini-card">
+            <span class="num">SOURCE</span>
             <h4>Build it yourself</h4>
-            <p>Get the C#/.NET source, Python companions, website source, docs, and GitHub Actions workflows.</p>
-            <a href="__SOURCE_ZIP__" download>Download source ZIP →</a>
-          </article>
-          <article class="mini-card">
-            <span class="num">03 / SAFETY</span>
-            <h4>Feature status catalog</h4>
-            <p>See which ideas are implemented, legacy/allowlist-limited, or intentionally rejected.</p>
-            <a href="downloads/feature-status.json" download>Download feature catalog →</a>
-          </article>
+            <p>Rust + Tauri source, the web UI, docs, and GitHub Actions workflows are all in the repository.</p>
+            <a href="__REPO__" data-external>Open GitHub →</a>
+          </div>
         </div>
       </section>
 
-      <!-- DOCS -->
+      <!-- ============ DOCS ============ -->
       <section class="tab-panel" id="panel-docs" role="tabpanel">
         <div class="section-head">
           <div>
-            <h2>Docs &amp; How it works</h2>
-            <p>Learn how the safe local JSON optimizer works, then use the Boost CLI to preview, apply, and restore performance settings on Windows or macOS.</p>
+            <span class="panel-label">How it works</span>
+            <h2>Docs &amp; safety</h2>
+            <p>Roptimer is a settings controller, not an injector. It only ever writes a small, reversible <code>ClientAppSettings.json</code> in Roblox's own ClientSettings folders.</p>
           </div>
-          <span class="tag violet">CLI performance guide</span>
+          <span class="tag violet">local JSON only</span>
         </div>
 
-        <div class="docs-layout">
-          <aside class="docs-nav" aria-label="Docs sections">
-            <span class="nav-title">On this page</span>
-            <a href="#how-it-works" data-doc-anchor="how-it-works" class="active">How it works</a>
-            <a href="#cli-performance" data-doc-anchor="cli-performance">Boost CLI performance</a>
-            <a href="#fastflag-allowlist" data-doc-anchor="fastflag-allowlist">FastFlag allowlist</a>
-            <a href="#settings" data-doc-anchor="settings">Settings builder</a>
-            <a href="#feature-status" data-doc-anchor="feature-status">Feature status</a>
-            <a href="#safety" data-doc-anchor="safety">Safety</a>
-            <a href="#download" data-doc-anchor="download">Downloads</a>
-          </aside>
+        <div class="docs-grid">
+          <div class="panel" id="how-it-works">
+            <h3>Three safe steps</h3>
+            <div class="steps">
+              <div class="step"><span class="step-num">STEP 01</span><h4>Detect</h4><p>The Rust client scans normal Roblox version folders and Windows install locations. Filesystem paths only — no processes, no memory.</p></div>
+              <div class="step"><span class="step-num">STEP 02</span><h4>Back up</h4><p>Existing JSON is copied to a timestamped backup. Unrelated keys are preserved; only allowlisted rendering/geometry keys are merged.</p></div>
+              <div class="step"><span class="step-num">STEP 03</span><h4>Restore</h4><p>Restore puts managed keys back from the backup. Every write is reversible from within the app or the Boost CLI.</p></div>
+            </div>
+            <div class="inline-actions">
+              <a class="button ghost small" href="downloads/Roptimer-How-It-Works.md" download>How-it-works.md</a>
+              <a class="button ghost small" href="downloads/Roptimer-Mac-README.md" download>macOS guide</a>
+            </div>
+          </div>
 
-          <div class="docs-content">
-            <article class="doc-section" id="how-it-works">
-              <h3>How it works</h3>
-              <p>Roptimer writes a small, reversible <code>ClientAppSettings.json</code> file that Roblox reads when the desktop client starts. It does not attach to the game, inject code, or read memory.</p>
-              <div class="steps">
-                <div class="step"><span class="step-num">STEP 01</span><h4>Discover</h4><p>Windows version folders and the macOS app-bundle <code>ClientSettings</code> folder are detected from normal filesystem paths.</p></div>
-                <div class="step"><span class="step-num">STEP 02</span><h4>Back up</h4><p>Existing JSON is copied to a timestamped backup. Unrelated keys are preserved; only managed rendering keys are merged.</p></div>
-                <div class="step"><span class="step-num">STEP 03</span><h4>Restore</h4><p><code>restore</code> puts managed keys back, and the optimized file is backed up again before the restore.</p></div>
-              </div>
-              <div class="inline-actions">
-                <a class="button small" href="downloads/Roptimer-How-It-Works.md" download>How-it-works.md</a>
-                <a class="button ghost small" href="downloads/Roptimer-Mac-README.md" download>macOS guide</a>
-              </div>
-            </article>
-
-            <article class="doc-section" id="cli-performance">
-              <h3>Boost CLI for better performance</h3>
-              <p>Preview first, apply a conservative mode, restart Roblox, then compare Roblox’s built-in Performance Stats. The CLI is a settings controller, not a DLL injector.</p>
-              <div class="settings-layout">
-                <div class="panel">
-                  <span class="label">Windows · RoptimerBoost.exe</span>
-                  <div class="code-card"><pre>RoptimerBoost.exe open
-RoptimerBoost.exe bootstrap --launch
-RoptimerBoost.exe preview --mode "Reduce building lag" --tier 21 --texture 0
+          <div class="panel" id="cli-performance">
+            <h3>Boost CLI for better performance</h3>
+            <p>Preview first, apply a conservative mode, restart Roblox, then compare Roblox's built-in Performance Stats.</p>
+            <div class="code-card"><pre>RoptimerBoost.exe open
+RoptimerBoost.exe preview --mode "Reduce building lag"
 RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
 RoptimerBoost.exe restore
-RoptimerBoost.exe cache-clean --days 7 --force
+RoptimerBoost.exe allowlist
 RoptimerBoost.exe self-test</pre></div>
-                </div>
-                <div class="panel">
-                  <span class="label">macOS · Roptimer Boost.command</span>
-                  <div class="code-card"><pre>./Roptimer\ Boost.command --preview
-./Roptimer\ Boost.command --apply --mode "Reduce building lag" \
-  --graphics-tier 21 --texture-tier 0 --all-versions --no-launch
-./Roptimer\ Boost.command --restore
-./Roptimer\ Boost.command --cache-report --cache-days 7
-./Roptimer\ Boost.command --self-test</pre></div>
-                </div>
-              </div>
-              <div class="notice" style="margin-top:18px"><strong>Compatibility:</strong> <code>DFIntTaskSchedulerTargetFps</code> is legacy and may be ignored by current allowlisted clients. Use Roblox Settings → Maximum Framerate for the supported cap. Graphics tiers above 10 are legacy/micro levels and may change as Roblox updates.</div>
-              <div class="inline-actions">
-                <a class="button small" href="downloads/Roptimer-CLI-Docs.md" download>Full CLI docs</a>
-                <a class="button ghost small" href="__RELEASE_CLI__" data-download>Download Boost CLI</a>
-              </div>
-            </article>
-
-            <article class="doc-section" id="fastflag-allowlist">
-              <h3>FastFlag allowlist</h3>
-              <p>These are the only <strong>18</strong> local <code>ClientAppSettings.json</code> keys Roptimer recognizes as allowlisted managed flags. Unrelated keys are preserved, and the legacy FPS flag is tracked separately.</p>
-              <span class="tag blue">3 categories · 18 flags</span>
-              <div class="allowlist-grid" id="allowlistCards"></div>
-              <div class="inline-actions">
-                <a class="button small" href="downloads/fastflags-allowlist.json" download>Download allowlist JSON</a>
-                <a class="button ghost small" href="downloads/Roptimer-FastFlag-Allowlist.md" download>Allowlist guide</a>
-                <a class="button ghost small" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noopener noreferrer">Official source</a>
-              </div>
-              <div class="notice" style="margin-top:18px"><strong>Safety:</strong> <code>DFIntTaskSchedulerTargetFps</code> is legacy and is not in this allowlist. Telemetry/Crashpad/Backtrace suppression, fullbright, x-ray, building removal, anti-cheat bypass, and game script execution are not allowlisted and are never written.</div>
-            </article>
-
-            <article class="doc-section" id="settings">
-              <h3>Settings builder</h3>
-              <p>These controls only generate a command and a local JSON file. Nothing changes until you run the app or CLI yourself.</p>
-              <div class="settings-layout">
-                <div class="panel">
-                  <span class="label">Safe profile</span>
-                  <h4>Choose your local settings</h4>
-                  <div class="control"><label>Optimization mode <b id="modeValue">Reduce building lag</b></label><select id="modeSelect"><option>Better FPS</option><option selected>Reduce building lag</option><option>Balanced</option><option>Maximum performance</option><option>Visual quality</option></select></div>
-                  <div class="control"><label>Legacy FPS target <b id="fpsValue">144</b></label><input id="fpsRange" type="range" min="60" max="240" value="144" step="1" /></div>
-                  <div class="control"><label>Extended graphics tier <b id="tierValue">21</b></label><input id="tierRange" type="range" min="0" max="21" value="21" step="1" /></div>
-                  <div class="control"><label>Texture tier <b id="textureValue">0</b></label><input id="textureRange" type="range" min="0" max="3" value="0" step="1" /></div>
-                  <div class="control"><label>Cache quarantine age <b id="cacheValue">7 days</b></label><input id="cacheRange" type="range" min="1" max="90" value="7" step="1" /></div>
-                  <div class="toggle-row"><span>Write legacy FPS flag</span><label class="switch"><input id="legacyToggle" type="checkbox" checked /><span class="slider"></span></label></div>
-                  <div class="toggle-row"><span>Apply to all detected versions</span><label class="switch"><input id="allVersionsToggle" type="checkbox" checked /><span class="slider"></span></label></div>
-                  <div class="toggle-row"><span>Launch Roblox after apply</span><label class="switch"><input id="launchToggle" type="checkbox" /><span class="slider"></span></label></div>
-                </div>
-                <div class="panel">
-                  <span class="label">Generated commands</span>
-                  <h4>Windows and macOS</h4>
-                  <p style="color:var(--muted);font-size:12px;line-height:1.7;margin:0 0 12px">Copy either command into a terminal in the extracted Roptimer folder.</p>
-                  <div class="code-card"><pre id="generatedCommandWindows">RoptimerBoost.exe apply --mode "Reduce building lag"</pre></div>
-                  <div class="inline-actions"><button class="button small" type="button" data-copy-target="generatedCommandWindows">Copy Windows command</button></div>
-                  <div class="code-card" style="margin-top:14px"><pre id="generatedCommandMac">./Roptimer\ Boost.command --apply --mode "Reduce building lag"</pre></div>
-                  <div class="inline-actions">
-                    <button class="button small" type="button" data-copy-target="generatedCommandMac">Copy Mac command</button>
-                    <button class="button ghost small" id="downloadSettings" type="button">Download settings.json</button>
-                    <button class="button ghost small" id="resetSettings" type="button">Reset</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="doc-section" id="feature-status">
-              <h3>Feature status</h3>
-              <p>Every requested idea is labelled honestly. The catalog is shared with the desktop app, CLI, and website.</p>
-              <span class="tag blue" id="featureCount">0 features</span>
-              <div class="feature-grid" id="featureCards"></div>
-              <h4>Sources</h4>
-              <div class="source-list" id="sourceList"></div>
-            </article>
-
-            <article class="doc-section" id="safety">
-              <h3>Safety &amp; rejected requests</h3>
-              <p>No “hardware ban” promise, no exploit tricks, no hidden diagnostic disabling. Roptimer writes local JSON and keeps backups.</p>
-              <div class="settings-layout">
-                <div>
-                  <h4>What Roptimer does</h4>
-                  <ul class="safety-list yes">
-                    <li>Writes allowlisted local rendering flags.</li>
-                    <li>Keeps timestamped backups.</li>
-                    <li>Preserves unrelated JSON keys.</li>
-                    <li>Detects clients through OS metadata only.</li>
-                    <li>Provides a local UI Script Hub preview.</li>
-                    <li>Uses normal <code>roblox://</code> / <code>open</code> launch commands.</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4>What Roptimer refuses</h4>
-                  <ul class="safety-list">
-                    <li>DLL injection or process hooks.</li>
-                    <li>Game memory reads/writes.</li>
-                    <li>Fullbright, x-ray, or building removal.</li>
-                    <li>Roblox telemetry/Crashpad/Backtrace disabling.</li>
-                    <li>Anti-cheat bypass or gameplay automation.</li>
-                    <li>Executing scripts inside a Roblox game.</li>
-                  </ul>
-                </div>
-              </div>
-            </article>
+            <div class="code-card" style="margin-top:12px"><pre id="generatedCommandShort">RoptimerBoost.exe apply --mode "Reduce building lag" --tier 21 --texture 0 --no-launch</pre></div>
+            <button class="button ghost small" type="button" data-copy-target="generatedCommandShort" style="margin-top:12px">Copy command</button>
           </div>
         </div>
-      </section>
 
-      <!-- SCRIPTS -->
-      <section class="tab-panel" id="panel-scripts" role="tabpanel">
-        <div class="section-head">
-          <div>
-            <h2>Scripts</h2>
-            <p>Our own Roptimer Script Hub: Luau-inspired local UI recipes, a Sirius/Rayfield-like loading GUI preview, and screenshots. It is a design/tooling showcase, not a Roblox executor.</p>
+        <div class="panel" id="feature-status" style="margin-top:18px">
+          <h3>Feature status <span class="tag blue" id="featureCount">__FEATURE_COUNT__ features</span></h3>
+          <p>An honest catalog of what is implemented safely, what is legacy/limited by Roblox's allowlist, and what is intentionally rejected.</p>
+          <div class="feature-grid" id="featureCards">__FEATURE_CARDS__</div>
+        </div>
+
+        <div class="panel" id="safety" style="margin-top:18px">
+          <h3>Safety boundaries</h3>
+          <ul class="safety-list yes">
+            <li>Local, reversible ClientAppSettings.json writes</li>
+            <li>Timestamped backups before every change</li>
+            <li>Unrelated JSON keys always preserved</li>
+            <li>Only Roblox-allowlisted FastFlags managed</li>
+            <li>OS-level Roblox installation detection only</li>
+            <li>Vendored Three.js — no CDN, no remote code</li>
+          </ul>
+          <ul class="safety-list">
+            <li>No DLL injection or process hooks</li>
+            <li>No memory reads/writes or executable patching</li>
+            <li>No telemetry/Crashpad/Backtrace disabling</li>
+            <li>No fullbright, x-ray, or building removal</li>
+            <li>No account-data extraction or anti-cheat bypass</li>
+            <li>No executor APIs, loadstring, or game script execution</li>
+          </ul>
+          <p class="dim" style="font-size:11px;line-height:1.7;margin-top:16px">The &ldquo;Reduce building lag&rdquo; mode means safe LOD / texture / grass / graphics reduction, never deleting buildings. The Script Hub preview (below) is local UI/documentation only.</p>
+        </div>
+
+        <div class="panel" style="margin-top:18px">
+          <h3>Screenshots</h3>
+          <div class="screenshot-gallery">
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Download tab screenshot" data-caption="Downloads — single-file Windows client and legacy builds."><img src="assets/sirius-download.svg" alt="Download tab screenshot" /><span><strong>01 · Downloads</strong>Windows x64 single .exe.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-cli-docs.svg" data-alt="CLI docs screenshot" data-caption="Boost CLI — safe preview/apply/restore commands."><img src="assets/sirius-cli-docs.svg" alt="CLI docs screenshot" /><span><strong>02 · CLI</strong>Safe settings commands.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-allowlist.svg" data-alt="Allowlist screenshot" data-caption="FastFlag allowlist — Geometry, Rendering, and User Interface."><img src="assets/sirius-allowlist.svg" alt="Allowlist screenshot" /><span><strong>03 · Allowlist</strong>18 official local flags.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Glowing starfield website" data-caption="Three.js glow — vendored, offline, no CDN."><img src="assets/sirius-starfield.svg" alt="Glowing starfield website" /><span><strong>04 · Three.js</strong>Local glowing scene.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Command palette screenshot" data-caption="Command palette — quick, searchable actions."><img src="assets/sirius-command-palette.svg" alt="Command palette screenshot" /><span><strong>05 · Commands</strong>Ctrl/Cmd + K.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-script-hub.svg" data-alt="Script Hub preview" data-caption="Script Hub — local UI preview only, never executed in-game."><img src="assets/sirius-script-hub.svg" alt="Script Hub preview" /><span><strong>06 · Preview</strong>Local UI mockups.</span></button>
           </div>
-          <span class="tag violet">Local preview only</span>
         </div>
 
-        <div class="script-safety">
-          <strong>Safety first:</strong> the code cards below are fictional <code>Roptimer.UI</code> recipes rendered by this website. They never call Roblox game services, <code>loadstring</code>, remote scripts, or executor APIs. “Run preview” only animates the mock window below.
-        </div>
-
-        <div class="script-studio">
-          <aside class="script-sidebar">
-            <span class="label">Roptimer UI Studio</span>
-            <h3>Script Hub</h3>
-            <button class="script-card active" type="button" data-script="loading"><strong>Sirius Loading GUI</strong><small>Loader + steps</small></button>
-            <button class="script-card" type="button" data-script="preset"><strong>Performance Preset</strong><small>Mode card</small></button>
-            <button class="script-card" type="button" data-script="toast"><strong>Session Ready Toast</strong><small>Notification</small></button>
-            <button class="script-card" type="button" data-script="backup"><strong>Backup Status Panel</strong><small>Local log</small></button>
-            <p style="color:var(--dim);font-size:11px;line-height:1.65;margin-top:18px">No game script execution. No account data. No remote code. All previews are hardcoded in <code>sirius.js</code>.</p>
-          </aside>
-
-          <article class="code-panel">
-            <div class="code-head"><span id="scriptFilename">loading.luau</span><span class="lang">Luau-inspired</span></div>
-            <pre class="code-body" id="scriptCode"></pre>
-            <div class="code-actions">
-              <button class="button small primary" id="runPreview" type="button">Run preview</button>
-              <button class="button small" id="copyScript" type="button">Copy script</button>
-              <a class="button ghost small" href="downloads/Roptimer-Script-Hub.md" download>Script Hub docs</a>
-            </div>
-          </article>
-
-          <article class="preview-panel">
-            <div class="preview-head"><span>Local GUI preview</span><span class="lang">HTML / CSS / JS</span></div>
-            <div class="preview-stage">
-              <div class="mock-window is-loading" id="mockWindow">
-                <div class="mock-head"><span></span><span></span><span></span><b>Roptimer UI · preview</b></div>
-                <div class="mock-body">
-                  <div class="mock-nav" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-                  <div class="mock-main">
-                    <div class="mock-shield" aria-hidden="true">R</div>
-                    <h4 id="mockTitle">Preparing safe profile</h4>
-                    <p id="mockSubtitle">Loading GUI preview · browser animation only</p>
-                    <div class="mock-progress"><span></span></div>
-                    <div class="mock-steps"><span>Scan settings</span><span>Back up JSON</span><span>Preview flags</span><span>Apply profile</span></div>
-                  </div>
-                </div>
-                <div class="mock-toast" id="mockToast">Local preview ready. No Roblox process was touched.</div>
-              </div>
-            </div>
-            <div class="preview-note">The progress bar, steps, and toast are a local animation. No code from the editor is evaluated or sent anywhere.</div>
-          </article>
-        </div>
-
-        <div class="section-head" style="margin-top:48px">
-          <div>
-            <h2 style="font-size:36px">Screenshots</h2>
-            <p>Original SVG previews of the dark website, CLI docs, Script Hub, loading GUI, macOS companion, command palette, starfield engine, and the FastFlag allowlist.</p>
-          </div>
-          <span class="tag amber">8 previews</span>
-        </div>
-        <div class="screenshot-gallery">
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Roptimer dark Download tab screenshot" data-caption="Download tab — Windows and macOS cards in the Sirius-style dark layout."><img src="assets/sirius-download.svg" alt="Roptimer dark Download tab screenshot" /><span><strong>01 · Download</strong>Windows EXE and macOS companion cards.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-cli-docs.svg" data-alt="Roptimer CLI docs screenshot" data-caption="CLI Docs tab — Boost commands and performance profile bars."><img src="assets/sirius-cli-docs.svg" alt="Roptimer CLI docs screenshot" /><span><strong>02 · CLI Docs</strong>How the Boost CLI gives safer performance settings.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-script-hub.svg" data-alt="Roptimer Script Hub screenshot" data-caption="Script Hub — local Luau-inspired UI recipes and code editor."><img src="assets/sirius-script-hub.svg" alt="Roptimer Script Hub screenshot" /><span><strong>03 · Script Hub</strong>Our own script cards and code panel.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-loading-gui.svg" data-alt="Roptimer loading GUI preview screenshot" data-caption="Loading GUI — Sirius/Rayfield-like local loading screen preview."><img src="assets/sirius-loading-gui.svg" alt="Roptimer loading GUI preview screenshot" /><span><strong>04 · Loading GUI</strong>GUI loading scripting preview, local only.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-mac.svg" data-alt="Roptimer macOS companion screenshot" data-caption="macOS companion — .app launcher and Boost.command terminal."><img src="assets/sirius-mac.svg" alt="Roptimer macOS companion screenshot" /><span><strong>05 · macOS</strong>Mac companion window and safe CLI output.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Roptimer command palette screenshot" data-caption="Command palette — searchable actions for downloads, docs, scripts, and CLI commands."><img src="assets/sirius-command-palette.svg" alt="Roptimer command palette screenshot" /><span><strong>06 · Command palette</strong>Searchable 100× navigation overlay.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Roptimer starfield website screenshot" data-caption="100× starfield engine — animated canvas, cursor spotlight, counters, and reveal effects."><img src="assets/sirius-starfield.svg" alt="Roptimer starfield website screenshot" /><span><strong>07 · 100× starfield</strong>Animated canvas and spotlight system.</span></button>
-          <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-allowlist.svg" data-alt="Roptimer FastFlag allowlist screenshot" data-caption="FastFlag allowlist — Geometry, Rendering, and User Interface categories rendered from the canonical JSON."><img src="assets/sirius-allowlist.svg" alt="Roptimer FastFlag allowlist screenshot" /><span><strong>08 · Allowlist</strong>18 official local FastFlags in three groups.</span></button>
+        <div class="panel" style="margin-top:18px">
+          <h3>Sources</h3>
+          <div class="source-list" id="sourceList">__SOURCE_LINKS__</div>
         </div>
       </section>
     </div>
   </main>
 
   <footer class="site-footer">
-    <div><strong>Roptimer Hub V3.2</strong><br />Safe local Roblox performance settings for Windows and macOS. 100× cooler, still no green neon dots.</div>
-    <div><a href="__REPO__" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="__RELEASE_PAGE_WINDOWS__" target="_blank" rel="noopener noreferrer">Windows release</a> · <a href="__RELEASE_PAGE_MAC__" target="_blank" rel="noopener noreferrer">macOS release</a> · <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> · <a href="downloads/fastflags-allowlist.json" download>Allowlist</a> · <a href="downloads/Roptimer-Pages-Help.md" download>Pages help</a></div>
+    <div><strong>Roptimer</strong> — a settings tool, not a hacking toolbox. Windows Client/allowlist features are Windows-only; the macOS companion is separate. Built with Rust + Tauri v2 and vendored Three.js.</div>
+    <div>
+      <a href="__REPO__" data-external>GitHub</a> ·
+      <a href="__RELEASE_PAGE_RUST__" data-external>Windows release</a> ·
+      <a href="__RELEASE_PAGE_MAC__" data-external>macOS release</a> ·
+      <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> ·
+      <a href="downloads/fastflags-allowlist.json" download>Allowlist JSON</a>
+    </div>
   </footer>
 
-  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot preview">
-    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close preview">×</button>
-    <div style="text-align:center">
-      <img id="lightboxImage" src="" alt="" />
-      <p id="lightboxCaption" style="color:var(--muted);font-size:12px;max-width:760px;margin:14px auto 0;line-height:1.6"></p>
-    </div>
-  </div>
-
-  <div class="command-palette" id="commandPalette" hidden role="dialog" aria-modal="true" aria-label="Command palette">
-    <div class="command-card" role="document">
-      <div class="command-top">
-        <span class="command-mark" aria-hidden="true">◆</span>
-        <input id="commandSearch" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command, tab, download, or docs topic…" aria-label="Search commands" />
-        <kbd>Esc</kbd>
-      </div>
-      <div class="command-results" id="commandResults" role="listbox" aria-label="Command results"></div>
-      <div class="command-footer">
-        <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-        <span><kbd>↵</kbd> run</span>
-        <span><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> open</span>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">×</button>
+    <img id="lightboxImage" alt="" />
+    <p id="lightboxCaption"></p>
+  </div>
+
+  <div class="command-palette" id="commandPalette" hidden>
+    <div class="command-card" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="command-top"><span class="command-mark" aria-hidden="true">◆</span><input id="commandSearch" type="text" placeholder="Search actions, flags, downloads…" autocomplete="off" /><kbd>esc</kbd></div>
+      <div class="command-results" id="commandResults" role="listbox"></div>
+      <div class="command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> run</span><span>Roptimer V__VERSION__</span></div>
+    </div>
+  </div>
+
   <script id="featureCatalog" type="application/json">__FEATURE_JSON__</script>
   <script id="fastflagAllowlist" type="application/json">__FASTFLAG_ALLOWLIST_JSON__</script>
-  <script src="assets/sirius.js"></script>
+  <script src="assets/nebula.js"></script>
+  <script src="assets/desktop.js"></script>
+  <script type="module" src="assets/three-scene.js"></script>
 </body>
 </html>

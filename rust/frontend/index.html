@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#030307" />
+  <meta name="description" content="Roptimer — a lightweight Rust + Tauri Windows client and a glowing Three.js site for safe, reversible Roblox performance settings. The main Client tab shows the 18 Roblox-allowlisted FastFlags in Geometry, Rendering, and User Interface, with what each improves." />
+  <title>Roptimer — Windows client for safe Roblox performance</title>
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
+  <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icons/roptimzier-shield.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="assets/nebula.css" />
+  <script>document.documentElement.classList.add('js'); window.ROPTIMER_WEB_BASE=".";</script>
+</head>
+<body>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <canvas id="three-canvas" aria-hidden="true"></canvas>
+  <div class="scene-veil" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Roptimer home">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      <span class="brand-name">Roptimer</span>
+      <span class="brand-version">V4.0.0</span>
+    </a>
+
+    <nav class="menu" id="primaryMenu" aria-label="Primary navigation">
+      <a class="menu-link active" href="#client" data-route="client">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+        Client
+      </a>
+      <a class="menu-link" href="#allowlist" data-route="allowlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>
+        Allowlist
+      </a>
+      <a class="menu-link" href="#downloads" data-route="downloads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+        Downloads
+      </a>
+      <a class="menu-link" href="#docs" data-route="docs" data-anchor="how-it-works">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg>
+        Docs
+      </a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="icon-link" href="https://github.com/gefrus112/robloxclinetbooster" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" data-external>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 19c-4.5 1.5-4.5-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.7 4.7 0 0 0-1.3-3.2 4.4 4.4 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.4 4.4 0 0 0-.1 3.2A4.7 4.7 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+      </a>
+      <button class="command-trigger" id="commandTrigger" type="button" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K /"><span aria-hidden="true">◆</span> K</button>
+      <a class="get-button" href="#downloads" data-route="downloads" data-jump="download-win"><span class="diamond" aria-hidden="true">◆</span> Get the Windows app</a>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle menu" aria-controls="primaryMenu">☰</button>
+    </div>
+  </header>
+
+  <main id="top" class="max">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow">Rust + Tauri v2 · single-file Windows client</div>
+        <h1 id="hero-title">Serious <span class="gradient">performance</span><br /><em>for the Windows client.</em></h1>
+        <p>
+          Roptimer is a small, lightweight desktop app built with Rust + Tauri. It opens to a single
+          <strong>Client</strong> tab, checks whether Roblox is installed on first launch, and shows only the
+          FastFlags Roblox actually allows — Geometry, Rendering, and User Interface — with exactly what each one improves.
+          Reversible local settings only. No injector, no memory edits, no exploits.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v4.0.0-windows-rust/Roptimer-Rust-x64.exe" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+          <a class="button ghost" href="#client" data-route="client" data-jump="detectPanel">See the Client tab</a>
+          <button class="button ghost" id="heroCommandButton" type="button">Commands <kbd>Ctrl K</kbd></button>
+        </div>
+        <div class="hero-badges">
+          <span class="live"><i aria-hidden="true"></i> Three.js glow</span>
+          <span>One .exe · no install</span>
+          <span>Windows 10/11 · 64-bit</span>
+          <span>18 allowlisted flags</span>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit-card">
+          <div class="orbit-head">
+            <strong>roptimer — client</strong>
+            <span class="dot"></span>
+          </div>
+          <div class="orbit-stats">
+            <div class="orbit-stat"><b>18</b><span>allowlisted flags</span></div>
+            <div class="orbit-stat"><b>3</b><span>feature groups</span></div>
+            <div class="orbit-stat"><b>0</b><span>injected DLLs</span></div>
+          </div>
+          <div class="orbit-code"><span class="prompt">$</span> <span class="cmd">Roptimer.exe --first-run</span>
+<span class="ok">✓</span> detecting Roblox installation...
+<span class="ok">✓</span> ClientAppSettings.json discovered
+<span class="ok">✓</span> allowlist: Geometry · Rendering · UI</div>
+          <div class="orbit-foot">
+            <span>Rust + Tauri</span><span>WebView2</span><span>local JSON</span><span>reversible</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stat-band" aria-label="Project facts">
+      <div><strong data-count="18">18</strong><span>Roblox-allowed flags</span></div>
+      <div><strong data-count="3">3</strong><span>feature groups</span></div>
+      <div><strong data-count="1" data-suffix="">1</strong><span>lightweight .exe</span></div>
+      <div><strong data-count="0">0</strong><span>game scripts executed</span></div>
+      <div><strong data-count="100" data-suffix="%">100%</strong><span>reversible settings</span></div>
+    </section>
+
+    <div class="tab-shell" id="tab-shell">
+      <div class="tab-bar" role="tablist" aria-label="Roptimer sections">
+        <button class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="panel-client" data-tab="client"><span>01</span> Client</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-allowlist" data-tab="allowlist"><span>02</span> Allowlist</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-downloads" data-tab="downloads"><span>03</span> Downloads</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-docs" data-tab="docs"><span>04</span> Docs</button>
+      </div>
+
+      <!-- ============ CLIENT (main tab) ============ -->
+      <section class="tab-panel active" id="panel-client" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">Windows client · main tab</span>
+            <h2>The Client</h2>
+            <p>The first thing Roptimer does on launch is detect your Roblox installation. Everything below is Windows-only and works on a local, reversible <code>ClientAppSettings.json</code>.</p>
+          </div>
+          <span class="tag violet">Windows only · not for Mac</span>
+        </div>
+
+        <div class="client-grid">
+          <div class="panel client-panel">
+            <h3>Roblox detection on first run</h3>
+            <p>On first open, the app scans the normal Roblox version folders and reports what it found. Read-only: it never attaches to a process, reads memory, or launches anything.</p>
+
+            <div id="detectPanel" class="detect-card" data-state="idle">
+              <div class="detect-icon" aria-hidden="true">⊞</div>
+              <div class="detect-body">
+                <strong id="detectTitle">Runs when you open the Windows app</strong>
+                <p id="detectText">Download the single-file Windows client below. On first launch it checks whether Roblox is installed and lists the version folders and ClientAppSettings.json files it can safely manage.</p>
+                <div id="detectMeta" class="detect-meta"></div>
+              </div>
+            </div>
+
+            <div class="windows-ribbon">
+              <span class="badge-icon" aria-hidden="true">⊞</span>
+              <span>This Client tab and its FastFlag allowlist are features of the <strong>Windows app only</strong>. The macOS companion is a separate, legacy Python tool and does not include the Windows client allowlist manager.</span>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric"><b>18</b><span>allowlisted keys</span></div>
+              <div class="metric"><b>3</b><span>ROBLOX groups</span></div>
+              <div class="metric"><b>0</b><span>memory reads</span></div>
+              <div class="metric"><b>0</b><span>executor APIs</span></div>
+            </div>
+          </div>
+
+          <div class="panel client-panel">
+            <h3>Safe settings builder</h3>
+            <p>Preview the exact command the Boost CLI would run. All generated keys are taken from the Roblox allowlist below — nothing else is ever written.</p>
+
+            <div class="control">
+              <label for="modeSelect">Optimization mode <b id="modeValue">Reduce building lag</b></label>
+              <select id="modeSelect">
+                <option>Reduce building lag</option>
+                <option>Better FPS</option>
+                <option>Balanced</option>
+                <option>Maximum performance</option>
+                <option>Visual quality</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="tierRange">Graphics tier <b id="tierValue">21</b></label>
+              <input id="tierRange" type="range" min="1" max="21" value="21" />
+            </div>
+            <div class="control">
+              <label for="textureRange">Texture tier <b id="textureValue">0</b></label>
+              <input id="textureRange" type="range" min="0" max="3" value="0" />
+            </div>
+            <div class="control">
+              <label for="fpsRange">FPS target (legacy) <b id="fpsValue">144</b></label>
+              <input id="fpsRange" type="range" min="60" max="240" step="1" value="144" />
+            </div>
+            <div class="toggle-row"><span>Legacy FPS flag (may be ignored)</span><label class="switch"><input type="checkbox" id="legacyToggle" checked /><span class="slider"></span></label></div>
+            <div class="toggle-row"><span>Target all detected versions</span><label class="switch"><input type="checkbox" id="allVersionsToggle" checked /><span class="slider"></span></label></div>
+            <div class="toggle-row"><span>Reduce VFX / world detail</span><label class="switch"><input type="checkbox" id="vfxToggle" checked /><span class="slider"></span></label></div>
+
+            <div class="code-card" style="margin-top:16px"><pre id="generatedCommand">RoptimerBoost.exe apply --mode "Reduce building lag" --tier 21 --texture 0 --no-launch</pre></div>
+            <div class="inline-actions">
+              <button class="button ghost small" type="button" data-copy-target="generatedCommand">Copy command</button>
+              <button class="button ghost small" id="resetSettings" type="button">Reset</button>
+              <button class="button small" id="downloadSettings" type="button">Save profile</button>
+              <button class="button primary small is-desktop-only" id="applySettings" type="button">Apply safely</button>
+              <button class="button ghost small is-desktop-only" id="restoreSettings" type="button">Restore</button>
+            </div>
+            <pre id="settingsPreview" class="settings-preview" hidden></pre>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:38px">
+          <div>
+            <h2>What Roblox allows</h2>
+            <p>Only these <strong>18</strong> local <code>ClientAppSettings.json</code> keys are on Roblox's allowlist. Roptimer groups them into <strong>3</strong> feature groups and shows what each one improves. Unrelated keys are always preserved.</p>
+          </div>
+          <a class="button ghost small" href="#allowlist" data-route="allowlist" data-jump="fastflag-allowlist">Full allowlist →</a>
+        </div>
+        <div class="allowlist-grid" id="clientAllowlistCards"><article class="allowlist-card" data-category="Geometry"><div class="allowlist-head"><span class="allowlist-count">4 flags</span><h4>Geometry<span class="al-badge">blue</span></h4><p class="allowlist-summary">Level-of-detail (LOD) switching distances for CSG / solid geometry.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce &#x27;building lag&#x27; — it never deletes buildings, changes collisions, or edits gameplay geometry.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistance</code><div class="al-feature"><span class="al-f-name">Base LOD distance</span><span class="al-f-hint">Distance in studs; lower = switch sooner</span></div><p class="al-improves">Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL12</code><div class="al-feature"><span class="al-f-name">LOD tier 1 to 2 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL23</code><div class="al-feature"><span class="al-f-name">LOD tier 2 to 3 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the second downgrade for far-away geometry detail.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL34</code><div class="al-feature"><span class="al-f-name">LOD tier 3 to 4 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the final downgrade so the most distant geometry costs less to draw.</p></div></div></article><article class="allowlist-card" data-category="Rendering"><div class="allowlist-head"><span class="allowlist-count">13 flags</span><h4>Rendering<span class="al-badge">violet</span></h4><p class="allowlist-summary">Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>FFlagHandleAltEnterFullscreenManually</code><div class="al-feature"><span class="al-f-name">Manual Alt+Enter fullscreen</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset.</p></div><div class="allowlist-flag"><code>DFFlagTextureQualityOverrideEnabled</code><div class="al-feature"><span class="al-f-name">Texture override switch</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play.</p></div><div class="allowlist-flag"><code>DFIntTextureQualityOverride</code><div class="al-feature"><span class="al-f-name">Texture quality tier</span><span class="al-f-hint">0-3 (lower = fewer texture bytes)</span></div><p class="al-improves">Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS.</p></div><div class="allowlist-flag"><code>FIntDebugForceMSAASamples</code><div class="al-feature"><span class="al-f-name">Force MSAA sample count</span><span class="al-f-hint">1, 2, 4 (lower = faster)</span></div><p class="al-improves">Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions.</p></div><div class="allowlist-flag"><code>DFFlagDisableDPIScale</code><div class="al-feature"><span class="al-f-name">Disable DPI scaling</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferD3D11</code><div class="al-feature"><span class="al-f-name">Prefer Direct3D 11</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the D3D11 renderer for stability on older GPUs.</p></div><div class="allowlist-flag"><code>FFlagDebugSkyGray</code><div class="al-feature"><span class="al-f-name">Neutral gray sky</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Replaces the detailed sky with a flat color to save fill-rate.</p></div><div class="allowlist-flag"><code>DFFlagDebugPauseVoxelizer</code><div class="al-feature"><span class="al-f-name">Pause voxelizer</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places.</p></div><div class="allowlist-flag"><code>DFIntDebugFRMQualityLevelOverride</code><div class="al-feature"><span class="al-f-name">FRM quality level</span><span class="al-f-hint">0-21 (values above 10 are legacy/micro levels)</span></div><p class="al-improves">Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing.</p></div><div class="allowlist-flag"><code>FIntFRMMaxGrassDistance</code><div class="al-feature"><span class="al-f-name">Max grass draw distance</span><span class="al-f-hint">Distance in studs; lower = less grass</span></div><p class="al-improves">Limits how far grass is drawn so distant grass stops costing GPU time.</p></div><div class="allowlist-flag"><code>FIntFRMMinGrassDistance</code><div class="al-feature"><span class="al-f-name">Min grass detail distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Controls how close grass must be before full detail is used.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferVulkan</code><div class="al-feature"><span class="al-f-name">Prefer Vulkan</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the Vulkan renderer where supported as a lower-overhead graphics path.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferOpenGL</code><div class="al-feature"><span class="al-f-name">Prefer OpenGL</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the OpenGL renderer where supported (legacy GPUs).</p></div></div></article><article class="allowlist-card" data-category="User Interface"><div class="allowlist-head"><span class="allowlist-count">1 flag</span><h4>User Interface<span class="al-badge">amber</span></h4><p class="allowlist-summary">Client-side motion / environmental detail reduction.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>FIntGrassMovementReducedMotionFactor</code><div class="al-feature"><span class="al-f-name">Reduced grass motion</span><span class="al-f-hint">0-100 (higher = less movement)</span></div><p class="al-improves">Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene.</p></div></div></article></div>
+      </section>
+
+      <!-- ============ ALLOWLIST ============ -->
+      <section class="tab-panel" id="panel-allowlist" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">Windows client · FastFlag allowlist</span>
+            <h2 id="fastflag-allowlist">The allowlist</h2>
+            <p>The canonical list of Roblox-allowed local FastFlags. <span id="allowlistSummary">18 flags · Windows client only</span>. Each card lists the feature and what it improves. The legacy <code>DFIntTaskSchedulerTargetFps</code> is tracked separately and is not part of this allowlist.</p>
+          </div>
+          <span class="tag blue">Geometry · Rendering · UI</span>
+        </div>
+
+        <div class="allowlist-toolbar">
+          <button class="button ghost small" id="copyAllowlist" type="button">Copy JSON</button>
+          <button class="button ghost small" id="downloadAllowlist" type="button">Download JSON</button>
+          <a class="button ghost small" href="downloads/Roptimer-FastFlag-Allowlist.md" download>Allowlist guide</a>
+          <a class="button ghost small" href="https://github.com/gefrus112/robloxclinetbooster/blob/main/docs/FASTFLAG_ALLOWLIST.md" data-external>Source &amp; safety notes</a>
+        </div>
+
+        <div class="allowlist-grid" id="allowlistCards"><article class="allowlist-card" data-category="Geometry"><div class="allowlist-head"><span class="allowlist-count">4 flags</span><h4>Geometry<span class="al-badge">blue</span></h4><p class="allowlist-summary">Level-of-detail (LOD) switching distances for CSG / solid geometry.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce &#x27;building lag&#x27; — it never deletes buildings, changes collisions, or edits gameplay geometry.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistance</code><div class="al-feature"><span class="al-f-name">Base LOD distance</span><span class="al-f-hint">Distance in studs; lower = switch sooner</span></div><p class="al-improves">Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL12</code><div class="al-feature"><span class="al-f-name">LOD tier 1 to 2 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL23</code><div class="al-feature"><span class="al-f-name">LOD tier 2 to 3 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the second downgrade for far-away geometry detail.</p></div><div class="allowlist-flag"><code>DFIntCSGLevelOfDetailSwitchingDistanceL34</code><div class="al-feature"><span class="al-f-name">LOD tier 3 to 4 distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Fine-tunes the final downgrade so the most distant geometry costs less to draw.</p></div></div></article><article class="allowlist-card" data-category="Rendering"><div class="allowlist-head"><span class="allowlist-count">13 flags</span><h4>Rendering<span class="al-badge">violet</span></h4><p class="allowlist-summary">Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>FFlagHandleAltEnterFullscreenManually</code><div class="al-feature"><span class="al-f-name">Manual Alt+Enter fullscreen</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset.</p></div><div class="allowlist-flag"><code>DFFlagTextureQualityOverrideEnabled</code><div class="al-feature"><span class="al-f-name">Texture override switch</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play.</p></div><div class="allowlist-flag"><code>DFIntTextureQualityOverride</code><div class="al-feature"><span class="al-f-name">Texture quality tier</span><span class="al-f-hint">0-3 (lower = fewer texture bytes)</span></div><p class="al-improves">Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS.</p></div><div class="allowlist-flag"><code>FIntDebugForceMSAASamples</code><div class="al-feature"><span class="al-f-name">Force MSAA sample count</span><span class="al-f-hint">1, 2, 4 (lower = faster)</span></div><p class="al-improves">Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions.</p></div><div class="allowlist-flag"><code>DFFlagDisableDPIScale</code><div class="al-feature"><span class="al-f-name">Disable DPI scaling</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferD3D11</code><div class="al-feature"><span class="al-f-name">Prefer Direct3D 11</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the D3D11 renderer for stability on older GPUs.</p></div><div class="allowlist-flag"><code>FFlagDebugSkyGray</code><div class="al-feature"><span class="al-f-name">Neutral gray sky</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Replaces the detailed sky with a flat color to save fill-rate.</p></div><div class="allowlist-flag"><code>DFFlagDebugPauseVoxelizer</code><div class="al-feature"><span class="al-f-name">Pause voxelizer</span><span class="al-f-hint">true / false</span></div><p class="al-improves">Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places.</p></div><div class="allowlist-flag"><code>DFIntDebugFRMQualityLevelOverride</code><div class="al-feature"><span class="al-f-name">FRM quality level</span><span class="al-f-hint">0-21 (values above 10 are legacy/micro levels)</span></div><p class="al-improves">Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing.</p></div><div class="allowlist-flag"><code>FIntFRMMaxGrassDistance</code><div class="al-feature"><span class="al-f-name">Max grass draw distance</span><span class="al-f-hint">Distance in studs; lower = less grass</span></div><p class="al-improves">Limits how far grass is drawn so distant grass stops costing GPU time.</p></div><div class="allowlist-flag"><code>FIntFRMMinGrassDistance</code><div class="al-feature"><span class="al-f-name">Min grass detail distance</span><span class="al-f-hint">Distance in studs</span></div><p class="al-improves">Controls how close grass must be before full detail is used.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferVulkan</code><div class="al-feature"><span class="al-f-name">Prefer Vulkan</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the Vulkan renderer where supported as a lower-overhead graphics path.</p></div><div class="allowlist-flag"><code>FFlagDebugGraphicsPreferOpenGL</code><div class="al-feature"><span class="al-f-name">Prefer OpenGL</span><span class="al-f-hint">true / false (mutually exclusive)</span></div><p class="al-improves">Selects the OpenGL renderer where supported (legacy GPUs).</p></div></div></article><article class="allowlist-card" data-category="User Interface"><div class="allowlist-head"><span class="allowlist-count">1 flag</span><h4>User Interface<span class="al-badge">amber</span></h4><p class="allowlist-summary">Client-side motion / environmental detail reduction.</p></div><div class="allowlist-improves"><span class="imp-label">Improves</span>Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.</div><div class="allowlist-flags"><div class="allowlist-flag"><code>FIntGrassMovementReducedMotionFactor</code><div class="al-feature"><span class="al-f-name">Reduced grass motion</span><span class="al-f-hint">0-100 (higher = less movement)</span></div><p class="al-improves">Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene.</p></div></div></article></div>
+
+        <div class="notice" style="margin-top:22px">
+          <strong>Windows-only feature.</strong> This allowlist manager lives in the Rust + Tauri Windows client. Telemetry/Crashpad/Backtrace disabling, screenshot-report flags, fullbright/x-ray, building removal, and anti-cheat bypass flags are deliberately rejected.
+        </div>
+      </section>
+
+      <!-- ============ DOWNLOADS ============ -->
+      <section class="tab-panel" id="panel-downloads" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">Get the app</span>
+            <h2>Downloads</h2>
+            <p>One small Windows executable built with Rust + Tauri v2. It uses the WebView2 runtime already present on Windows 10/11 — nothing else to install.</p>
+          </div>
+          <span class="tag amber">64-bit · single .exe</span>
+        </div>
+
+        <div class="download-grid">
+          <div class="panel" id="download-win">
+            <span class="panel-label">Windows · Rust + Tauri v2 (recommended)</span>
+            <h3>Roptimer.exe</h3>
+            <p>The new single-file Windows client. Opens to the Client tab, detects Roblox on first launch, and manages only allowlisted local settings with timestamped backups. Requires the Microsoft Edge WebView2 runtime (built into Windows 10/11).</p>
+            <ul class="asset-list">
+              <li><span>Windows 64-bit · portable .exe</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v4.0.0-windows-rust/Roptimer-Rust-x64.exe" data-external>Download</a></li>
+              <li><span>Windows installer · .msi / setup</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v4.0.0-windows-rust" data-external>Release page</a></li>
+              <li><span>SHA256 checksum</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v4.0.0-windows-rust" data-external>View</a></li>
+            </ul>
+            <div class="inline-actions" style="margin-top:16px">
+              <a class="button primary" href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v4.0.0-windows-rust/Roptimer-Rust-x64.exe" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+              <a class="button ghost small" href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v4.0.0-windows-rust" data-external>All Windows assets</a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <span class="panel-label">Windows · legacy .NET build</span>
+            <h3>Roptimer (.NET 8)</h3>
+            <p>The earlier C# / WPF desktop app. Kept for reference and for users who already have the .NET 8 Desktop Runtime. The Rust client is the recommended, lighter download.</p>
+            <ul class="asset-list">
+              <li><span>Full Windows package · ZIP</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v3.0.0-windows/Roptimer-Windows-x64.zip" data-external>Download</a></li>
+              <li><span>Desktop app · EXE</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v3.0.0-windows/Roptimer.exe" data-external>Download</a></li>
+              <li><span>Boost CLI · EXE</span><a href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v3.0.0-windows/RoptimerBoost.exe" data-external>Download</a></li>
+              <li><span>.NET source package</span><a href="downloads/Roptimer-DotNet-Source.zip" download>Download</a></li>
+            </ul>
+            <div class="inline-actions" style="margin-top:16px">
+              <a class="button ghost small" href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows" data-external>.NET release page</a>
+              <a class="button ghost small" href="downloads/Install-DotNet8-DesktopRuntime.bat" download>.NET 8 helper</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <span class="num">MACOS · LEGACY</span>
+            <h4>macOS companion</h4>
+            <p>A separate Python/Tkinter tool with its own downloads. It is not the Windows Client and does not include the Windows FastFlag allowlist manager.</p>
+            <a href="https://github.com/gefrus112/robloxclinetbooster/releases/download/v3.1.0-mac/Roptimer-Mac.zip" data-external>Mac release →</a>
+          </div>
+          <div class="mini-card">
+            <span class="num">CLI DOCS</span>
+            <h4>Boost CLI reference</h4>
+            <p>Safe commands to preview, apply, and restore allowlisted performance settings on Windows.</p>
+            <a href="downloads/Roptimer-CLI-Docs.md" download>Read the guide →</a>
+          </div>
+          <div class="mini-card">
+            <span class="num">SOURCE</span>
+            <h4>Build it yourself</h4>
+            <p>Rust + Tauri source, the web UI, docs, and GitHub Actions workflows are all in the repository.</p>
+            <a href="https://github.com/gefrus112/robloxclinetbooster" data-external>Open GitHub →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DOCS ============ -->
+      <section class="tab-panel" id="panel-docs" role="tabpanel">
+        <div class="section-head">
+          <div>
+            <span class="panel-label">How it works</span>
+            <h2>Docs &amp; safety</h2>
+            <p>Roptimer is a settings controller, not an injector. It only ever writes a small, reversible <code>ClientAppSettings.json</code> in Roblox's own ClientSettings folders.</p>
+          </div>
+          <span class="tag violet">local JSON only</span>
+        </div>
+
+        <div class="docs-grid">
+          <div class="panel" id="how-it-works">
+            <h3>Three safe steps</h3>
+            <div class="steps">
+              <div class="step"><span class="step-num">STEP 01</span><h4>Detect</h4><p>The Rust client scans normal Roblox version folders and Windows install locations. Filesystem paths only — no processes, no memory.</p></div>
+              <div class="step"><span class="step-num">STEP 02</span><h4>Back up</h4><p>Existing JSON is copied to a timestamped backup. Unrelated keys are preserved; only allowlisted rendering/geometry keys are merged.</p></div>
+              <div class="step"><span class="step-num">STEP 03</span><h4>Restore</h4><p>Restore puts managed keys back from the backup. Every write is reversible from within the app or the Boost CLI.</p></div>
+            </div>
+            <div class="inline-actions">
+              <a class="button ghost small" href="downloads/Roptimer-How-It-Works.md" download>How-it-works.md</a>
+              <a class="button ghost small" href="downloads/Roptimer-Mac-README.md" download>macOS guide</a>
+            </div>
+          </div>
+
+          <div class="panel" id="cli-performance">
+            <h3>Boost CLI for better performance</h3>
+            <p>Preview first, apply a conservative mode, restart Roblox, then compare Roblox's built-in Performance Stats.</p>
+            <div class="code-card"><pre>RoptimerBoost.exe open
+RoptimerBoost.exe preview --mode "Reduce building lag"
+RoptimerBoost.exe apply --mode "Better FPS" --fps 144 --all-versions
+RoptimerBoost.exe restore
+RoptimerBoost.exe allowlist
+RoptimerBoost.exe self-test</pre></div>
+            <div class="code-card" style="margin-top:12px"><pre id="generatedCommandShort">RoptimerBoost.exe apply --mode "Reduce building lag" --tier 21 --texture 0 --no-launch</pre></div>
+            <button class="button ghost small" type="button" data-copy-target="generatedCommandShort" style="margin-top:12px">Copy command</button>
+          </div>
+        </div>
+
+        <div class="panel" id="feature-status" style="margin-top:18px">
+          <h3>Feature status <span class="tag blue" id="featureCount">31 features</span></h3>
+          <p>An honest catalog of what is implemented safely, what is legacy/limited by Roblox's allowlist, and what is intentionally rejected.</p>
+          <div class="feature-grid" id="featureCards"><article class="feature-card" data-state="legacy"><span class="status">Legacy / may be ignored</span><h4>Unlocking FPS</h4><p>Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings &gt; Maximum Framerate for the supported cap up to 240 FPS.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>Texture and cache alterations</h4><p>Provides texture tiers 0-3 through the allowlisted texture override, plus a conservative cleaner for old Roblox/Roptimer log and temporary files. It does not perform aggressive in-memory cache garbage collection or touch game assets.</p></article><article class="feature-card" data-state="rejected"><span class="status">Rejected</span><h4>Disable Roblox telemetry / Crashpad / Backtrace / screenshots</h4><p>Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Roptimer sends no analytics of its own, but it does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Extended graphic tiers</h4><p>Exposes quality values 0-21 through the allowlisted FRM quality override. Values above 10 use legacy/micro levels and may look different or be ignored as Roblox changes the client.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Better FPS / optimization modes</h4><p>Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. All modes write reversible local JSON settings only.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>Reduce building lag</h4><p>Reduces geometry LOD distance, grass distance, textures, MSAA and motion. It does not remove buildings, change collision, or alter gameplay geometry.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Session detection</h4><p>Detects running Roblox processes and OS window titles only. The Roblox display name is typed locally; no account data, player list, chat, game state, or memory is read.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Safe bootstrapper / CLI</h4><p>RoptimerBoost.exe and Roptimer Boost.command can preview, apply, restore, inspect a session, clean old cache files, print the canonical FastFlag allowlist, launch Roblox through its normal URL scheme, and open the desktop app. Neither injects a DLL.</p></article><article class="feature-card" data-state="rejected"><span class="status">Rejected</span><h4>DLL injector / process hooks</h4><p>No process injection, DLL loading, renderer hooks, memory patching, or executable modification, even when described as optimization only.</p></article><article class="feature-card" data-state="rejected"><span class="status">Rejected</span><h4>Fullbright / x-ray / building removal</h4><p>No exploit-style visuals, world lighting changes, transparent walls, collision edits, or building deletion.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>C# .NET 8 WPF app</h4><p>Dependency-free WPF desktop app with a Bubblestrap-inspired settings layout, custom shield icon, blue Lumina theme, and local-settings-only bootstrapper.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Settings tab</h4><p>Interactive website settings builder for optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, generated Windows/macOS CLI commands, and the embedded FastFlag allowlist docs section.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Blue Lumina desktop interface</h4><p>Blue/purple/cyan desktop app theme inspired by the provided Lumina Hub reference. No green neon status dots.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Windows EXE build</h4><p>GitHub Actions builds Roptimer.exe and RoptimerBoost.exe on windows-latest. RoptimerBoost.exe open launches the desktop app; bootstrap applies safe settings first.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>macOS companion downloads</h4><p>Adds an unsigned Python/Tkinter macOS package with .command launchers, a .app terminal launcher, Mac path discovery for /Applications/Roblox.app/Contents/MacOS/ClientSettings, CLI parity, canonical allowlist files, docs, and a macOS build workflow.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Sirius-style dark website, 100× edition</h4><p>Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, FastFlag allowlist docs, and no green neon dots.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>CLI and how-it-works docs</h4><p>Adds a complete CLI reference, performance guide, canonical FastFlag allowlist guide, local JSON/backup explanation, macOS setup guide, GitHub Pages help, downloadable markdown docs, and a docs tab with generated commands.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>Roptimer Script Hub</h4><p>Original Luau-inspired local UI recipe catalog with code cards, eight screenshots, a Run preview button, and command-palette actions. It is not a Roblox executor and never sends code to a game.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>GUI loading script preview</h4><p>A local HTML/CSS/JavaScript loading GUI preview with steps, progress bar, and Sirius/Rayfield-like menu styling. No loadstring, game services, remote code, or executor APIs.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>GitHub Pages Actions deployment</h4><p>A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, checks the current Pages build type, and deploys web/ with actions/deploy-pages@v4 when source is GitHub Actions. If source stays legacy, it skips deployment and the committed root index.html fallback serves the site instead of README.md.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Root fallback + website validator</h4><p>build_website.py now generates web/index.html, a root index.html fallback, .nojekyll, 404 pages, site.webmanifest, robots.txt, sitemap.xml, and embeds both the feature catalog and canonical FastFlag allowlist. Its --check mode validates placeholders, local references, JSON, manifest, and allowlist output.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Searchable command palette</h4><p>Ctrl/Cmd+K or / opens a keyboard-navigable palette with 14 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>100× animated starfield and spotlight FX</h4><p>Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Canonical FastFlag allowlist</h4><p>Adds fastflags-allowlist.json as the single source of truth for 18 Roblox local ClientAppSettings.json flags in Geometry, Rendering, and User Interface categories. Python and .NET load/validate the same list, the CLI exposes it with --allowlist/allowlist, the website Docs tab renders it, and the WPF app has a dedicated Allowlist page. The legacy FPS flag is explicitly excluded, and telemetry/exploit/anti-cheat flags are rejected.</p></article><article class="feature-card" data-state="rejected"><span class="status">Rejected</span><h4>Roblox game script executor / exploit loader</h4><p>No game script execution, loadstring, executor API, remote script hub, process attachment, or anti-cheat bypass. The Script Hub is strictly a local UI/documentation preview.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Rust + Tauri v2 Windows client</h4><p>Rebuilt the desktop app as a single, lightweight Rust + Tauri v2 executable (Roptimer-Rust-x64.exe) that embeds the same glowing Three.js web UI. Uses the built-in WebView2 runtime, no Electron/Chromium bundle.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>Roblox detection on first launch</h4><p>On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear in the main Client tab.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Windows-only main Client tab</h4><p>The website and app put a Client tab first. Its allowlist manager is explicitly Windows-only; the macOS companion is a separate legacy tool and does not include the Windows client allowlist manager.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Allowlist features: what each flag improves</h4><p>The canonical allowlist now ships categoryDescriptions and per-flag flagFeatures (feature name, value hint, and what it improves) for all 18 Geometry, Rendering, and User Interface flags. The Client and Allowlist tabs render these details.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented</span><h4>Glowing Three.js website (offline, no CDN)</h4><p>New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable.</p></article><article class="feature-card" data-state="implemented"><span class="status">Implemented safely</span><h4>Rust safe apply/restore with backups</h4><p>Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written.</p></article></div>
+        </div>
+
+        <div class="panel" id="safety" style="margin-top:18px">
+          <h3>Safety boundaries</h3>
+          <ul class="safety-list yes">
+            <li>Local, reversible ClientAppSettings.json writes</li>
+            <li>Timestamped backups before every change</li>
+            <li>Unrelated JSON keys always preserved</li>
+            <li>Only Roblox-allowlisted FastFlags managed</li>
+            <li>OS-level Roblox installation detection only</li>
+            <li>Vendored Three.js — no CDN, no remote code</li>
+          </ul>
+          <ul class="safety-list">
+            <li>No DLL injection or process hooks</li>
+            <li>No memory reads/writes or executable patching</li>
+            <li>No telemetry/Crashpad/Backtrace disabling</li>
+            <li>No fullbright, x-ray, or building removal</li>
+            <li>No account-data extraction or anti-cheat bypass</li>
+            <li>No executor APIs, loadstring, or game script execution</li>
+          </ul>
+          <p class="dim" style="font-size:11px;line-height:1.7;margin-top:16px">The &ldquo;Reduce building lag&rdquo; mode means safe LOD / texture / grass / graphics reduction, never deleting buildings. The Script Hub preview (below) is local UI/documentation only.</p>
+        </div>
+
+        <div class="panel" style="margin-top:18px">
+          <h3>Screenshots</h3>
+          <div class="screenshot-gallery">
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Download tab screenshot" data-caption="Downloads — single-file Windows client and legacy builds."><img src="assets/sirius-download.svg" alt="Download tab screenshot" /><span><strong>01 · Downloads</strong>Windows x64 single .exe.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-cli-docs.svg" data-alt="CLI docs screenshot" data-caption="Boost CLI — safe preview/apply/restore commands."><img src="assets/sirius-cli-docs.svg" alt="CLI docs screenshot" /><span><strong>02 · CLI</strong>Safe settings commands.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-allowlist.svg" data-alt="Allowlist screenshot" data-caption="FastFlag allowlist — Geometry, Rendering, and User Interface."><img src="assets/sirius-allowlist.svg" alt="Allowlist screenshot" /><span><strong>03 · Allowlist</strong>18 official local flags.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Glowing starfield website" data-caption="Three.js glow — vendored, offline, no CDN."><img src="assets/sirius-starfield.svg" alt="Glowing starfield website" /><span><strong>04 · Three.js</strong>Local glowing scene.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Command palette screenshot" data-caption="Command palette — quick, searchable actions."><img src="assets/sirius-command-palette.svg" alt="Command palette screenshot" /><span><strong>05 · Commands</strong>Ctrl/Cmd + K.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-script-hub.svg" data-alt="Script Hub preview" data-caption="Script Hub — local UI preview only, never executed in-game."><img src="assets/sirius-script-hub.svg" alt="Script Hub preview" /><span><strong>06 · Preview</strong>Local UI mockups.</span></button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:18px">
+          <h3>Sources</h3>
+          <div class="source-list" id="sourceList"><a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noopener noreferrer">Roblox FastFlag allowlist announcement</a><a href="https://create.roblox.com/docs/reference/engine/enums/QualityLevel" target="_blank" rel="noopener noreferrer">Roblox QualityLevel enum</a><a href="https://github.com/dyokism/sober-fastflags" target="_blank" rel="noopener noreferrer">Allowlisted Roblox FastFlags guide (0-21 FRM levels)</a><a href="https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality" target="_blank" rel="noopener noreferrer">Roblox graphics quality help</a><a href="https://devforum.roblox.com/t/fast-flags-clientappsettingsjson-folder-locations-for-most-os-eg-windows-macos-android-and-ios/3180597" target="_blank" rel="noopener noreferrer">ClientAppSettings.json folder locations, including macOS</a><a href="https://create.roblox.com/docs/performance-optimization/identify" target="_blank" rel="noopener noreferrer">Roblox built-in performance stats</a><a href="https://github.com/ItzBloxxy/Bubblestrap" target="_blank" rel="noopener noreferrer">Bubblestrap WPF layout reference</a><a href="https://github.com/bloxstraplabs/bloxstrap" target="_blank" rel="noopener noreferrer">Bloxstrap original project</a><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages" target="_blank" rel="noopener noreferrer">GitHub Pages custom workflows documentation</a></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>Roptimer</strong> — a settings tool, not a hacking toolbox. Windows Client/allowlist features are Windows-only; the macOS companion is separate. Built with Rust + Tauri v2 and vendored Three.js.</div>
+    <div>
+      <a href="https://github.com/gefrus112/robloxclinetbooster" data-external>GitHub</a> ·
+      <a href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v4.0.0-windows-rust" data-external>Windows release</a> ·
+      <a href="https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac" data-external>macOS release</a> ·
+      <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> ·
+      <a href="downloads/fastflags-allowlist.json" download>Allowlist JSON</a>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">×</button>
+    <img id="lightboxImage" alt="" />
+    <p id="lightboxCaption"></p>
+  </div>
+
+  <div class="command-palette" id="commandPalette" hidden>
+    <div class="command-card" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="command-top"><span class="command-mark" aria-hidden="true">◆</span><input id="commandSearch" type="text" placeholder="Search actions, flags, downloads…" autocomplete="off" /><kbd>esc</kbd></div>
+      <div class="command-results" id="commandResults" role="listbox"></div>
+      <div class="command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> run</span><span>Roptimer V4.0.0</span></div>
+    </div>
+  </div>
+
+  <script id="featureCatalog" type="application/json">{"product":"Roptimer Hub V4","version":"4.0.0","platform":"Rust + Tauri v2 / Windows 10+ (single-file client); .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with vendored Three.js","safety":{"injection":false,"memoryReads":false,"memoryWrites":false,"antiCheatBypass":false,"fullbright":false,"xray":false,"buildingRemoval":false,"robloxTelemetryDisable":false,"appTelemetry":false,"gameScriptExecution":false,"allowlistOnly":true},"features":[{"id":"fps-unlock","name":"Unlocking FPS","status":"Legacy / may be ignored","implemented":true,"safe":true,"flag":"DFIntTaskSchedulerTargetFps","details":"Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings > Maximum Framerate for the supported cap up to 240 FPS."},{"id":"texture-cache","name":"Texture and cache alterations","status":"Implemented safely","implemented":true,"safe":true,"flag":"DFIntTextureQualityOverride","details":"Provides texture tiers 0-3 through the allowlisted texture override, plus a conservative cleaner for old Roblox/Roptimer log and temporary files. It does not perform aggressive in-memory cache garbage collection or touch game assets."},{"id":"telemetry-disable","name":"Disable Roblox telemetry / Crashpad / Backtrace / screenshots","status":"Rejected","implemented":false,"safe":false,"flag":null,"details":"Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Roptimer sends no analytics of its own, but it does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems."},{"id":"graphics-tiers","name":"Extended graphic tiers","status":"Implemented","implemented":true,"safe":true,"flag":"DFIntDebugFRMQualityLevelOverride","details":"Exposes quality values 0-21 through the allowlisted FRM quality override. Values above 10 use legacy/micro levels and may look different or be ignored as Roblox changes the client."},{"id":"better-fps","name":"Better FPS / optimization modes","status":"Implemented","implemented":true,"safe":true,"flag":"multiple allowlisted flags","details":"Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. All modes write reversible local JSON settings only."},{"id":"building-lag","name":"Reduce building lag","status":"Implemented safely","implemented":true,"safe":true,"flag":"DFIntCSGLevelOfDetailSwitchingDistance*","details":"Reduces geometry LOD distance, grass distance, textures, MSAA and motion. It does not remove buildings, change collision, or alter gameplay geometry."},{"id":"session","name":"Session detection","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Detects running Roblox processes and OS window titles only. The Roblox display name is typed locally; no account data, player list, chat, game state, or memory is read."},{"id":"bootstrapper","name":"Safe bootstrapper / CLI","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"RoptimerBoost.exe and Roptimer Boost.command can preview, apply, restore, inspect a session, clean old cache files, print the canonical FastFlag allowlist, launch Roblox through its normal URL scheme, and open the desktop app. Neither injects a DLL."},{"id":"dll-injector","name":"DLL injector / process hooks","status":"Rejected","implemented":false,"safe":false,"flag":null,"details":"No process injection, DLL loading, renderer hooks, memory patching, or executable modification, even when described as optimization only."},{"id":"exploit-visuals","name":"Fullbright / x-ray / building removal","status":"Rejected","implemented":false,"safe":false,"flag":null,"details":"No exploit-style visuals, world lighting changes, transparent walls, collision edits, or building deletion."},{"id":"dotnet-app","name":"C# .NET 8 WPF app","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Dependency-free WPF desktop app with a Bubblestrap-inspired settings layout, custom shield icon, blue Lumina theme, and local-settings-only bootstrapper."},{"id":"settings-tab","name":"Settings tab","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Interactive website settings builder for optimization mode, FPS target, graphics tier 0-21, texture tier 0-3, cache age, generated Windows/macOS CLI commands, and the embedded FastFlag allowlist docs section."},{"id":"blue-ui","name":"Blue Lumina desktop interface","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Blue/purple/cyan desktop app theme inspired by the provided Lumina Hub reference. No green neon status dots."},{"id":"bootstrapper-exe","name":"Windows EXE build","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"GitHub Actions builds Roptimer.exe and RoptimerBoost.exe on windows-latest. RoptimerBoost.exe open launches the desktop app; bootstrap applies safe settings first."},{"id":"mac-companion","name":"macOS companion downloads","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Adds an unsigned Python/Tkinter macOS package with .command launchers, a .app terminal launcher, Mac path discovery for /Applications/Roblox.app/Contents/MacOS/ClientSettings, CLI parity, canonical allowlist files, docs, and a macOS build workflow."},{"id":"sirius-website","name":"Sirius-style dark website, 100× edition","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, FastFlag allowlist docs, and no green neon dots."},{"id":"cli-docs","name":"CLI and how-it-works docs","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Adds a complete CLI reference, performance guide, canonical FastFlag allowlist guide, local JSON/backup explanation, macOS setup guide, GitHub Pages help, downloadable markdown docs, and a docs tab with generated commands."},{"id":"script-hub","name":"Roptimer Script Hub","status":"Implemented safely","implemented":true,"safe":true,"flag":null,"details":"Original Luau-inspired local UI recipe catalog with code cards, eight screenshots, a Run preview button, and command-palette actions. It is not a Roblox executor and never sends code to a game."},{"id":"loading-gui","name":"GUI loading script preview","status":"Implemented safely","implemented":true,"safe":true,"flag":null,"details":"A local HTML/CSS/JavaScript loading GUI preview with steps, progress bar, and Sirius/Rayfield-like menu styling. No loadstring, game services, remote code, or executor APIs."},{"id":"github-pages-workflow","name":"GitHub Pages Actions deployment","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"A deploy-pages.yml workflow regenerates screenshots and HTML, validates local links, checks the current Pages build type, and deploys web/ with actions/deploy-pages@v4 when source is GitHub Actions. If source stays legacy, it skips deployment and the committed root index.html fallback serves the site instead of README.md."},{"id":"website-generator-v2","name":"Root fallback + website validator","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"build_website.py now generates web/index.html, a root index.html fallback, .nojekyll, 404 pages, site.webmanifest, robots.txt, sitemap.xml, and embeds both the feature catalog and canonical FastFlag allowlist. Its --check mode validates placeholders, local references, JSON, manifest, and allowlist output."},{"id":"command-palette","name":"Searchable command palette","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Ctrl/Cmd+K or / opens a keyboard-navigable palette with 14 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution."},{"id":"starfield-fx","name":"100× animated starfield and spotlight FX","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual."},{"id":"fastflag-allowlist","name":"Canonical FastFlag allowlist","status":"Implemented","implemented":true,"safe":true,"flag":"18 allowlisted keys","details":"Adds fastflags-allowlist.json as the single source of truth for 18 Roblox local ClientAppSettings.json flags in Geometry, Rendering, and User Interface categories. Python and .NET load/validate the same list, the CLI exposes it with --allowlist/allowlist, the website Docs tab renders it, and the WPF app has a dedicated Allowlist page. The legacy FPS flag is explicitly excluded, and telemetry/exploit/anti-cheat flags are rejected."},{"id":"game-script-executor","name":"Roblox game script executor / exploit loader","status":"Rejected","implemented":false,"safe":false,"flag":null,"details":"No game script execution, loadstring, executor API, remote script hub, process attachment, or anti-cheat bypass. The Script Hub is strictly a local UI/documentation preview."},{"id":"rust-tauri-client","name":"Rust + Tauri v2 Windows client","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"Rebuilt the desktop app as a single, lightweight Rust + Tauri v2 executable (Roptimer-Rust-x64.exe) that embeds the same glowing Three.js web UI. Uses the built-in WebView2 runtime, no Electron/Chromium bundle."},{"id":"roblox-detect-on-launch","name":"Roblox detection on first launch","status":"Implemented safely","implemented":true,"safe":true,"flag":null,"details":"On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear in the main Client tab."},{"id":"windows-only-client-tab","name":"Windows-only main Client tab","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"The website and app put a Client tab first. Its allowlist manager is explicitly Windows-only; the macOS companion is a separate legacy tool and does not include the Windows client allowlist manager."},{"id":"allowlist-feature-improvements","name":"Allowlist features: what each flag improves","status":"Implemented","implemented":true,"safe":true,"flag":"18 allowlisted keys","details":"The canonical allowlist now ships categoryDescriptions and per-flag flagFeatures (feature name, value hint, and what it improves) for all 18 Geometry, Rendering, and User Interface flags. The Client and Allowlist tabs render these details."},{"id":"vendored-threejs-website","name":"Glowing Three.js website (offline, no CDN)","status":"Implemented","implemented":true,"safe":true,"flag":null,"details":"New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable."},{"id":"rust-safe-apply-restore","name":"Rust safe apply/restore with backups","status":"Implemented safely","implemented":true,"safe":true,"flag":"allowlisted keys only","details":"Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."}],"sources":[{"title":"Roblox FastFlag allowlist announcement","url":"https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"},{"title":"Roblox QualityLevel enum","url":"https://create.roblox.com/docs/reference/engine/enums/QualityLevel"},{"title":"Allowlisted Roblox FastFlags guide (0-21 FRM levels)","url":"https://github.com/dyokism/sober-fastflags"},{"title":"Roblox graphics quality help","url":"https://en.help.roblox.com/hc/en-us/articles/203314310-Graphics-Quality"},{"title":"ClientAppSettings.json folder locations, including macOS","url":"https://devforum.roblox.com/t/fast-flags-clientappsettingsjson-folder-locations-for-most-os-eg-windows-macos-android-and-ios/3180597"},{"title":"Roblox built-in performance stats","url":"https://create.roblox.com/docs/performance-optimization/identify"},{"title":"Bubblestrap WPF layout reference","url":"https://github.com/ItzBloxxy/Bubblestrap"},{"title":"Bloxstrap original project","url":"https://github.com/bloxstraplabs/bloxstrap"},{"title":"GitHub Pages custom workflows documentation","url":"https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"}]}</script>
+  <script id="fastflagAllowlist" type="application/json">{"product":"Roptimer Hub","version":"4.0.0","edition":"Rust + Tauri Windows Client","allowlistVersion":2,"platform":"windows","windowsOnly":true,"description":"Canonical list of Roblox local ClientAppSettings.json FastFlags that the Roptimer Windows client may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.","source":"https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569","client":{"name":"Roptimer","framework":"Rust + Tauri v2","webview":"Microsoft Edge WebView2 (Windows)","executable":"Roptimer-Rust-x64.exe","architecture":"x86_64 (64-bit)","minOS":"Windows 10 version 1803 or newer","singleFile":true,"detectsRobloxOnLaunch":true,"target":"ClientAppSettings.json"},"safety":{"localJsonOnly":true,"injection":false,"memoryReads":false,"memoryWrites":false,"telemetryDisable":false,"antiCheatBypass":false,"gameScriptExecution":false},"categories":[{"name":"Geometry","flags":["DFIntCSGLevelOfDetailSwitchingDistance","DFIntCSGLevelOfDetailSwitchingDistanceL12","DFIntCSGLevelOfDetailSwitchingDistanceL23","DFIntCSGLevelOfDetailSwitchingDistanceL34"]},{"name":"Rendering","flags":["FFlagHandleAltEnterFullscreenManually","DFFlagTextureQualityOverrideEnabled","DFIntTextureQualityOverride","FIntDebugForceMSAASamples","DFFlagDisableDPIScale","FFlagDebugGraphicsPreferD3D11","FFlagDebugSkyGray","DFFlagDebugPauseVoxelizer","DFIntDebugFRMQualityLevelOverride","FIntFRMMaxGrassDistance","FIntFRMMinGrassDistance","FFlagDebugGraphicsPreferVulkan","FFlagDebugGraphicsPreferOpenGL"]},{"name":"User Interface","flags":["FIntGrassMovementReducedMotionFactor"]}],"categoryDescriptions":{"Geometry":{"summary":"Level-of-detail (LOD) switching distances for CSG / solid geometry.","improves":"Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce 'building lag' — it never deletes buildings, changes collisions, or edits gameplay geometry.","accent":"blue"},"Rendering":{"summary":"Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.","improves":"The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.","accent":"violet"},"User Interface":{"summary":"Client-side motion / environmental detail reduction.","improves":"Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.","accent":"amber"}},"flagFeatures":{"DFIntCSGLevelOfDetailSwitchingDistance":{"feature":"Base LOD distance","category":"Geometry","valueHint":"Distance in studs; lower = switch sooner","improves":"Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places."},"DFIntCSGLevelOfDetailSwitchingDistanceL12":{"feature":"LOD tier 1 to 2 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner."},"DFIntCSGLevelOfDetailSwitchingDistanceL23":{"feature":"LOD tier 2 to 3 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the second downgrade for far-away geometry detail."},"DFIntCSGLevelOfDetailSwitchingDistanceL34":{"feature":"LOD tier 3 to 4 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the final downgrade so the most distant geometry costs less to draw."},"FFlagHandleAltEnterFullscreenManually":{"feature":"Manual Alt+Enter fullscreen","category":"Rendering","valueHint":"true / false","improves":"Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset."},"DFFlagTextureQualityOverrideEnabled":{"feature":"Texture override switch","category":"Rendering","valueHint":"true / false","improves":"Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play."},"DFIntTextureQualityOverride":{"feature":"Texture quality tier","category":"Rendering","valueHint":"0-3 (lower = fewer texture bytes)","improves":"Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS."},"FIntDebugForceMSAASamples":{"feature":"Force MSAA sample count","category":"Rendering","valueHint":"1, 2, 4 (lower = faster)","improves":"Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions."},"DFFlagDisableDPIScale":{"feature":"Disable DPI scaling","category":"Rendering","valueHint":"true / false","improves":"Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead."},"FFlagDebugGraphicsPreferD3D11":{"feature":"Prefer Direct3D 11","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the D3D11 renderer for stability on older GPUs."},"FFlagDebugSkyGray":{"feature":"Neutral gray sky","category":"Rendering","valueHint":"true / false","improves":"Replaces the detailed sky with a flat color to save fill-rate."},"DFFlagDebugPauseVoxelizer":{"feature":"Pause voxelizer","category":"Rendering","valueHint":"true / false","improves":"Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places."},"DFIntDebugFRMQualityLevelOverride":{"feature":"FRM quality level","category":"Rendering","valueHint":"0-21 (values above 10 are legacy/micro levels)","improves":"Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing."},"FIntFRMMaxGrassDistance":{"feature":"Max grass draw distance","category":"Rendering","valueHint":"Distance in studs; lower = less grass","improves":"Limits how far grass is drawn so distant grass stops costing GPU time."},"FIntFRMMinGrassDistance":{"feature":"Min grass detail distance","category":"Rendering","valueHint":"Distance in studs","improves":"Controls how close grass must be before full detail is used."},"FFlagDebugGraphicsPreferVulkan":{"feature":"Prefer Vulkan","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the Vulkan renderer where supported as a lower-overhead graphics path."},"FFlagDebugGraphicsPreferOpenGL":{"feature":"Prefer OpenGL","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the OpenGL renderer where supported (legacy GPUs)."},"FIntGrassMovementReducedMotionFactor":{"feature":"Reduced grass motion","category":"User Interface","valueHint":"0-100 (higher = less movement)","improves":"Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene."}},"legacyNotInAllowlist":["DFIntTaskSchedulerTargetFps"],"rejected":["Telemetry suppression flags","Crashpad or Backtrace disabling flags","Screenshot/report upload disabling flags","Fullbright, x-ray, building removal, or anti-cheat bypass flags"]}</script>
+  <script src="assets/nebula.js"></script>
+  <script src="assets/desktop.js"></script>
+  <script type="module" src="assets/three-scene.js"></script>
+</body>
+</html>
