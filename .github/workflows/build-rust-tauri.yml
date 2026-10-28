@@ -7,6 +7,7 @@ on:
       - main
       - arena/48fc7138-robloxclinetbooster
       - arena/f2b9b777-robloxclinetbooster
+      - arena/1443a973-robloxclinetbooster
     paths:
       - "rust/**"
       - "web/**"
@@ -30,10 +31,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -41,7 +42,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -56,31 +57,78 @@ jobs:
           python build_tauri_frontend.py
           python build_tauri_frontend.py --check
 
-      # A plain `cargo build --release` embeds the static frontend via the
-      # generate_context! macro and produces a single, lightweight .exe that
-      # uses the WebView2 runtime already present on Windows 10/11. No Node,
-      # npm, or JS bundler is required.
-      - name: Build release executable
-        working-directory: rust/src-tauri
-        run: cargo build --release
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
 
-      - name: Stage single-file Windows executable + checksum
+      - name: Run Rust unit tests
+        working-directory: rust/src-tauri
+        shell: pwsh
+        run: |
+          $testLog = Join-Path $env:RUNNER_TEMP "tauri-tests.log"
+          cargo test 2>&1 | Tee-Object -FilePath $testLog
+          $testExit = $LASTEXITCODE
+          if ($testExit -ne 0) {
+            $tail = (Get-Content $testLog -Tail 18) -join " | "
+            $tail = $tail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Rust unit test failure::$tail"
+            exit $testExit
+          }
+
+      - name: Ensure NSIS is available
+        shell: pwsh
+        run: |
+          if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
+            choco install nsis --yes --no-progress
+          }
+          $nsisDirs = @(
+            (Join-Path ${env:ProgramFiles(x86)} "NSIS"),
+            (Join-Path $env:ProgramFiles "NSIS")
+          )
+          foreach ($nsisDir in $nsisDirs) {
+            if (Test-Path (Join-Path $nsisDir "makensis.exe")) {
+              $nsisDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+              $env:PATH = "$nsisDir;$env:PATH"
+            }
+          }
+          if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
+            throw "NSIS makensis.exe is required to build the setup wizard."
+          }
+
+      - name: Build guided NSIS setup installer
+        working-directory: rust/src-tauri
+        shell: pwsh
+        run: |
+          $buildLog = Join-Path $env:RUNNER_TEMP "tauri-build.log"
+          cargo tauri build --bundles nsis 2>&1 | Tee-Object -FilePath $buildLog
+          $buildExit = $LASTEXITCODE
+          if ($buildExit -ne 0) {
+            $tail = (Get-Content $buildLog -Tail 18) -join " | "
+            $tail = $tail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Tauri build failure::$tail"
+            exit $buildExit
+          }
+
+      - name: Stage Windows setup wizard + checksum
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path rust/artifacts | Out-Null
-          Copy-Item rust/src-tauri/target/release/roptimer.exe rust/artifacts/Roptimer-Rust-x64.exe
-          $hash = (Get-FileHash rust/artifacts/Roptimer-Rust-x64.exe -Algorithm SHA256).Hash.ToLower()
-          "$hash  Roptimer-Rust-x64.exe" | Out-File -Encoding ascii rust/artifacts/Roptimer-Rust-x64.exe.sha256
+          $bundleDir = "rust/src-tauri/target/release/bundle/nsis"
+          $installer = Get-ChildItem -Path $bundleDir -Filter "*_x64-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw "Tauri NSIS installer was not produced in $bundleDir" }
+          Copy-Item $installer.FullName "rust/artifacts/Marktis-Optimizer-Rust-Setup-x64.exe"
+          $hash = (Get-FileHash "rust/artifacts/Marktis-Optimizer-Rust-Setup-x64.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hash  Marktis-Optimizer-Rust-Setup-x64.exe" | Out-File -Encoding ascii "rust/artifacts/Marktis-Optimizer-Rust-Setup-x64.exe.sha256"
           Get-ChildItem rust/artifacts | Format-Table Name,Length
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Tauri setup artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: Roptimer-Rust-x64
+          name: Marktis-Optimizer-Rust-Setup-x64
           path: rust/artifacts/*
           if-no-files-found: error
 
       - name: Publish GitHub Release assets
+        if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,6 +138,14 @@ jobs:
           $tag = (Get-Content $flag -Raw).Trim()
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title "Roptimer $tag — Rust + Tauri Windows client" --notes "Single-file, lightweight Rust + Tauri v2 Windows client. On first launch it detects whether Roblox is installed and manages only Roblox-allowlisted, reversible ClientAppSettings.json settings."
+            gh release create $tag --title "Marktis Optimizer $tag — Rust + Tauri setup wizard" --notes "Guided x64 installer for Marktis Optimizer. It detects Roblox locally, manages canonical allowlisted settings by default, and offers separate experimental graphics and legacy FPS requests that Roblox may ignore. The System tab shows read-only local hardware; actual game FPS and server ping remain in Roblox Stats (Shift+F5)."
           }
-          gh release upload $tag rust/artifacts/Roptimer-Rust-x64.exe rust/artifacts/Roptimer-Rust-x64.exe.sha256 --clobber
+          gh release upload $tag rust/artifacts/Marktis-Optimizer-Rust-Setup-x64.exe rust/artifacts/Marktis-Optimizer-Rust-Setup-x64.exe.sha256 --clobber
+          $publishedAssets = gh release view $tag --json assets --jq '.assets[].name'
+          if ($LASTEXITCODE -eq 0) {
+            foreach ($oldAsset in @("Roptimer-Rust-x64.exe", "Roptimer-Rust-x64.exe.sha256", "Roptimer-Rust-Setup-x64.exe", "Roptimer-Rust-Setup-x64.exe.sha256")) {
+              if ($publishedAssets -contains $oldAsset) {
+                gh release delete-asset $tag $oldAsset --yes
+              }
+            }
+          }

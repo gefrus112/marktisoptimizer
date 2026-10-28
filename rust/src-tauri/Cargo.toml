@@ -1,12 +1,12 @@
 [package]
 name = "roptimer"
 version = "4.0.0"
-description = "Roptimer — safe, reversible Roblox performance settings for the Windows client"
-authors = ["Roptimer Hub"]
+description = "Marktis Optimizer — safe, reversible Roblox settings for Windows"
+authors = ["Marktis Optimizer"]
 edition = "2021"
 rust-version = "1.77.2"
 license = "MIT"
-repository = "https://github.com/gefrus112/robloxclinetbooster"
+repository = "https://github.com/gefrus112/marktisoptimizer"
 
 # The library target is required by Tauri v2 on mobile and desktop alike.
 [lib]

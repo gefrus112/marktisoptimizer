@@ -57,7 +57,7 @@ Local reversible `ClientAppSettings.json` writes only. No DLL injection, process
 
 ## Release binaries
 
-The Windows EXEs are published on the [v3.0.0-windows release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows).
+The Windows EXEs are published on the [v3.0.0-windows release](https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.0.0-windows).
 
 ## Website and macOS companion
 

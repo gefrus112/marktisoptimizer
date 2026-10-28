@@ -1,14 +1,17 @@
-//! Roptimer — Rust + Tauri v2 Windows client.
+//! Marktis Optimizer — Rust + Tauri v2 Windows client.
 //!
-//! A single, lightweight executable with its own standalone desktop UI. It
-//! detects whether Roblox is installed on first launch, reports process-name-
-//! only Player presence, and manages allowlisted FastFlags via local,
-//! reversible ClientAppSettings.json writes.
+//! The primary Tauri desktop client has its own standalone UI. It detects
+//! whether Roblox is installed on first launch, reports process-name-only
+//! Player presence, checks a short list of executor process names locally,
+//! and manages allowlisted FastFlags via reversible ClientAppSettings.json writes.
 //!
-//! No injection, memory access, telemetry disabling, anti-cheat bypass, or
-//! game script execution. See settings.rs and detect.rs for the safety boundary.
+//! No injection, memory access, telemetry disabling, anti-cheat bypass, automatic
+//! process termination, file deletion, or game script execution. See safety.rs,
+//! settings.rs, and detect.rs for the safety boundaries.
 
 mod detect;
+mod device;
+mod safety;
 mod session;
 mod settings;
 
@@ -33,6 +36,14 @@ pub struct AppInfo {
 #[serde(rename_all = "camelCase")]
 pub struct AppSafety {
     pub local_json_only: bool,
+    pub process_names_only_scan: bool,
+    pub network_requests: bool,
+    pub network_probe_on_demand: bool,
+    pub network_probe_endpoint: &'static str,
+    pub probe_sends_payload: bool,
+    pub full_antivirus: bool,
+    pub automatic_process_termination: bool,
+    pub automatic_software_removal: bool,
     pub injection: bool,
     pub memory_reads: bool,
     pub telemetry_disable: bool,
@@ -58,7 +69,7 @@ fn flag_count() -> usize {
 #[tauri::command]
 fn app_info() -> AppInfo {
     AppInfo {
-        product: "Roptimer",
+        product: "Marktis Optimizer",
         version: env!("CARGO_PKG_VERSION"),
         edition: "Windows Client",
         framework: "Rust + Tauri v2",
@@ -69,6 +80,14 @@ fn app_info() -> AppInfo {
         allowlist_flags: flag_count(),
         safety: AppSafety {
             local_json_only: true,
+            process_names_only_scan: true,
+            network_requests: true,
+            network_probe_on_demand: true,
+            network_probe_endpoint: "www.roblox.com:443",
+            probe_sends_payload: false,
+            full_antivirus: false,
+            automatic_process_termination: false,
+            automatic_software_removal: false,
             injection: false,
             memory_reads: false,
             telemetry_disable: false,
@@ -109,17 +128,51 @@ fn open_external(url: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Ask Windows Explorer to dispatch the fixed Roblox protocol URI to its
+/// registered handler. No user-supplied URL, shell command, or launch flags.
+#[tauri::command]
+fn launch_roblox() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("WINDIR"))
+            .ok_or_else(|| "Windows system folder could not be located.".to_string())?;
+        let root = std::path::PathBuf::from(root);
+        if !root.is_absolute() {
+            return Err("Windows system folder path is invalid.".to_string());
+        }
+        let explorer = root.join("explorer.exe");
+        if !explorer.is_file() {
+            return Err("Windows Explorer could not be found in the system folder.".to_string());
+        }
+        std::process::Command::new(explorer)
+            .arg("roblox://")
+            .spawn()
+            .map_err(|error| format!("Could not request Roblox launch: {error}"))?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("Roblox launch is available in the Windows desktop app only.".to_string())
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             app_info,
             get_allowlist,
             open_external,
+            launch_roblox,
             detect::detect_roblox,
+            device::device_snapshot,
+            device::probe_roblox_latency,
+            safety::scan_known_executor_processes,
+            safety::open_windows_settings,
             session::active_roblox_status,
             settings::apply_settings,
             settings::restore_settings,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Roptimer application");
+        .expect("error while running Marktis Optimizer application");
 }

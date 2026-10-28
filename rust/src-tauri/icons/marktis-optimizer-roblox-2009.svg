@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Marktis Optimizer app icon, inspired by the classic Roblox 2009 tilted-square mark">
+  <rect x="20" y="20" width="472" height="472" rx="112" fill="#11151b"/>
+  <g transform="translate(0 8) rotate(15 256 256)">
+    <path fill="#651b1c" fill-rule="evenodd" d="M104 104h304v304H104z M218 218h76v76h-76z"/>
+  </g>
+  <g transform="rotate(15 256 256)">
+    <path fill="#e2231a" fill-rule="evenodd" d="M104 104h304v304H104z M218 218h76v76h-76z"/>
+  </g>
+</svg>

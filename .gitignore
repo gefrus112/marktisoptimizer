@@ -56,3 +56,7 @@ dotnet/artifacts/
 rust/src-tauri/target/
 rust/src-tauri/gen/
 rust/artifacts/
+
+# Optional Electron Windows client
+electron/node_modules/
+electron/dist/

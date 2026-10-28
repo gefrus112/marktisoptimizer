@@ -1,20 +1,25 @@
-# Roptimer — Rust + Tauri v2 Windows client (V4)
+# Marktis Optimizer — Rust + Tauri v2 Windows client (V4)
 
-Roptimer V4 is a **single, lightweight Windows 64-bit executable** built with
-**Rust + Tauri v2**. It has a purpose-built desktop interface, independent from
-the GitHub Pages website, while keeping the deployment simplicity of one `.exe`.
+Marktis Optimizer V4's primary Windows client is built with **Rust + Tauri v2** and is
+distributed through a guided x64 NSIS setup wizard. It has a purpose-built
+desktop interface, independent from the GitHub Pages website. An optional
+Electron setup wizard is also available; see [`electron/README.md`](../electron/README.md).
 
 ## Why Rust + Tauri
 
-- **One small file.** `Roptimer-Rust-x64.exe` embeds the whole UI. It uses the
-  Microsoft Edge **WebView2** runtime already present on Windows 10/11 — no
-  Electron/Chromium bundle, no .NET runtime to install, no Node at runtime.
-- **Standalone UI, offline.** The app has its own compact HTML/CSS/JS interface
-  in `rust/desktop-ui/`, separate from `web/`. It bundles no website CSS/JS,
-  Three.js, CDN assets, or remote scripts.
+- **Guided installer.** `Marktis-Optimizer-Rust-Setup-x64.exe` installs the primary
+  Tauri app, creates a Start Menu shortcut, offers a Desktop shortcut option on
+  the finish page, and registers a Windows uninstaller. The app uses Microsoft
+  Edge **WebView2**
+  runtime; the setup bootstraps it if it is missing. No Electron/Chromium bundle
+  or .NET/Node runtime is required for this build.
+- **Standalone UI.** The app has its own compact HTML/CSS/JS interface in
+  `rust/desktop-ui/`, separate from `web/`. It bundles no website CSS/JS, CDN
+  assets, or remote scripts.
 - **Rust backend, safe by design.** Detection and settings are Rust commands
-  called over Tauri IPC. No eval, remote code, or network calls are used for
-  core features.
+  called over Tauri IPC. There is no eval or remote code. One fixed TCP
+  connection-time probe to `www.roblox.com:443` is available only on button
+  press; it sends no app-data payload and is not game-server ping.
 
 The website remains a separate GitHub Pages project. Both frontends consume the
 canonical root allowlist, but the packaged Windows executable does not load the
@@ -33,11 +38,14 @@ level**:
   `RobloxStudioBeta.exe` and any `ClientSettings\ClientAppSettings.json` files.
 - Returns `installed`, the version list, settings paths, and a human message.
 
-It **never** attaches to a process, reads memory, injects anything, or launches
-Roblox. On non-Windows builds it returns a clear "Windows client" message.
+The detection command **never** attaches to a process, reads memory, injects
+anything, or launches Roblox. A separate, user-triggered launcher dispatches
+only the fixed `roblox://` protocol through Windows Explorer; Apply & launch
+asks for confirmation and runs the launcher only after a successful settings
+write. On non-Windows builds detection returns a clear "Windows client" message.
 
 ```
-Roblox detected: 2 version folders found. Roptimer can manage allowlisted
+Roblox detected: 2 version folders found. Marktis Optimizer can manage allowlisted
 local settings safely.
 ```
 
@@ -51,54 +59,122 @@ Windows process list when the app opens, on request, and every ten seconds while
 it is open. The Rust command `active_roblox_status` returns only a running/not
 running result and a timestamp; this does not confirm that an experience is
 loaded. It does not open a process handle or inspect command-line arguments,
-game state, game thumbnails, server IDs/addresses, account data, or memory. The **Open optimizations** button jumps to the local
-profile builder; it does not modify Roblox's in-game menu.
+game state, game thumbnails, server IDs/addresses, account data, or memory. The **Configure this profile** button opens local Rendering settings; it does
+not modify Roblox's in-game menu.
+
+## Device, performance, and network details (Windows only)
+
+The grouped Settings area adds a **System** tab. A user-triggered, read-only
+Windows WMI snapshot displays manufacturer/model and device type, CPU/core
+counts, installed RAM, graphics adapters, physical drive models, and logical
+drive free space. The snapshot stays in memory in the app; no serial numbers are
+queried, and the app does not upload or save this inventory. A rough Max
+performance / Balanced / High quality suggestion uses reported RAM and GPU model names only;
+it is a heuristic, not a benchmark, and only stages local profile values until
+the user separately confirms Apply. The System tab can open Windows Advanced
+Graphics settings so the user can choose Roblox's preferred GPU. This is only a
+navigation shortcut: HAGS, driver settings, and per-app GPU preferences remain
+under Windows control.
+
+Actual game FPS and experience/server ping are not read from Roblox memory or
+otherwise inferred. Users can see Roblox's own live performance overlay with
+`Shift+F5`. The app does not automatically delete caches, logs, or `%TEMP%` files,
+write fullscreen/priority registry values, clear standby memory, force restore
+points, change DNS/MTU or server routes, or replace Roblox assets. It sticks to
+allowlisted local settings and timestamped JSON backups. A separate button can measure one TCP connection to
+`www.roblox.com:443`; this is website connection time, not game ping. It sends
+no app-data payload, but the website receives the ordinary network connection
+and can see its source IP.
+
+## Local known-process safety check (Windows only)
+
+The Main page runs a lightweight local check at startup, every 30 seconds while
+the app is open, and on request for the exact process image names `Xeno.exe`,
+`Solara.exe`, `JJSploit.exe`, and `Delta.exe`. The Rust command
+`scan_known_executor_processes` uses Windows' built-in `tasklist` filters and
+parses only the image-name field. `tasklist` may include a PID in its temporary
+CSV output for a matching process, but Marktis Optimizer ignores it: no PID is stored,
+logged, or returned. The check does not read paths, command lines, process
+handles, or memory, and sends no network requests. Any alert is displayed inside
+the app only.
+
+This is a **limited name match, not antivirus or a malware verdict**: names can
+be changed, spoofed, or used by unrelated files. A match is a prompt to review
+it. Marktis Optimizer never terminates a process or deletes software; buttons open the
+fixed Windows Installed Apps and Windows Security pages so the user can review
+or uninstall manually.
 
 ## Standalone desktop tabs (Windows only)
 
 The Tauri executable has its own interface and does not load the GitHub Pages
-UI or any Three.js assets. Navigation is **Main** plus a grouped **Settings**
-area with four sections:
+UI or its assets. Navigation remains **Main** plus a grouped **Settings** area
+with the original four sections and a new **System** section:
 
-- **Rendering** — choose Performance/Balanced, graphics quality, and texture
-  quality. Unsupported target-FPS flags are not written.
+- **Rendering** — choose Max performance, Balanced, or High quality presets; adjust
+graphics and texture quality; and select an allowlisted renderer preference
+(System default, Direct3D 11, Vulkan, or OpenGL). Direct3D 12 is not offered.
+Max performance trades visual detail for lower selected workload and cannot
+promise zero lag. Presets only stage values. An experimental legacy FPS target (60–1000) remains
+a separate, opt-in request that Roblox may ignore; it is not actual FPS.
 - **Geometry** — set level-of-detail distance and optionally reduce approved
   sky/voxelizer effects. Distances affect rendering only; they do not delete
   objects or change collision/gameplay geometry.
-- **Icons** — choose Roptimer UI icon weight and accent color. These preferences
-  stay in local app storage and do not modify Roblox icons or game assets.
+- **Icons** — choose the UI icon weight, one of nine accent colors, and a
+  bundled anime background. Ten original theme images are included so far; the
+  remaining thirty requested images are pending generation. These local
+  preferences do not modify Roblox icons or game assets.
 - **Allowlist** — search/filter the canonical **18 allowed flags**, read-only,
   grouped into Geometry, Rendering, and User Interface. See
   [`FASTFLAG_ALLOWLIST.md`](FASTFLAG_ALLOWLIST.md) for the full table.
+- **System** — view local hardware, Roblox Player/Studio version folders,
+  process-name scan status, and the optional website TCP connection-time probe.
+  A fixed shortcut opens Windows Advanced Graphics settings; it does not change
+  GPU preference or HAGS itself. Actual in-game FPS and game-server ping are
+  not read; use `Shift+F5` in Roblox.
 
 The Windows settings manager is not included in the separate legacy
 Python/Tkinter macOS companion.
 
 ## Safe settings (apply / restore)
 
-`apply_settings` / `restore_settings` write **only** canonical allowlisted keys
-to `ClientAppSettings.json`:
+`apply_settings` writes canonical allowlisted keys to
+`ClientAppSettings.json` by default. If the user explicitly enables
+**Experimental legacy FPS target**, it also writes only
+`DFIntTaskSchedulerTargetFps` with the requested value clamped to 60–1000. That
+legacy key remains outside the canonical 18-key allowlist; current Roblox
+clients may ignore or cap it, so no FPS gain or unlock is guaranteed.
 
 - Timestamped backups are created before every write.
 - Unrelated keys are always preserved.
-- Restore removes only the keys Roptimer managed.
-- The legacy `DFIntTaskSchedulerTargetFps` flag is **not** written (it is not on
-  Roblox's current local allowlist and may be ignored).
+- Restore removes only Marktis Optimizer-managed canonical keys plus the separate legacy
+  FPS key; the timestamped backup is kept for manual recovery.
+- Roblox's in-game Maximum Framerate setting remains the supported option.
 - "Reduce building lag" = safe LOD / texture / grass / graphics reduction — it
   never deletes buildings or changes collision/gameplay geometry.
 
 **Never**: DLL injection, process hooks, memory reads/writes, executable
 patching, account-data extraction, telemetry/Crashpad/Backtrace disabling,
-anti-cheat bypass, gameplay automation, executor APIs, `loadstring`, or game
-script execution.
+anti-cheat bypass, gameplay automation, executor APIs, `loadstring`, game script
+execution, or automatic process termination/software deletion.
+
+Profiles are static local settings, not dynamic hardware control. The app does
+not measure in-game FPS or game-server ping, monitor live GPU utilization,
+alter Roblox's internal resolution, change process CPU affinity, or reroute
+game traffic through a VPN/relay. Use Roblox's own Performance Stats (`Shift+F5`)
+for live experience FPS/ping; the optional website probe is not a substitute.
 
 ## Rust commands (IPC)
 
 | Command | Purpose | Side effects |
 | --- | --- | --- |
 | `app_info` | Product/version/framework/safety info | none |
-| `detect_roblox` | Detect Roblox installation | read-only filesystem scan |
+| `detect_roblox` | Detect official Roblox Player/Studio folders | read-only filesystem scan |
 | `active_roblox_status` | Check whether the Roblox Player process name is present | read-only process-name check |
+| `device_snapshot` | Read local device/CPU/RAM/GPU/drive details | read-only WMI query; no serial numbers or upload |
+| `probe_roblox_latency` | Measure a fixed TCP connection to `www.roblox.com:443` | one user-triggered TCP handshake; no app-data payload; not game ping |
+| `scan_known_executor_processes` | Match exact Xeno, Solara, JJSploit, and Delta process names | local name-only check; no paths or command lines |
+| `open_windows_settings` | Open a fixed Installed Apps, Windows Security, or Advanced Graphics page | launches Windows Settings; no system values are changed |
+| `launch_roblox` | Dispatch fixed `roblox://` URI through Windows Explorer | requests normal Roblox protocol launch |
 | `get_allowlist` | Return the canonical allowlist JSON | none |
 | `apply_settings` | Apply allowlisted settings | local JSON write + backup |
 | `restore_settings` | Restore managed keys | local JSON write + backup |
@@ -106,31 +182,34 @@ script execution.
 
 ## Build it yourself
 
-Prerequisites: Rust (stable), the WebView2 runtime (bundled with Windows), and
-Python 3 to assemble the desktop frontend.
+Prerequisites: Rust (stable) and Python 3 to assemble the desktop frontend.
+For users, the setup wizard installs the WebView2 runtime bootstrapper if it is
+not already present.
 
 ```powershell
 # From the repo root (Windows PowerShell):
 python build_tauri_frontend.py   # assembles rust/frontend/ from rust/desktop-ui/
 python build_tauri_frontend.py --check
 cd rust/src-tauri
-cargo build --release            # -> target/release/roptimer.exe
+cargo install tauri-cli --version "^2" --locked
+cargo tauri build --bundles nsis
 ```
 
-Rename `target/release/roptimer.exe` to `Roptimer-Rust-x64.exe` and ship it as a
-single file. `build.rs` embeds the repo-root `fastflags-allowlist.json` in Rust,
-and the frontend build embeds that same canonical list in the local UI.
+The build produces a guided NSIS setup wizard, staged in CI as
+`Marktis-Optimizer-Rust-Setup-x64.exe`. The installer creates shortcuts and installs the
+Tauri app; users do not need a batch launcher. `build.rs` embeds the repo-root
+`fastflags-allowlist.json` in Rust, and the frontend build embeds that same
+canonical list in the local UI.
 
 ### CI
 
-`.github/workflows/build-rust-tauri.yml` builds on `windows-latest`, runs
-`build_website.py --check` and `build_tauri_frontend.py --check`, compiles the
-release exe, stages `Roptimer-Rust-x64.exe` + SHA256, and (when the
-`release-upload-rust.flag` is present) publishes the release assets.
+`.github/workflows/build-rust-tauri.yml` builds on `windows-latest`, validates
+the website and standalone desktop frontend, packages the NSIS installer, and
+stages `Marktis-Optimizer-Rust-Setup-x64.exe` plus its SHA256 file. A release upload is
+limited to `main` and still respects `release-upload-rust.flag`.
 
-To also produce NSIS/MSI installers, install the Tauri CLI and run
-`cargo tauri build` — `tauri.conf.json` already declares the bundle targets and
-icons. The single-exe path above needs no Node/npm.
+A direct `cargo build --release` remains available for development, but the
+published Tauri distribution is the setup wizard.
 
 ## Project layout
 
@@ -148,8 +227,9 @@ rust/
     icons/                  window/app icons
     src/
       main.rs               windows_subsystem + entry point
-      lib.rs                app_info, get_allowlist, open_external, run()
-      detect.rs             read-only Roblox installation detection
+      lib.rs                app_info, command registration, and app setup
+      detect.rs             read-only Roblox Player/Studio installation detection
+      device.rs             read-only hardware inventory + explicit TCP probe
       session.rs            process-name-only Roblox Player status
       settings.rs           safe apply/restore with backups
   frontend/                 GENERATED from desktop-ui; embeds allowlist JSON

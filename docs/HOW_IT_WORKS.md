@@ -27,11 +27,16 @@ Roptimer checks the standard app-bundle settings path:
 
 It also accepts a user-selected custom folder. macOS updates can replace this folder, so re-run `apply` after a Roblox update.
 
+The V4 Windows desktop Main page also offers a standard launcher. It sends only
+the fixed `roblox://` URI to Windows Explorer. **Apply & launch** requires a
+confirmation and requests launch only after a successful local settings write;
+it does not construct arbitrary URLs, join a game, or touch a Roblox process.
+
 ---
 
 ## 2. Generate a safe profile
 
-Roptimer only writes keys from the canonical [`fastflags-allowlist.json`](../fastflags-allowlist.json). The full allowlist has **18** flags in three categories:
+The V4 Tauri/Electron desktop clients write keys from the canonical [`fastflags-allowlist.json`](../fastflags-allowlist.json) by default. That list has **18** flags in three categories:
 
 | Category | Flags |
 | --- | --- |
@@ -39,7 +44,7 @@ Roptimer only writes keys from the canonical [`fastflags-allowlist.json`](../fas
 | Rendering | `FFlagHandleAltEnterFullscreenManually`, `DFFlagTextureQualityOverrideEnabled`, `DFIntTextureQualityOverride`, `FIntDebugForceMSAASamples`, `DFFlagDisableDPIScale`, `FFlagDebugGraphicsPreferD3D11`, `FFlagDebugSkyGray`, `DFFlagDebugPauseVoxelizer`, `DFIntDebugFRMQualityLevelOverride`, `FIntFRMMaxGrassDistance`, `FIntFRMMinGrassDistance`, `FFlagDebugGraphicsPreferVulkan`, `FFlagDebugGraphicsPreferOpenGL` |
 | User Interface | `FIntGrassMovementReducedMotionFactor` |
 
-`DFIntTaskSchedulerTargetFps` is tracked separately as a legacy compatibility flag and is **not** part of this allowlist.
+`DFIntTaskSchedulerTargetFps` is tracked separately as an experimental legacy compatibility flag; it is **not** part of this allowlist. The V4 desktop clients keep it off by default and request it only after an explicit opt-in (60–1000), with a backup before writing. Current clients may ignore or cap it, so no unlock or FPS gain is guaranteed.
 
 Examples of flags Roptimer writes by default:
 
@@ -50,7 +55,7 @@ Examples of flags Roptimer writes by default:
 | Texture tier | `DFIntTextureQualityOverride` | Reduces texture work. |
 | MSAA | `FIntDebugForceMSAASamples` | Lowers anti-aliasing cost. |
 | Grass | `FIntFRMMaxGrassDistance`, `FIntFRMMinGrassDistance` | Reduces grass rendering distance. |
-| Legacy FPS | `DFIntTaskSchedulerTargetFps` | Compatibility only; current clients may ignore it. |
+| Legacy FPS | `DFIntTaskSchedulerTargetFps` | Separate desktop opt-in; current clients may ignore or cap it. Restore removes this managed key. |
 
 Roblox’s local FastFlag allowlist can change. Unlisted keys are ignored by the client, so Roptimer labels outdated keys as legacy instead of promising an FPS unlock.
 

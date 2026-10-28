@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gefrus112.github.io/robloxclinetbooster/sitemap.xml
+Sitemap: https://gefrus112.github.io/marktisoptimizer/sitemap.xml
