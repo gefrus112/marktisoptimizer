@@ -8,8 +8,9 @@ Electron setup wizard is also available; see [`electron/README.md`](../electron/
 ## Why Rust + Tauri
 
 - **Guided installer.** `Roptimer-Rust-Setup-x64.exe` installs the primary
-  Tauri app, creates Start Menu/Desktop shortcuts, and registers a Windows
-  uninstaller. The app uses the Microsoft Edge **WebView2**
+  Tauri app, creates a Start Menu shortcut, offers a Desktop shortcut option on
+  the finish page, and registers a Windows uninstaller. The app uses Microsoft
+  Edge **WebView2**
   runtime; the setup bootstraps it if it is missing. No Electron/Chromium bundle
   or .NET/Node runtime is required for this build.
 - **Standalone UI, offline.** The app has its own compact HTML/CSS/JS interface

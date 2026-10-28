@@ -364,7 +364,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Configures separate NSIS setup wizards for the Rust + Tauri and Electron apps. Both installers create Start Menu/Desktop shortcuts, register Windows uninstallers, and can launch the app after setup; no batch launcher is required. The new distribution stops staging the old portable Rust x64 executable."
+      "details": "Configures separate NSIS setup wizards for the Rust + Tauri and Electron apps. Both installers create Start Menu shortcuts and register Windows uninstallers; the Tauri wizard offers a Desktop shortcut option, and the Electron wizard creates a Desktop shortcut. Both can launch the app after setup; no batch launcher is required. The new distribution stops staging the old portable Rust x64 executable."
     }
   ],
   "sources": [

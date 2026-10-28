@@ -45,8 +45,6 @@
       "nsis": {
         "installMode": "currentUser",
         "displayLanguageSelector": true,
-        "createDesktopShortcut": true,
-        "createStartMenuShortcut": true,
         "startMenuFolder": "Roptimer"
       }
     }

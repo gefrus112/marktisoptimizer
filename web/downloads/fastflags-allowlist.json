@@ -21,7 +21,7 @@
       "Tauri NSIS x64 setup wizard",
       "Electron NSIS x64 setup wizard"
     ],
-    "installation": "Guided setup wizards create Start Menu/Desktop shortcuts and uninstall support; no batch launcher required."
+    "installation": "Guided wizards create Start Menu shortcuts and uninstall support; Tauri offers a Desktop shortcut option, Electron creates one; no batch launcher required."
   },
   "safety": {
     "localJsonOnly": true,

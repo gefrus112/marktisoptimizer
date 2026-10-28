@@ -66,10 +66,15 @@ jobs:
           if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
             choco install nsis --yes --no-progress
           }
-          $nsisDir = Join-Path ${env:ProgramFiles(x86)} "NSIS"
-          if (Test-Path (Join-Path $nsisDir "makensis.exe")) {
-            $nsisDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-            $env:PATH = "$nsisDir;$env:PATH"
+          $nsisDirs = @(
+            (Join-Path ${env:ProgramFiles(x86)} "NSIS"),
+            (Join-Path $env:ProgramFiles "NSIS")
+          )
+          foreach ($nsisDir in $nsisDirs) {
+            if (Test-Path (Join-Path $nsisDir "makensis.exe")) {
+              $nsisDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+              $env:PATH = "$nsisDir;$env:PATH"
+            }
           }
           if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
             throw "NSIS makensis.exe is required to build the setup wizard."

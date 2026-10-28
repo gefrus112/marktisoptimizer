@@ -1,8 +1,9 @@
 # Roptimer — Rust + Tauri v2 Windows client
 
 The primary Rust + Tauri Windows client is distributed through a guided x64
-setup wizard. The NSIS installer creates Start Menu and Desktop shortcuts and
-provides a Windows uninstaller. The app has a standalone desktop interface,
+setup wizard. The NSIS installer creates a Start Menu shortcut, offers a
+Desktop shortcut option on the finish page, and provides a Windows uninstaller.
+The app has a standalone desktop interface,
 detects whether Roblox is installed on first launch, reports process-name-only
 Player presence, and manages Roblox-allowlisted, reversible
 `ClientAppSettings.json` settings. An optional Electron shell is also available;

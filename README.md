@@ -88,9 +88,9 @@ deletes software automatically.
 ### Rust + Tauri v2 Windows client (primary)
 
 - `Roptimer-Rust-Setup-x64.exe` — guided x64 installer with a selectable install
-  folder, Start Menu/Desktop shortcuts, and a Windows uninstaller. The installed
-  app uses system WebView2; no batch file, .NET runtime, or Node runtime is
-  required.
+  folder, a Start Menu shortcut, an optional Desktop shortcut on the finish
+  page, and a Windows uninstaller. The installed app uses system WebView2; no
+  batch file, .NET runtime, or Node runtime is required.
 - **Detects Roblox on first launch** by scanning standard Windows version
   folders — read-only, no process attach, no memory reads, no launching Roblox.
   The result appears on the Main page with a Re-scan button.
