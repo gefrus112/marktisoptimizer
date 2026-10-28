@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d1014"/><stop offset="1" stop-color="#11181a"/></linearGradient><linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#73d6ad" stop-opacity=".14"/><stop offset="1" stop-color="#73d6ad" stop-opacity=".025"/></linearGradient></defs>
+<title>Roptimer standalone desktop Main screen</title>
+<rect width="100%" height="100%" fill="url(#bg)"/>
+<rect x="0" y="0" width="236" height="900" rx="0" fill="#0a0d11"/>
+<path d="M236 0H236" stroke="#20272d" stroke-width="1"/>
+<rect x="24" y="25" width="40" height="40" rx="12" fill="url(#accent)" stroke="#345047" stroke-width="1"/>
+<text x="36" y="53" fill="#73d6ad" font-family="Consolas, monospace" font-size="24px" font-weight="800">R</text>
+<text x="76" y="42" fill="#edf2f1" font-family="Consolas, monospace" font-size="12px" font-weight="800" letter-spacing="1.6px">ROPTIMER</text>
+<text x="76" y="57" fill="#7c8988" font-family="Consolas, monospace" font-size="8px" font-weight="700" letter-spacing="1.2px">WINDOWS CLIENT</text>
+<path d="M20 84H216" stroke="#20272f" stroke-width="1"/>
+<text x="27" y="112" fill="#65716e" font-family="Consolas, monospace" font-size="9px" font-weight="800" letter-spacing="1.3px">WORKSPACE</text>
+<rect x="16" y="126" width="204" height="42" rx="9" fill="rgba(115,214,173,.085)" stroke="#294038" stroke-width="1"/>
+<text x="31" y="153" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="18px" font-weight="650">⌂</text>
+<text x="60" y="153" fill="#eef8f3" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="650">Main</text>
+<rect x="16" y="173" width="204" height="42" rx="9" fill="transparent"/>
+<text x="31" y="200" fill="#7b8886" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="650">☷</text>
+<text x="60" y="200" fill="#9aa5a4" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="650">Settings</text>
+<text x="193" y="199" fill="#74807d" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="600">⌄</text>
+<text x="43" y="246" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">◉</text>
+<text x="68" y="246" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Rendering</text>
+<text x="43" y="280" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">◇</text>
+<text x="68" y="280" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Geometry</text>
+<text x="43" y="314" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">▦</text>
+<text x="68" y="314" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Icons</text>
+<text x="43" y="348" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">☷</text>
+<text x="68" y="348" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Allowlist</text>
+<rect x="17" y="746" width="202" height="55" rx="10" fill="rgba(115,214,173,.045)" stroke="#263a32" stroke-width="1"/>
+<text x="30" y="769" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="600">◈</text>
+<text x="56" y="766" fill="#d1ddd6" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Local &amp; reversible</text>
+<text x="56" y="782" fill="#72807a" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">No injection · No memory access</text>
+<circle cx="23" cy="843" r="3" fill="#73d6ad"/>
+<text x="34" y="847" fill="#697473" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.7px">DESKTOP MODE</text>
+<text x="190" y="847" fill="#495453" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">V4</text>
+<rect x="236" y="0" width="1204" height="62" rx="0" fill="#0d1115"/>
+<path d="M236 62H1440" stroke="#20272d" stroke-width="1"/>
+<text x="274" y="37" fill="#63706d" font-family="Consolas, monospace" font-size="9px" font-weight="700" letter-spacing="1px">ROPTIMER</text>
+<text x="329" y="37" fill="#39413f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">/</text>
+<text x="344" y="37" fill="#c6cecc" font-family="Consolas, monospace" font-size="10px" font-weight="700">Main</text>
+<circle cx="1170" cy="31" r="3" fill="#73d6ad"/>
+<text x="1180" y="34" fill="#77817f" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">RUNNING LOCALLY</text>
+<path d="M1322 24H1322" stroke="#323a3f" stroke-width="1"/>
+<text x="1341" y="34" fill="#9da8a6" font-family="Consolas, monospace" font-size="9px" font-weight="800">V4.0.0</text>
+<text x="276" y="108" fill="#73d6ad" font-family="Consolas, monospace" font-size="9px" font-weight="800" letter-spacing="1.2px">DESKTOP CONTROL CENTER     ·     WINDOWS</text>
+<text x="276" y="157" fill="#edf2f1" font-family="Segoe UI, Arial, sans-serif" font-size="41px" font-weight="650">Your client,</text>
+<text x="276" y="202" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="41px" font-weight="450">in your control.</text>
+<text x="276" y="230" fill="#87928f" font-family="Segoe UI, Arial, sans-serif" font-size="12px" font-weight="400">A focused workspace for safe, local Roblox settings. No web dashboard required.</text>
+<rect x="1038" y="174" width="145" height="40" rx="9" fill="#171c22" stroke="#323b42" stroke-width="1"/>
+<text x="1055" y="199" fill="#c2ccca" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">↻  Refresh status</text>
+<rect x="1192" y="174" width="184" height="40" rx="9" fill="#73d6ad" stroke="#86dcb8" stroke-width="1"/>
+<text x="1210" y="199" fill="#11231c" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">Open settings</text>
+<text x="1344" y="199" fill="#11231c" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="700">→</text>
+<rect x="276" y="270" width="548" height="230" rx="15" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<rect x="839" y="270" width="548" height="230" rx="15" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<text x="296" y="297" fill="#73d6ad" font-family="Consolas, monospace" font-size="9px" font-weight="800">01</text>
+<text x="322" y="297" fill="#77827f" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">ROBLOX INSTALLATION</text>
+<rect x="720" y="283" width="82" height="21" rx="11" fill="#163027" stroke="#2b5b45" stroke-width="1"/>
+<circle cx="733" cy="293" r="2.5" fill="#73d6ad"/>
+<text x="741" y="296" fill="#73d6ad" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.5px">INSTALLED</text>
+<rect x="296" y="320" width="46" height="46" rx="13" fill="#14231d" stroke="#31483b" stroke-width="1"/>
+<text x="309" y="351" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="22px" font-weight="600">▱</text>
+<text x="356" y="339" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="700">Roblox was detected</text>
+<text x="356" y="358" fill="#87928f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Install folders found · local read-only scan</text>
+<path d="M296 385H804" stroke="#252d33" stroke-width="1"/>
+<text x="298" y="416" fill="#dfe7e4" font-family="Consolas, monospace" font-size="16px" font-weight="700">2</text>
+<text x="298" y="433" fill="#727e7b" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">client folders</text>
+<path d="M443 397H443" stroke="#283037" stroke-width="1"/>
+<text x="464" y="416" fill="#dfe7e4" font-family="Consolas, monospace" font-size="16px" font-weight="700">1</text>
+<text x="464" y="433" fill="#727e7b" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">settings files</text>
+<path d="M609 397H609" stroke="#283037" stroke-width="1"/>
+<text x="630" y="416" fill="#dfe7e4" font-family="Consolas, monospace" font-size="16px" font-weight="700">18</text>
+<text x="630" y="433" fill="#727e7b" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">approved flags</text>
+<text x="298" y="475" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">↻  Re-scan install folders</text>
+<text x="859" y="297" fill="#73d6ad" font-family="Consolas, monospace" font-size="9px" font-weight="800">02</text>
+<text x="885" y="297" fill="#77827f" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">PLAYER PRESENCE</text>
+<rect x="1275" y="283" width="90" height="21" rx="11" fill="#172a37" stroke="#2d4858" stroke-width="1"/>
+<circle cx="1288" cy="293" r="2.5" fill="#83baf0"/>
+<text x="1296" y="296" fill="#83baf0" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.4px">PROCESS OPEN</text>
+<rect x="859" y="320" width="46" height="46" rx="13" fill="#15212c" stroke="#30424d" stroke-width="1"/>
+<text x="871" y="350" fill="#83baf0" font-family="Segoe UI, Arial, sans-serif" font-size="20px" font-weight="600">▣</text>
+<text x="919" y="339" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="700">Roblox Player is open</text>
+<text x="919" y="358" fill="#87928f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Only process-name presence is confirmed.</text>
+<rect x="859" y="383" width="227" height="28" rx="7" fill="#10161b" stroke="#2a353d" stroke-width="1"/>
+<circle cx="874" cy="397" r="3" fill="#83baf0"/>
+<text x="886" y="401" fill="#c1cdca" font-family="Consolas, monospace" font-size="8px" font-weight="700">RobloxPlayerBeta.exe</text>
+<text x="1034" y="401" fill="#71807d" font-family="Consolas, monospace" font-size="6px" font-weight="800" letter-spacing="0.3px">NAME ONLY</text>
+<text x="860" y="428" fill="#74807d" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">No game, server, account or memory data is read.</text>
+<text x="861" y="475" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">↻  Refresh Player status</text>
+<rect x="276" y="518" width="548" height="224" rx="15" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<text x="296" y="545" fill="#73d6ad" font-family="Consolas, monospace" font-size="9px" font-weight="800">03</text>
+<text x="322" y="545" fill="#77827f" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">CURRENT PROFILE</text>
+<rect x="701" y="530" width="101" height="21" rx="11" fill="#14251e" stroke="#2d493c" stroke-width="1"/>
+<text x="714" y="544" fill="#73d6ad" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.4px">PERFORMANCE</text>
+<text x="298" y="588" fill="#75807d" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.8px">LOCAL SETTINGS PREVIEW</text>
+<text x="298" y="618" fill="#e3ece8" font-family="Segoe UI, Arial, sans-serif" font-size="20px" font-weight="650">Reduce building lag</text>
+<rect x="298" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="307" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Graphics</text>
+<text x="373" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">21 / 21</text>
+<rect x="458" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="467" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Texture</text>
+<text x="533" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">0 / 3</text>
+<rect x="618" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="627" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Geometry</text>
+<text x="693" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">64 studs</text>
+<text x="298" y="708" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">⚙  Configure this profile</text>
+<rect x="839" y="518" width="548" height="224" rx="15" fill="url(#accent)" stroke="#2d3b35" stroke-width="1"/>
+<rect x="858" y="539" width="37" height="37" rx="11" fill="#14241e" stroke="#375347" stroke-width="1"/>
+<text x="868" y="565" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="19px" font-weight="600">◈</text>
+<text x="909" y="549" fill="#73d6ad" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.9px">BUILT AROUND REVERSIBILITY</text>
+<text x="909" y="579" fill="#e3ece8" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="650">Your settings stay yours.</text>
+<text x="909" y="601" fill="#8b9793" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Backups before writes; unrelated JSON is preserved;</text>
+<text x="909" y="617" fill="#8b9793" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">only canonical allowlisted keys are touched.</text>
+<text x="909" y="655" fill="#a4b0aa" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="600">✓  Local files only      ✓  Restore available</text>
+<text x="909" y="675" fill="#a4b0aa" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="600">✓  No game injection      ✓  No memory access</text>
+<text x="277" y="777" fill="#677370" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">●  Roptimer changes local client settings only. Restart Roblox normally after applying.</text>
+</svg>

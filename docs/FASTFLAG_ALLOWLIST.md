@@ -105,7 +105,7 @@ The authoritative JSON is [`fastflags-allowlist.json`](../fastflags-allowlist.js
 - `dotnet/src/Roptimer.Core/fastflags-allowlist.json` — legacy C# core (embedded).
 - `web/downloads/fastflags-allowlist.json` — direct website download.
 - `web/index.html` — embedded for the website Client/Allowlist tabs.
-- `rust/frontend/downloads/fastflags-allowlist.json` — Tauri app copy.
+- `rust/desktop-ui` / generated `rust/frontend/index.html` — allowlist embedded by `build_tauri_frontend.py` from the canonical file.
 - `rust/src-tauri` — embedded at compile time by `build.rs`.
 - Windows/macOS/source packages — included with the documentation.
 

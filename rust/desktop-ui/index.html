@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" data-accent="mint" data-icon-style="outline">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Roptimer Windows desktop client for safe, reversible local Roblox settings." />
+  <title>Roptimer — Windows Client</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body class="is-booting">
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-brand" viewBox="0 0 40 40"><path d="M20 2.8 36.5 12v16L20 37.2 3.5 28V12L20 2.8Z"/><path d="M12.5 30V10H21a6 6 0 0 1 0 12h-8.5M19 22l9 8"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
+    <symbol id="i-rendering" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></symbol>
+    <symbol id="i-geometry" viewBox="0 0 24 24"><path d="m12 2.8 9 4.8v9L12 21.2l-9-4.6v-9l9-4.8Z"/><path d="m3.4 7.8 8.6 4.6 8.6-4.6M12 12.4v8.4M7.5 5.2l9 4.8"/></symbol>
+    <symbol id="i-icons" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.2 1.2L6.5 5M3 12l1.2 1.2L6.5 11M3 18l1.2 1.2L6.5 17"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.5-8 10-4.6-1.5-8-4.9-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a6.6 6.6 0 0 1 11.1-2L20 12M4 12l2.8 5a6.6 6.6 0 0 0 11.1-2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3h2Z"/><path d="M7 3v6h10V3M7 21v-8h10v8"/></symbol>
+    <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 7v5h5M5 12a7 7 0 1 0 2-5"/><path d="M12 8v4l3 2"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 4h7v7m0-7-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </svg>
+
+  <div class="boot-screen" id="bootScreen" role="status" aria-live="polite">
+    <div class="boot-mark"><svg class="icon"><use href="#i-brand"/></svg></div>
+    <p class="eyebrow">ROPTIMER · WINDOWS CLIENT</p>
+    <h1>Preparing your workspace<span>.</span></h1>
+    <p class="boot-message" id="bootMessage">Starting the local settings service…</p>
+    <div class="boot-track"><span id="bootProgress"></span></div>
+    <div class="boot-foot"><span>LOCAL FIRST</span><span>ALLOWLIST ONLY</span></div>
+  </div>
+
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" aria-label="Application navigation">
+      <a class="brand-lockup" href="#main" aria-label="Roptimer main page">
+        <span class="brand-mark"><svg class="icon"><use href="#i-brand"/></svg></span>
+        <span class="brand-copy"><strong>ROPTIMER</strong><small>WINDOWS CLIENT</small></span>
+      </a>
+
+      <div class="side-divider"></div>
+      <p class="nav-caption">WORKSPACE</p>
+      <nav class="primary-nav">
+        <button class="nav-item is-active" id="navMain" type="button" data-view="main" aria-current="page">
+          <svg class="icon"><use href="#i-home"/></svg><span>Main</span><span class="nav-end-mark"></span>
+        </button>
+        <button class="nav-item" id="navSettings" type="button" data-view="settings" aria-expanded="true">
+          <svg class="icon"><use href="#i-settings"/></svg><span>Settings</span><svg class="icon nav-chevron"><use href="#i-arrow"/></svg>
+        </button>
+        <div class="settings-subnav" id="settingsSubnav" aria-label="Settings sections">
+          <button class="subnav-item is-active" type="button" data-tab="rendering" aria-selected="true"><svg class="icon"><use href="#i-rendering"/></svg><span>Rendering</span></button>
+          <button class="subnav-item" type="button" data-tab="geometry" aria-selected="false"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
+          <button class="subnav-item" type="button" data-tab="icons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
+          <button class="subnav-item" type="button" data-tab="allowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+        </div>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-safety">
+        <span class="safety-icon"><svg class="icon"><use href="#i-shield"/></svg></span>
+        <div><strong>Local & reversible</strong><small>No injection · No memory access</small></div>
+      </div>
+      <div class="sidebar-bottom">
+        <span class="runtime-dot"></span><span>DESKTOP MODE</span><span class="sidebar-version" id="sidebarVersion">V4</span>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="breadcrumb"><span>ROPTIMER</span><span class="crumb-slash">/</span><strong id="breadcrumbTitle">Main</strong></div>
+        <div class="topbar-meta"><span class="local-indicator"><i></i> RUNNING LOCALLY</span><span class="topbar-separator"></span><span class="build-label" id="buildLabel">V4.0.0</span></div>
+      </header>
+
+      <div class="page-scroll" id="pageScroll">
+        <section class="view-section" id="mainView" data-view-panel="main" aria-labelledby="mainTitle">
+          <div class="page-heading main-heading">
+            <div>
+              <p class="eyebrow">DESKTOP CONTROL CENTER <span class="eyebrow-rule"></span> WINDOWS</p>
+              <h1 id="mainTitle">Your client,<br><em>in your control.</em></h1>
+              <p class="heading-copy">A focused workspace for safe, local Roblox settings. No web dashboard required.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-soft" id="quickRefresh" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh status</button>
+              <button class="button button-primary" id="mainOpenSettings" type="button">Open settings<svg class="icon"><use href="#i-arrow"/></svg></button>
+            </div>
+          </div>
+
+          <div class="overview-grid">
+            <article class="panel status-panel" aria-labelledby="installTitle">
+              <div class="panel-topline"><span class="panel-index">01</span><span class="panel-kicker">ROBLOX INSTALLATION</span><span class="state-pill state-pending" id="installBadge">CHECKING</span></div>
+              <div class="status-main-row">
+                <span class="large-icon install-icon"><svg class="icon"><use href="#i-folder"/></svg></span>
+                <div class="status-copy"><h2 id="installTitle">Checking local folders</h2><p id="installDetail">Read-only scan of standard Roblox install locations.</p></div>
+              </div>
+              <div class="metric-row">
+                <div class="metric"><strong id="versionCount">—</strong><span>client folders</span></div>
+                <div class="metric"><strong id="settingsCount">—</strong><span>settings files</span></div>
+                <div class="metric"><strong id="allowlistCount">18</strong><span>approved flags</span></div>
+              </div>
+              <button class="text-action" id="scanAgain" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Re-scan install folders</button>
+            </article>
+
+            <article class="panel status-panel player-panel" aria-labelledby="playerTitle">
+              <div class="panel-topline"><span class="panel-index">02</span><span class="panel-kicker">PLAYER PRESENCE</span><span class="state-pill state-pending" id="playerBadge">CHECKING</span></div>
+              <div class="status-main-row">
+                <span class="large-icon player-icon"><svg class="icon"><use href="#i-monitor"/></svg></span>
+                <div class="status-copy"><h2 id="playerTitle">Checking Player process</h2><p id="playerDetail">Windows-only process-name check.</p></div>
+              </div>
+              <div class="process-chip"><span class="process-dot"></span><code>RobloxPlayerBeta.exe</code><span>NAME ONLY</span></div>
+              <p class="process-note">This does not confirm an experience is loaded or collect game, server, account, command-line, or memory data.</p>
+              <button class="text-action" id="refreshPlayer" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh Player status</button>
+            </article>
+
+            <article class="panel profile-panel">
+              <div class="panel-topline"><span class="panel-index">03</span><span class="panel-kicker">CURRENT PROFILE</span><span class="profile-mode" id="profileModeLabel">PERFORMANCE</span></div>
+              <div class="profile-heading"><div><p class="profile-kicker">LOCAL SETTINGS PREVIEW</p><h2 id="profileTitle">Reduce building lag</h2></div><span class="profile-orbit"><svg class="icon"><use href="#i-spark"/></svg></span></div>
+              <div class="profile-chips" id="profileSummary">
+                <span>Graphics <b id="summaryGraphics">21 / 21</b></span>
+                <span>Texture <b id="summaryTexture">0 / 3</b></span>
+                <span>Geometry <b id="summaryGeometry">64 studs</b></span>
+              </div>
+              <button class="text-action" id="editProfile" type="button"><svg class="icon"><use href="#i-settings"/></svg>Configure this profile</button>
+            </article>
+
+            <article class="safety-panel">
+              <span class="safety-emblem"><svg class="icon"><use href="#i-shield"/></svg></span>
+              <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Roptimer creates a timestamped backup, preserves unrelated JSON keys, and touches only keys on the canonical allowlist.</p></div>
+              <div class="safety-checks"><span><svg class="icon"><use href="#i-check"/></svg>Local files only</span><span><svg class="icon"><use href="#i-check"/></svg>Restore available</span><span><svg class="icon"><use href="#i-check"/></svg>No game injection</span></div>
+            </article>
+          </div>
+          <p class="page-footnote"><span class="footnote-dot"></span> Roptimer changes local client settings only. Restart Roblox normally after applying.</p>
+        </section>
+
+        <section class="view-section settings-view" id="settingsView" data-view-panel="settings" aria-labelledby="settingsTitle" hidden>
+          <div class="page-heading settings-heading">
+            <div><p class="eyebrow">LOCAL CONFIGURATION <span class="eyebrow-rule"></span> SAFE BY DEFAULT</p><h1 id="settingsTitle">Settings</h1><p class="heading-copy">Choose a profile and review the exact groups Roptimer is allowed to manage.</p></div>
+            <div class="settings-header-status"><span class="status-light"></span> Changes are staged locally</div>
+          </div>
+
+          <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+            <button class="settings-tab is-active" id="tabRendering" type="button" role="tab" data-tab="rendering" aria-controls="paneRendering" aria-selected="true"><svg class="icon"><use href="#i-rendering"/></svg><span>Rendering</span></button>
+            <button class="settings-tab" id="tabGeometry" type="button" role="tab" data-tab="geometry" aria-controls="paneGeometry" aria-selected="false"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
+            <button class="settings-tab" id="tabIcons" type="button" role="tab" data-tab="icons" aria-controls="paneIcons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
+            <button class="settings-tab" id="tabAllowlist" type="button" role="tab" data-tab="allowlist" aria-controls="paneAllowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+          </div>
+
+          <div class="settings-pane-stack">
+            <section class="settings-pane is-active" id="paneRendering" data-pane="rendering" role="tabpanel" aria-labelledby="tabRendering">
+              <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings. Roblox's in-game FPS control is not changed.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
+              <div class="form-card">
+                <div class="form-row mode-row">
+                  <div class="field-copy"><label for="modeSelect">Optimization profile</label><p>Sets safe defaults for graphics workload and LOD.</p></div>
+                  <select id="modeSelect" class="select-control">
+                    <option value="Reduce building lag">Reduce building lag</option>
+                    <option value="Balanced">Balanced</option>
+                  </select>
+                </div>
+                <div class="form-divider"></div>
+                <div class="form-row slider-row">
+                  <div class="field-copy"><label for="graphicsQuality">Graphics quality</label><p>Lower values may reduce rendering workload. Range: 0–21.</p></div>
+                  <div class="range-control"><input id="graphicsQuality" type="range" min="0" max="21" step="1" value="21" /><output id="graphicsQualityValue" for="graphicsQuality">21</output></div>
+                </div>
+                <div class="form-divider"></div>
+                <div class="form-row slider-row">
+                  <div class="field-copy"><label for="textureQuality">Texture quality</label><p>Uses Roblox's allowlisted texture-quality override. Range: 0–3.</p></div>
+                  <div class="range-control"><input id="textureQuality" type="range" min="0" max="3" step="1" value="0" /><output id="textureQualityValue" for="textureQuality">0</output></div>
+                </div>
+                <div class="form-divider"></div>
+                <div class="info-callout"><svg class="icon"><use href="#i-shield"/></svg><p><strong>No unapproved FPS flags.</strong> FPS limits are controlled inside Roblox. Roptimer does not write the legacy target-FPS flag.</p></div>
+              </div>
+            </section>
+
+            <section class="settings-pane" id="paneGeometry" data-pane="geometry" role="tabpanel" aria-labelledby="tabGeometry" hidden>
+              <div class="pane-heading"><div><span class="pane-index">02 / GEOMETRY</span><h2>Geometry detail</h2><p>Control safe level-of-detail distances without deleting objects or changing gameplay collision.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-geometry"/></svg></span></div>
+              <div class="form-card">
+                <div class="geometry-meter"><div><span class="field-label">LOD distance</span><p>Higher distances keep detailed geometry visible farther away.</p></div><strong><span id="geometryDistanceValue">64</span><small>studs</small></strong></div>
+                <input class="wide-range" id="geometryDistance" type="range" min="32" max="256" step="16" value="64" aria-label="Geometry level-of-detail distance" />
+                <div class="range-ends"><span>32 · lower workload</span><span>256 · more detail</span></div>
+                <div class="lod-preview" aria-live="polite">
+                  <div><small>LOD BASE</small><strong id="lodBase">64</strong></div><span class="lod-connector"></span>
+                  <div><small>LEVEL 1–2</small><strong id="lodL12">64</strong></div><span class="lod-connector"></span>
+                  <div><small>LEVEL 2–3</small><strong id="lodL23">32</strong></div><span class="lod-connector"></span>
+                  <div><small>LEVEL 3–4</small><strong id="lodL34">16</strong></div>
+                </div>
+                <div class="form-divider"></div>
+                <label class="toggle-row" for="vfxToggle"><span class="toggle-copy"><strong>Reduce optional sky and voxelizer effects</strong><small>Adds only the allowlisted gray-sky and voxelizer flags; grass behavior follows the selected profile.</small></span><span class="switch"><input id="vfxToggle" type="checkbox" checked /><span></span></span></label>
+                <div class="info-callout"><svg class="icon"><use href="#i-shield"/></svg><p><strong>Cosmetic and reversible.</strong> Geometry controls change rendering distance only; they never remove buildings, alter collisions, or touch game memory.</p></div>
+              </div>
+            </section>
+
+            <section class="settings-pane" id="paneIcons" data-pane="icons" role="tabpanel" aria-labelledby="tabIcons" hidden>
+              <div class="pane-heading"><div><span class="pane-index">03 / ICONS</span><h2>Desktop appearance</h2><p>These preferences customize Roptimer's own interface and stay on this device.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-icons"/></svg></span></div>
+              <div class="appearance-grid">
+                <div class="form-card appearance-card">
+                  <div class="section-title"><div><h3>Icon weight</h3><p>Choose how navigation icons are drawn in the desktop app.</p></div></div>
+                  <div class="icon-style-options" role="group" aria-label="Desktop icon style">
+                    <button class="icon-style-option is-selected" type="button" data-icon-style-choice="outline"><span class="style-preview"><svg class="icon"><use href="#i-geometry"/></svg><svg class="icon"><use href="#i-rendering"/></svg><svg class="icon"><use href="#i-icons"/></svg></span><strong>Outline</strong><small>Clean and light</small></button>
+                    <button class="icon-style-option" type="button" data-icon-style-choice="bold"><span class="style-preview"><svg class="icon"><use href="#i-geometry"/></svg><svg class="icon"><use href="#i-rendering"/></svg><svg class="icon"><use href="#i-icons"/></svg></span><strong>Bold</strong><small>More contrast</small></button>
+                    <button class="icon-style-option" type="button" data-icon-style-choice="minimal"><span class="style-preview"><svg class="icon"><use href="#i-geometry"/></svg><svg class="icon"><use href="#i-rendering"/></svg><svg class="icon"><use href="#i-icons"/></svg></span><strong>Minimal</strong><small>Quiet accents</small></button>
+                  </div>
+                  <div class="form-divider"></div>
+                  <div class="section-title"><div><h3>Accent color</h3><p>Applied to Roptimer UI highlights only.</p></div></div>
+                  <div class="accent-options" role="group" aria-label="Desktop accent color">
+                    <button class="accent-choice is-selected" type="button" data-accent-choice="mint"><i class="accent-swatch swatch-mint"></i><span>Mint</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="amber"><i class="accent-swatch swatch-amber"></i><span>Amber</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="blue"><i class="accent-swatch swatch-blue"></i><span>Blue</span></button>
+                  </div>
+                </div>
+                <div class="appearance-preview-card">
+                  <div class="preview-window-head"><span class="window-lights"><i></i><i></i><i></i></span><span>ROPTIMER DESKTOP</span><svg class="icon"><use href="#i-icons"/></svg></div>
+                  <div class="preview-window-body"><div class="preview-side"><span class="preview-logo">R</span><i class="preview-selected"><svg class="icon"><use href="#i-home"/></svg></i><i><svg class="icon"><use href="#i-settings"/></svg></i><i><svg class="icon"><use href="#i-list"/></svg></i></div><div class="preview-content"><span class="preview-line"></span><span class="preview-line short"></span><div class="preview-tile"><svg class="icon"><use href="#i-shield"/></svg><b>Local & reversible</b></div></div></div>
+                  <p>Appearance settings do not change Roblox icons, game assets, or the bundled Windows application icon.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-pane" id="paneAllowlist" data-pane="allowlist" role="tabpanel" aria-labelledby="tabAllowlist" hidden>
+              <div class="pane-heading"><div><span class="pane-index">04 / ALLOWLIST</span><h2>Approved settings only</h2><p>Read-only reference for the canonical local FastFlag allowlist included with Roptimer.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span></div>
+              <div class="allowlist-toolbar"><div class="allowlist-count"><strong id="allowlistTotal">18</strong><span>approved keys</span></div><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="allowlistSearch" type="search" placeholder="Search flags…" autocomplete="off" /><kbd>CTRL K</kbd></label><button class="button button-soft" id="exportAllowlist" type="button"><svg class="icon"><use href="#i-save"/></svg>Export JSON</button></div>
+              <div class="filter-row" id="allowlistFilters" role="tablist" aria-label="Filter allowlist category"></div>
+              <div class="allowlist-groups" id="allowlistGroups" aria-live="polite"></div>
+              <p class="allowlist-note"><svg class="icon"><use href="#i-shield"/></svg>This list is informational and read-only. Roptimer preserves any unrelated settings already in the local JSON file.</p>
+            </section>
+          </div>
+
+          <footer class="settings-footer">
+            <label class="scope-toggle" for="allVersionsToggle"><span class="switch"><input id="allVersionsToggle" type="checkbox" checked /><span></span></span><span><strong>Apply to all detected versions</strong><small>Otherwise, use the first detected settings file.</small></span></label>
+            <div class="footer-actions"><button class="button button-soft" id="saveProfile" type="button"><svg class="icon"><use href="#i-save"/></svg>Save profile</button><button class="button button-outline-warn" id="restoreSettings" type="button"><svg class="icon"><use href="#i-restore"/></svg>Restore managed</button><button class="button button-primary" id="applySettings" type="button"><svg class="icon"><use href="#i-check"/></svg>Apply settings</button></div>
+          </footer>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay" hidden>
+    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <span class="confirm-icon"><svg class="icon"><use href="#i-shield"/></svg></span>
+      <p class="eyebrow" id="confirmEyebrow">LOCAL SETTINGS</p>
+      <h2 id="confirmTitle">Apply this profile?</h2>
+      <p id="confirmText">A timestamped backup will be created before any local setting is changed.</p>
+      <div class="confirm-actions"><button class="button button-soft" id="cancelConfirm" type="button">Cancel</button><button class="button button-primary" id="acceptConfirm" type="button">Confirm</button></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script id="fastflagAllowlist" type="application/json">__FASTFLAG_ALLOWLIST_JSON__</script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

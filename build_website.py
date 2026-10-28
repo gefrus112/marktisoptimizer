@@ -2,7 +2,7 @@
 """Build and validate the Roptimer V4 website for GitHub Pages.
 
 Outputs:
-    web/index.html          primary Pages artifact (also the Tauri frontend source)
+    web/index.html          primary GitHub Pages artifact (website frontend only)
     web/.nojekyll           disables Jekyll processing
     web/404.html            custom not-found page
     web/site.webmanifest    install metadata
@@ -15,9 +15,11 @@ Outputs:
     .nojekyll               root Jekyll bypass
 
 The site is a glowing, vendored-Three.js layout whose MAIN tab is the Windows
-"Client". The Rust + Tauri Windows client ships the same UI. On the website the
-FastFlag allowlist (Geometry / Rendering / User Interface) is server-rendered
-into the HTML so it is visible even if JavaScript fails.
+"Client". The Rust + Tauri Windows executable has a separate desktop interface
+built from ``rust/desktop-ui``; this website generator does not assemble the app
+UI. On the website the FastFlag allowlist (Geometry / Rendering / User
+Interface) is server-rendered into the HTML so it remains visible if JavaScript
+fails.
 
 Usage:
     python3 build_website.py
@@ -375,7 +377,7 @@ def check() -> None:
 
     root_html = ROOT_INDEX.read_text(encoding="utf-8")
     # V4 asset checks: root fallback uses web/-prefixed assets.
-    for asset in ("web/assets/nebula.css", "web/assets/nebula.js", "web/assets/three-scene.js", "web/assets/desktop.js"):
+    for asset in ("web/assets/nebula.css", "web/assets/nebula.js", "web/assets/three-scene.js"):
         if asset not in root_html:
             raise RuntimeError(f"Root index does not reference {asset}")
     if 'href="assets/nebula.css"' not in web_html or 'src="assets/nebula.js"' not in web_html:

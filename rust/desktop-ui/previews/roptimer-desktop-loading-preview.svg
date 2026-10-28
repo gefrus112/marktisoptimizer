@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Roptimer standalone desktop startup preview</title>
+<defs><radialGradient id="wash"><stop stop-color="#73d6ad" stop-opacity=".12"/><stop offset="1" stop-color="#0b0e12" stop-opacity="0"/></radialGradient><linearGradient id="bar"><stop stop-color="#73d6ad"/><stop offset="1" stop-color="#8fe1ba"/></linearGradient></defs>
+<rect width="1440" height="900" fill="#0b0e12"/><ellipse cx="720" cy="420" rx="550" ry="480" fill="url(#wash)"/>
+<rect x="677" y="264" width="86" height="86" rx="23" fill="#12221c" stroke="#426655"/>
+<path d="M720 275 751 293v31l-31 18-31-18v-31l31-18Z" fill="none" stroke="#73d6ad" stroke-width="2.6" stroke-linejoin="round"/><path d="M706 329v-43h18a13 13 0 0 1 0 26h-18m15 0 19 16" fill="none" stroke="#73d6ad" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="720" y="407" text-anchor="middle" fill="#73d6ad" font-family="Consolas,monospace" font-size="10" font-weight="800" letter-spacing="2.2">ROPTIMER · WINDOWS CLIENT</text>
+<text x="720" y="465" text-anchor="middle" fill="#e5ece8" font-family="Segoe UI,Arial,sans-serif" font-size="31" font-weight="600">Preparing your workspace<tspan fill="#73d6ad">.</tspan></text>
+<text x="720" y="497" text-anchor="middle" fill="#84908b" font-family="Segoe UI,Arial,sans-serif" font-size="13">Starting the local settings service…</text>
+<rect x="565" y="532" width="310" height="5" rx="3" fill="#2a3234"/><rect x="565" y="532" width="218" height="5" rx="3" fill="url(#bar)"/>
+<text x="610" y="575" text-anchor="middle" fill="#59645f" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">LOCAL FIRST</text>
+<text x="830" y="575" text-anchor="middle" fill="#59645f" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">ALLOWLIST ONLY</text>
+</svg>

@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900"><title>Roptimer standalone desktop Geometry settings</title><rect width="100%" height="100%" fill="#0d1014"/>
+<rect x="0" y="0" width="236" height="900" rx="0" fill="#0a0d11"/>
+<path d="M236 0H236" stroke="#20272d" stroke-width="1"/>
+<rect x="24" y="25" width="40" height="40" rx="12" fill="#12221c" stroke="#345047" stroke-width="1"/>
+<text x="36" y="53" fill="#73d6ad" font-family="Consolas,monospace" font-size="24px" font-weight="800">R</text>
+<text x="76" y="42" fill="#edf2f1" font-family="Consolas,monospace" font-size="12px" font-weight="800" letter-spacing="1.5px">ROPTIMER</text>
+<text x="76" y="57" fill="#7c8988" font-family="Consolas,monospace" font-size="8px" font-weight="700" letter-spacing="1px">WINDOWS CLIENT</text>
+<path d="M20 84H216" stroke="#20272f" stroke-width="1"/>
+<text x="27" y="112" fill="#65716e" font-family="Consolas,monospace" font-size="9px" font-weight="800" letter-spacing="1.2px">WORKSPACE</text>
+<rect x="16" y="126" width="204" height="42" rx="9" fill="transparent"/>
+<text x="31" y="153" fill="#7b8886" font-family="Segoe UI,Arial,sans-serif" font-size="18px" font-weight="600">⌂</text>
+<text x="60" y="153" fill="#9aa5a4" font-family="Segoe UI,Arial,sans-serif" font-size="13px" font-weight="600">Main</text>
+<rect x="16" y="173" width="204" height="42" rx="9" fill="rgba(115,214,173,.085)" stroke="#294038" stroke-width="1"/>
+<text x="31" y="200" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="16px" font-weight="600">☷</text>
+<text x="60" y="200" fill="#eef8f3" font-family="Segoe UI,Arial,sans-serif" font-size="13px" font-weight="650">Settings</text>
+<text x="193" y="199" fill="#74807d" font-family="Segoe UI,Arial,sans-serif" font-size="13px" font-weight="400">⌄</text>
+<text x="43" y="246" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="14px" font-weight="600">◉</text>
+<text x="68" y="246" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="600">Rendering</text>
+<rect x="29" y="259" width="185" height="30" rx="7" fill="rgba(115,214,173,.07)"/>
+<text x="43" y="280" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="14px" font-weight="600">◇</text>
+<text x="68" y="280" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="600">Geometry</text>
+<text x="43" y="314" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="14px" font-weight="600">▦</text>
+<text x="68" y="314" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="600">Icons</text>
+<text x="43" y="348" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="14px" font-weight="600">☷</text>
+<text x="68" y="348" fill="#788481" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="600">Allowlist</text>
+<rect x="17" y="746" width="202" height="55" rx="10" fill="rgba(115,214,173,.045)" stroke="#263a32" stroke-width="1"/>
+<text x="30" y="769" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="16px" font-weight="600">◈</text>
+<text x="56" y="766" fill="#d1ddd6" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Local &amp; reversible</text>
+<text x="56" y="782" fill="#72807a" font-family="Segoe UI,Arial,sans-serif" font-size="8px" font-weight="400">No injection · No memory access</text>
+<circle cx="23" cy="843" r="3" fill="#73d6ad"/>
+<text x="34" y="847" fill="#697473" font-family="Consolas,monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">DESKTOP MODE</text>
+<text x="190" y="847" fill="#495453" font-family="Consolas,monospace" font-size="8px" font-weight="800">V4</text>
+<rect x="236" y="0" width="1204" height="62" rx="0" fill="#0d1115"/>
+<path d="M236 62H1440" stroke="#20272d" stroke-width="1"/>
+<text x="274" y="37" fill="#63706d" font-family="Consolas,monospace" font-size="9px" font-weight="700" letter-spacing="1px">ROPTIMER</text>
+<text x="329" y="37" fill="#39413f" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="400">/</text>
+<text x="344" y="37" fill="#c6cecc" font-family="Consolas,monospace" font-size="10px" font-weight="700">Settings · Geometry</text>
+<circle cx="1170" cy="31" r="3" fill="#73d6ad"/>
+<text x="1180" y="34" fill="#77817f" font-family="Consolas,monospace" font-size="8px" font-weight="800" letter-spacing="0.5px">RUNNING LOCALLY</text>
+<path d="M1322 24H1322" stroke="#323a3f" stroke-width="1"/>
+<text x="1341" y="34" fill="#9da8a6" font-family="Consolas,monospace" font-size="9px" font-weight="800">V4.0.0</text>
+<text x="276" y="109" fill="#73d6ad" font-family="Consolas,monospace" font-size="9px" font-weight="800" letter-spacing="1.2px">LOCAL CONFIGURATION     ·     SAFE BY DEFAULT</text>
+<text x="276" y="158" fill="#edf2f1" font-family="Segoe UI,Arial,sans-serif" font-size="38px" font-weight="650">Settings</text>
+<text x="276" y="186" fill="#909b99" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="400">Choose a profile and review the exact groups Roptimer is allowed to manage.</text>
+<rect x="1123" y="127" width="254" height="34" rx="8" fill="#11171a" stroke="#2b3535" stroke-width="1"/>
+<circle cx="1140" cy="144" r="3" fill="#73d6ad"/>
+<text x="1151" y="147" fill="#8d9995" font-family="Consolas,monospace" font-size="8px" font-weight="700">CHANGES STAGED LOCALLY</text>
+<rect x="276" y="211" width="1100" height="48" rx="10" fill="#0b0f13" stroke="#283137" stroke-width="1"/>
+<text x="358" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="15px" font-weight="600">◉</text>
+<text x="382" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Rendering</text>
+<rect x="554" y="216" width="265" height="38" rx="7" fill="rgba(115,214,173,.095)" stroke="#2e4a3d" stroke-width="1"/>
+<text x="630" y="241" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="15px" font-weight="600">◇</text>
+<text x="654" y="241" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Geometry</text>
+<text x="902" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="15px" font-weight="600">▦</text>
+<text x="926" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Icons</text>
+<text x="1174" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="15px" font-weight="600">☷</text>
+<text x="1198" y="241" fill="#87918f" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Allowlist</text>
+<text x="277" y="295" fill="#73d6ad" font-family="Consolas,monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">02 / GEOMETRY</text>
+<text x="277" y="324" fill="#e5ecea" font-family="Segoe UI,Arial,sans-serif" font-size="21px" font-weight="630">Geometry detail</text>
+<text x="277" y="345" fill="#84908d" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="400">Set safe level-of-detail distances without deleting objects or changing collision.</text>
+<rect x="276" y="366" width="1100" height="344" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<text x="301" y="406" fill="#d7e0dd" font-family="Segoe UI,Arial,sans-serif" font-size="11px" font-weight="700">LOD distance</text>
+<text x="301" y="425" fill="#7e8a87" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="400">Higher distances keep detailed geometry visible farther away.</text>
+<text x="1293" y="412" fill="#73d6ad" font-family="Consolas,monospace" font-size="24px" font-weight="720">64</text>
+<text x="1330" y="412" fill="#7c8984" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="400">studs</text>
+<path d="M302 465H1348" stroke="#34403c" stroke-width="5"/>
+<path d="M302 465H455" stroke="#73d6ad" stroke-width="5"/>
+<circle cx="455" cy="465" r="8" fill="#73d6ad"/>
+<text x="302" y="487" fill="#727e7b" font-family="Consolas,monospace" font-size="8px" font-weight="500">32 · lower workload</text>
+<text x="1267" y="487" fill="#727e7b" font-family="Consolas,monospace" font-size="8px" font-weight="500">256 · more detail</text>
+<rect x="300" y="514" width="1052" height="62" rx="9" fill="#10161b" stroke="#2b3438" stroke-width="1"/>
+<text x="318" y="538" fill="#74807d" font-family="Consolas,monospace" font-size="7px" font-weight="800" letter-spacing="0.7px">LOD BASE</text>
+<text x="318" y="560" fill="#d5dfdb" font-family="Consolas,monospace" font-size="13px" font-weight="700">64</text>
+<path d="M438 548H541" stroke="#38423f" stroke-width="1"/>
+<text x="568" y="538" fill="#74807d" font-family="Consolas,monospace" font-size="7px" font-weight="800" letter-spacing="0.7px">LEVEL 1–2</text>
+<text x="568" y="560" fill="#d5dfdb" font-family="Consolas,monospace" font-size="13px" font-weight="700">64</text>
+<path d="M688 548H791" stroke="#38423f" stroke-width="1"/>
+<text x="818" y="538" fill="#74807d" font-family="Consolas,monospace" font-size="7px" font-weight="800" letter-spacing="0.7px">LEVEL 2–3</text>
+<text x="818" y="560" fill="#d5dfdb" font-family="Consolas,monospace" font-size="13px" font-weight="700">32</text>
+<path d="M938 548H1041" stroke="#38423f" stroke-width="1"/>
+<text x="1068" y="538" fill="#74807d" font-family="Consolas,monospace" font-size="7px" font-weight="800" letter-spacing="0.7px">LEVEL 3–4</text>
+<text x="1068" y="560" fill="#d5dfdb" font-family="Consolas,monospace" font-size="13px" font-weight="700">16</text>
+<path d="M298 594H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="301" y="630" fill="#d2dcd8" font-family="Segoe UI,Arial,sans-serif" font-size="10px" font-weight="700">Reduce optional sky and voxelizer effects</text>
+<text x="301" y="648" fill="#7f8b87" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="400">Adds only allowlisted gray-sky and voxelizer flags; grass behavior follows the selected profile.</text>
+<rect x="1310" y="617" width="38" height="22" rx="12" fill="rgba(115,214,173,.27)" stroke="#668c79" stroke-width="1"/>
+<circle cx="1336" cy="628" r="7" fill="#73d6ad"/>
+<rect x="299" y="672" width="1053" height="25" rx="7" fill="rgba(115,214,173,.045)" stroke="#2b3b35" stroke-width="1"/>
+<text x="315" y="689" fill="#73d6ad" font-family="Segoe UI,Arial,sans-serif" font-size="13px" font-weight="600">◈</text>
+<text x="338" y="689" fill="#a0ada8" font-family="Segoe UI,Arial,sans-serif" font-size="8px" font-weight="400">Geometry changes rendering distance only. No building deletion, collision changes, or game-memory access.</text>
+<rect x="236" y="811" width="1204" height="89" rx="0" fill="#0d1115"/>
+<path d="M236 811H1440" stroke="#2c343a" stroke-width="1"/>
+<rect x="277" y="834" width="31" height="18" rx="11" fill="rgba(115,214,173,.27)" stroke="#668c79" stroke-width="1"/>
+<circle cx="299" cy="843" r="6" fill="#73d6ad"/>
+<text x="318" y="842" fill="#c2cdca" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="700">Apply to all detected versions</text>
+<text x="318" y="859" fill="#74807d" font-family="Segoe UI,Arial,sans-serif" font-size="8px" font-weight="400">Otherwise, use the first detected settings file.</text>
+<rect x="877" y="829" width="109" height="35" rx="8" fill="#171c22" stroke="#323b42" stroke-width="1"/>
+<text x="891" y="851" fill="#c2ccca" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="700">▣  Save profile</text>
+<rect x="996" y="829" width="151" height="35" rx="8" fill="#191918" stroke="#513936" stroke-width="1"/>
+<text x="1008" y="851" fill="#e8aaa2" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="700">↶  Restore managed</text>
+<rect x="1157" y="829" width="182" height="35" rx="8" fill="#73d6ad" stroke="#86dcb8" stroke-width="1"/>
+<text x="1175" y="851" fill="#11231c" font-family="Segoe UI,Arial,sans-serif" font-size="9px" font-weight="750">✓  Apply settings</text>
+</svg>
