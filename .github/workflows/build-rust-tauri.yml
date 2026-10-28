@@ -60,6 +60,20 @@ jobs:
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "^2" --locked
 
+      - name: Run Rust unit tests
+        working-directory: rust/src-tauri
+        shell: pwsh
+        run: |
+          $testLog = Join-Path $env:RUNNER_TEMP "tauri-tests.log"
+          cargo test 2>&1 | Tee-Object -FilePath $testLog
+          $testExit = $LASTEXITCODE
+          if ($testExit -ne 0) {
+            $tail = (Get-Content $testLog -Tail 18) -join " | "
+            $tail = $tail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Rust unit test failure::$tail"
+            exit $testExit
+          }
+
       - name: Ensure NSIS is available
         shell: pwsh
         run: |
