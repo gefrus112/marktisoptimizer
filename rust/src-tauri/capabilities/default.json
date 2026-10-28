@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main Roptimer client window. Custom Rust commands (detect_roblox, apply_settings, restore_settings, app_info, get_allowlist, open_external) are exposed via the invoke handler and are not gated by plugin permissions. No shell or filesystem plugins are enabled.",
+  "description": "Default capability for the main Roptimer client window. Custom Rust commands (detect_roblox, active_roblox_status, apply_settings, restore_settings, app_info, get_allowlist, open_external) are exposed via the invoke handler and are not gated by plugin permissions. No shell or filesystem plugins are enabled.",
   "windows": ["main"],
   "permissions": [
     "core:default"

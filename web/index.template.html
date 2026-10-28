@@ -11,9 +11,33 @@
   <link rel="apple-touch-icon" href="assets/icons/roptimzier-shield.png" />
   <link rel="manifest" href="site.webmanifest" />
   <link rel="stylesheet" href="assets/nebula.css" />
-  <script>document.documentElement.classList.add('js'); window.ROPTIMER_WEB_BASE=".";</script>
+  <script>
+    document.documentElement.classList.add('js');
+    window.ROPTIMER_WEB_BASE=".";
+    var tauriBridge = window["_" + "_TAURI" + "__"] || window["_" + "_TAURI_INTERNALS" + "__"];
+    if (tauriBridge) document.documentElement.classList.add('is-tauri-loading');
+  </script>
 </head>
 <body>
+  <div class="app-boot-splash" id="appBootSplash" aria-hidden="true">
+    <div class="boot-splash-glow" aria-hidden="true"></div>
+    <section class="boot-splash-card" role="status" aria-live="polite">
+      <div class="boot-brand">
+        <span class="boot-brand-mark" aria-hidden="true">R</span>
+        <span>ROPTIMER <b>V4</b></span>
+        <span class="boot-local-badge">LOCAL · SAFE</span>
+      </div>
+      <div class="boot-orbit" aria-hidden="true"><span>R</span><i></i></div>
+      <p class="boot-eyebrow">RUST + TAURI · WINDOWS CLIENT</p>
+      <h1>Getting things ready<span>.</span></h1>
+      <p class="boot-status" id="appBootStatus">Preparing your safe local client…</p>
+      <div class="boot-progress" role="progressbar" aria-label="Loading Roptimer" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12">
+        <span id="appBootProgress"></span>
+      </div>
+      <div class="boot-foot"><span>OFFLINE-READY UI</span><span>LOCAL SETTINGS ONLY</span></div>
+    </section>
+  </div>
+
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
   <canvas id="three-canvas" aria-hidden="true"></canvas>
   <div class="scene-veil" aria-hidden="true"></div>
@@ -142,6 +166,21 @@
               </div>
             </div>
 
+            <div class="active-client-card" id="activeClientCard" data-state="idle" role="status" aria-live="polite">
+              <div class="active-client-icon" aria-hidden="true">◉</div>
+              <div class="active-client-body">
+                <strong id="activeClientTitle">Live Roblox Player status · Windows app</strong>
+                <p id="activeClientText">The app checks the Player process name only; this does not confirm an experience is loaded. It does not read the game, server, account, command line, or memory.</p>
+              </div>
+              <div class="active-client-actions">
+                <span class="active-client-badge" id="activeClientBadge">Desktop only</span>
+                <div class="active-client-buttons">
+                  <button class="button ghost small is-desktop-only" id="refreshActiveClient" type="button">Refresh</button>
+                  <button class="button primary small is-desktop-only" id="openClientOptimizer" type="button">Open optimizations</button>
+                </div>
+              </div>
+            </div>
+
             <div class="windows-ribbon">
               <span class="badge-icon" aria-hidden="true">⊞</span>
               <span>This Client tab and its FastFlag allowlist are features of the <strong>Windows app only</strong>. The macOS companion is a separate, legacy Python tool and does not include the Windows client allowlist manager.</span>
@@ -155,7 +194,7 @@
             </div>
           </div>
 
-          <div class="panel client-panel">
+          <div class="panel client-panel" id="settingsBuilder">
             <h3>Safe settings builder</h3>
             <p>Preview the exact command the Boost CLI would run. All generated keys are taken from the Roblox allowlist below — nothing else is ever written.</p>
 
@@ -313,7 +352,7 @@
           <div class="panel" id="how-it-works">
             <h3>Three safe steps</h3>
             <div class="steps">
-              <div class="step"><span class="step-num">STEP 01</span><h4>Detect</h4><p>The Rust client scans normal Roblox version folders and Windows install locations. Filesystem paths only — no processes, no memory.</p></div>
+              <div class="step"><span class="step-num">STEP 01</span><h4>Detect</h4><p>Install detection scans normal Roblox version folders. A separate Windows-only status check reads only whether RobloxPlayerBeta.exe appears in the process list — no command line, game/server details, or memory.</p></div>
               <div class="step"><span class="step-num">STEP 02</span><h4>Back up</h4><p>Existing JSON is copied to a timestamped backup. Unrelated keys are preserved; only allowlisted rendering/geometry keys are merged.</p></div>
               <div class="step"><span class="step-num">STEP 03</span><h4>Restore</h4><p>Restore puts managed keys back from the backup. Every write is reversible from within the app or the Boost CLI.</p></div>
             </div>
@@ -350,7 +389,7 @@ RoptimerBoost.exe self-test</pre></div>
             <li>Timestamped backups before every change</li>
             <li>Unrelated JSON keys always preserved</li>
             <li>Only Roblox-allowlisted FastFlags managed</li>
-            <li>OS-level Roblox installation detection only</li>
+            <li>OS-level install detection + process-name-only running status</li>
             <li>Vendored Three.js — no CDN, no remote code</li>
           </ul>
           <ul class="safety-list">

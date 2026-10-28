@@ -1,8 +1,9 @@
 # Roptimer — Rust + Tauri v2 Windows client
 
 A **single, lightweight Windows 64-bit executable** that opens to one **Client**
-tab, **detects whether Roblox is installed on first launch**, and manages only
-Roblox-allowlisted, reversible `ClientAppSettings.json` performance flags.
+tab, detects whether Roblox is installed on first launch, reports whether the
+Player process name is present, and manages only Roblox-allowlisted, reversible
+`ClientAppSettings.json` performance flags.
 
 Built with [Tauri v2](https://tauri.app/) + Rust. The UI is the same static,
 glowing (vendored) Three.js site that powers GitHub Pages — no CDN, no remote
@@ -31,6 +32,7 @@ src-tauri/
     main.rs      entry point (windows_subsystem for a GUI-only release exe)
     lib.rs       Tauri app + app_info / get_allowlist / open_external commands
     detect.rs    read-only Roblox installation detection (Windows)
+    session.rs   process-name-only Roblox Player status (Windows)
     settings.rs  safe apply/restore with timestamped backups, allowlist only
 frontend/        GENERATED — do not edit; assembled from ../web by
                  ../build_tauri_frontend.py
@@ -38,6 +40,8 @@ frontend/        GENERATED — do not edit; assembled from ../web by
 
 ## Safety
 
-Local reversible JSON writes only, timestamped backups, unrelated keys
-preserved, allowlisted keys only. No injection, memory access, telemetry
-disabling, anti-cheat bypass, or game script execution.
+Settings changes are local, reversible JSON writes with timestamped backups;
+unrelated keys are preserved and only allowlisted keys are managed. The live
+status check reads only whether `RobloxPlayerBeta.exe` is present in the Windows
+process list. No process handles, command lines, game/server details, memory,
+injection, telemetry disabling, anti-cheat bypass, or game script execution.

@@ -77,7 +77,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Detects running Roblox processes and OS window titles only. The Roblox display name is typed locally; no account data, player list, chat, game state, or memory is read."
+      "details": "The V4 Windows client reports whether RobloxPlayerBeta.exe appears in the OS process list using the process image name only; it does not read command-line arguments, game titles, thumbnails, server IDs/addresses, account data, player lists, chat, or memory. The legacy .NET Session page also displays local process paths and window titles."
     },
     {
       "id": "bootstrapper",

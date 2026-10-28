@@ -1,13 +1,15 @@
 //! Roptimer — Rust + Tauri v2 Windows client.
 //!
 //! A single, lightweight executable that opens to one "Client" tab, detects
-//! whether Roblox is installed on first launch, and manages only Roblox-
-//! allowlisted FastFlags via local, reversible ClientAppSettings.json writes.
+//! whether Roblox is installed on first launch, reports process-name-only
+//! Player presence, and manages allowlisted FastFlags via local, reversible
+//! ClientAppSettings.json writes.
 //!
 //! No injection, memory access, telemetry disabling, anti-cheat bypass, or
 //! game script execution. See settings.rs and detect.rs for the safety boundary.
 
 mod detect;
+mod session;
 mod settings;
 
 use serde::Serialize;
@@ -114,6 +116,7 @@ pub fn run() {
             get_allowlist,
             open_external,
             detect::detect_roblox,
+            session::active_roblox_status,
             settings::apply_settings,
             settings::restore_settings,
         ])

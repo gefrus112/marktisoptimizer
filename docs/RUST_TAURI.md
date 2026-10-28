@@ -44,6 +44,16 @@ local settings safely.
 If Roblox is missing, the app tells the user to install the desktop client from
 roblox.com and offers a **Re-scan** button.
 
+## Live Player presence (Windows only)
+
+The Client tab also checks whether `RobloxPlayerBeta.exe` is present in the
+Windows process list when the app opens, on request, and every ten seconds while
+it is open. The Rust command `active_roblox_status` returns only a running/not
+running result and a timestamp; this does not confirm that an experience is
+loaded. It does not open a process handle or inspect command-line arguments,
+game state, game thumbnails, server IDs/addresses, account data, or memory. The **Open optimizations** button jumps to the local
+profile builder; it does not modify Roblox's in-game menu.
+
 ## The Client tab + allowlist (Windows only)
 
 The main tab groups the **18 Roblox-allowlisted FastFlags** into
@@ -79,6 +89,7 @@ script execution.
 | --- | --- | --- |
 | `app_info` | Product/version/framework/safety info | none |
 | `detect_roblox` | Detect Roblox installation | read-only filesystem scan |
+| `active_roblox_status` | Check whether the Roblox Player process name is present | read-only process-name check |
 | `get_allowlist` | Return the canonical allowlist JSON | none |
 | `apply_settings` | Apply allowlisted settings | local JSON write + backup |
 | `restore_settings` | Restore managed keys | local JSON write + backup |
@@ -125,7 +136,8 @@ rust/
     src/
       main.rs               windows_subsystem + entry point
       lib.rs                app_info, get_allowlist, open_external, run()
-      detect.rs             read-only Roblox detection
+      detect.rs             read-only Roblox installation detection
+      session.rs            process-name-only Roblox Player status
       settings.rs           safe apply/restore with backups
   frontend/                 GENERATED static UI (from web/)
     index.html
