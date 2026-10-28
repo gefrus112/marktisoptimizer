@@ -56,11 +56,11 @@
         <button class="nav-item" id="navSettings" type="button" data-view="settings" aria-expanded="true">
           <svg class="icon"><use href="#i-settings"/></svg><span>Settings</span><svg class="icon nav-chevron"><use href="#i-arrow"/></svg>
         </button>
-        <div class="settings-subnav" id="settingsSubnav" aria-label="Settings sections">
-          <button class="subnav-item is-active" type="button" data-tab="rendering" aria-selected="true"><svg class="icon"><use href="#i-rendering"/></svg><span>Rendering</span></button>
-          <button class="subnav-item" type="button" data-tab="geometry" aria-selected="false"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
-          <button class="subnav-item" type="button" data-tab="icons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
-          <button class="subnav-item" type="button" data-tab="allowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+        <div class="settings-subnav" id="settingsSubnav" role="group" aria-label="Settings sections">
+          <button class="subnav-item" type="button" data-tab="rendering"><svg class="icon"><use href="#i-rendering"/></svg><span>Rendering</span></button>
+          <button class="subnav-item" type="button" data-tab="geometry"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
+          <button class="subnav-item" type="button" data-tab="icons"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
+          <button class="subnav-item" type="button" data-tab="allowlist"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
         </div>
       </nav>
 
@@ -226,7 +226,7 @@
             <section class="settings-pane" id="paneAllowlist" data-pane="allowlist" role="tabpanel" aria-labelledby="tabAllowlist" hidden>
               <div class="pane-heading"><div><span class="pane-index">04 / ALLOWLIST</span><h2>Approved settings only</h2><p>Read-only reference for the canonical local FastFlag allowlist included with Roptimer.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span></div>
               <div class="allowlist-toolbar"><div class="allowlist-count"><strong id="allowlistTotal">18</strong><span>approved keys</span></div><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="allowlistSearch" type="search" placeholder="Search flags…" autocomplete="off" /><kbd>CTRL K</kbd></label><button class="button button-soft" id="exportAllowlist" type="button"><svg class="icon"><use href="#i-save"/></svg>Export JSON</button></div>
-              <div class="filter-row" id="allowlistFilters" role="tablist" aria-label="Filter allowlist category"></div>
+              <div class="filter-row" id="allowlistFilters" role="group" aria-label="Filter allowlist category"></div>
               <div class="allowlist-groups" id="allowlistGroups" aria-live="polite"></div>
               <p class="allowlist-note"><svg class="icon"><use href="#i-shield"/></svg>This list is informational and read-only. Roptimer preserves any unrelated settings already in the local JSON file.</p>
             </section>
@@ -242,7 +242,7 @@
   </div>
 
   <div class="confirm-overlay" id="confirmOverlay" hidden>
-    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <section class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText" tabindex="-1">
       <span class="confirm-icon"><svg class="icon"><use href="#i-shield"/></svg></span>
       <p class="eyebrow" id="confirmEyebrow">LOCAL SETTINGS</p>
       <h2 id="confirmTitle">Apply this profile?</h2>

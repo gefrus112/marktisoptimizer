@@ -8,6 +8,6 @@
 <text x="720" y="465" text-anchor="middle" fill="#e5ece8" font-family="Segoe UI,Arial,sans-serif" font-size="31" font-weight="600">Preparing your workspace<tspan fill="#73d6ad">.</tspan></text>
 <text x="720" y="497" text-anchor="middle" fill="#84908b" font-family="Segoe UI,Arial,sans-serif" font-size="13">Starting the local settings service…</text>
 <rect x="565" y="532" width="310" height="5" rx="3" fill="#2a3234"/><rect x="565" y="532" width="218" height="5" rx="3" fill="url(#bar)"/>
-<text x="610" y="575" text-anchor="middle" fill="#59645f" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">LOCAL FIRST</text>
-<text x="830" y="575" text-anchor="middle" fill="#59645f" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">ALLOWLIST ONLY</text>
+<text x="610" y="575" text-anchor="middle" fill="#7c8988" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">LOCAL FIRST</text>
+<text x="830" y="575" text-anchor="middle" fill="#7c8988" font-family="Consolas,monospace" font-size="8" font-weight="800" letter-spacing="1.2">ALLOWLIST ONLY</text>
 </svg>

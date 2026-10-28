@@ -30,6 +30,7 @@
     allowlistFilter: "all",
     geometryManuallyChanged: false,
     pendingAction: null,
+    confirmReturnFocus: null,
     statusPending: false,
     toastTimer: 0,
     saveTimer: 0
@@ -301,6 +302,12 @@
     if (view === "main") byId("navMain").setAttribute("aria-current", "page");
     else byId("navMain").removeAttribute("aria-current");
     byId("navSettings").classList.toggle("is-active", view === "settings");
+    if (view === "main") {
+      document.querySelectorAll(".subnav-item").forEach(function (item) {
+        item.classList.remove("is-active");
+        item.removeAttribute("aria-current");
+      });
+    }
     byId("breadcrumbTitle").textContent = view === "settings" ? "Settings" : "Main";
     if (view === "settings") {
       byId("navSettings").setAttribute("aria-expanded", "true");
@@ -330,7 +337,8 @@
     document.querySelectorAll(".subnav-item").forEach(function (tab) {
       const active = tab.dataset.tab === selected;
       tab.classList.toggle("is-active", active);
-      tab.setAttribute("aria-selected", active ? "true" : "false");
+      if (active) tab.setAttribute("aria-current", "page");
+      else tab.removeAttribute("aria-current");
     });
     document.querySelectorAll(".settings-pane").forEach(function (pane) {
       const active = pane.dataset.pane === selected;
@@ -362,8 +370,7 @@
       button.type = "button";
       button.className = "filter-chip" + (state.allowlistFilter === item.key ? " is-active" : "");
       button.dataset.filterCategory = item.key;
-      button.setAttribute("role", "tab");
-      button.setAttribute("aria-selected", state.allowlistFilter === item.key ? "true" : "false");
+      button.setAttribute("aria-pressed", state.allowlistFilter === item.key ? "true" : "false");
       const label = document.createElement("span");
       label.textContent = item.name;
       const count = document.createElement("b");
@@ -472,6 +479,7 @@
       return;
     }
     state.pendingAction = action;
+    state.confirmReturnFocus = document.activeElement;
     const isApply = action === "apply";
     byId("confirmEyebrow").textContent = isApply ? "LOCAL SETTINGS · BACKUP FIRST" : "LOCAL SETTINGS · RESTORE";
     byId("confirmTitle").textContent = isApply ? "Apply this profile?" : "Restore managed settings?";
@@ -485,33 +493,47 @@
   function closeConfirmation() {
     byId("confirmOverlay").hidden = true;
     state.pendingAction = null;
+    const returnFocus = state.confirmReturnFocus;
+    state.confirmReturnFocus = null;
+    if (returnFocus && returnFocus.isConnected && typeof returnFocus.focus === "function") returnFocus.focus();
   }
 
   async function confirmAction() {
     const action = state.pendingAction;
     if (!action || !invoke) return closeConfirmation();
     const accept = byId("acceptConfirm");
+    const cancel = byId("cancelConfirm");
+    const dialog = byId("confirmDialog");
     accept.disabled = true;
+    cancel.disabled = true;
+    dialog.setAttribute("aria-busy", "true");
+    dialog.focus();
     accept.textContent = action === "apply" ? "Applying…" : "Restoring…";
+    let result = null;
+    let failure = null;
     try {
-      let result;
       if (action === "apply") result = await invoke("apply_settings", { profile: currentProfile() });
       else result = await invoke("restore_settings");
-      closeConfirmation();
-      if (result && result.applied) {
-        showToast(result.message || (action === "apply" ? "Settings applied with backups." : "Managed settings restored."), "success");
-      } else {
-        showToast(result && result.message ? result.message : "No settings files were changed.", "warning");
-      }
-      await detectRoblox();
-      updateProfileDisplay();
     } catch (error) {
-      closeConfirmation();
-      showToast((action === "apply" ? "Apply failed: " : "Restore failed: ") + (error && error.message ? error.message : String(error)), "error");
+      failure = error;
     } finally {
       accept.disabled = false;
+      cancel.disabled = false;
+      dialog.removeAttribute("aria-busy");
       accept.textContent = "Confirm";
     }
+    closeConfirmation();
+    if (failure) {
+      showToast((action === "apply" ? "Apply failed: " : "Restore failed: ") + (failure && failure.message ? failure.message : String(failure)), "error");
+      return;
+    }
+    if (result && result.applied) {
+      showToast(result.message || (action === "apply" ? "Settings applied with backups." : "Managed settings restored."), "success");
+    } else {
+      showToast(result && result.message ? result.message : "No settings files were changed.", "warning");
+    }
+    await detectRoblox();
+    updateProfileDisplay();
   }
 
   async function quickRefresh() {
@@ -519,6 +541,26 @@
     if (button) button.disabled = true;
     await Promise.all([detectRoblox(), refreshPlayerStatus()]);
     if (button) button.disabled = false;
+  }
+
+  function trapConfirmationFocus(event) {
+    const dialog = byId("confirmDialog");
+    const focusable = Array.from(dialog.querySelectorAll(
+      'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+    )).filter(function (element) { return !element.hidden; });
+    if (!focusable.length) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+    const index = focusable.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) {
+      event.preventDefault();
+      focusable[focusable.length - 1].focus();
+    } else if (!event.shiftKey && (index < 0 || index === focusable.length - 1)) {
+      event.preventDefault();
+      focusable[0].focus();
+    }
   }
 
   function wireEvents() {
@@ -535,6 +577,21 @@
     });
     document.querySelectorAll("[data-tab]").forEach(function (button) {
       button.addEventListener("click", function () { setSettingsTab(button.dataset.tab); });
+    });
+    document.querySelectorAll(".settings-tab").forEach(function (tab) {
+      tab.addEventListener("keydown", function (event) {
+        const tabs = Array.from(document.querySelectorAll(".settings-tab"));
+        const index = tabs.indexOf(tab);
+        let next = -1;
+        if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+        else if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = tabs.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        setSettingsTab(tabs[next].dataset.tab);
+        tabs[next].focus();
+      });
     });
     byId("mainOpenSettings").addEventListener("click", function () { setView("settings"); });
     byId("editProfile").addEventListener("click", function () { setSettingsTab("rendering"); });
@@ -569,7 +626,7 @@
     byId("acceptConfirm").addEventListener("click", confirmAction);
     byId("cancelConfirm").addEventListener("click", closeConfirmation);
     byId("confirmOverlay").addEventListener("click", function (event) {
-      if (event.target === byId("confirmOverlay")) closeConfirmation();
+      if (event.target === byId("confirmOverlay") && !byId("acceptConfirm").disabled) closeConfirmation();
     });
 
     byId("allowlistSearch").addEventListener("input", renderAllowlist);
@@ -577,7 +634,11 @@
       const button = event.target.closest("[data-filter-category]");
       if (!button) return;
       state.allowlistFilter = button.dataset.filterCategory;
-      renderAllowlistFilters();
+      byId("allowlistFilters").querySelectorAll("[data-filter-category]").forEach(function (chip) {
+        const active = chip.dataset.filterCategory === state.allowlistFilter;
+        chip.classList.toggle("is-active", active);
+        chip.setAttribute("aria-pressed", active ? "true" : "false");
+      });
       renderAllowlist();
     });
     byId("exportAllowlist").addEventListener("click", function () {
@@ -603,12 +664,21 @@
     });
 
     document.addEventListener("keydown", function (event) {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      const overlay = byId("confirmOverlay");
+      if (!overlay.hidden && event.key === "Tab") {
+        trapConfirmationFocus(event);
+        return;
+      }
+      if (!overlay.hidden && event.key === "Escape") {
+        event.preventDefault();
+        if (!byId("acceptConfirm").disabled) closeConfirmation();
+        return;
+      }
+      if (overlay.hidden && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setSettingsTab("allowlist");
         byId("allowlistSearch").focus();
       }
-      if (event.key === "Escape" && !byId("confirmOverlay").hidden) closeConfirmation();
     });
   }
 
@@ -621,7 +691,10 @@
   }
 
   async function boot() {
-    applyProfileToControls(readProfile());
+    const initialProfile = readProfile();
+    const modeDefaultDistance = initialProfile.mode === "Balanced" ? 128 : 64;
+    state.geometryManuallyChanged = initialProfile.geometryDistance !== modeDefaultDistance;
+    applyProfileToControls(initialProfile);
     applyAppearance(readAppearance());
     const allowlistTask = loadAllowlist();
     if (!invoke) {

@@ -31,7 +31,7 @@
 <text x="56" y="782" fill="#72807a" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">No injection · No memory access</text>
 <circle cx="23" cy="843" r="3" fill="#73d6ad"/>
 <text x="34" y="847" fill="#697473" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.7px">DESKTOP MODE</text>
-<text x="190" y="847" fill="#495453" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">V4</text>
+<text x="190" y="847" fill="#7c8988" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">V4</text>
 <rect x="236" y="0" width="1204" height="62" rx="0" fill="#0d1115"/>
 <path d="M236 62H1440" stroke="#20272d" stroke-width="1"/>
 <text x="274" y="37" fill="#63706d" font-family="Consolas, monospace" font-size="9px" font-weight="700" letter-spacing="1px">ROPTIMER</text>
