@@ -68,7 +68,8 @@ installer and SHA-256 file as a build artifact.
   internal render resolution, reroutes traffic, or executes game scripts. It
   also does not silently delete cache/log/temp files, write fullscreen or CPU
   priority registry tweaks, clear standby memory, force restore points, change
-  DNS/MTU, or replace Roblox assets or audio.
+  DNS/MTU, or replace Roblox assets or audio. See the [safe feature roadmap](../docs/ROADMAP.md)
+  for scoped next steps and features intentionally left out.
 
 The Electron backend is covered by `npm test`; the Windows installer itself is
 built by `.github/workflows/build-electron.yml` on a Windows runner.

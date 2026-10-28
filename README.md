@@ -34,6 +34,7 @@ Roblox’s official application logo.
 | **Rust + Tauri guide** | [`docs/RUST_TAURI.md`](docs/RUST_TAURI.md) · [`rust/README.md`](rust/README.md) |
 | **FastFlag allowlist** | [`docs/FASTFLAG_ALLOWLIST.md`](docs/FASTFLAG_ALLOWLIST.md) · [`fastflags-allowlist.json`](fastflags-allowlist.json) |
 | **Pages troubleshooting** | [`docs/PAGES.md`](docs/PAGES.md) |
+| **Safe feature roadmap** | [`docs/ROADMAP.md`](docs/ROADMAP.md) |
 | **CLI / how it works** | [`docs/CLI.md`](docs/CLI.md) · [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md) |
 
 ---
