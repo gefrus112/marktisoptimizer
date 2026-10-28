@@ -439,6 +439,34 @@ body.is-desktop .is-desktop-only { display: inline-flex !important; }
 .detect-card[data-state="missing"] .detect-icon { border-color: rgba(242,182,93,.5); background: rgba(242,182,93,.09); color: #ffe6bd; }
 .detect-card .detect-actions { display: flex; gap: 8px; margin-top: 14px; }
 
+.active-client-card {
+  display: flex; align-items: center; gap: 11px; margin-top: 12px; padding: 12px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: linear-gradient(115deg, rgba(156,140,255,.07), rgba(111,207,255,.035));
+}
+.active-client-icon {
+  display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 34px;
+  border: 1px solid rgba(156,140,255,.27); border-radius: 11px;
+  color: var(--violet); background: rgba(156,140,255,.09); font-size: 16px;
+}
+.active-client-body { min-width: 0; flex: 1; }
+.active-client-body strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 11px; }
+.active-client-body p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.active-client-actions { display: flex; flex: 0 0 auto; align-items: flex-end; flex-direction: column; gap: 6px; }
+.active-client-buttons { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.active-client-buttons .button { padding: 6px 8px; font-size: 8px; }
+.active-client-badge {
+  padding: 4px 7px; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--dim); font-family: var(--mono); font-size: 7px;
+  font-weight: 900; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+.active-client-card[data-state="checking"] .active-client-icon { animation: bootPulse 1.8s ease-in-out infinite; }
+.active-client-card[data-state="running"] { border-color: rgba(111,207,255,.38); background: linear-gradient(115deg, rgba(111,207,255,.09), rgba(156,140,255,.04)); }
+.active-client-card[data-state="running"] .active-client-icon { color: #b8eaff; border-color: rgba(111,207,255,.35); background: rgba(111,207,255,.12); }
+.active-client-card[data-state="running"] .active-client-badge { color: #b8eaff; border-color: rgba(111,207,255,.34); }
+.active-client-card[data-state="unavailable"] .active-client-icon,
+.active-client-card[data-state="unsupported"] .active-client-icon { color: var(--amber); border-color: rgba(242,182,93,.34); background: rgba(242,182,93,.08); }
+
 /* Enriched allowlist cards (what each Roblox-allowed flag improves) */
 .allowlist-card .allowlist-head { padding: 18px 18px 14px; }
 .allowlist-card .allowlist-head h4 {
@@ -503,4 +531,123 @@ body.is-desktop .is-desktop-only { display: inline-flex !important; }
 
 @media (max-width: 820px) {
   .detect-card { flex-direction: column; }
+  .active-client-card { align-items: flex-start; flex-wrap: wrap; }
+  .active-client-actions { width: 100%; margin-left: 45px; align-items: center; flex-direction: row; }
+}
+
+/* Tauri startup splash — only shown in the packaged desktop app. */
+.app-boot-splash {
+  position: fixed; inset: 0; z-index: 10000;
+  display: grid; place-items: center; padding: 24px; overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(156,140,255,.17), transparent 34%),
+    radial-gradient(circle at 68% 68%, rgba(111,207,255,.10), transparent 30%),
+    #050509;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .36s ease, visibility .36s ease;
+}
+html.is-tauri-loading body { overflow: hidden; }
+html.is-tauri-loading .app-boot-splash {
+  opacity: 1; visibility: visible; pointer-events: auto;
+}
+.app-boot-splash::before {
+  content: ""; position: absolute; inset: -20%; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 24%, rgba(255,255,255,.66) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 78% 21%, rgba(255,255,255,.6) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 31% 78%, rgba(111,207,255,.65) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 89% 71%, rgba(156,140,255,.7) 0 1px, transparent 1.5px);
+  background-size: 190px 180px, 240px 220px, 280px 260px, 220px 210px;
+  opacity: .62; animation: bootStars 18s linear infinite;
+}
+body.is-desktop.is-booting { overflow: hidden; }
+body.is-desktop.is-booting .app-boot-splash {
+  opacity: 1; visibility: visible; pointer-events: auto;
+}
+.boot-splash-glow {
+  position: absolute; width: min(620px, 92vw); aspect-ratio: 1;
+  border: 1px solid rgba(156,140,255,.12); border-radius: 50%;
+  box-shadow: 0 0 80px rgba(156,140,255,.08), inset 0 0 70px rgba(111,207,255,.04);
+  animation: bootPulse 4.6s ease-in-out infinite;
+}
+.boot-splash-card {
+  position: relative; width: min(490px, 100%); padding: 28px 34px 25px;
+  border: 1px solid rgba(164,150,255,.29); border-radius: 24px;
+  background: linear-gradient(150deg, rgba(18,17,30,.95), rgba(7,7,12,.96));
+  box-shadow: 0 28px 110px rgba(0,0,0,.62), 0 0 55px rgba(156,140,255,.13);
+  text-align: center; backdrop-filter: blur(18px);
+}
+.boot-brand {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text); font-size: 11px; font-weight: 900; letter-spacing: .14em;
+  text-align: left;
+}
+.boot-brand-mark {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border: 1px solid rgba(156,140,255,.55); border-radius: 11px;
+  background: linear-gradient(135deg, rgba(156,140,255,.3), rgba(111,207,255,.12));
+  color: #fff; font-family: var(--serif); font-size: 20px; letter-spacing: 0;
+  box-shadow: 0 0 22px rgba(156,140,255,.22);
+}
+.boot-brand b { color: var(--blue); font-family: var(--mono); font-size: 9px; }
+.boot-local-badge {
+  margin-left: auto; padding: 6px 9px; border: 1px solid rgba(111,207,255,.28);
+  border-radius: 999px; color: #b8eaff; font-family: var(--mono);
+  font-size: 8px; letter-spacing: .08em;
+}
+.boot-orbit {
+  position: relative; display: grid; place-items: center; width: 88px; height: 88px;
+  margin: 30px auto 17px; border: 1px solid rgba(156,140,255,.26); border-radius: 50%;
+  background: radial-gradient(circle, rgba(156,140,255,.18), rgba(10,10,20,.18) 63%, transparent 66%);
+  box-shadow: 0 0 45px rgba(156,140,255,.12);
+}
+.boot-orbit::before, .boot-orbit::after {
+  content: ""; position: absolute; border: 1px solid rgba(111,207,255,.26); border-radius: 50%;
+}
+.boot-orbit::before { inset: 8px; border-left-color: transparent; border-bottom-color: rgba(156,140,255,.6); animation: bootOrbit 3.4s linear infinite; }
+.boot-orbit::after { inset: -7px; border-top-color: transparent; border-right-color: rgba(242,182,93,.45); animation: bootOrbit 5.3s linear infinite reverse; }
+.boot-orbit span {
+  color: #f7f5ff; font-family: var(--serif); font-size: 36px; font-weight: 900;
+  text-shadow: 0 0 24px rgba(156,140,255,.7);
+}
+.boot-orbit i {
+  position: absolute; top: 7px; right: 12px; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--blue); box-shadow: 0 0 14px var(--blue);
+}
+.boot-eyebrow {
+  margin: 0 0 9px; color: var(--amber); font-family: var(--mono);
+  font-size: 8px; font-weight: 900; letter-spacing: .2em;
+}
+.boot-splash-card h1 {
+  margin: 0; color: var(--text); font-family: var(--serif); font-size: 34px;
+  font-weight: 400; letter-spacing: -.045em;
+}
+.boot-splash-card h1 span { color: var(--blue); }
+.boot-status { min-height: 22px; margin: 10px 0 20px; color: var(--muted); font-size: 11px; }
+.boot-progress {
+  height: 7px; overflow: hidden; border: 1px solid rgba(164,150,255,.16);
+  border-radius: 999px; background: #07070c;
+}
+.boot-progress span {
+  display: block; width: 12%; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--violet), var(--blue), var(--amber));
+  box-shadow: 0 0 18px rgba(111,207,255,.36);
+  transition: width .4s cubic-bezier(.2,.8,.2,1);
+}
+.boot-foot {
+  display: flex; justify-content: space-between; gap: 12px; margin-top: 16px;
+  color: var(--dim); font-family: var(--mono); font-size: 7px;
+  font-weight: 800; letter-spacing: .12em;
+}
+@keyframes bootOrbit { to { transform: rotate(360deg); } }
+@keyframes bootPulse { 50% { transform: scale(1.045); opacity: .58; } }
+@keyframes bootStars { to { transform: translate3d(-24px, 18px, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .app-boot-splash::before, .boot-splash-glow, .boot-orbit::before, .boot-orbit::after { animation: none; }
+  .boot-progress span { transition: none; }
+}
+@media (max-width: 520px) {
+  .boot-splash-card { padding: 23px 20px 20px; }
+  .boot-splash-card h1 { font-size: 29px; }
+  .boot-foot { font-size: 6px; }
 }

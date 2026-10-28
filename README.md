@@ -32,6 +32,37 @@ Interface — each with what it improves.
 
 ---
 
+## Windows x64 app screenshots (V4)
+
+These **PNG interface previews** show the shared UI used by the Rust + Tauri
+Windows `.exe`. They are illustrative—not captures from a running Windows
+build—and the scan counts/settings shown are examples.
+
+![Roptimer V4 startup loading screen](web/assets/roptimer-v4-loading-preview.png)
+
+![Roptimer V4 home screen and app navigation](web/assets/roptimer-v4-home-preview.png)
+
+![Roptimer V4 Client tab with read-only Player status, settings, Apply and Restore controls](web/assets/roptimer-v4-client-preview.png)
+
+The app opens with the animated startup screen, then shows the home page and its
+four sections: **Client** (the main tab, with installation detection and the
+settings builder), **Allowlist**, **Downloads**, and **Docs**. Settings are
+part of the Client tab; V4 does not have a separate Settings tab. The Client
+screen provides **Apply safely**, **Restore**, and **Save profile** controls.
+
+> **Current V4 scope:** the app detects installed Roblox versions and local
+> settings files. Its live status card checks only whether
+> `RobloxPlayerBeta.exe` appears in the Windows process list; this reports that
+> the Player process is open, not that an experience is actively loaded. It
+> does not read command-line arguments, game title/thumbnail, server address or
+> ID, account data, or memory. **Open optimizations** jumps to Roptimer's profile builder;
+> it does not overlay or replace Roblox's in-game menu. The V4 GUI applies or
+> restores local settings but does not launch Roblox; restart it normally after
+> applying. The separate legacy Boost CLI has an optional `bootstrap --launch`
+> command ([CLI guide](docs/CLI.md)).
+
+---
+
 ## V4 highlights
 
 ### Rust + Tauri v2 single-file Windows client
@@ -41,6 +72,10 @@ Interface — each with what it improves.
 - **Detects Roblox on first launch** by scanning standard Windows version
   folders — read-only, no process attach, no memory reads, no launching Roblox.
   The result appears in the Client tab with a Re-scan button.
+- Live status checks at startup and every 10 seconds whether
+  `RobloxPlayerBeta.exe` appears in the Windows process list; no command line,
+  game/session details, thumbnail, server ID, or address is read. **Open
+  optimizations** jumps to the safe profile builder.
 - Safe `apply_settings` / `restore_settings` Rust commands: allowlisted keys
   only, timestamped backups, unrelated keys preserved.
 - The **same web UI** as the website (vendored Three.js glow). See
@@ -92,7 +127,8 @@ See [`docs/FASTFLAG_ALLOWLIST.md`](docs/FASTFLAG_ALLOWLIST.md).
 
 Roptimer is a **performance tool, not a hacking toolbox**. It uses only local,
 reversible `ClientAppSettings.json` writes with timestamped backups, preserves
-unrelated keys, restores managed keys, and reads OS-level install metadata only.
+unrelated keys, restores managed keys, and checks Roblox installation metadata
+plus the Roblox Player process name only (no process handles or command lines).
 
 **Never:** DLL injection, process hooks, memory reads/writes, executable
 patching, account-data extraction, telemetry/Crashpad/Backtrace disabling,
@@ -146,7 +182,8 @@ web/                         generated website (also the Tauri UI source)
   assets/desktop.js          Tauri bridge (no-op on the website)
   assets/vendor/three/       vendored Three.js 0.169.0 (MIT)
 rust/                        Rust + Tauri v2 app (single-file Windows exe)
-  src-tauri/                 Rust crate + config + commands
+  src-tauri/                 Rust crate, Tauri config + commands
+    src/session.rs           process-name-only Roblox Player status check
   frontend/                  GENERATED static UI (from web/)
 build_website.py             site generator + validator
 build_tauri_frontend.py      assembles rust/frontend/ from web/

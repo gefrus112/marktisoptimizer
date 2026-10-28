@@ -352,6 +352,7 @@ def build_dotnet_source_zip() -> Path:
             RUST / "src-tauri/src/lib.rs",
             RUST / "src-tauri/src/main.rs",
             RUST / "src-tauri/src/detect.rs",
+            RUST / "src-tauri/src/session.rs",
             RUST / "src-tauri/src/settings.rs",
             RUST / "README.md",
             ROOT / "roblox_fps_optimizer.py",
