@@ -123,7 +123,7 @@ $volumes = @(Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3
     };
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut inventory: Value = match serde_json::from_str(stdout.trim()) {
+    let mut inventory: Value = match serde_json::from_str::<Value>(stdout.trim()) {
         Ok(value) if value.is_object() => value,
         _ => return unavailable_device(true, "Windows returned an unreadable hardware inventory."),
     };
