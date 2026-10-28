@@ -121,12 +121,42 @@ fn open_external(url: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Ask Windows Explorer to dispatch the fixed Roblox protocol URI to its
+/// registered handler. No user-supplied URL, shell command, or launch flags.
+#[tauri::command]
+fn launch_roblox() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("WINDIR"))
+            .ok_or_else(|| "Windows system folder could not be located.".to_string())?;
+        let root = std::path::PathBuf::from(root);
+        if !root.is_absolute() {
+            return Err("Windows system folder path is invalid.".to_string());
+        }
+        let explorer = root.join("explorer.exe");
+        if !explorer.is_file() {
+            return Err("Windows Explorer could not be found in the system folder.".to_string());
+        }
+        std::process::Command::new(explorer)
+            .arg("roblox://")
+            .spawn()
+            .map_err(|error| format!("Could not request Roblox launch: {error}"))?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("Roblox launch is available in the Windows desktop app only.".to_string())
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             app_info,
             get_allowlist,
             open_external,
+            launch_roblox,
             detect::detect_roblox,
             safety::scan_known_executor_processes,
             safety::open_windows_settings,

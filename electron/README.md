@@ -44,9 +44,16 @@ installer and SHA-256 file as a build artifact.
 - Local discovery checks standard Roblox install folders. Process checks inspect
   only exact image-name fields; they do not retain PIDs or read paths, command
   lines, memory, game data, or network data.
-- Settings writes are limited to the canonical FastFlag allowlist in discovered
-  Roblox `ClientAppSettings.json` files. The app preserves unrelated JSON keys,
-  writes timestamped backups before changes, and can restore only managed keys.
+- Settings writes use the canonical 18-key FastFlag allowlist by default in
+  discovered Roblox `ClientAppSettings.json` files. An explicit, off-by-default
+  experimental option separately requests the legacy
+  `DFIntTaskSchedulerTargetFps` value (60–1000); it is not allowlisted and
+  current Roblox clients may ignore or cap it. No FPS gain is guaranteed. The
+  app preserves unrelated JSON keys, creates timestamped backups, and Restore
+  removes managed keys, including the legacy FPS key.
+- The launcher dispatches only the fixed `roblox://` URI through Windows
+  Explorer, without a shell or user-provided URL. Apply & launch asks for
+  confirmation and launches only after a successful settings write.
 - It never injects into or terminates Roblox, changes process affinity, alters
   internal render resolution, reroutes traffic, or executes game scripts.
 

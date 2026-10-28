@@ -138,7 +138,7 @@ jobs:
           $tag = (Get-Content $flag -Raw).Trim()
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title "Roptimer $tag — Rust + Tauri setup wizard" --notes "Guided x64 installer for the Rust + Tauri Windows client. On first launch it detects whether Roblox is installed and manages only Roblox-allowlisted, reversible ClientAppSettings.json settings."
+            gh release create $tag --title "Roptimer $tag — Rust + Tauri setup wizard" --notes "Guided x64 installer for the Rust + Tauri Windows client. It detects Roblox locally, manages canonical allowlisted settings by default, and offers a separate experimental legacy FPS request that may be ignored. Main-page launch uses the standard roblox:// protocol; local settings are backed up before writes."
           }
           gh release upload $tag rust/artifacts/Roptimer-Rust-Setup-x64.exe rust/artifacts/Roptimer-Rust-Setup-x64.exe.sha256 --clobber
           $publishedAssets = gh release view $tag --json assets --jq '.assets[].name'

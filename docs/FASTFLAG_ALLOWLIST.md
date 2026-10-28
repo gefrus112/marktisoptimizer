@@ -76,10 +76,12 @@ scene. A local UI/motion setting, not gameplay automation.
 
 ## Legacy flag, not allowlisted
 
-`DFIntTaskSchedulerTargetFps` is tracked separately as a **legacy compatibility
-flag**. Current allowlisted Roblox clients may silently ignore it, so Roptimer
-does **not** write it during apply. Roptimer recommends Roblox Settings →
-Maximum Framerate for supported frame-rate changes.
+`DFIntTaskSchedulerTargetFps` is tracked separately as an **experimental legacy
+compatibility flag**, not as a nineteenth allowlist entry. The V4 Tauri and
+Electron desktop profiles leave it off by default and write it only after an
+explicit opt-in; the 60–1000 request is backed up and removed by Restore.
+Current Roblox clients may ignore or cap it, so no FPS unlock or gain is
+guaranteed. Use Roblox Settings → Maximum Framerate for the supported option.
 
 ---
 

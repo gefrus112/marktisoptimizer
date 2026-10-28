@@ -37,8 +37,11 @@ level**:
   `RobloxStudioBeta.exe` and any `ClientSettings\ClientAppSettings.json` files.
 - Returns `installed`, the version list, settings paths, and a human message.
 
-It **never** attaches to a process, reads memory, injects anything, or launches
-Roblox. On non-Windows builds it returns a clear "Windows client" message.
+The detection command **never** attaches to a process, reads memory, injects
+anything, or launches Roblox. A separate, user-triggered launcher dispatches
+only the fixed `roblox://` protocol through Windows Explorer; Apply & launch
+asks for confirmation and runs the launcher only after a successful settings
+write. On non-Windows builds detection returns a clear "Windows client" message.
 
 ```
 Roblox detected: 2 version folders found. Roptimer can manage allowlisted
@@ -55,8 +58,8 @@ Windows process list when the app opens, on request, and every ten seconds while
 it is open. The Rust command `active_roblox_status` returns only a running/not
 running result and a timestamp; this does not confirm that an experience is
 loaded. It does not open a process handle or inspect command-line arguments,
-game state, game thumbnails, server IDs/addresses, account data, or memory. The **Open optimizations** button jumps to the local
-profile builder; it does not modify Roblox's in-game menu.
+game state, game thumbnails, server IDs/addresses, account data, or memory. The **Configure this profile** button opens local Rendering settings; it does
+not modify Roblox's in-game menu.
 
 ## Local known-process safety check (Windows only)
 
@@ -83,9 +86,9 @@ UI or its assets. Navigation is **Main** plus a grouped **Settings**
 area with four sections:
 
 - **Rendering** — choose Performance/Balanced, graphics quality, texture
-  quality, and a renderer preference from the allowlisted System default,
-  Direct3D 11, Vulkan, or OpenGL options. Direct3D 12 and unsupported target-FPS
-  flags are not written.
+  quality, and an allowlisted renderer preference (System default, Direct3D 11,
+  Vulkan, or OpenGL). Direct3D 12 is not offered. An experimental legacy FPS
+  target (60–1000) is a separate, opt-in request and may be ignored by Roblox.
 - **Geometry** — set level-of-detail distance and optionally reduce approved
   sky/voxelizer effects. Distances affect rendering only; they do not delete
   objects or change collision/gameplay geometry.
@@ -100,14 +103,18 @@ Python/Tkinter macOS companion.
 
 ## Safe settings (apply / restore)
 
-`apply_settings` / `restore_settings` write **only** canonical allowlisted keys
-to `ClientAppSettings.json`:
+`apply_settings` writes canonical allowlisted keys to
+`ClientAppSettings.json` by default. If the user explicitly enables
+**Experimental legacy FPS target**, it also writes only
+`DFIntTaskSchedulerTargetFps` with the requested value clamped to 60–1000. That
+legacy key remains outside the canonical 18-key allowlist; current Roblox
+clients may ignore or cap it, so no FPS gain or unlock is guaranteed.
 
 - Timestamped backups are created before every write.
 - Unrelated keys are always preserved.
-- Restore removes only the keys Roptimer managed.
-- The legacy `DFIntTaskSchedulerTargetFps` flag is **not** written (it is not on
-  Roblox's current local allowlist and may be ignored).
+- Restore removes only Roptimer-managed canonical keys plus the separate legacy
+  FPS key; the timestamped backup is kept for manual recovery.
+- Roblox's in-game Maximum Framerate setting remains the supported option.
 - "Reduce building lag" = safe LOD / texture / grass / graphics reduction — it
   never deletes buildings or changes collision/gameplay geometry.
 
@@ -130,6 +137,7 @@ Roblox's own graphics controls and Windows' normal scheduler/network settings.
 | `active_roblox_status` | Check whether the Roblox Player process name is present | read-only process-name check |
 | `scan_known_executor_processes` | Match exact Xeno, Solara, and JJSploit process names | local name-only check; no paths or command lines |
 | `open_windows_settings` | Open fixed Installed Apps or Windows Security page | launches Windows Settings |
+| `launch_roblox` | Dispatch fixed `roblox://` URI through Windows Explorer | requests normal Roblox protocol launch |
 | `get_allowlist` | Return the canonical allowlist JSON | none |
 | `apply_settings` | Apply allowlisted settings | local JSON write + backup |
 | `restore_settings` | Restore managed keys | local JSON write + backup |

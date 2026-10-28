@@ -4,8 +4,9 @@
 //!  * Only local, reversible ClientAppSettings.json writes.
 //!  * Timestamped backups are created before every write.
 //!  * Unrelated keys are always preserved.
-//!  * Only keys present in the canonical allowlist are ever managed.
-//!  * Restore removes only the keys Roptimer managed.
+//!  * The canonical allowlist is the default; one separate experimental legacy
+//!    FPS key is written only after explicit opt-in and is backed up/restorable.
+//!  * Restore removes only the keys Roptimer manages.
 //!  * No DLL injection, process hooks, memory reads/writes, executable
 //!    patching, telemetry/Crashpad/Backtrace disabling, anti-cheat bypass,
 //!    executor APIs, loadstring, or game script execution.
@@ -69,7 +70,7 @@ pub struct Profile {
 
 fn default_mode() -> String { "Reduce building lag".to_string() }
 fn default_tier() -> u32 { 21 }
-fn default_fps() -> u32 { 144 }
+fn default_fps() -> u32 { 240 }
 fn default_renderer() -> String { "Auto".to_string() }
 fn default_true() -> bool { true }
 
@@ -91,17 +92,19 @@ pub struct ApplySafety {
     pub backup_created: bool,
     pub unrelated_keys_preserved: bool,
     pub allowlist_only: bool,
+    pub experimental_legacy_fps: bool,
     pub injection: bool,
     pub memory_writes: bool,
     pub game_script_execution: bool,
 }
 
-fn apply_safety() -> ApplySafety {
+fn apply_safety(experimental_legacy_fps: bool, backup_created: bool) -> ApplySafety {
     ApplySafety {
         local_json_only: true,
-        backup_created: true,
+        backup_created,
         unrelated_keys_preserved: true,
-        allowlist_only: true,
+        allowlist_only: !experimental_legacy_fps,
+        experimental_legacy_fps,
         injection: false,
         memory_writes: false,
         game_script_execution: false,
@@ -182,6 +185,20 @@ fn build_managed(profile: &Profile, allowed: &HashSet<String>) -> serde_json::Ma
     managed
 }
 
+/// Add the optional, unsupported legacy FPS request only after canonical
+/// allowlist-derived settings have been constructed.
+fn add_experimental_legacy_fps(
+    managed: &mut serde_json::Map<String, serde_json::Value>,
+    profile: &Profile,
+) {
+    if profile.legacy_fps {
+        managed.insert(
+            LEGACY_FPS_FLAG.to_string(),
+            serde_json::Value::from(profile.fps.clamp(60, 1000)),
+        );
+    }
+}
+
 fn target_paths(detection: &Detection, all_versions: bool) -> Vec<PathBuf> {
     let mut paths: Vec<PathBuf> = detection
         .versions
@@ -194,30 +211,43 @@ fn target_paths(detection: &Detection, all_versions: bool) -> Vec<PathBuf> {
     paths
 }
 
-fn read_json_object(path: &Path) -> serde_json::Map<String, serde_json::Value> {
-    if let Ok(text) = std::fs::read_to_string(path) {
-        if let Ok(serde_json::Value::Object(map)) = serde_json::from_str::<serde_json::Value>(&text) {
-            return map;
-        }
+fn parse_json_object(text: &str) -> Option<serde_json::Map<String, serde_json::Value>> {
+    match serde_json::from_str::<serde_json::Value>(text).ok()? {
+        serde_json::Value::Object(map) => Some(map),
+        _ => None,
     }
-    serde_json::Map::new()
 }
 
 fn write_backup(path: &Path, original: Option<&str>) -> Option<String> {
-    let backup = path.with_file_name(format!(
-        "{}.bak-{}",
-        path.file_name()?.to_string_lossy(),
-        now_stamp()
-    ));
+    use std::io::Write;
+
+    let file_name = path.file_name()?.to_string_lossy();
+    let base = format!("{}.bak-{}", file_name, now_stamp());
     let content = original.unwrap_or("{}");
-    std::fs::write(&backup, content).ok()?;
-    Some(backup.to_string_lossy().to_string())
+    for suffix in 0..10_000 {
+        let name = if suffix == 0 { base.clone() } else { format!("{}-{}", base, suffix) };
+        let backup = path.with_file_name(name);
+        let mut file = match std::fs::OpenOptions::new().write(true).create_new(true).open(&backup) {
+            Ok(file) => file,
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(_) => return None,
+        };
+        if file.write_all(content.as_bytes()).is_err() {
+            drop(file);
+            let _ = std::fs::remove_file(&backup);
+            return None;
+        }
+        return Some(backup.to_string_lossy().to_string());
+    }
+    None
 }
 
 #[tauri::command]
 pub fn apply_settings(profile: Profile) -> ApplyResult {
     let allowed = allowlisted_keys();
-    let managed = build_managed(&profile, &allowed);
+    let mut managed = build_managed(&profile, &allowed);
+    // This explicit opt-in remains separate from the canonical 18-key set.
+    add_experimental_legacy_fps(&mut managed, &profile);
     let managed_keys: Vec<String> = managed.keys().cloned().collect();
     let detection = detect();
     let paths = target_paths(&detection, profile.all_versions);
@@ -233,14 +263,28 @@ pub fn apply_settings(profile: Profile) -> ApplyResult {
         if std::fs::create_dir_all(parent).is_err() {
             continue;
         }
-        let original = std::fs::read_to_string(&path).ok();
+        let original = match std::fs::read_to_string(&path) {
+            Ok(content) => Some(content),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+            Err(_) => continue,
+        };
+        // Refuse to replace a malformed/non-object file; its original bytes stay untouched.
+        let mut document = match original.as_deref() {
+            Some(content) => match parse_json_object(content) {
+                Some(document) => document,
+                None => continue,
+            },
+            None => serde_json::Map::new(),
+        };
+        // Never write if a backup could not be created first.
+        let backup = match write_backup(&path, original.as_deref()) {
+            Some(path) => path,
+            None => continue,
+        };
+        backups.push(backup);
         // Preserve unrelated keys; merge only allowlisted managed keys.
-        let mut document = read_json_object(&path);
-        if let Some(backup) = write_backup(&path, original.as_deref()) {
-            backups.push(backup);
-        }
         for (key, value) in &managed {
-            if allowed.contains(key) {
+            if allowed.contains(key) || (profile.legacy_fps && key == LEGACY_FPS_FLAG) {
                 document.insert(key.clone(), value.clone());
             }
         }
@@ -253,16 +297,34 @@ pub fn apply_settings(profile: Profile) -> ApplyResult {
 
     let applied = !written.is_empty();
     let message = if applied {
-        format!(
-            "Applied {} allowlisted settings to {} file(s). Backups created; use Restore to undo.",
-            managed_keys.len(),
-            written.len()
-        )
+        let canonical_count = managed_keys.len() - (if profile.legacy_fps { 1 } else { 0 });
+        if profile.legacy_fps {
+            format!(
+                "Applied {} canonical allowlisted settings and experimental legacy FPS target {} to {} file(s). Backups created; use Restore to remove managed keys.",
+                canonical_count,
+                profile.fps.clamp(60, 1000),
+                written.len()
+            )
+        } else {
+            format!(
+                "Applied {} allowlisted settings to {} file(s). Backups created; use Restore to remove managed keys.",
+                canonical_count,
+                written.len()
+            )
+        }
     } else {
-        "No Roblox ClientSettings files were found. Install/launch Roblox once, then try again.".to_string()
+        "No usable Roblox ClientSettings files were found. Check the local JSON format, install/launch Roblox once, then try again.".to_string()
     };
 
-    ApplyResult { applied, message, written_paths: written, backups, managed_keys, safety: apply_safety() }
+    let backup_created = !written.is_empty() && backups.len() == written.len();
+    ApplyResult {
+        applied,
+        message,
+        written_paths: written,
+        backups,
+        managed_keys,
+        safety: apply_safety(profile.legacy_fps, backup_created),
+    }
 }
 
 #[tauri::command]
@@ -273,17 +335,26 @@ pub fn restore_settings() -> ApplyResult {
     let mut written = Vec::new();
     let mut backups = Vec::new();
     let mut managed_keys: Vec<String> = allowed.iter().cloned().collect();
+    managed_keys.push(LEGACY_FPS_FLAG.to_string());
     managed_keys.sort();
 
     for path in paths {
         if !path.exists() {
             continue;
         }
-        let original = std::fs::read_to_string(&path).ok();
-        let mut document = read_json_object(&path);
-        if let Some(backup) = write_backup(&path, original.as_deref()) {
-            backups.push(backup);
-        }
+        let original = match std::fs::read_to_string(&path) {
+            Ok(content) => content,
+            Err(_) => continue,
+        };
+        let mut document = match parse_json_object(&original) {
+            Some(document) => document,
+            None => continue,
+        };
+        let backup = match write_backup(&path, Some(&original)) {
+            Some(path) => path,
+            None => continue,
+        };
+        backups.push(backup);
         // Remove only the keys Roptimer manages; keep everything else.
         for key in &managed_keys {
             document.remove(key);
@@ -300,27 +371,76 @@ pub fn restore_settings() -> ApplyResult {
     let message = if applied {
         format!("Restored managed settings in {} file(s). Backups kept.", written.len())
     } else {
-        "No Roblox ClientSettings files were found to restore.".to_string()
+        "No valid Roblox ClientSettings files were found to restore.".to_string()
     };
-    ApplyResult { applied, message, written_paths: written, backups, managed_keys, safety: apply_safety() }
+    let backup_created = !written.is_empty() && backups.len() == written.len();
+    ApplyResult {
+        applied,
+        message,
+        written_paths: written,
+        backups,
+        managed_keys,
+        safety: apply_safety(true, backup_created),
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{allowlisted_keys, build_managed, Profile};
+    use super::{add_experimental_legacy_fps, allowlisted_keys, build_managed, Profile, LEGACY_FPS_FLAG};
 
     fn profile(renderer: &str) -> Profile {
         Profile {
             mode: "Balanced".to_string(),
             tier: 21,
             texture: 0,
-            fps: 144,
+            fps: 240,
             legacy_fps: false,
             renderer: renderer.to_string(),
             geometry_distance: Some(128),
             all_versions: true,
             vfx: false,
         }
+    }
+
+    #[test]
+    fn profile_defaults_legacy_fps_off_and_reads_camel_case_fields() {
+        let defaults: Profile = serde_json::from_str("{}").expect("profile defaults should deserialize");
+        assert_eq!(defaults.fps, 240);
+        assert!(!defaults.legacy_fps);
+
+        let profile: Profile = serde_json::from_str(r#"{"fps":360,"legacyFps":true}"#)
+            .expect("frontend profile should deserialize");
+        assert_eq!(profile.fps, 360);
+        assert!(profile.legacy_fps);
+    }
+
+    #[test]
+    fn legacy_fps_request_is_opt_in_and_separate_from_canonical_allowlist() {
+        let allowed = allowlisted_keys();
+        assert!(!allowed.contains(LEGACY_FPS_FLAG));
+
+        let mut off_profile = profile("Auto");
+        let mut off = build_managed(&off_profile, &allowed);
+        add_experimental_legacy_fps(&mut off, &off_profile);
+        assert!(!off.contains_key(LEGACY_FPS_FLAG));
+
+        off_profile.legacy_fps = true;
+        off_profile.fps = 1200;
+        let mut opted_in = build_managed(&off_profile, &allowed);
+        assert!(!opted_in.contains_key(LEGACY_FPS_FLAG));
+        add_experimental_legacy_fps(&mut opted_in, &off_profile);
+        assert_eq!(
+            opted_in.get(LEGACY_FPS_FLAG).and_then(serde_json::Value::as_u64),
+            Some(1000)
+        );
+
+        off_profile.fps = 30;
+        let mut minimum = build_managed(&off_profile, &allowed);
+        add_experimental_legacy_fps(&mut minimum, &off_profile);
+        assert_eq!(
+            minimum.get(LEGACY_FPS_FLAG).and_then(serde_json::Value::as_u64),
+            Some(60)
+        );
     }
 
     #[test]

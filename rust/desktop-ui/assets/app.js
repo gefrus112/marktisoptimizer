@@ -14,6 +14,8 @@
     tier: 21,
     texture: 0,
     renderer: "Auto",
+    fps: 240,
+    legacyFps: false,
     geometryDistance: 64,
     vfx: true,
     allVersions: true
@@ -99,6 +101,8 @@
       tier: clampInteger(values.tier, 0, 21, defaultProfile.tier),
       texture: clampInteger(values.texture, 0, 3, defaultProfile.texture),
       renderer: ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(values.renderer) ? values.renderer : defaultProfile.renderer,
+      fps: clampInteger(values.fps, 60, 1000, defaultProfile.fps),
+      legacyFps: typeof values.legacyFps === "boolean" ? values.legacyFps : defaultProfile.legacyFps,
       geometryDistance: clampInteger(values.geometryDistance, 32, 256, defaultProfile.geometryDistance),
       vfx: typeof values.vfx === "boolean" ? values.vfx : defaultProfile.vfx,
       allVersions: typeof values.allVersions === "boolean" ? values.allVersions : defaultProfile.allVersions
@@ -135,6 +139,8 @@
       tier: clampInteger(byId("graphicsQuality").value, 0, 21, defaultProfile.tier),
       texture: clampInteger(byId("textureQuality").value, 0, 3, defaultProfile.texture),
       renderer: byId("rendererSelect").value,
+      fps: clampInteger(byId("fpsTarget").value, 60, 1000, defaultProfile.fps),
+      legacyFps: byId("legacyFpsToggle").checked,
       geometryDistance: clampInteger(byId("geometryDistance").value, 32, 256, defaultProfile.geometryDistance),
       vfx: byId("vfxToggle").checked,
       allVersions: byId("allVersionsToggle").checked
@@ -146,6 +152,9 @@
     byId("graphicsQuality").value = String(profile.tier);
     byId("textureQuality").value = String(profile.texture);
     byId("rendererSelect").value = profile.renderer;
+    byId("legacyFpsToggle").checked = profile.legacyFps;
+    byId("fpsTarget").value = String(profile.fps);
+    byId("fpsTarget").disabled = !profile.legacyFps;
     byId("geometryDistance").value = String(profile.geometryDistance);
     byId("vfxToggle").checked = profile.vfx;
     byId("allVersionsToggle").checked = profile.allVersions;
@@ -161,8 +170,11 @@
     const profile = currentProfile();
     const graphicsOut = byId("graphicsQualityValue");
     const textureOut = byId("textureQualityValue");
+    const fpsOut = byId("fpsTargetValue");
     if (graphicsOut) graphicsOut.value = String(profile.tier);
     if (textureOut) textureOut.value = String(profile.texture);
+    if (fpsOut) fpsOut.value = String(profile.fps);
+    byId("fpsTarget").disabled = !profile.legacyFps;
     byId("geometryDistanceValue").textContent = String(profile.geometryDistance);
     byId("lodBase").textContent = String(profile.geometryDistance);
     byId("lodL12").textContent = String(profile.geometryDistance);
@@ -174,6 +186,7 @@
     byId("summaryTexture").textContent = profile.texture + " / 3";
     byId("summaryRenderer").textContent = profile.renderer === "Auto" ? "System default" : profile.renderer;
     byId("summaryGeometry").textContent = profile.geometryDistance + " studs";
+    byId("summaryFps").textContent = profile.legacyFps ? profile.fps + " FPS · legacy" : "Off";
     scheduleProfileSave();
   }
 
@@ -603,12 +616,19 @@
     }
     state.pendingAction = action;
     state.confirmReturnFocus = document.activeElement;
-    const isApply = action === "apply";
-    byId("confirmEyebrow").textContent = isApply ? "LOCAL SETTINGS · BACKUP FIRST" : "LOCAL SETTINGS · RESTORE";
-    byId("confirmTitle").textContent = isApply ? "Apply this profile?" : "Restore managed settings?";
-    byId("confirmText").textContent = isApply
-      ? "Roptimer will back up each target file, then update only canonical allowlisted keys. Unrelated JSON keys stay untouched."
-      : "Roptimer will remove only the keys it manages from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+    const isRestore = action === "restore";
+    const isApplyLaunch = action === "apply-launch";
+    const profile = currentProfile();
+    byId("confirmEyebrow").textContent = isRestore ? "LOCAL SETTINGS · RESTORE" : "LOCAL SETTINGS · BACKUP FIRST";
+    byId("confirmTitle").textContent = isRestore ? "Restore managed settings?" : (isApplyLaunch ? "Apply and launch Roblox?" : "Apply this profile?");
+    if (isRestore) {
+      byId("confirmText").textContent = "Roptimer will remove canonical managed keys and the separate legacy FPS key from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+    } else {
+      let message = "Roptimer will back up each target file, then apply your local profile. Unrelated JSON keys stay untouched.";
+      if (profile.legacyFps) message += " The opt-in legacy FPS target (" + profile.fps + ") is outside Roblox's current allowlist and may be ignored.";
+      if (isApplyLaunch) message += " If settings are applied successfully, Roblox will open through the normal roblox:// protocol.";
+      byId("confirmText").textContent = message;
+    }
     byId("confirmOverlay").hidden = false;
     byId("cancelConfirm").focus();
   }
@@ -624,6 +644,8 @@
   async function confirmAction() {
     const action = state.pendingAction;
     if (!action || !invoke) return closeConfirmation();
+    const isRestore = action === "restore";
+    const isApplyLaunch = action === "apply-launch";
     const accept = byId("acceptConfirm");
     const cancel = byId("cancelConfirm");
     const dialog = byId("confirmDialog");
@@ -631,12 +653,20 @@
     cancel.disabled = true;
     dialog.setAttribute("aria-busy", "true");
     dialog.focus();
-    accept.textContent = action === "apply" ? "Applying…" : "Restoring…";
+    accept.textContent = isRestore ? "Restoring…" : (isApplyLaunch ? "Applying & launching…" : "Applying…");
     let result = null;
     let failure = null;
+    let launchRequested = false;
     try {
-      if (action === "apply") result = await invoke("apply_settings", { profile: currentProfile() });
-      else result = await invoke("restore_settings");
+      if (isRestore) {
+        result = await invoke("restore_settings");
+      } else {
+        result = await invoke("apply_settings", { profile: currentProfile() });
+        if (isApplyLaunch && result && result.applied) {
+          await invoke("launch_roblox");
+          launchRequested = true;
+        }
+      }
     } catch (error) {
       failure = error;
     } finally {
@@ -647,16 +677,41 @@
     }
     closeConfirmation();
     if (failure) {
-      showToast((action === "apply" ? "Apply failed: " : "Restore failed: ") + (failure && failure.message ? failure.message : String(failure)), "error");
+      const message = failure && failure.message ? failure.message : String(failure);
+      const prefix = isApplyLaunch && result && result.applied
+        ? "Settings were applied, but Roblox could not be launched: "
+        : (isRestore ? "Restore failed: " : "Apply failed: ");
+      showToast(prefix + message, "error");
+      await detectRoblox();
       return;
     }
     if (result && result.applied) {
-      showToast(result.message || (action === "apply" ? "Settings applied with backups." : "Managed settings restored."), "success");
+      const message = isApplyLaunch && launchRequested
+        ? "Settings applied with backups; Roblox launch requested through roblox://."
+        : (result.message || (isRestore ? "Managed settings restored." : "Settings applied with backups."));
+      showToast(message, "success");
     } else {
-      showToast(result && result.message ? result.message : "No settings files were changed.", "warning");
+      showToast(result && result.message ? result.message : "No settings files were changed; Roblox was not launched.", "warning");
     }
     await detectRoblox();
     updateProfileDisplay();
+  }
+
+  async function launchRoblox() {
+    const button = byId("launchRoblox");
+    if (!invoke) {
+      showToast("Launch Roblox from the packaged Windows desktop app.", "warning");
+      return;
+    }
+    if (button) button.disabled = true;
+    try {
+      await invoke("launch_roblox");
+      showToast("Roblox launch requested through the standard roblox:// protocol.", "success");
+    } catch (error) {
+      showToast("Roblox could not be launched: " + (error && error.message ? error.message : String(error)), "error");
+    } finally {
+      if (button) button.disabled = false;
+    }
   }
 
   async function quickRefresh() {
@@ -718,6 +773,8 @@
     });
     byId("mainOpenSettings").addEventListener("click", function () { setView("settings"); });
     byId("editProfile").addEventListener("click", function () { setSettingsTab("rendering"); });
+    byId("launchRoblox").addEventListener("click", launchRoblox);
+    byId("applyLaunch").addEventListener("click", function () { openConfirmation("apply-launch"); });
     byId("quickRefresh").addEventListener("click", quickRefresh);
     byId("scanAgain").addEventListener("click", detectRoblox);
     byId("refreshPlayer").addEventListener("click", refreshPlayerStatus);
@@ -732,7 +789,11 @@
       updateProfileDisplay();
     });
     byId("rendererSelect").addEventListener("change", updateProfileDisplay);
-    ["graphicsQuality", "textureQuality", "geometryDistance"].forEach(function (id) {
+    byId("legacyFpsToggle").addEventListener("change", function () {
+      updateProfileDisplay();
+      if (this.checked) showToast("Experimental legacy FPS target enabled. Roblox may ignore it.", "warning");
+    });
+    ["graphicsQuality", "textureQuality", "fpsTarget", "geometryDistance"].forEach(function (id) {
       byId(id).addEventListener("input", function () {
         if (id === "geometryDistance") state.geometryManuallyChanged = true;
         updateProfileDisplay();
@@ -839,6 +900,8 @@
       byId("settingsCount").textContent = "—";
       byId("applySettings").disabled = true;
       byId("restoreSettings").disabled = true;
+      byId("launchRoblox").disabled = true;
+      byId("applyLaunch").disabled = true;
       byId("refreshPlayer").disabled = true;
       renderSafetyScan(null, "Local process scanning is available only in the packaged Windows app.");
       setBoot("Standalone desktop layout ready · no remote assets", 100);

@@ -115,7 +115,7 @@
 <text x="870" y="666" fill="#a9b6b1" font-family="Consolas, monospace" font-size="8px" font-weight="500">DFlagDebugGraphicsPreferD3D11</text>
 <rect x="276" y="675" width="1100" height="59" rx="9" fill="rgba(115,214,173,.035)" stroke="#2b3b35" stroke-width="1"/>
 <text x="294" y="700" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="600">◈</text>
-<text x="320" y="699" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Read-only allowlist reference. Only these canonical keys are written; unrelated JSON is preserved.</text>
+<text x="320" y="699" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Read-only list of 18 canonical keys; the legacy FPS request is a separate opt-in.</text>
 <text x="320" y="716" fill="#77847f" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">No injection, process memory, game assets, or server data are accessed.</text>
 <rect x="236" y="811" width="1204" height="89" rx="0" fill="#0d1115"/>
 <path d="M236 811H1440" stroke="#2c343a" stroke-width="1"/>

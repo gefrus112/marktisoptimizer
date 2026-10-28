@@ -1,11 +1,13 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { EventEmitter } = require("node:events");
 const path = require("node:path");
 const test = require("node:test");
 const {
   allowlistedKeys,
   buildManaged,
+  buildExperimentalSettings,
   createBackend,
   loadAllowlist,
   mergeAllowlistedObject,
@@ -39,6 +41,20 @@ test("managed profile writes only canonical allowlisted keys", () => {
   assert.equal(managed.FFlagDebugGraphicsPreferOpenGL, false);
   assert.equal(managed.DFIntDebugFRMQualityLevelOverride, 21);
   assert.equal(managed.DFIntTextureQualityOverride, 0);
+});
+
+test("legacy FPS request is opt-in, clamped, and kept outside the canonical map", () => {
+  assert.deepEqual(buildExperimentalSettings(profile("Auto")), {});
+  assert.deepEqual(buildExperimentalSettings(profile("Auto", { legacyFps: false, fps: 500 })), {});
+  assert.deepEqual(buildExperimentalSettings(profile("Auto", { legacyFps: true, fps: 144 })), {
+    DFIntTaskSchedulerTargetFps: 144
+  });
+  assert.deepEqual(buildExperimentalSettings(profile("Auto", { legacyFps: true, fps: 5000 })), {
+    DFIntTaskSchedulerTargetFps: 1000
+  });
+  assert.deepEqual(buildExperimentalSettings(profile("Auto", { legacyFps: true, fps: 0 })), {
+    DFIntTaskSchedulerTargetFps: 60
+  });
 });
 
 test("renderer choices remain mutually exclusive and values are clamped", () => {
@@ -76,6 +92,97 @@ test("merge and restore preserve unrelated JSON keys", () => {
   assert.deepEqual(merged, { CustomFlag: true, DFIntTextureQualityOverride: 1, DFIntTaskSchedulerTargetFps: 240 });
   const restored = restoredObject(merged, allowed);
   assert.deepEqual(restored, { CustomFlag: true });
+});
+
+test("opted-in FPS writes are backed up and removed by Restore", async () => {
+  const localAppData = "C:\\Users\\Tester\\AppData\\Local";
+  const versionsRoot = path.win32.join(localAppData, "Roblox", "Versions");
+  const versionPath = path.win32.join(versionsRoot, "version-test");
+  const playerPath = path.win32.join(versionPath, "RobloxPlayerBeta.exe");
+  const settingsPath = path.win32.join(versionPath, "ClientSettings", "ClientAppSettings.json");
+  const originalText = JSON.stringify({ UserOwnedSetting: "keep", DFIntTaskSchedulerTargetFps: 333 });
+  const files = new Map([[playerPath, ""], [settingsPath, originalText]]);
+  const memoryFs = {
+    constants: { X_OK: 1 },
+    readdirSync(root) {
+      if (root.toLowerCase() === versionsRoot.toLowerCase()) {
+        return [{ name: "version-test", isDirectory: () => true }];
+      }
+      throw new Error("directory not found");
+    },
+    existsSync(filePath) { return files.has(filePath); },
+    readFileSync(filePath) {
+      if (!files.has(filePath)) throw new Error("file not found");
+      return files.get(filePath);
+    },
+    writeFileSync(filePath, contents, options = {}) {
+      if (options.flag === "wx" && files.has(filePath)) throw new Error("file exists");
+      files.set(filePath, String(contents));
+    },
+    renameSync(from, to) {
+      if (!files.has(from)) throw new Error("temporary file not found");
+      files.set(to, files.get(from));
+      files.delete(from);
+    },
+    rmSync(filePath) { files.delete(filePath); },
+    mkdirSync() {}
+  };
+  const backend = createBackend({
+    platform: "win32",
+    env: { LOCALAPPDATA: localAppData },
+    allowlist,
+    fs: memoryFs
+  });
+
+  const applied = await backend.invoke("apply_settings", {
+    profile: profile("Auto", { legacyFps: true, fps: 360, vfx: false })
+  });
+  assert.equal(applied.applied, true);
+  assert.equal(applied.safety.backupCreated, true);
+  assert.equal(applied.safety.allowlistOnly, false);
+  assert.equal(applied.safety.experimentalLegacyFps, true);
+  assert.equal(files.get(applied.backups[0]), originalText);
+  assert.equal(JSON.parse(files.get(settingsPath)).DFIntTaskSchedulerTargetFps, 360);
+  assert.equal(JSON.parse(files.get(settingsPath)).UserOwnedSetting, "keep");
+  assert.ok(applied.managedKeys.includes("DFIntTaskSchedulerTargetFps"));
+
+  const restored = await backend.invoke("restore_settings");
+  assert.equal(restored.applied, true);
+  assert.ok(restored.managedKeys.includes("DFIntTaskSchedulerTargetFps"));
+  assert.equal("DFIntTaskSchedulerTargetFps" in JSON.parse(files.get(settingsPath)), false);
+  assert.equal(JSON.parse(files.get(settingsPath)).UserOwnedSetting, "keep");
+});
+
+test("Roblox launch dispatches a fixed roblox:// URI through system Explorer", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: {
+      statSync(filePath) {
+        assert.equal(filePath, "C:\\Windows\\explorer.exe");
+        return { isFile: () => true };
+      }
+    },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  await backend.invoke("launch_roblox", { uri: "file:///not-accepted" });
+  assert.equal(spawnCalls.length, 1);
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, ["roblox://"]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+
+  const unsupported = createBackend({ platform: "linux", allowlist });
+  await assert.rejects(() => unsupported.invoke("launch_roblox"), /Windows desktop app\./);
 });
 
 test("Electron command bridge rejects unknown commands and reports its shell", async () => {

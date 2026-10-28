@@ -129,16 +129,28 @@
                 <span>Texture <b id="summaryTexture">0 / 3</b></span>
                 <span>Renderer <b id="summaryRenderer">Auto</b></span>
                 <span>Geometry <b id="summaryGeometry">64 studs</b></span>
+                <span>Legacy FPS <b id="summaryFps">Off</b></span>
               </div>
               <button class="text-action" id="editProfile" type="button"><svg class="icon"><use href="#i-settings"/></svg>Configure this profile</button>
             </article>
 
             <article class="safety-panel">
               <span class="safety-emblem"><svg class="icon"><use href="#i-shield"/></svg></span>
-              <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Roptimer creates a timestamped backup, preserves unrelated JSON keys, and touches only keys on the canonical allowlist.</p></div>
+              <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Roptimer creates a timestamped backup and preserves unrelated JSON keys. Canonical allowlist keys are the default; the legacy FPS request is a separate opt-in.</p></div>
               <div class="safety-checks"><span><svg class="icon"><use href="#i-check"/></svg>Local files only</span><span><svg class="icon"><use href="#i-check"/></svg>Restore available</span><span><svg class="icon"><use href="#i-check"/></svg>No game injection</span></div>
             </article>
           </div>
+          <section class="panel launcher-panel" aria-labelledby="launcherTitle">
+            <div class="launcher-copy">
+              <p class="panel-kicker">STANDARD ROBLOX LAUNCH · USER CONTROLLED</p>
+              <h2 id="launcherTitle">Start with your settings.</h2>
+              <p>Launch the installed Roblox client through Windows’ normal <code>roblox://</code> protocol, or confirm your local profile and launch in one step.</p>
+            </div>
+            <div class="launcher-actions">
+              <button class="button button-soft" id="launchRoblox" type="button">Launch Roblox</button>
+              <button class="button button-primary" id="applyLaunch" type="button">Apply &amp; launch</button>
+            </div>
+          </section>
           <section class="panel safety-scan-panel" aria-labelledby="safetyScanTitle">
             <div class="safety-scan-top">
               <div class="safety-scan-copy">
@@ -174,7 +186,7 @@
 
           <div class="settings-pane-stack">
             <section class="settings-pane is-active" id="paneRendering" data-pane="rendering" role="tabpanel" aria-labelledby="tabRendering">
-              <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings. Roblox's in-game FPS control is not changed.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
+              <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings, plus an optional experimental legacy FPS target request.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
               <div class="form-card">
                 <div class="form-row mode-row">
                   <div class="field-copy"><label for="modeSelect">Optimization profile</label><p>Sets safe defaults for graphics workload and LOD.</p></div>
@@ -204,7 +216,12 @@
                   <div class="range-control"><input id="textureQuality" type="range" min="0" max="3" step="1" value="0" /><output id="textureQualityValue" for="textureQuality">0</output></div>
                 </div>
                 <div class="form-divider"></div>
-                <div class="info-callout"><svg class="icon"><use href="#i-shield"/></svg><p><strong>No unapproved FPS flags.</strong> FPS limits are controlled inside Roblox. Roptimer does not write the legacy target-FPS flag.</p></div>
+                <label class="toggle-row" for="legacyFpsToggle"><span class="toggle-copy"><strong>Experimental legacy FPS target</strong><small id="legacyFpsWarning">Off by default. Opt in to <code>DFIntTaskSchedulerTargetFps</code>, a legacy setting outside Roblox’s current 18-key allowlist.</small></span><span class="switch"><input id="legacyFpsToggle" type="checkbox" aria-describedby="legacyFpsWarning" /><span></span></span></label>
+                <div class="form-row slider-row fps-target-row">
+                  <div class="field-copy"><label for="fpsTarget">Requested frame-rate target</label><p>Choose 60–1000 FPS. Roblox may ignore or cap this legacy request; results depend on the client and hardware.</p></div>
+                  <div class="range-control"><input id="fpsTarget" type="range" min="60" max="1000" step="10" value="240" disabled aria-describedby="experimentalFpsNote" /><output id="fpsTargetValue" for="fpsTarget">240</output></div>
+                </div>
+                <div class="info-callout experimental-callout"><svg class="icon"><use href="#i-shield"/></svg><p id="experimentalFpsNote"><strong>Not a guaranteed unlock.</strong> This single setting is opt-in, backed up, and removed by Restore; Roblox may ignore or cap it. It does not bypass anti-cheat or change game memory. For supported limits, use Roblox’s in-game frame-rate setting.</p></div>
               </div>
             </section>
 

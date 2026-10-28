@@ -449,7 +449,7 @@ def allowlist_svg() -> str:
         b.append(rect(690, 236 + i * 24, 420, 19, "#070709", 5, BORDER))
         b.append(txt(698, 250 + i * 24, flag, 9.6, TEXT, 400, "SFMono-Regular, Consolas, monospace"))
     b.append(rect(290, 580, 840, 60, "#070709", 12, BORDER))
-    b.append(txt(310, 605, "Legacy: DFIntTaskSchedulerTargetFps is NOT allowlisted", 12, MUTED, 700))
+    b.append(txt(310, 605, "Legacy FPS target is a separate opt-in and may be ignored by Roblox", 12, MUTED, 700))
     b.append(txt(310, 625, "No telemetry, Crashpad/Backtrace, fullbright, x-ray, building removal, anti-cheat bypass, or game script execution flags.", 10, DIM))
     return svg_doc("Roptimer FastFlag allowlist screenshot", "".join(b))
 

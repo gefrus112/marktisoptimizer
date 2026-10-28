@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1060" viewBox="0 0 1440 1060">
 <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d1014"/><stop offset="1" stop-color="#11181a"/></linearGradient><linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#73d6ad" stop-opacity=".14"/><stop offset="1" stop-color="#73d6ad" stop-opacity=".025"/></linearGradient></defs>
 <title>Roptimer standalone desktop Rendering settings screen</title>
 <rect width="100%" height="100%" fill="url(#bg)"/>
-<rect x="0" y="0" width="236" height="900" rx="0" fill="#0a0d11"/>
+<rect x="0" y="0" width="236" height="1060" rx="0" fill="#0a0d11"/>
 <path d="M236 0H236" stroke="#20272d" stroke-width="1"/>
 <rect x="24" y="25" width="40" height="40" rx="12" fill="url(#accent)" stroke="#345047" stroke-width="1"/>
 <text x="36" y="53" fill="#73d6ad" font-family="Consolas, monospace" font-size="24px" font-weight="800">R</text>
@@ -26,6 +26,7 @@
 <text x="68" y="314" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Icons</text>
 <text x="43" y="348" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">☷</text>
 <text x="68" y="348" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Allowlist</text>
+<g transform="translate(0 155)">
 <rect x="17" y="746" width="202" height="55" rx="10" fill="rgba(115,214,173,.045)" stroke="#263a32" stroke-width="1"/>
 <text x="30" y="769" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="600">◈</text>
 <text x="56" y="766" fill="#d1ddd6" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Local &amp; reversible</text>
@@ -33,6 +34,7 @@
 <circle cx="23" cy="843" r="3" fill="#73d6ad"/>
 <text x="34" y="847" fill="#697473" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.7px">DESKTOP MODE</text>
 <text x="190" y="847" fill="#7c8988" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">V4</text>
+</g>
 <rect x="236" y="0" width="1204" height="62" rx="0" fill="#0d1115"/>
 <path d="M236 62H1440" stroke="#20272d" stroke-width="1"/>
 <text x="274" y="37" fill="#63706d" font-family="Consolas, monospace" font-size="9px" font-weight="700" letter-spacing="1px">ROPTIMER</text>
@@ -60,8 +62,8 @@
 <text x="1198" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Allowlist</text>
 <text x="277" y="295" fill="#73d6ad" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">01 / RENDERING</text>
 <text x="277" y="324" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="21px" font-weight="630">Rendering profile</text>
-<text x="277" y="345" fill="#84908d" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Adjust approved graphics and texture settings. Roblox in-game FPS control is not changed.</text>
-<rect x="276" y="366" width="1100" height="408" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<text x="277" y="345" fill="#84908d" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Adjust allowlisted graphics and texture settings plus an optional legacy FPS target.</text>
+<rect x="276" y="366" width="1100" height="540" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
 <text x="300" y="407" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Optimization profile</text>
 <text x="300" y="426" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Sets safe defaults for graphics workload and level-of-detail.</text>
 <rect x="1010" y="388" width="334" height="37" rx="8" fill="#10151a" stroke="#3a4449" stroke-width="1"/>
@@ -90,10 +92,24 @@
 <rect x="1310" y="607" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
 <text x="1321" y="627" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">0</text>
 <path d="M298 659H1352" stroke="#2a3238" stroke-width="1"/>
-<rect x="299" y="677" width="1053" height="75" rx="8" fill="rgba(115,214,173,.045)" stroke="#2b3b35" stroke-width="1"/>
-<text x="316" y="706" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="600">◈</text>
-<text x="343" y="700" fill="#c7d7cf" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">No unapproved FPS flags.</text>
-<text x="343" y="719" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">FPS limits stay in Roblox. Roptimer does not write legacy target-FPS settings.</text>
+<text x="300" y="683" fill="#d2dcd8" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Experimental legacy FPS target</text>
+<text x="300" y="702" fill="#7f8b87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Off by default · outside Roblox’s canonical 18-key allowlist.</text>
+<rect x="1300" y="675" width="37" height="21" rx="11" fill="#222a2e" stroke="#424d4e" stroke-width="1"/>
+<circle cx="1310" cy="685" r="6" fill="#99a5a0"/>
+<path d="M298 721H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="300" y="750" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Requested frame-rate target</text>
+<text x="300" y="768" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Choose 60–1000 FPS. Roblox may ignore or cap this legacy request.</text>
+<path d="M1007 750H1293" stroke="#34403c" stroke-width="4"/>
+<circle cx="1062" cy="750" r="8" fill="#566160"/>
+<rect x="1310" y="734" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
+<text x="1318" y="754" fill="#7c8988" font-family="Consolas, monospace" font-size="10px" font-weight="700">240</text>
+<path d="M298 786H1352" stroke="#2a3238" stroke-width="1"/>
+<rect x="299" y="803" width="1053" height="86" rx="8" fill="rgba(232,188,116,.045)" stroke="rgba(232,188,116,.24)" stroke-width="1"/>
+<text x="316" y="832" fill="#edbd72" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="600">◈</text>
+<text x="343" y="826" fill="#ebc782" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">Not a guaranteed unlock.</text>
+<text x="343" y="846" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">The legacy request is opt-in, backed up, and removed by Restore; Roblox may ignore it.</text>
+<text x="343" y="864" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">It does not change game memory or bypass anti-cheat. Use Roblox’s in-game setting.</text>
+<g transform="translate(0 155)">
 <rect x="236" y="811" width="1204" height="89" rx="0" fill="#0d1115"/>
 <path d="M236 811H1440" stroke="#2c343a" stroke-width="1"/>
 <rect x="277" y="834" width="31" height="18" rx="11" fill="rgba(115,214,173,.27)" stroke="#668c79" stroke-width="1"/>
@@ -106,4 +122,6 @@
 <text x="1008" y="851" fill="#e8aaa2" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="700">↶  Restore managed</text>
 <rect x="1157" y="829" width="182" height="35" rx="8" fill="#73d6ad" stroke="#86dcb8" stroke-width="1"/>
 <text x="1175" y="851" fill="#11231c" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="750">✓  Apply settings</text>
+
+</g>
 </svg>

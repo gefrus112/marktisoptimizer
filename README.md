@@ -52,16 +52,17 @@ captured from a running Windows executable—and example counts are shown.
 
 ![Roptimer standalone Windows desktop Icons settings](rust/desktop-ui/previews/roptimer-desktop-icons-preview.png)
 
-![Roptimer standalone Windows desktop Allowlist settings](rust/desktop-ui/previews/roptimer-desktop-allowlist-preview.png)
+![Roptimer standalone Windows desktop Allowlist settings](rust/desktop-ui/previews/roptimer-desktop-allowlist-preview.svg)
 
 The app starts with its own loading screen, then opens **Main** plus a grouped
 **Settings** area with **Rendering**, **Geometry**, **Icons**, and **Allowlist**
 sections. Rendering and geometry controls use the Rust allowlist-backed settings
 commands. Rendering includes graphics/texture quality and allowlisted System
-default, Direct3D 11, Vulkan, or OpenGL preferences; FPS caps remain controlled
-in Roblox. The Icons section customizes only Roptimer's local interface (icon
-weight and accent), not Roblox icons or game assets. Settings can be previewed,
-saved as a local profile, applied with a backup, or restored.
+default, Direct3D 11, Vulkan, or OpenGL preferences, plus an off-by-default
+experimental legacy FPS request that Roblox may ignore. The supported frame-rate
+setting remains in Roblox. The Icons section customizes only Roptimer's local
+interface (icon weight and accent), not Roblox icons or game assets. Settings
+can be previewed, saved as a local profile, applied with a backup, or restored.
 
 The Main page also performs a local, name-only check for the exact running
 process names `Xeno.exe`, `Solara.exe`, and `JJSploit.exe` at startup, every 30
@@ -77,9 +78,10 @@ deletes software automatically.
 > the Player process is open, not that an experience is actively loaded. It
 > does not read command-line arguments, game title/thumbnail, server address or
 > ID, account data, or memory. The app does not overlay or replace Roblox's
-> in-game menu, and it does not launch Roblox; restart it normally after
-> applying. The separate legacy Boost CLI has an optional `bootstrap --launch`
-> command ([CLI guide](docs/CLI.md)).
+> in-game menu. Its launcher uses the fixed standard `roblox://` protocol; the
+> Apply & launch action asks for confirmation and launches only after settings
+> are written successfully. The separate legacy Boost CLI also has an optional
+> `bootstrap --launch` command ([CLI guide](docs/CLI.md)).
 
 ---
 
@@ -92,17 +94,18 @@ deletes software automatically.
   page, and a Windows uninstaller. The installed app uses system WebView2; no
   batch file, .NET runtime, or Node runtime is required.
 - **Detects Roblox on first launch** by scanning standard Windows version
-  folders — read-only, no process attach, no memory reads, no launching Roblox.
-  The result appears on the Main page with a Re-scan button.
+  folders — read-only, with no process attach or memory reads. Separate Main-page
+  controls request a standard `roblox://` launch or confirm settings then launch.
 - Live status checks at startup and every 10 seconds whether
   `RobloxPlayerBeta.exe` appears in the Windows process list; no command line,
   game/session details, thumbnail, server ID, or address is read.
 - Main plus grouped Settings tabs for Rendering, Geometry, Icons, and
   Allowlist. The desktop interface is independent from the website and bundles
   no website CSS or JavaScript.
-- Safe `apply_settings` / `restore_settings` Rust commands: allowlisted keys
-  only, timestamped backups, unrelated keys preserved. See
-  [`docs/RUST_TAURI.md`](docs/RUST_TAURI.md).
+- Safe `apply_settings` / `restore_settings` Rust commands: canonical 18-key
+  allowlist by default, timestamped backups, unrelated keys preserved. A
+  separate legacy FPS request is opt-in, experimental, and may be ignored by
+  Roblox. See [`docs/RUST_TAURI.md`](docs/RUST_TAURI.md).
 
 ### Optional Electron Windows client
 
@@ -163,29 +166,31 @@ Python/CLI tools.
 
 Each flag now has a `flagFeatures` entry (feature name, value hint, what it
 improves); each category has a `categoryDescriptions` entry. The legacy
-`DFIntTaskSchedulerTargetFps` is tracked separately and is **not** written.
+`DFIntTaskSchedulerTargetFps` is tracked separately, stays off by default, and
+may be written only as an experimental opt-in request; Roblox may ignore it.
 See [`docs/FASTFLAG_ALLOWLIST.md`](docs/FASTFLAG_ALLOWLIST.md).
 
 ---
 
 ## Safety boundaries and scan scope
 
-Roptimer is a **performance tool, not a hacking toolbox**. It uses local,
-reversible `ClientAppSettings.json` writes with timestamped backups, preserves
-unrelated keys, and manages only the canonical allowlist. The Player status and
-executor check inspect process image names only; they do not open process
-handles or read paths, command lines, account data, game state, or memory. The
-executor check is a limited name match—not antivirus—and all alerts stay in the
-app. Roptimer never terminates a process or deletes software; users review
-matches through Windows Settings or Windows Security.
+Roptimer is a **performance tool, not a hacking toolbox**. It uses local
+`ClientAppSettings.json` writes with timestamped backups and preserves unrelated
+keys. The canonical 18-key allowlist is the default; one experimental legacy
+FPS target is separate, off by default, and may be ignored by Roblox. The Player
+status and executor check inspect process image names only; they do not open
+process handles or read paths, command lines, account data, game state, or
+memory. The executor check is a limited name match—not antivirus—and all alerts
+stay in the app. Roptimer never terminates a process or deletes software; users
+review matches through Windows Settings or Windows Security.
 
-**Not included:** unsupported FPS-unlock flags, arbitrary hidden-flag editors,
-Direct3D 12 (not on the canonical allowlist), asset preloading or game-asset
-mods, Roblox in-game menu changes, multi-instance bypasses, ping/network
-optimization or server-region manipulation, or Discord Rich Presence. These
-would exceed the app's safe,
-local allowlist scope. The existing CLI can report/quarantine only old Roblox
-log/temp files; it does not clean game assets.
+**Not included:** guarantees of an FPS unlock or universal lag removal,
+arbitrary hidden-flag editors, Direct3D 12 (not on the canonical allowlist),
+asset preloading or game-asset mods, Roblox in-game menu changes, multi-instance
+bypasses, ping/network optimization or server-region manipulation, or Discord
+Rich Presence. These exceed the app's safe, local-settings scope. The existing
+CLI can report/quarantine only old Roblox log/temp files; it does not clean game
+assets.
 
 **Never:** DLL injection, process hooks, memory reads/writes, executable
 patching, account-data extraction, telemetry/Crashpad/Backtrace disabling,

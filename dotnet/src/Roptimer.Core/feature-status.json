@@ -13,7 +13,7 @@
     "robloxTelemetryDisable": false,
     "appTelemetry": false,
     "gameScriptExecution": false,
-    "allowlistOnly": true,
+    "allowlistOnly": false,
     "localProcessNameScan": true,
     "networkRequests": false,
     "fullMalwareScan": false,
@@ -21,17 +21,19 @@
     "automaticSoftwareRemoval": false,
     "hardwareTelemetry": false,
     "processAffinityChanges": false,
-    "networkRouteChanges": false
+    "networkRouteChanges": false,
+    "canonicalAllowlistDefault": true,
+    "experimentalLegacyFpsOptIn": true
   },
   "features": [
     {
       "id": "fps-unlock",
-      "name": "Unlocking FPS",
-      "status": "Legacy / may be ignored",
+      "name": "Experimental legacy FPS target request",
+      "status": "Experimental legacy / opt-in / may be ignored",
       "implemented": true,
       "safe": true,
       "flag": "DFIntTaskSchedulerTargetFps",
-      "details": "Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings > Maximum Framerate for the supported cap up to 240 FPS."
+      "details": "The V4 Tauri/Electron desktop profile keeps DFIntTaskSchedulerTargetFps off by default and writes it only after explicit opt-in, separately from the canonical 18-key allowlist. The request is clamped to 60-1000 FPS, backed up, and removed by Restore. Current Roblox clients may ignore or cap it; no FPS gain or unlock is guaranteed. Use Roblox Settings > Maximum Framerate for the supported option."
     },
     {
       "id": "texture-cache",
@@ -256,7 +258,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Guided x64 NSIS setup wizard for the primary Rust + Tauri Windows client. It uses the built-in WebView2 runtime, has its own Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist), detects Roblox locally, and manages only allowlisted reversible settings. The Windows app offers System default, Direct3D 11, Vulkan, or OpenGL and the limited local process-name scan."
+      "details": "Guided x64 NSIS setup wizard for the primary Rust + Tauri Windows client. It uses WebView2, has its own Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist), detects Roblox locally, and manages canonical allowlisted settings by default with a separately opted-in experimental legacy FPS request. Main also offers a fixed roblox:// launcher and confirmed Apply & launch."
     },
     {
       "id": "roblox-detect-on-launch",
@@ -265,7 +267,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear on the standalone Main page."
+      "details": "The Windows client detects installation by scanning standard version folders and ClientSettings paths (read-only, OS-level); detection itself does not launch Roblox. A separate user-triggered launcher dispatches the fixed roblox:// protocol through Windows Explorer. Apply & launch requires confirmation and runs only after a successful settings write."
     },
     {
       "id": "windows-only-client-tab",
@@ -300,8 +302,8 @@
       "status": "Implemented safely",
       "implemented": true,
       "safe": true,
-      "flag": "allowlisted keys only",
-      "details": "Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."
+      "flag": "18 canonical allowlisted keys + opt-in legacy FPS key",
+      "details": "Rust writes canonical allowlisted ClientAppSettings.json keys by default, preserves unrelated keys, and creates timestamped backups. The experimental legacy FPS target is a separate opt-in and is removed by Restore; it may be ignored by Roblox."
     },
     {
       "id": "renderer-preference",
@@ -349,13 +351,22 @@
       "details": "Not implemented. Route rerouting requires a VPN/relay, driver, or system network-path changes and may send traffic through a third party. Roptimer does not tunnel, intercept, reroute, or optimize Roblox network traffic."
     },
     {
+      "id": "desktop-roblox-launcher",
+      "name": "Fixed-protocol Roblox desktop launcher",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The Tauri and Electron Main pages can ask Windows Explorer to dispatch the fixed roblox:// URI. Apply & launch requires confirmation and launches only after settings are successfully written. No shell command, arbitrary URL, game join, injection, or process manipulation is performed."
+    },
+    {
       "id": "electron-desktop-client",
       "name": "Optional Electron Windows desktop client",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Adds a separate Electron shell for the standalone desktop UI, alongside the primary Rust + Tauri app. Uses context isolation, sandboxing, no renderer Node integration, a narrow IPC command allowlist, and blocks remote navigation plus HTTP(S)/WebSocket requests. Its local backend preserves the same allowlist-only settings, backups, exact-name process checks, and no-injection/no-memory/no-network boundaries."
+      "details": "Adds a separate Electron shell for the standalone desktop UI, alongside the primary Rust + Tauri app. Uses context isolation, sandboxing, no renderer Node integration, a narrow IPC command allowlist, and blocks remote navigation plus HTTP(S)/WebSocket requests. Its local backend preserves canonical allowlist settings by default, supports a separate opt-in experimental legacy FPS request with backups/Restore, and launches only through a fixed roblox:// protocol URI."
     },
     {
       "id": "guided-windows-installers",

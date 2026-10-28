@@ -78,6 +78,10 @@ def check() -> None:
         "Allowlist section": 'data-tab="allowlist"',
         "renderer preference control": 'id="rendererSelect"',
         "local safety scan": 'id="scanSafety"',
+        "Roblox launcher": 'id="launchRoblox"',
+        "apply-and-launch confirmation action": 'id="applyLaunch"',
+        "opt-in experimental FPS toggle": 'id="legacyFpsToggle"',
+        "experimental FPS slider": 'id="fpsTarget"',
         "embedded canonical allowlist": 'id="fastflagAllowlist"',
     }
     absent = [label for label, marker in expected.items() if marker not in html]
@@ -91,8 +95,17 @@ def check() -> None:
         raise SystemExit("Tauri desktop stylesheet must be self-contained and local.")
     if "fetch(" in js or "XMLHttpRequest" in js:
         raise SystemExit("Tauri desktop UI must not make network requests.")
-    if any(command not in js for command in ("scan_known_executor_processes", "open_windows_settings")):
-        raise SystemExit("Tauri desktop safety scan commands are not wired to the local UI.")
+    required_commands = (
+        "scan_known_executor_processes",
+        "open_windows_settings",
+        "launch_roblox",
+        "apply_settings",
+        "restore_settings",
+    )
+    if any(command not in js for command in required_commands):
+        raise SystemExit("Tauri desktop local commands are not wired to the UI.")
+    if "legacyFps: false" not in js or "Experimental legacy FPS target" not in html:
+        raise SystemExit("The experimental legacy FPS request must remain explicitly opt-in by default.")
     if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Old website UI assets remain in the generated Tauri bundle.")
     try:

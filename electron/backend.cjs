@@ -7,6 +7,7 @@ const { promisify } = require("node:util");
 
 const execFileAsync = promisify(execFile);
 const LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps";
+const ROBLOX_URI = "roblox://";
 const KNOWN_EXECUTORS = [
   ["Xeno", "Xeno.exe"],
   ["Solara", "Solara.exe"],
@@ -23,6 +24,7 @@ const ALLOWED_COMMANDS = new Set([
   "active_roblox_status",
   "scan_known_executor_processes",
   "open_windows_settings",
+  "launch_roblox",
   "apply_settings",
   "restore_settings"
 ]);
@@ -103,9 +105,18 @@ function buildManaged(profileInput, allowlist) {
     set("DFFlagDebugPauseVoxelizer", true);
   }
 
-  // Never write the legacy FPS-unlock flag or any key outside the canonical list.
+  // Keep this map restricted to the canonical allowlist. The legacy FPS request
+  // is built separately and is only merged into a write when explicitly opted in.
   delete managed[LEGACY_FPS_FLAG];
   return managed;
+}
+
+function buildExperimentalSettings(profileInput) {
+  const profile = profileInput && typeof profileInput === "object" ? profileInput : {};
+  if (profile.legacyFps !== true) return {};
+  return {
+    [LEGACY_FPS_FLAG]: clampInteger(profile.fps, 60, 1000, 240)
+  };
 }
 
 function parseTasklistImageName(output, expected) {
@@ -136,27 +147,27 @@ function restoredObject(original, allowed) {
   return restored;
 }
 
-function makeBackupPath(filePath) {
+function makeBackupPath(filePath, fileSystem = fs) {
   const base = `${filePath}.bak-${Date.now()}`;
   let candidate = base;
   let suffix = 1;
-  while (fs.existsSync(candidate)) candidate = `${base}-${suffix++}`;
+  while (fileSystem.existsSync(candidate)) candidate = `${base}-${suffix++}`;
   return candidate;
 }
 
-function writeBackup(filePath, content) {
-  const backupPath = makeBackupPath(filePath);
-  fs.writeFileSync(backupPath, content == null ? "{}" : content, { flag: "wx" });
+function writeBackup(filePath, content, fileSystem = fs) {
+  const backupPath = makeBackupPath(filePath, fileSystem);
+  fileSystem.writeFileSync(backupPath, content == null ? "{}" : content, { flag: "wx" });
   return backupPath;
 }
 
-function writeJsonAtomically(filePath, value) {
+function writeJsonAtomically(filePath, value, fileSystem = fs) {
   const temporaryPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
   try {
-    fs.writeFileSync(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, { flag: "wx" });
-    fs.renameSync(temporaryPath, filePath);
+    fileSystem.writeFileSync(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, { flag: "wx" });
+    fileSystem.renameSync(temporaryPath, filePath);
   } catch (error) {
-    try { fs.rmSync(temporaryPath, { force: true }); } catch (_cleanupError) { /* best effort */ }
+    try { fileSystem.rmSync(temporaryPath, { force: true }); } catch (_cleanupError) { /* best effort */ }
     throw error;
   }
 }
@@ -414,6 +425,33 @@ function createBackend(options = {}) {
     });
   }
 
+  async function launchRoblox() {
+    if (!isWindows()) throw new Error("Roblox launch is available only in the Windows desktop app.");
+    const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
+    if (!root || !path.win32.isAbsolute(root)) throw new Error("Windows Explorer could not be found in the system directory.");
+    const explorer = path.win32.join(root, "explorer.exe");
+    try {
+      if (!fileSystem.statSync(explorer).isFile()) throw new Error("not a file");
+    } catch (_error) {
+      throw new Error("Windows Explorer could not be found in the system directory.");
+    }
+    return new Promise((resolve, reject) => {
+      let child;
+      try {
+        // The protocol URI is a constant; shell execution and user-supplied URLs are forbidden.
+        child = spawnImpl(explorer, [ROBLOX_URI], { detached: true, windowsHide: true, stdio: "ignore", shell: false });
+      } catch (error) {
+        reject(new Error(`Could not request Roblox launch: ${error.message}`));
+        return;
+      }
+      child.once("error", (error) => reject(new Error(`Could not request Roblox launch: ${error.message}`)));
+      child.once("spawn", () => {
+        child.unref();
+        resolve();
+      });
+    });
+  }
+
   function appInfo() {
     return {
       product: "Roptimer",
@@ -432,16 +470,18 @@ function createBackend(options = {}) {
   function readJsonObject(filePath) {
     try {
       const value = JSON.parse(fileSystem.readFileSync(filePath, "utf8"));
-      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      return value && typeof value === "object" && !Array.isArray(value) ? value : null;
     } catch (_error) {
-      return {};
+      return null;
     }
   }
 
   function applySettings(args) {
     if (!isWindows()) throw new Error("Applying Roblox settings is available only on Windows.");
     const profile = args && args.profile && typeof args.profile === "object" ? args.profile : {};
-    const managed = buildManaged(profile, allowlist);
+    const canonicalManaged = buildManaged(profile, allowlist);
+    const experimentalManaged = buildExperimentalSettings(profile);
+    const managed = { ...canonicalManaged, ...experimentalManaged };
     const managedKeys = Object.keys(managed).sort();
     const detection = detectRoblox();
     const paths = targetPaths(detection, profile.allVersions !== false);
@@ -453,10 +493,14 @@ function createBackend(options = {}) {
         const parent = path.win32.dirname(filePath);
         fileSystem.mkdirSync(parent, { recursive: true });
         const original = fileSystem.existsSync(filePath) ? fileSystem.readFileSync(filePath, "utf8") : null;
-        const backup = writeBackup(filePath, original);
-        const document = readJsonObject(filePath);
-        const merged = mergeAllowlistedObject(document, managed, allowlistedKeys(allowlist));
-        writeJsonAtomically(filePath, merged);
+        const document = original == null ? {} : readJsonObject(filePath);
+        if (!document) continue;
+        const backup = writeBackup(filePath, original, fileSystem);
+        const merged = mergeAllowlistedObject(document, canonicalManaged, allowlistedKeys(allowlist));
+        if (profile.legacyFps === true && Object.hasOwn(experimentalManaged, LEGACY_FPS_FLAG)) {
+          merged[LEGACY_FPS_FLAG] = experimentalManaged[LEGACY_FPS_FLAG];
+        }
+        writeJsonAtomically(filePath, merged, fileSystem);
         backups.push(backup);
         writtenPaths.push(filePath);
       } catch (_error) {
@@ -468,8 +512,10 @@ function createBackend(options = {}) {
     return {
       applied,
       message: applied
-        ? `Applied ${managedKeys.length} allowlisted settings to ${writtenPaths.length} file(s). Backups created; use Restore to undo.`
-        : "No Roblox ClientSettings files were found. Install/launch Roblox once, then try again.",
+        ? (profile.legacyFps === true
+          ? `Applied ${Object.keys(canonicalManaged).length} canonical allowlisted settings and experimental legacy FPS target ${experimentalManaged[LEGACY_FPS_FLAG]} to ${writtenPaths.length} file(s). Backups created; use Restore to remove managed keys.`
+          : `Applied ${Object.keys(canonicalManaged).length} allowlisted settings to ${writtenPaths.length} file(s). Backups created; use Restore to remove managed keys.`)
+        : "No usable Roblox ClientSettings files were found. Check the local JSON format, install/launch Roblox once, then try again.",
       writtenPaths,
       backups,
       managedKeys,
@@ -477,7 +523,8 @@ function createBackend(options = {}) {
         localJsonOnly: true,
         backupCreated: backups.length === writtenPaths.length && applied,
         unrelatedKeysPreserved: true,
-        allowlistOnly: true,
+        allowlistOnly: profile.legacyFps !== true,
+        experimentalLegacyFps: profile.legacyFps === true,
         injection: false,
         memoryWrites: false,
         gameScriptExecution: false
@@ -489,6 +536,7 @@ function createBackend(options = {}) {
     if (!isWindows()) throw new Error("Restoring Roblox settings is available only on Windows.");
     const allowed = allowlistedKeys(allowlist);
     const managedKeys = Array.from(allowed).sort();
+    managedKeys.push(LEGACY_FPS_FLAG);
     const detection = detectRoblox();
     const paths = targetPaths(detection, true);
     const writtenPaths = [];
@@ -498,9 +546,11 @@ function createBackend(options = {}) {
       try {
         if (!fileSystem.existsSync(filePath)) continue;
         const original = fileSystem.readFileSync(filePath, "utf8");
-        const backup = writeBackup(filePath, original);
-        const restored = restoredObject(readJsonObject(filePath), allowed);
-        writeJsonAtomically(filePath, restored);
+        const document = readJsonObject(filePath);
+        if (!document) continue;
+        const backup = writeBackup(filePath, original, fileSystem);
+        const restored = restoredObject(document, allowed);
+        writeJsonAtomically(filePath, restored, fileSystem);
         backups.push(backup);
         writtenPaths.push(filePath);
       } catch (_error) {
@@ -513,7 +563,7 @@ function createBackend(options = {}) {
       applied,
       message: applied
         ? `Restored managed settings in ${writtenPaths.length} file(s). Backups kept.`
-        : "No Roblox ClientSettings files were found to restore.",
+        : "No valid Roblox ClientSettings files were found to restore.",
       writtenPaths,
       backups,
       managedKeys,
@@ -521,7 +571,8 @@ function createBackend(options = {}) {
         localJsonOnly: true,
         backupCreated: backups.length === writtenPaths.length && applied,
         unrelatedKeysPreserved: true,
-        allowlistOnly: true,
+        allowlistOnly: false,
+        experimentalLegacyFps: true,
         injection: false,
         memoryWrites: false,
         gameScriptExecution: false
@@ -538,6 +589,7 @@ function createBackend(options = {}) {
       case "active_roblox_status": return activeRobloxStatus();
       case "scan_known_executor_processes": return scanKnownExecutorProcesses();
       case "open_windows_settings": return openWindowsSettings(args);
+      case "launch_roblox": return launchRoblox();
       case "apply_settings": return applySettings(args);
       case "restore_settings": return restoreSettings();
       default: throw new Error("Unsupported local desktop command.");
@@ -562,6 +614,7 @@ module.exports = {
   SETTINGS_URIS,
   allowlistedKeys,
   buildManaged,
+  buildExperimentalSettings,
   createBackend,
   loadAllowlist,
   mergeAllowlistedObject,
