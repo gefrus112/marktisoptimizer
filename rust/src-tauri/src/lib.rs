@@ -1,14 +1,16 @@
 //! Roptimer — Rust + Tauri v2 Windows client.
 //!
-//! A single, lightweight executable with its own standalone desktop UI. It
-//! detects whether Roblox is installed on first launch, reports process-name-
-//! only Player presence, and manages allowlisted FastFlags via local,
-//! reversible ClientAppSettings.json writes.
+//! The primary Tauri desktop client has its own standalone UI. It detects
+//! whether Roblox is installed on first launch, reports process-name-only
+//! Player presence, checks a short list of executor process names locally,
+//! and manages allowlisted FastFlags via reversible ClientAppSettings.json writes.
 //!
-//! No injection, memory access, telemetry disabling, anti-cheat bypass, or
-//! game script execution. See settings.rs and detect.rs for the safety boundary.
+//! No injection, memory access, telemetry disabling, anti-cheat bypass, automatic
+//! process termination, file deletion, or game script execution. See safety.rs,
+//! settings.rs, and detect.rs for the safety boundaries.
 
 mod detect;
+mod safety;
 mod session;
 mod settings;
 
@@ -33,6 +35,11 @@ pub struct AppInfo {
 #[serde(rename_all = "camelCase")]
 pub struct AppSafety {
     pub local_json_only: bool,
+    pub process_names_only_scan: bool,
+    pub network_requests: bool,
+    pub full_antivirus: bool,
+    pub automatic_process_termination: bool,
+    pub automatic_software_removal: bool,
     pub injection: bool,
     pub memory_reads: bool,
     pub telemetry_disable: bool,
@@ -69,6 +76,11 @@ fn app_info() -> AppInfo {
         allowlist_flags: flag_count(),
         safety: AppSafety {
             local_json_only: true,
+            process_names_only_scan: true,
+            network_requests: false,
+            full_antivirus: false,
+            automatic_process_termination: false,
+            automatic_software_removal: false,
             injection: false,
             memory_reads: false,
             telemetry_disable: false,
@@ -116,6 +128,8 @@ pub fn run() {
             get_allowlist,
             open_external,
             detect::detect_roblox,
+            safety::scan_known_executor_processes,
+            safety::open_windows_settings,
             session::active_roblox_status,
             settings::apply_settings,
             settings::restore_settings,

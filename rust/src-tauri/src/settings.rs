@@ -57,6 +57,8 @@ pub struct Profile {
     pub fps: u32,
     #[serde(default)]
     pub legacy_fps: bool,
+    #[serde(default = "default_renderer")]
+    pub renderer: String,
     #[serde(default)]
     pub geometry_distance: Option<u32>,
     #[serde(default = "default_true")]
@@ -68,6 +70,7 @@ pub struct Profile {
 fn default_mode() -> String { "Reduce building lag".to_string() }
 fn default_tier() -> u32 { 21 }
 fn default_fps() -> u32 { 144 }
+fn default_renderer() -> String { "Auto".to_string() }
 fn default_true() -> bool { true }
 
 #[derive(Serialize)]
@@ -141,6 +144,14 @@ fn build_managed(profile: &Profile, allowed: &HashSet<String>) -> serde_json::Ma
 
     // DPI scaling off renders at native pixels.
     put!("DFFlagDisableDPIScale", Value::Bool(true));
+
+    // Renderer preference uses only the three mutually exclusive allowlisted
+    // switches. "Auto" leaves every preference off; Direct3D 12 is not on the
+    // canonical allowlist and is intentionally not offered.
+    let renderer = profile.renderer.to_ascii_lowercase();
+    put!("FFlagDebugGraphicsPreferD3D11", Value::Bool(renderer == "direct3d 11" || renderer == "d3d11"));
+    put!("FFlagDebugGraphicsPreferVulkan", Value::Bool(renderer == "vulkan"));
+    put!("FFlagDebugGraphicsPreferOpenGL", Value::Bool(renderer == "opengl"));
 
     if lag || balanced || profile.vfx {
         // Geometry LOD switching distances — safe "reduce building lag".
@@ -292,4 +303,51 @@ pub fn restore_settings() -> ApplyResult {
         "No Roblox ClientSettings files were found to restore.".to_string()
     };
     ApplyResult { applied, message, written_paths: written, backups, managed_keys, safety: apply_safety() }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{allowlisted_keys, build_managed, Profile};
+
+    fn profile(renderer: &str) -> Profile {
+        Profile {
+            mode: "Balanced".to_string(),
+            tier: 21,
+            texture: 0,
+            fps: 144,
+            legacy_fps: false,
+            renderer: renderer.to_string(),
+            geometry_distance: Some(128),
+            all_versions: true,
+            vfx: false,
+        }
+    }
+
+    #[test]
+    fn renderer_preference_is_mutually_exclusive_and_allowlisted() {
+        let allowed = allowlisted_keys();
+        let renderer_keys = [
+            "FFlagDebugGraphicsPreferD3D11",
+            "FFlagDebugGraphicsPreferVulkan",
+            "FFlagDebugGraphicsPreferOpenGL",
+        ];
+        for (choice, expected) in [
+            ("Auto", None),
+            ("Direct3D 11", Some("FFlagDebugGraphicsPreferD3D11")),
+            ("Vulkan", Some("FFlagDebugGraphicsPreferVulkan")),
+            ("OpenGL", Some("FFlagDebugGraphicsPreferOpenGL")),
+            ("Direct3D 12", None),
+        ] {
+            let managed = build_managed(&profile(choice), &allowed);
+            let enabled: Vec<_> = renderer_keys
+                .iter()
+                .filter(|key| managed.get(**key).and_then(serde_json::Value::as_bool) == Some(true))
+                .copied()
+                .collect();
+            match expected {
+                Some(key) => assert_eq!(enabled, vec![key]),
+                None => assert!(enabled.is_empty()),
+            }
+        }
+    }
 }

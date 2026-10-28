@@ -76,8 +76,8 @@
 <rect x="1275" y="283" width="90" height="21" rx="11" fill="#172a37" stroke="#2d4858" stroke-width="1"/>
 <circle cx="1288" cy="293" r="2.5" fill="#83baf0"/>
 <text x="1296" y="296" fill="#83baf0" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.4px">PROCESS OPEN</text>
-<rect x="859" y="320" width="46" height="46" rx="13" fill="#15212c" stroke="#30424d" stroke-width="1"/>
-<text x="871" y="350" fill="#83baf0" font-family="Segoe UI, Arial, sans-serif" font-size="20px" font-weight="600">▣</text>
+<rect x="859" y="320" width="46" height="46" rx="13" fill="#f5f5f5" stroke="#dedede" stroke-width="1"/>
+<path d="M875 326 897 331 891 356 869 351Z M882 338 887 339 886 344 881 343Z" fill="#111111" fill-rule="evenodd"/>
 <text x="919" y="339" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="700">Roblox Player is open</text>
 <text x="919" y="358" fill="#87928f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Only process-name presence is confirmed.</text>
 <rect x="859" y="383" width="227" height="28" rx="7" fill="#10161b" stroke="#2a353d" stroke-width="1"/>
@@ -93,15 +93,18 @@
 <text x="714" y="544" fill="#73d6ad" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.4px">PERFORMANCE</text>
 <text x="298" y="588" fill="#75807d" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.8px">LOCAL SETTINGS PREVIEW</text>
 <text x="298" y="618" fill="#e3ece8" font-family="Segoe UI, Arial, sans-serif" font-size="20px" font-weight="650">Reduce building lag</text>
-<rect x="298" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
-<text x="307" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Graphics</text>
-<text x="373" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">21 / 21</text>
-<rect x="458" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
-<text x="467" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Texture</text>
-<text x="533" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">0 / 3</text>
-<rect x="618" y="637" width="145" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
-<text x="627" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Geometry</text>
-<text x="693" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">64 studs</text>
+<rect x="298" y="637" width="118" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="306" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Graphics</text>
+<text x="362" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">21 / 21</text>
+<rect x="428" y="637" width="118" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="436" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Texture</text>
+<text x="488" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">0 / 3</text>
+<rect x="558" y="637" width="118" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="566" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Renderer</text>
+<text x="621" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="7px" font-weight="700">System default</text>
+<rect x="688" y="637" width="118" height="31" rx="7" fill="#11171b" stroke="#2c343a" stroke-width="1"/>
+<text x="696" y="657" fill="#899492" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Geometry</text>
+<text x="754" y="657" fill="#cbd5d1" font-family="Consolas, monospace" font-size="8px" font-weight="700">64 studs</text>
 <text x="298" y="708" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">⚙  Configure this profile</text>
 <rect x="839" y="518" width="548" height="224" rx="15" fill="url(#accent)" stroke="#2d3b35" stroke-width="1"/>
 <rect x="858" y="539" width="37" height="37" rx="11" fill="#14241e" stroke="#375347" stroke-width="1"/>
@@ -112,5 +115,14 @@
 <text x="909" y="617" fill="#8b9793" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">only canonical allowlisted keys are touched.</text>
 <text x="909" y="655" fill="#a4b0aa" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="600">✓  Local files only      ✓  Restore available</text>
 <text x="909" y="675" fill="#a4b0aa" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="600">✓  No game injection      ✓  No memory access</text>
-<text x="277" y="777" fill="#677370" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">●  Roptimer changes local client settings only. Restart Roblox normally after applying.</text>
+<rect x="276" y="758" width="1111" height="126" rx="15" fill="#151a20" stroke="#2d3b35" stroke-width="1"/>
+<text x="296" y="782" fill="#73d6ad" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1px">WINDOWS ONLY · LOCAL PROCESS-NAME CHECK</text>
+<text x="296" y="807" fill="#e3ece8" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="650">Known executor process scan</text>
+<rect x="1273" y="772" width="94" height="21" rx="11" fill="#163027" stroke="#2b5b45" stroke-width="1"/>
+<circle cx="1286" cy="782" r="2.5" fill="#73d6ad"/>
+<text x="1295" y="785" fill="#73d6ad" font-family="Consolas, monospace" font-size="7px" font-weight="800" letter-spacing="0.3px">NO MATCH</text>
+<rect x="296" y="820" width="198" height="28" rx="7" fill="#171c22" stroke="#323b42" stroke-width="1"/>
+<text x="310" y="838" fill="#c2ccca" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="700">↻  Scan running processes</text>
+<text x="296" y="864" fill="#84908d" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Exact Xeno.exe, Solara.exe, JJSploit.exe names only. Not antivirus; no files deleted or processes stopped.</text>
+<text x="277" y="898" fill="#677370" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">●  Roptimer changes local client settings only. Restart Roblox normally after applying.</text>
 </svg>

@@ -14,12 +14,13 @@ Outputs:
     404.html                root not-found fallback
     .nojekyll               root Jekyll bypass
 
-The site is a glowing, vendored-Three.js layout whose MAIN tab is the Windows
-"Client". The Rust + Tauri Windows executable has a separate desktop interface
-built from ``rust/desktop-ui``; this website generator does not assemble the app
-UI. On the website the FastFlag allowlist (Geometry / Rendering / User
-Interface) is server-rendered into the HTML so it remains visible if JavaScript
-fails.
+The site uses a lightweight CSS-only backdrop, with no Three.js/WebGL renderer.
+Its MAIN tab is the Windows "Client". The Rust + Tauri and optional Electron
+Windows executables use the separate desktop interface built from
+``rust/desktop-ui``; this website generator does not assemble the app UI. On the
+website the FastFlag allowlist
+(Geometry / Rendering / User Interface) is server-rendered into the HTML so it
+remains visible if JavaScript fails.
 
 Usage:
     python3 build_website.py
@@ -66,7 +67,8 @@ RELEASE_PAGE_RUST = f"{REPO}/releases/tag/{RELEASE_TAG_RUST}"
 RELEASE_BASE_WINDOWS = f"{REPO}/releases/download/{RELEASE_TAG_WINDOWS}"
 RELEASE_BASE_MAC = f"{REPO}/releases/download/{RELEASE_TAG_MAC}"
 RELEASE_BASE_RUST = f"{REPO}/releases/download/{RELEASE_TAG_RUST}"
-RUST_EXE = "Roptimer-Rust-x64.exe"
+RUST_SETUP_EXE = "Roptimer-Rust-Setup-x64.exe"
+ELECTRON_WORKFLOW = f"{REPO}/actions/workflows/build-electron.yml"
 SOURCE_ZIP = "downloads/Roptimer-DotNet-Source.zip"
 
 PLACEHOLDER_RE = re.compile(r"__[A-Z0-9_]+__")
@@ -78,7 +80,7 @@ ROOT_PATH_RE = re.compile(
 MANIFEST = {
     "name": "Roptimer — Windows client for safe Roblox performance",
     "short_name": "Roptimer",
-    "description": "Rust + Tauri Windows client, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags with what each improves.",
+    "description": "Rust + Tauri Windows client with an optional Electron setup wizard, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags.",
     "start_url": "./",
     "scope": "./",
     "display": "standalone",
@@ -241,7 +243,8 @@ def replacements(catalog: dict, allowlist: dict) -> dict[str, str]:
         "__RELEASE_PAGE_WINDOWS__": html.escape(RELEASE_PAGE_WINDOWS, quote=True),
         "__RELEASE_PAGE_MAC__": html.escape(RELEASE_PAGE_MAC, quote=True),
         "__RELEASE_PAGE_RUST__": html.escape(RELEASE_PAGE_RUST, quote=True),
-        "__RELEASE_RUST_EXE__": html.escape(f"{RELEASE_BASE_RUST}/{RUST_EXE}", quote=True),
+        "__RELEASE_RUST_SETUP__": html.escape(f"{RELEASE_BASE_RUST}/{RUST_SETUP_EXE}", quote=True),
+        "__ELECTRON_WORKFLOW__": html.escape(ELECTRON_WORKFLOW, quote=True),
         "__RELEASE_ZIP__": html.escape(f"{RELEASE_BASE_WINDOWS}/Roptimer-Windows-x64.zip", quote=True),
         "__RELEASE_EXE__": html.escape(f"{RELEASE_BASE_WINDOWS}/Roptimer.exe", quote=True),
         "__RELEASE_CLI__": html.escape(f"{RELEASE_BASE_WINDOWS}/RoptimerBoost.exe", quote=True),
@@ -377,34 +380,38 @@ def check() -> None:
 
     root_html = ROOT_INDEX.read_text(encoding="utf-8")
     # V4 asset checks: root fallback uses web/-prefixed assets.
-    for asset in ("web/assets/nebula.css", "web/assets/nebula.js", "web/assets/three-scene.js"):
+    for asset in ("web/assets/nebula.css", "web/assets/nebula.js"):
         if asset not in root_html:
             raise RuntimeError(f"Root index does not reference {asset}")
     if 'href="assets/nebula.css"' not in web_html or 'src="assets/nebula.js"' not in web_html:
-        raise RuntimeError("web/index.html does not use the V4 nebula assets")
+        raise RuntimeError("web/index.html does not use the lightweight nebula assets")
+    for token in ("Roptimer-Rust-Setup-x64.exe", "download-electron", "build-electron.yml"):
+        if token not in web_html or token not in root_html:
+            raise RuntimeError(f"Generated downloads are missing the guided installer option: {token}")
+    if "Roptimer-Rust-x64.exe" in web_html or "Roptimer-Rust-x64.exe" in root_html:
+        raise RuntimeError("Website still links the superseded portable Rust x64 executable")
+    template_html = TEMPLATE.read_text(encoding="utf-8").lower()
+    runtime_js = (WEB / "assets" / "nebula.js").read_text(encoding="utf-8").lower()
+    runtime_css = (WEB / "assets" / "nebula.css").read_text(encoding="utf-8").lower()
+    forbidden_runtime_markers = (
+        "three-scene.js", "three-canvas", "assets/vendor/three", "webglrenderer",
+        "webglrenderingcontext", "cursor-glow", '<script type="module"',
+    )
+    for marker in forbidden_runtime_markers:
+        if any(marker in text for text in (template_html, web_html, root_html, runtime_js, runtime_css)):
+            raise RuntimeError(f"Website still contains removed 3D runtime code: {marker}")
+    if (WEB / "assets" / "three-scene.js").exists() or (WEB / "assets" / "vendor" / "three").exists():
+        raise RuntimeError("Three.js runtime assets must be removed from web/assets")
     for token in ("id=\"fastflag-allowlist\"", "detectPanel", "allowlist-card", "al-improves", "Windows"):
         if token not in web_html or token not in root_html:
             raise RuntimeError(f"Generated site is missing expected content: {token}")
     if allowlist.get("windowsOnly") is not True or allowlist.get("platform") != "windows":
         raise RuntimeError("Allowlist must be explicitly marked Windows-only")
 
-    # Vendored Three.js module graph must be self-contained (no bare 'three').
-    vendor = WEB / "assets" / "vendor" / "three"
-    core = vendor / "three.module.min.js"
-    if not core.exists():
-        raise RuntimeError("Vendored three.module.min.js is missing")
-    for js in [WEB / "assets" / "three-scene.js", *sorted((vendor / "addons").rglob("*.js"))]:
-        txt = js.read_text(encoding="utf-8")
-        for spec in re.findall(r"""(?:from\s*|import\s*)['"]([^'"]+)['"]""", txt):
-            if spec == "three":
-                raise RuntimeError(f"Bare 'three' specifier in {js.relative_to(WEB)} (would break without an import map)")
-            if spec.startswith(".") and not (js.parent / spec).resolve().exists():
-                raise RuntimeError(f"Unresolved module specifier {spec} in {js.relative_to(WEB)}")
-
     print(
         f"WEBSITE CHECK OK: {len(catalog['features'])} features, "
         f"{len(catalog.get('sources', []))} sources, {len(flags)} allowlisted flags "
-        f"({len(features)} with improvements), vendored Three.js self-contained, "
+        f"({len(features)} with improvements), CSS-only backdrop, no Three.js runtime, "
         f"root fallback + Pages artifact valid."
     )
 

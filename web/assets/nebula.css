@@ -55,30 +55,15 @@ body::before {
   background-position: 24px 40px, 130px 160px;
   mask-image: linear-gradient(to bottom, black, transparent 92%);
 }
-#three-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.88;
-}
-.scene-veil {
+.ambient-glow {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(3,3,7,.92) 0%, rgba(3,3,7,.58) 46%, rgba(3,3,7,.28) 100%),
-    radial-gradient(circle at 70% 40%, transparent, rgba(3,3,7,.55) 78%);
-}
-.no-webgl #three-canvas { display: none; }
-.no-webgl .scene-veil {
-  background:
-    radial-gradient(circle at 72% 35%, rgba(156,140,255,.22), transparent 30%),
-    radial-gradient(circle at 82% 55%, rgba(111,207,255,.13), transparent 28%),
-    linear-gradient(90deg, rgba(3,3,7,.96), rgba(3,3,7,.64));
+    radial-gradient(circle at 72% 35%, rgba(156,140,255,.12), transparent 30%),
+    radial-gradient(circle at 82% 55%, rgba(111,207,255,.08), transparent 28%),
+    linear-gradient(90deg, rgba(3,3,7,.35), rgba(3,3,7,.08));
 }
 a { color: inherit; text-decoration: none; }
 a:hover { color: var(--blue); }
@@ -248,7 +233,7 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 .allowlist-toolbar { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
 
 /* Downloads */
-.download-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+.download-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .asset-list { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .asset-list li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(164,150,255,.1); color: var(--muted); font-size: 12px; }
 .asset-list li span::before { content: "◆"; color: var(--amber); margin-right: 9px; font-size: 8px; }
@@ -364,29 +349,15 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .js .reveal { opacity: 1 !important; transform: none !important; }
 }
 
-/* Cursor glow, focus mode, and command-triggered bloom pulse */
-.cursor-glow {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 2;
-  width: 540px;
-  height: 540px;
-  border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(156,140,255,.14), rgba(111,207,255,.05) 42%, transparent 68%);
-  transform: translate3d(-50%, -50%, 0);
-  opacity: 0;
-  transition: opacity .35s ease;
-}
-body.pointer-active .cursor-glow { opacity: 1; }
-body.focus-mode #three-canvas,
-body.focus-mode .cursor-glow,
-body.focus-mode body::before { opacity: 0; }
-body.glow-boost .glass,
-body.glow-boost .panel,
-body.glow-boost .orbit-card { box-shadow: 0 0 70px rgba(156,140,255,.32), 0 0 110px rgba(111,207,255,.14), var(--shadow); }
-body.glow-boost .brand-mark { box-shadow: 0 0 60px rgba(156,140,255,.72); }
+/* Optional low-motion mode for the lightweight CSS-only presentation */
+body.focus-mode::before,
+body.focus-mode .ambient-glow { opacity: .08; }
+body.focus-mode .glass,
+body.focus-mode .panel,
+body.focus-mode .orbit-card { box-shadow: none; backdrop-filter: none; }
+body.focus-mode *,
+body.focus-mode *::before,
+body.focus-mode *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 
 /* ================================================================== */
 /* V4 additions — Rust + Tauri Client, enriched allowlist, detection    */

@@ -46,6 +46,7 @@ ICONS = WEB / "assets" / "icons"
 ASSETS = ROOT / "assets"
 DOTNET = ROOT / "dotnet"
 RUST = ROOT / "rust"
+ELECTRON = ROOT / "electron"
 DOCS = ROOT / "docs"
 MAC = ROOT / "mac"
 
@@ -338,10 +339,16 @@ def build_dotnet_source_zip() -> Path:
             ROOT / "build_website.py",
             ROOT / "build_screenshots.py",
             ROOT / "build_tauri_frontend.py",
+            ELECTRON / "package.json",
+            ELECTRON / "package-lock.json",
+            ELECTRON / "README.md",
+            ELECTRON / "main.cjs",
+            ELECTRON / "preload.cjs",
+            ELECTRON / "backend.cjs",
+            ELECTRON / "test/backend.test.cjs",
             WEB / "index.template.html",
             WEB / "assets/nebula.css",
             WEB / "assets/nebula.js",
-            WEB / "assets/three-scene.js",
             RUST / "src-tauri/Cargo.toml",
             RUST / "src-tauri/build.rs",
             RUST / "src-tauri/tauri.conf.json",
@@ -350,6 +357,7 @@ def build_dotnet_source_zip() -> Path:
             RUST / "src-tauri/src/main.rs",
             RUST / "src-tauri/src/detect.rs",
             RUST / "src-tauri/src/session.rs",
+            RUST / "src-tauri/src/safety.rs",
             RUST / "src-tauri/src/settings.rs",
             RUST / "README.md",
             ROOT / "roblox_fps_optimizer.py",
@@ -359,6 +367,7 @@ def build_dotnet_source_zip() -> Path:
             ROOT / ".github/workflows/build-windows.yml",
             ROOT / ".github/workflows/build-macos.yml",
             ROOT / ".github/workflows/build-rust-tauri.yml",
+            ROOT / ".github/workflows/build-electron.yml",
             ROOT / ".github/workflows/deploy-pages.yml",
             ROOT / "index.html",
             ROOT / "404.html",
@@ -379,9 +388,6 @@ def build_dotnet_source_zip() -> Path:
             ICONS / "roptimzier-shield.ico",
             ICONS / "favicon.ico",
             *sorted(WEB.glob("assets/sirius-*.svg")),
-            *sorted((WEB / "assets" / "vendor" / "three").rglob("*.js")),
-            WEB / "assets" / "vendor" / "three" / "LICENSE.txt",
-            WEB / "assets" / "vendor" / "three" / "VERSION.txt",
             *sorted((RUST / "src-tauri" / "icons").glob("*")),
             *sorted((RUST / "desktop-ui").rglob("*")),
             *sorted(DOCS.glob("*.md")),

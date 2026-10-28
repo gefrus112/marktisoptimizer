@@ -1,7 +1,7 @@
 {
   "product": "Roptimer Hub V4",
   "version": "4.0.0",
-  "platform": "Rust + Tauri v2 / Windows 10+ (single-file standalone desktop UI); .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with vendored Three.js",
+  "platform": "Rust + Tauri v2 / Windows 10+ (primary desktop client); optional Electron / Windows x64 setup wizard; .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with a CSS-only backdrop",
   "safety": {
     "injection": false,
     "memoryReads": false,
@@ -13,7 +13,15 @@
     "robloxTelemetryDisable": false,
     "appTelemetry": false,
     "gameScriptExecution": false,
-    "allowlistOnly": true
+    "allowlistOnly": true,
+    "localProcessNameScan": true,
+    "networkRequests": false,
+    "fullMalwareScan": false,
+    "automaticProcessTermination": false,
+    "automaticSoftwareRemoval": false,
+    "hardwareTelemetry": false,
+    "processAffinityChanges": false,
+    "networkRouteChanges": false
   },
   "features": [
     {
@@ -153,12 +161,12 @@
     },
     {
       "id": "sirius-website",
-      "name": "Sirius-style dark website, 100× edition",
+      "name": "Lightweight Sirius-style CSS-only website",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, FastFlag allowlist docs, and no green neon dots."
+      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, static CSS starfield and gradients, command palette, counters, scroll reveals, Windows/macOS download cards, and FastFlag allowlist docs. No WebGL renderer or Three.js runtime is loaded."
     },
     {
       "id": "cli-docs",
@@ -212,16 +220,16 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 14 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution."
+      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 13 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, low-motion focus mode, and the local Script Hub preview. No dynamic code execution."
     },
     {
       "id": "starfield-fx",
-      "name": "100× animated starfield and spotlight FX",
+      "name": "Lightweight CSS starfield and visual effects",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual."
+      "details": "Uses a static CSS starfield and gradient backdrop, modest tab/reveal/counter interactions, and an optional low-motion focus mode. No canvas rendering loop, WebGL, GPU bloom, or cursor-follow spotlight."
     },
     {
       "id": "fastflag-allowlist",
@@ -248,7 +256,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Single lightweight Roptimer-Rust-x64.exe with its own standalone Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist). It is independent from the website and bundles no website UI, CSS, JavaScript, or Three.js. Uses the built-in WebView2 runtime."
+      "details": "Guided x64 NSIS setup wizard for the primary Rust + Tauri Windows client. It uses the built-in WebView2 runtime, has its own Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist), detects Roblox locally, and manages only allowlisted reversible settings. The Windows app offers System default, Direct3D 11, Vulkan, or OpenGL and the limited local process-name scan."
     },
     {
       "id": "roblox-detect-on-launch",
@@ -279,12 +287,12 @@
     },
     {
       "id": "vendored-threejs-website",
-      "name": "Glowing Three.js website (offline, no CDN)",
-      "status": "Implemented",
-      "implemented": true,
+      "name": "Three.js / WebGL website scene",
+      "status": "Removed at user request",
+      "implemented": false,
       "safe": true,
       "flag": null,
-      "details": "New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable."
+      "details": "Removed from the website to reduce rendering load. The site no longer ships or imports Three.js, a WebGL canvas, or a 3D scene; lightweight CSS gradients and static stars remain."
     },
     {
       "id": "rust-safe-apply-restore",
@@ -294,6 +302,69 @@
       "safe": true,
       "flag": "allowlisted keys only",
       "details": "Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."
+    },
+    {
+      "id": "renderer-preference",
+      "name": "Allowlisted rendering API preference",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "FFlagDebugGraphicsPreferD3D11 / FFlagDebugGraphicsPreferVulkan / FFlagDebugGraphicsPreferOpenGL",
+      "details": "The standalone Windows app selects System default, Direct3D 11, Vulkan, or OpenGL using only the mutually exclusive canonical allowlisted switches. Direct3D 12 is not included in the allowlist; unsupported renderer flags are never written."
+    },
+    {
+      "id": "local-executor-name-scan",
+      "name": "Local known-executor process-name check",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "At startup, every 30 seconds while open, and on request, the Windows app checks exact process image names Xeno.exe, Solara.exe, and JJSploit.exe. Alerts stay in-app; only the image-name field is parsed. Any PID present in tasklist temporary output is ignored and not retained or reported; no paths, command lines, process memory, or network data are collected. This is not antivirus or a complete malware scan. Matches lead to Windows Settings/Windows Security for user review; no process is terminated and no files/software are deleted automatically."
+    },
+    {
+      "id": "dynamic-resolution-scaling",
+      "name": "Dynamic in-game resolution scaling",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. The canonical Roblox allowlist has no supported runtime render-scale control. Monitoring game-frame/GPU conditions and changing internal render resolution would cross the app’s no-process-inspection/no-hook boundary. Use Roblox’s official graphics controls instead."
+    },
+    {
+      "id": "core-affinity-optimization",
+      "name": "Force Roblox onto selected CPU cores",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. Setting per-process P-core/E-core affinity requires opening and changing the Roblox process, which is outside the local allowlisted-settings boundary. Windows and Roblox retain control of CPU scheduling."
+    },
+    {
+      "id": "intelligent-network-routing",
+      "name": "ExitLag-style route optimization / jitter mitigation",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. Route rerouting requires a VPN/relay, driver, or system network-path changes and may send traffic through a third party. Roptimer does not tunnel, intercept, reroute, or optimize Roblox network traffic."
+    },
+    {
+      "id": "electron-desktop-client",
+      "name": "Optional Electron Windows desktop client",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Adds a separate Electron shell for the standalone desktop UI, alongside the primary Rust + Tauri app. Uses context isolation, sandboxing, no renderer Node integration, a narrow IPC command allowlist, and blocks remote navigation plus HTTP(S)/WebSocket requests. Its local backend preserves the same allowlist-only settings, backups, exact-name process checks, and no-injection/no-memory/no-network boundaries."
+    },
+    {
+      "id": "guided-windows-installers",
+      "name": "Guided x64 Windows setup wizards",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Configures separate NSIS setup wizards for the Rust + Tauri and Electron apps. Both installers create Start Menu/Desktop shortcuts, register Windows uninstallers, and can launch the app after setup; no batch launcher is required. The new distribution stops staging the old portable Rust x64 executable."
     }
   ],
   "sources": [

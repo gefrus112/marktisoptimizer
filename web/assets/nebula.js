@@ -191,7 +191,7 @@
 
   function featureState(status) {
     var value = String(status || "").toLowerCase();
-    if (value.indexOf("reject") !== -1) return "rejected";
+    if (value.indexOf("reject") !== -1 || value.indexOf("removed") !== -1) return "rejected";
     if (value.indexOf("legacy") !== -1) return "legacy";
     return "implemented";
   }
@@ -413,8 +413,7 @@
     { title: "Open macOS companion release", hint: "Legacy Mac companion only · not the allowlist client", icon: "↗", keywords: "github release mac macos companion download", run: function () { openExternal(URLS.mac); } },
     { title: "Open official allowlist source", hint: "Roblox DevForum local FastFlag allowlist", icon: "◇", keywords: "official source roblox devforum fastflag allowlist", run: function () { openExternal(URLS.allowlist); } },
     { title: "View feature status", hint: "Jump to implemented, legacy, and rejected features", icon: "✓", keywords: "feature status audit safety rejected", run: function () { activateTab("docs"); scrollToAnchor("feature-status"); } },
-    { title: "Pulse the Three.js glow", hint: "Trigger a brief bloom pulse in the 3D scene", icon: "✦", keywords: "three.js glow bloom pulse webgl scene", run: function () { document.body.classList.add("glow-boost"); window.dispatchEvent(new CustomEvent("roptimer:glow-boost")); toast("Glow pulse sent to the Three.js scene."); window.setTimeout(function () { document.body.classList.remove("glow-boost"); }, 1800); } },
-    { title: "Toggle focus mode", hint: "Hide the 3D canvas and reduce visual motion", icon: "◐", keywords: "focus mode calm reduce motion webgl canvas", run: function () { document.body.classList.toggle("focus-mode"); toast(document.body.classList.contains("focus-mode") ? "Focus mode on." : "Focus mode off."); } },
+    { title: "Toggle focus mode", hint: "Pause decorative animations and dim the static CSS backdrop", icon: "◐", keywords: "focus mode calm reduce motion performance css", run: function () { document.body.classList.toggle("focus-mode"); toast(document.body.classList.contains("focus-mode") ? "Low-motion focus mode on." : "Low-motion focus mode off."); } },
     { title: "Open GitHub repository", hint: "Source, workflows, docs, and issues", icon: "⌥", keywords: "github repo source code repository", run: function () { openExternal(URLS.repo); } }
   ];
 
@@ -528,16 +527,6 @@
     return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
-  function initCursorGlow() {
-    var glow = $("#cursorGlow");
-    if (!glow) return;
-    window.addEventListener("pointermove", function (event) {
-      document.body.classList.add("pointer-active");
-      glow.style.transform = "translate3d(" + event.clientX + "px," + event.clientY + "px,0) translate(-50%,-50%)";
-    }, { passive: true });
-    window.addEventListener("pointerleave", function () { document.body.classList.remove("pointer-active"); });
-  }
-
   function initReveal() {
     var items = $$(".glass, .panel, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
     items.forEach(function (el) { el.classList.add("reveal"); });
@@ -585,7 +574,6 @@
     bar.style.width = Math.min(100, Math.max(0, pct)) + "%";
   }
 
-  initCursorGlow();
   initReveal();
   initCounters();
   window.addEventListener("scroll", updateScrollProgress, { passive: true });
@@ -603,7 +591,7 @@
     commandCount: commands.length,
     allowlistFlagCount: allowlistFlags.length,
     allowlistCategoryCount: (allowlist.categories || []).length,
-    threeCanvas: !!$("#three-canvas"),
+    visualRenderer: "css-only",
     platform: (allowlist.platform || "windows").toLowerCase(),
     activeTab: function () {
       var active = $(".tab-button.active");

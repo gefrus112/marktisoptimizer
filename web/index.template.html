@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#030307" />
-  <meta name="description" content="Roptimer — a lightweight Rust + Tauri Windows client and a glowing Three.js site for safe, reversible Roblox performance settings. The main Client tab shows the 18 Roblox-allowlisted FastFlags in Geometry, Rendering, and User Interface, with what each improves." />
+  <meta name="description" content="Roptimer — a lightweight Rust + Tauri Windows client and fast, CSS-only website for safe, reversible Roblox performance settings. The Client tab shows the 18 Roblox-allowlisted FastFlags in Geometry, Rendering, and User Interface, with what each improves." />
   <title>Roptimer — Windows client for safe Roblox performance</title>
   <link rel="icon" href="assets/icons/favicon.ico" sizes="any" />
   <link rel="icon" href="assets/icons/roptimzier-shield.png" type="image/png" />
@@ -34,9 +34,7 @@
   </div>
 
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
-  <canvas id="three-canvas" aria-hidden="true"></canvas>
-  <div class="scene-veil" aria-hidden="true"></div>
-  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+  <div class="ambient-glow" aria-hidden="true"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Roptimer home">
@@ -77,7 +75,7 @@
   <main id="top" class="max">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="eyebrow">Rust + Tauri v2 · single-file Windows client</div>
+        <div class="eyebrow">Rust + Tauri v2 · Windows x64 setup wizard</div>
         <h1 id="hero-title">Serious <span class="gradient">performance</span><br /><em>for the Windows client.</em></h1>
         <p>
           Roptimer is a small, lightweight desktop app built with Rust + Tauri. It opens to a dedicated
@@ -86,13 +84,13 @@
           with what each one improves. Reversible local settings only. No injector, no memory edits, no exploits.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="__RELEASE_RUST_EXE__" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+          <a class="button primary" href="__RELEASE_RUST_SETUP__" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
           <a class="button ghost" href="#client" data-route="client" data-jump="detectPanel">See the Client tab</a>
           <button class="button ghost" id="heroCommandButton" type="button">Commands <kbd>Ctrl K</kbd></button>
         </div>
         <div class="hero-badges">
-          <span class="live"><i aria-hidden="true"></i> Three.js glow</span>
-          <span>One .exe · no install</span>
+          <span class="live"><i aria-hidden="true"></i> CSS-only visuals</span>
+          <span>Guided setup · no batch</span>
           <span>Windows 10/11 · 64-bit</span>
           <span>18 allowlisted flags</span>
         </div>
@@ -156,7 +154,7 @@
               <div class="detect-icon" aria-hidden="true">⊞</div>
               <div class="detect-body">
                 <strong id="detectTitle">Runs when you open the Windows app</strong>
-                <p id="detectText">Download the single-file Windows client below. On first launch it checks whether Roblox is installed and lists the version folders and ClientAppSettings.json files it can safely manage.</p>
+                <p id="detectText">Download the Windows setup wizard below. On first launch it checks whether Roblox is installed and lists the version folders and ClientAppSettings.json files it can safely manage.</p>
                 <div id="detectMeta" class="detect-meta"></div>
               </div>
             </div>
@@ -262,7 +260,7 @@
         <div class="allowlist-grid" id="allowlistCards">__ALLOWLIST_CARDS__</div>
 
         <div class="notice" style="margin-top:22px">
-          <strong>Windows-only feature.</strong> This allowlist manager lives in the Rust + Tauri Windows client. Telemetry/Crashpad/Backtrace disabling, screenshot-report flags, fullbright/x-ray, building removal, and anti-cheat bypass flags are deliberately rejected.
+          <strong>Windows-only feature.</strong> This allowlist manager is available in the standalone Windows desktop clients (Rust + Tauri primary; optional Electron). Telemetry/Crashpad/Backtrace disabling, screenshot-report flags, fullbright/x-ray, building removal, and anti-cheat bypass flags are deliberately rejected.
         </div>
       </section>
 
@@ -272,24 +270,39 @@
           <div>
             <span class="panel-label">Get the app</span>
             <h2>Downloads</h2>
-            <p>One small Windows executable built with Rust + Tauri v2. It uses the WebView2 runtime already present on Windows 10/11 — nothing else to install.</p>
+            <p>Choose the primary Rust + Tauri client or the optional Electron build. Both arrive as guided x64 setup wizards with shortcuts and uninstall support; neither needs a batch file.</p>
           </div>
-          <span class="tag amber">64-bit · single .exe</span>
+          <span class="tag amber">Windows x64 · setup wizard</span>
         </div>
 
         <div class="download-grid">
           <div class="panel" id="download-win">
             <span class="panel-label">Windows · Rust + Tauri v2 (recommended)</span>
-            <h3>Roptimer.exe</h3>
-            <p>The new single-file Windows client. Opens to a dedicated Main page and grouped Settings for Rendering, Geometry, Icons, and Allowlist, detects Roblox on first launch, and manages only allowlisted local settings with timestamped backups. Requires the Microsoft Edge WebView2 runtime (built into Windows 10/11).</p>
+            <h3>Roptimer Setup</h3>
+            <p>The primary desktop client opens to Main and grouped Settings for Rendering, Geometry, Icons, and Allowlist. The guided installer creates Start Menu/Desktop shortcuts and a Windows uninstaller; the app uses the WebView2 runtime (setup bootstraps it if missing) and manages only allowlisted local settings with backups.</p>
             <ul class="asset-list">
-              <li><span>Windows 64-bit · portable .exe</span><a href="__RELEASE_RUST_EXE__" data-external>Download</a></li>
-              <li><span>Windows installer · .msi / setup</span><a href="__RELEASE_PAGE_RUST__" data-external>Release page</a></li>
+              <li><span>Windows x64 · setup wizard</span><a href="__RELEASE_RUST_SETUP__" data-external>Download</a></li>
               <li><span>SHA256 checksum</span><a href="__RELEASE_PAGE_RUST__" data-external>View</a></li>
+              <li><span>All release assets</span><a href="__RELEASE_PAGE_RUST__" data-external>Release page</a></li>
             </ul>
             <div class="inline-actions" style="margin-top:16px">
-              <a class="button primary" href="__RELEASE_RUST_EXE__" data-external>Download for Windows <span aria-hidden="true">↓</span></a>
+              <a class="button primary" href="__RELEASE_RUST_SETUP__" data-external>Install for Windows <span aria-hidden="true">↓</span></a>
               <a class="button ghost small" href="__RELEASE_PAGE_RUST__" data-external>All Windows assets</a>
+            </div>
+          </div>
+
+          <div class="panel" id="download-electron">
+            <span class="panel-label">Windows · Electron alternative</span>
+            <h3>Roptimer Electron Setup</h3>
+            <p>An optional Electron shell for the same standalone desktop UI. Its NSIS wizard offers install-folder selection, Start Menu/Desktop shortcuts, uninstall support, and launch-after-setup. No batch file is required.</p>
+            <ul class="asset-list">
+              <li><span>Windows x64 · setup wizard</span><a href="__ELECTRON_WORKFLOW__" data-external>Actions build</a></li>
+              <li><span>SHA256 checksum</span><a href="__ELECTRON_WORKFLOW__" data-external>Actions artifact</a></li>
+              <li><span>Electron source and build notes</span><a href="https://github.com/gefrus112/robloxclinetbooster/tree/main/electron" data-external>View source</a></li>
+            </ul>
+            <div class="inline-actions" style="margin-top:16px">
+              <a class="button primary" href="__ELECTRON_WORKFLOW__" data-external>Get Electron installer <span aria-hidden="true">↓</span></a>
+              <a class="button ghost small" href="https://github.com/gefrus112/robloxclinetbooster/blob/main/electron/README.md" data-external>Build notes</a>
             </div>
           </div>
 
@@ -385,7 +398,7 @@ RoptimerBoost.exe self-test</pre></div>
             <li>Unrelated JSON keys always preserved</li>
             <li>Only Roblox-allowlisted FastFlags managed</li>
             <li>OS-level install detection + process-name-only running status</li>
-            <li>Vendored Three.js — no CDN, no remote code</li>
+            <li>Static CSS backdrop — no WebGL or 3D engine</li>
           </ul>
           <ul class="safety-list">
             <li>No DLL injection or process hooks</li>
@@ -401,10 +414,10 @@ RoptimerBoost.exe self-test</pre></div>
         <div class="panel" style="margin-top:18px">
           <h3>Screenshots</h3>
           <div class="screenshot-gallery">
-            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Download tab screenshot" data-caption="Downloads — single-file Windows client and legacy builds."><img src="assets/sirius-download.svg" alt="Download tab screenshot" /><span><strong>01 · Downloads</strong>Windows x64 single .exe.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-download.svg" data-alt="Download tab screenshot" data-caption="Downloads — guided x64 setup wizards for Rust + Tauri and Electron, with no batch launcher."><img src="assets/sirius-download.svg" alt="Download tab screenshot" /><span><strong>01 · Downloads</strong>Guided x64 setup wizards.</span></button>
             <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-cli-docs.svg" data-alt="CLI docs screenshot" data-caption="Boost CLI — safe preview/apply/restore commands."><img src="assets/sirius-cli-docs.svg" alt="CLI docs screenshot" /><span><strong>02 · CLI</strong>Safe settings commands.</span></button>
             <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-allowlist.svg" data-alt="Allowlist screenshot" data-caption="FastFlag allowlist — Geometry, Rendering, and User Interface."><img src="assets/sirius-allowlist.svg" alt="Allowlist screenshot" /><span><strong>03 · Allowlist</strong>18 official local flags.</span></button>
-            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Glowing starfield website" data-caption="Three.js glow — vendored, offline, no CDN."><img src="assets/sirius-starfield.svg" alt="Glowing starfield website" /><span><strong>04 · Three.js</strong>Local glowing scene.</span></button>
+            <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-starfield.svg" data-alt="Static CSS starfield website preview" data-caption="CSS gradients and static stars — no WebGL renderer or Three.js runtime."><img src="assets/sirius-starfield.svg" alt="Static CSS starfield website preview" /><span><strong>04 · Lightweight</strong>CSS gradients and static stars.</span></button>
             <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-command-palette.svg" data-alt="Command palette screenshot" data-caption="Command palette — quick, searchable actions."><img src="assets/sirius-command-palette.svg" alt="Command palette screenshot" /><span><strong>05 · Commands</strong>Ctrl/Cmd + K.</span></button>
             <button class="screenshot-card" type="button" data-lightbox data-src="assets/sirius-script-hub.svg" data-alt="Script Hub preview" data-caption="Script Hub — local UI preview only, never executed in-game."><img src="assets/sirius-script-hub.svg" alt="Script Hub preview" /><span><strong>06 · Preview</strong>Local UI mockups.</span></button>
           </div>
@@ -419,7 +432,7 @@ RoptimerBoost.exe self-test</pre></div>
   </main>
 
   <footer class="site-footer">
-    <div><strong>Roptimer</strong> — a settings tool, not a hacking toolbox. Windows Client/allowlist features are Windows-only; the macOS companion is separate. The desktop app uses Rust + Tauri v2; this website's visual scene uses locally vendored Three.js.</div>
+    <div><strong>Roptimer</strong> — a settings tool, not a hacking toolbox. Windows Client/allowlist features are Windows-only; the macOS companion is separate. The primary desktop app uses Rust + Tauri v2 with an optional Electron build; this website uses a lightweight CSS-only backdrop.</div>
     <div>
       <a href="__REPO__" data-external>GitHub</a> ·
       <a href="__RELEASE_PAGE_RUST__" data-external>Windows release</a> ·
@@ -447,7 +460,6 @@ RoptimerBoost.exe self-test</pre></div>
 
   <script id="featureCatalog" type="application/json">__FEATURE_JSON__</script>
   <script id="fastflagAllowlist" type="application/json">__FASTFLAG_ALLOWLIST_JSON__</script>
-  <script src="assets/nebula.js"></script>
-  <script type="module" src="assets/three-scene.js"></script>
+  <script src="assets/nebula.js" defer></script>
 </body>
 </html>

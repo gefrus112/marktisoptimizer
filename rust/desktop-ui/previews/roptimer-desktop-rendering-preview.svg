@@ -61,33 +61,39 @@
 <text x="277" y="295" fill="#73d6ad" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">01 / RENDERING</text>
 <text x="277" y="324" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="21px" font-weight="630">Rendering profile</text>
 <text x="277" y="345" fill="#84908d" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Adjust approved graphics and texture settings. Roblox in-game FPS control is not changed.</text>
-<rect x="276" y="366" width="1100" height="344" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<rect x="276" y="366" width="1100" height="408" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
 <text x="300" y="407" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Optimization profile</text>
 <text x="300" y="426" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Sets safe defaults for graphics workload and level-of-detail.</text>
 <rect x="1010" y="388" width="334" height="37" rx="8" fill="#10151a" stroke="#3a4449" stroke-width="1"/>
 <text x="1026" y="412" fill="#d5dfdb" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="600">Reduce building lag</text>
 <text x="1318" y="412" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="12px" font-weight="400">⌄</text>
 <path d="M298 444H1352" stroke="#2a3238" stroke-width="1"/>
-<text x="300" y="479" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Graphics quality</text>
-<text x="300" y="498" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Lower values may reduce rendering workload. Range: 0–21.</text>
-<path d="M1007 484H1293" stroke="#34403c" stroke-width="4"/>
-<path d="M1007 484H1279" stroke="#73d6ad" stroke-width="4"/>
-<circle cx="1279" cy="484" r="8" fill="#73d6ad"/>
-<rect x="1310" y="468" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
-<text x="1321" y="488" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">21</text>
-<path d="M298 519H1352" stroke="#2a3238" stroke-width="1"/>
-<text x="300" y="555" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Texture quality</text>
-<text x="300" y="574" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Uses Roblox’s allowlisted texture-quality override. Range: 0–3.</text>
-<path d="M1007 560H1293" stroke="#34403c" stroke-width="4"/>
-<path d="M1007 560H1007" stroke="#73d6ad" stroke-width="4"/>
-<circle cx="1007" cy="560" r="8" fill="#73d6ad"/>
-<rect x="1310" y="544" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
-<text x="1321" y="564" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">0</text>
-<path d="M298 595H1352" stroke="#2a3238" stroke-width="1"/>
-<rect x="299" y="615" width="1053" height="75" rx="8" fill="rgba(115,214,173,.045)" stroke="#2b3b35" stroke-width="1"/>
-<text x="316" y="644" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="600">◈</text>
-<text x="343" y="638" fill="#c7d7cf" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">No unapproved FPS flags.</text>
-<text x="343" y="657" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">FPS limits stay in Roblox. Roptimer does not write legacy target-FPS settings.</text>
+<text x="300" y="469" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Rendering API preference</text>
+<text x="300" y="486" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">System default, Direct3D 11, Vulkan, or OpenGL. No Direct3D 12.</text>
+<rect x="1010" y="451" width="334" height="37" rx="8" fill="#10151a" stroke="#3a4449" stroke-width="1"/>
+<text x="1026" y="475" fill="#d5dfdb" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="600">System default</text>
+<text x="1318" y="475" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="12px" font-weight="400">⌄</text>
+<path d="M298 507H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="300" y="542" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Graphics quality</text>
+<text x="300" y="561" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Lower values may reduce rendering workload. Range: 0–21.</text>
+<path d="M1007 547H1293" stroke="#34403c" stroke-width="4"/>
+<path d="M1007 547H1279" stroke="#73d6ad" stroke-width="4"/>
+<circle cx="1279" cy="547" r="8" fill="#73d6ad"/>
+<rect x="1310" y="531" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
+<text x="1321" y="551" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">21</text>
+<path d="M298 582H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="300" y="618" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Texture quality</text>
+<text x="300" y="637" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Uses Roblox’s allowlisted texture-quality override. Range: 0–3.</text>
+<path d="M1007 623H1293" stroke="#34403c" stroke-width="4"/>
+<path d="M1007 623H1007" stroke="#73d6ad" stroke-width="4"/>
+<circle cx="1007" cy="623" r="8" fill="#73d6ad"/>
+<rect x="1310" y="607" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
+<text x="1321" y="627" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">0</text>
+<path d="M298 659H1352" stroke="#2a3238" stroke-width="1"/>
+<rect x="299" y="677" width="1053" height="75" rx="8" fill="rgba(115,214,173,.045)" stroke="#2b3b35" stroke-width="1"/>
+<text x="316" y="706" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="600">◈</text>
+<text x="343" y="700" fill="#c7d7cf" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">No unapproved FPS flags.</text>
+<text x="343" y="719" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">FPS limits stay in Roblox. Roptimer does not write legacy target-FPS settings.</text>
 <rect x="236" y="811" width="1204" height="89" rx="0" fill="#0d1115"/>
 <path d="M236 811H1440" stroke="#2c343a" stroke-width="1"/>
 <rect x="277" y="834" width="31" height="18" rx="11" fill="rgba(115,214,173,.27)" stroke="#668c79" stroke-width="1"/>

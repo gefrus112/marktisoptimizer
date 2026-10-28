@@ -1,7 +1,7 @@
 {
   "name": "Roptimer — Windows client for safe Roblox performance",
   "short_name": "Roptimer",
-  "description": "Rust + Tauri Windows client, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags with what each improves.",
+  "description": "Rust + Tauri Windows client with an optional Electron setup wizard, Windows-only Client tab, and the 18 Roblox-allowlisted FastFlags.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

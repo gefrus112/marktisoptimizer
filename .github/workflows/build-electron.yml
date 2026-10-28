@@ -1,0 +1,72 @@
+name: Build Electron Windows client
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - arena/1443a973-robloxclinetbooster
+    paths:
+      - "electron/**"
+      - "rust/desktop-ui/**"
+      - "rust/src-tauri/icons/**"
+      - "fastflags-allowlist.json"
+      - "build_tauri_frontend.py"
+      - ".github/workflows/build-electron.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: electron-windows
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+
+      - name: Assemble the shared standalone desktop UI
+        run: |
+          python build_tauri_frontend.py
+          python build_tauri_frontend.py --check
+
+      - name: Install locked Electron toolchain
+        working-directory: electron
+        run: npm ci
+
+      - name: Test and package x64 setup wizard
+        working-directory: electron
+        run: npm run build:win
+
+      - name: Create installer checksum
+        shell: pwsh
+        run: |
+          $installer = "electron/dist/Roptimer-Electron-Setup-x64.exe"
+          if (-not (Test-Path $installer)) { throw "Electron setup wizard was not produced: $installer" }
+          $hash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "$hash  Roptimer-Electron-Setup-x64.exe" | Out-File -Encoding ascii "electron/dist/Roptimer-Electron-Setup-x64.exe.sha256"
+          Get-ChildItem electron/dist | Format-Table Name,Length
+
+      - name: Upload Electron setup wizard
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roptimer-Electron-Setup-x64
+          path: |
+            electron/dist/Roptimer-Electron-Setup-x64.exe
+            electron/dist/Roptimer-Electron-Setup-x64.exe.sha256
+          if-no-files-found: error

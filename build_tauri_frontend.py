@@ -2,7 +2,7 @@
 """Build the standalone Rust + Tauri desktop interface.
 
 The Windows executable has its own compact desktop UI under ``rust/desktop-ui``;
-it does not reuse the GitHub Pages website, website CSS, Three.js, or website JS.
+it does not reuse the GitHub Pages frontend, CSS, or JavaScript.
 This script injects the canonical allowlist as local JSON and assembles the
 small static bundle embedded by Tauri under ``rust/frontend``.
 
@@ -76,6 +76,8 @@ def check() -> None:
         "Geometry section": 'data-tab="geometry"',
         "Icons section": 'data-tab="icons"',
         "Allowlist section": 'data-tab="allowlist"',
+        "renderer preference control": 'id="rendererSelect"',
+        "local safety scan": 'id="scanSafety"',
         "embedded canonical allowlist": 'id="fastflagAllowlist"',
     }
     absent = [label for label, marker in expected.items() if marker not in html]
@@ -83,13 +85,15 @@ def check() -> None:
         raise SystemExit("Tauri desktop index is missing: " + ", ".join(absent))
     if PLACEHOLDER in html:
         raise SystemExit("Tauri desktop index still contains the unrendered allowlist placeholder.")
-    if any(token in html for token in ("three-scene.js", "nebula.css", "nebula.js", "desktop.js")):
+    if any(token in html for token in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Tauri frontend must not include or link to the shared website UI.")
     if "@import" in css or "https://" in css or "http://" in css:
         raise SystemExit("Tauri desktop stylesheet must be self-contained and local.")
     if "fetch(" in js or "XMLHttpRequest" in js:
         raise SystemExit("Tauri desktop UI must not make network requests.")
-    if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "three-scene.js", "desktop.js")):
+    if any(command not in js for command in ("scan_known_executor_processes", "open_windows_settings")):
+        raise SystemExit("Tauri desktop safety scan commands are not wired to the local UI.")
+    if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Old website UI assets remain in the generated Tauri bundle.")
     try:
         start = html.index('<script id="fastflagAllowlist" type="application/json">') + len('<script id="fastflagAllowlist" type="application/json">')

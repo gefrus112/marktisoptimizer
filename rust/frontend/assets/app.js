@@ -1,6 +1,6 @@
-/* Roptimer standalone Tauri desktop UI.
+/* Roptimer standalone Windows desktop UI, shared by the Tauri and Electron builds.
  * No website bundle, remote code, network calls, process handles, or game memory.
- * All app settings are local; Roblox writes go through the Rust allowlist commands.
+ * Settings use the narrow local allowlist bridge exposed by each desktop shell.
  */
 (function () {
   "use strict";
@@ -13,6 +13,7 @@
     mode: "Reduce building lag",
     tier: 21,
     texture: 0,
+    renderer: "Auto",
     geometryDistance: 64,
     vfx: true,
     allVersions: true
@@ -32,6 +33,8 @@
     pendingAction: null,
     confirmReturnFocus: null,
     statusPending: false,
+    safetyScanPending: false,
+    lastSafetyAlertSignature: "",
     toastTimer: 0,
     saveTimer: 0
   };
@@ -46,7 +49,7 @@
       if (window.__TAURI_INTERNALS__ && typeof window.__TAURI_INTERNALS__.invoke === "function") {
         return window.__TAURI_INTERNALS__.invoke.bind(window.__TAURI_INTERNALS__);
       }
-    } catch (_error) { /* Tauri bridge is not exposed in a browser preview. */ }
+    } catch (_error) { /* Desktop-shell IPC is not exposed in a browser preview. */ }
     return null;
   }
 
@@ -95,6 +98,7 @@
       mode: values.mode === "Balanced" ? "Balanced" : defaultProfile.mode,
       tier: clampInteger(values.tier, 0, 21, defaultProfile.tier),
       texture: clampInteger(values.texture, 0, 3, defaultProfile.texture),
+      renderer: ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(values.renderer) ? values.renderer : defaultProfile.renderer,
       geometryDistance: clampInteger(values.geometryDistance, 32, 256, defaultProfile.geometryDistance),
       vfx: typeof values.vfx === "boolean" ? values.vfx : defaultProfile.vfx,
       allVersions: typeof values.allVersions === "boolean" ? values.allVersions : defaultProfile.allVersions
@@ -130,6 +134,7 @@
       mode: byId("modeSelect").value,
       tier: clampInteger(byId("graphicsQuality").value, 0, 21, defaultProfile.tier),
       texture: clampInteger(byId("textureQuality").value, 0, 3, defaultProfile.texture),
+      renderer: byId("rendererSelect").value,
       geometryDistance: clampInteger(byId("geometryDistance").value, 32, 256, defaultProfile.geometryDistance),
       vfx: byId("vfxToggle").checked,
       allVersions: byId("allVersionsToggle").checked
@@ -140,6 +145,7 @@
     byId("modeSelect").value = profile.mode;
     byId("graphicsQuality").value = String(profile.tier);
     byId("textureQuality").value = String(profile.texture);
+    byId("rendererSelect").value = profile.renderer;
     byId("geometryDistance").value = String(profile.geometryDistance);
     byId("vfxToggle").checked = profile.vfx;
     byId("allVersionsToggle").checked = profile.allVersions;
@@ -166,6 +172,7 @@
     byId("profileModeLabel").textContent = profile.mode === "Balanced" ? "BALANCED" : "PERFORMANCE";
     byId("summaryGraphics").textContent = profile.tier + " / 21";
     byId("summaryTexture").textContent = profile.texture + " / 3";
+    byId("summaryRenderer").textContent = profile.renderer === "Auto" ? "System default" : profile.renderer;
     byId("summaryGeometry").textContent = profile.geometryDistance + " studs";
     scheduleProfileSave();
   }
@@ -291,6 +298,122 @@
     } finally {
       state.statusPending = false;
       if (button) button.disabled = false;
+    }
+  }
+
+  function renderSafetyScan(result, error) {
+    const badge = byId("safetyScanBadge");
+    const detail = byId("safetyScanDetail");
+    const matchesHost = byId("safetyMatches");
+    const scanButton = byId("scanSafety");
+    const appsButton = byId("openInstalledApps");
+    const securityButton = byId("openWindowsSecurity");
+    const matches = result && Array.isArray(result.matches) ? result.matches : [];
+    matchesHost.replaceChildren();
+    appsButton.hidden = true;
+    securityButton.hidden = true;
+    scanButton.disabled = !invoke || state.safetyScanPending;
+
+    function addSummary(message) {
+      const summary = document.createElement("p");
+      summary.className = "safety-match-summary";
+      summary.textContent = message;
+      matchesHost.appendChild(summary);
+    }
+
+    if (!invoke || (result && !result.supported)) {
+      badge.textContent = "DESKTOP ONLY";
+      badge.className = "state-pill state-pending";
+      detail.textContent = "The local process-name check runs only in the packaged Windows app.";
+      addSummary(error || "No process scan runs in the website preview.");
+      return;
+    }
+
+    if (matches.length) {
+      badge.textContent = result.available ? "REVIEW MATCH" : "PARTIAL SCAN";
+      badge.className = "state-pill state-missing";
+      detail.textContent = result.message || "Review the possible process-name match before launching Roblox.";
+      matches.forEach(function (match) {
+        const row = document.createElement("div");
+        row.className = "safety-match-item";
+        const product = document.createElement("strong");
+        product.textContent = String(match.productName || "Known process name");
+        const process = document.createElement("code");
+        process.textContent = String(match.processName || "");
+        row.append(product, process);
+        matchesHost.appendChild(row);
+      });
+      if (!result.available) addSummary("The scan was incomplete; displayed matches are still name-only results.");
+      appsButton.hidden = false;
+      securityButton.hidden = false;
+      scanButton.disabled = state.safetyScanPending;
+      return;
+    }
+
+    if (error || !result || !result.available) {
+      badge.textContent = "UNAVAILABLE";
+      badge.className = "state-pill state-error";
+      detail.textContent = error || (result && result.message) || "The local process-name check could not complete.";
+      addSummary("No clean result is claimed when a scan is unavailable.");
+      return;
+    }
+
+    badge.textContent = "NO MATCH";
+    badge.className = "state-pill state-found";
+    detail.textContent = result.message;
+    addSummary("No exact Xeno.exe, Solara.exe, or JJSploit.exe process name was found. This is not an antivirus verdict.");
+  }
+
+  async function scanKnownExecutorProcesses(silent) {
+    if (!invoke) {
+      renderSafetyScan(null, "Open the packaged Windows app to scan local process names.");
+      return null;
+    }
+    if (state.safetyScanPending) return null;
+    state.safetyScanPending = true;
+    const button = byId("scanSafety");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    byId("safetyScanBadge").textContent = "SCANNING";
+    byId("safetyScanBadge").className = "state-pill state-pending";
+    byId("safetyScanDetail").textContent = "Checking only the allowlisted process names on this device…";
+    try {
+      const result = await invoke("scan_known_executor_processes");
+      renderSafetyScan(result);
+      const matches = result && Array.isArray(result.matches) ? result.matches : [];
+      if (matches.length) {
+        const signature = matches.map(function (match) {
+          return String(match.processName || match.productName || "").toLowerCase();
+        }).filter(Boolean).sort().join("|");
+        if (signature && signature !== state.lastSafetyAlertSignature) {
+          showToast("Local safety alert: review the possible process-name match on Main.", "warning");
+        }
+        if (signature) state.lastSafetyAlertSignature = signature;
+      } else if (result && result.available) {
+        state.lastSafetyAlertSignature = "";
+      }
+      return result;
+    } catch (error) {
+      const message = error && error.message ? error.message : String(error);
+      renderSafetyScan(null, message);
+      if (!silent) showToast("Local process scan unavailable: " + message, "warning");
+      return null;
+    } finally {
+      state.safetyScanPending = false;
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+    }
+  }
+
+  async function openWindowsSettings(section) {
+    if (!invoke) {
+      showToast("Windows Settings links are available in the packaged app.", "warning");
+      return;
+    }
+    try {
+      await invoke("open_windows_settings", { section: section });
+    } catch (error) {
+      showToast("Could not open Windows Settings: " + (error && error.message ? error.message : String(error)), "warning");
     }
   }
 
@@ -598,6 +721,9 @@
     byId("quickRefresh").addEventListener("click", quickRefresh);
     byId("scanAgain").addEventListener("click", detectRoblox);
     byId("refreshPlayer").addEventListener("click", refreshPlayerStatus);
+    byId("scanSafety").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
+    byId("openInstalledApps").addEventListener("click", function () { openWindowsSettings("apps"); });
+    byId("openWindowsSecurity").addEventListener("click", function () { openWindowsSettings("security"); });
 
     byId("modeSelect").addEventListener("change", function () {
       if (!state.geometryManuallyChanged) {
@@ -605,6 +731,7 @@
       }
       updateProfileDisplay();
     });
+    byId("rendererSelect").addEventListener("change", updateProfileDisplay);
     ["graphicsQuality", "textureQuality", "geometryDistance"].forEach(function (id) {
       byId(id).addEventListener("input", function () {
         if (id === "geometryDistance") state.geometryManuallyChanged = true;
@@ -703,7 +830,7 @@
       byId("installBadge").textContent = "DESKTOP ONLY";
       byId("installBadge").className = "state-pill state-pending";
       byId("installTitle").textContent = "Packaged Windows app required";
-      byId("installDetail").textContent = "This standalone layout previews the desktop client. Local detection and writes run only in the packaged Tauri executable.";
+      byId("installDetail").textContent = "This standalone layout previews the desktop client. Local detection and settings writes run only in the packaged Windows desktop app.";
       byId("playerBadge").textContent = "DESKTOP ONLY";
       byId("playerBadge").className = "state-pill state-pending";
       byId("playerTitle").textContent = "Windows desktop runtime required";
@@ -713,6 +840,7 @@
       byId("applySettings").disabled = true;
       byId("restoreSettings").disabled = true;
       byId("refreshPlayer").disabled = true;
+      renderSafetyScan(null, "Local process scanning is available only in the packaged Windows app.");
       setBoot("Standalone desktop layout ready · no remote assets", 100);
       finishBoot();
       return;
@@ -728,11 +856,13 @@
     }).catch(function () { /* Product metadata is non-critical. */ });
     const detectionTask = detectRoblox();
     const playerTask = refreshPlayerStatus();
-    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask]).then(function () {
+    const safetyTask = scanKnownExecutorProcesses(true);
+    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask, safetyTask]).then(function () {
       window.clearTimeout(fallbackTimer);
       finishBoot();
     });
     window.setInterval(refreshPlayerStatus, 10000);
+    window.setInterval(function () { scanKnownExecutorProcesses(true); }, 30000);
   }
 
   wireEvents();

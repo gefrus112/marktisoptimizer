@@ -26,6 +26,7 @@
     <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 7v5h5M5 12a7 7 0 1 0 2-5"/><path d="M12 8v4l3 2"/></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 4h7v7m0-7-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></symbol>
     <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-roblox" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
@@ -112,7 +113,7 @@
             <article class="panel status-panel player-panel" aria-labelledby="playerTitle">
               <div class="panel-topline"><span class="panel-index">02</span><span class="panel-kicker">PLAYER PRESENCE</span><span class="state-pill state-pending" id="playerBadge">CHECKING</span></div>
               <div class="status-main-row">
-                <span class="large-icon player-icon"><svg class="icon"><use href="#i-monitor"/></svg></span>
+                <span class="large-icon player-icon" aria-hidden="true"><svg class="icon"><use href="#i-roblox"/></svg></span>
                 <div class="status-copy"><h2 id="playerTitle">Checking Player process</h2><p id="playerDetail">Windows-only process-name check.</p></div>
               </div>
               <div class="process-chip"><span class="process-dot"></span><code>RobloxPlayerBeta.exe</code><span>NAME ONLY</span></div>
@@ -126,6 +127,7 @@
               <div class="profile-chips" id="profileSummary">
                 <span>Graphics <b id="summaryGraphics">21 / 21</b></span>
                 <span>Texture <b id="summaryTexture">0 / 3</b></span>
+                <span>Renderer <b id="summaryRenderer">Auto</b></span>
                 <span>Geometry <b id="summaryGeometry">64 studs</b></span>
               </div>
               <button class="text-action" id="editProfile" type="button"><svg class="icon"><use href="#i-settings"/></svg>Configure this profile</button>
@@ -137,6 +139,23 @@
               <div class="safety-checks"><span><svg class="icon"><use href="#i-check"/></svg>Local files only</span><span><svg class="icon"><use href="#i-check"/></svg>Restore available</span><span><svg class="icon"><use href="#i-check"/></svg>No game injection</span></div>
             </article>
           </div>
+          <section class="panel safety-scan-panel" aria-labelledby="safetyScanTitle">
+            <div class="safety-scan-top">
+              <div class="safety-scan-copy">
+                <p class="panel-kicker">WINDOWS ONLY · LOCAL-ONLY CHECK</p>
+                <h2 id="safetyScanTitle">Known executor process scan</h2>
+                <p id="safetyScanDetail">Checks exact Xeno, Solara, and JJSploit process names at startup, every 30 seconds, and on request. Alerts stay in this app.</p>
+              </div>
+              <span class="state-pill state-pending" id="safetyScanBadge">NOT CHECKED</span>
+            </div>
+            <div class="safety-scan-controls">
+              <button class="button button-soft" id="scanSafety" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Scan running processes</button>
+              <button class="button button-outline-warn" id="openInstalledApps" type="button" hidden><svg class="icon"><use href="#i-settings"/></svg>Open Installed Apps</button>
+              <button class="button button-soft" id="openWindowsSecurity" type="button" hidden><svg class="icon"><use href="#i-shield"/></svg>Open Windows Security</button>
+            </div>
+            <div class="safety-match-list" id="safetyMatches" role="status" aria-live="polite"></div>
+            <p class="safety-scan-note">Automatic checks run at startup and every 30 seconds while the app is open. This is not antivirus: it checks only exact process names, not paths, command lines, files, or memory. No data is uploaded. A match is not proof of malware; Roptimer never stops or deletes anything. Review or uninstall programs yourself in Windows Settings or Windows Security.</p>
+          </section>
           <p class="page-footnote"><span class="footnote-dot"></span> Roptimer changes local client settings only. Restart Roblox normally after applying.</p>
         </section>
 
@@ -162,6 +181,16 @@
                   <select id="modeSelect" class="select-control">
                     <option value="Reduce building lag">Reduce building lag</option>
                     <option value="Balanced">Balanced</option>
+                  </select>
+                </div>
+                <div class="form-divider"></div>
+                <div class="form-row mode-row">
+                  <div class="field-copy"><label for="rendererSelect">Rendering API preference</label><p>Uses only allowlisted backend preferences. Direct3D 12 is not on the current allowlist.</p></div>
+                  <select id="rendererSelect" class="select-control">
+                    <option value="Auto">System default</option>
+                    <option value="Direct3D 11">Direct3D 11</option>
+                    <option value="Vulkan">Vulkan</option>
+                    <option value="OpenGL">OpenGL</option>
                   </select>
                 </div>
                 <div class="form-divider"></div>

@@ -128,40 +128,40 @@ def download_svg() -> str:
     b.append(txt(1000, 50, "GitHub", 13, MUTED, 700))
     b.append(rect(1080, 28, 90, 36, "#141418", 10, BORDER))
     b.append(txt(1125, 51, "Get Roptimer", 11, TEXT, 700, anchor="middle"))
-    b.append(txt(70, 180, "ROPTIMER HUB V3.2 · 100× COOLER", 12, AMBER, 800, letter=2.5))
-    b.append(txt(70, 260, "Serious performance", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
-    b.append(txt(70, 326, "for every player.", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
-    b.append(txt(72, 380, "Safe local Roblox settings for Windows and macOS.", 17, MUTED))
-    b.append(txt(72, 408, "No executor. No injection. No memory edits.", 17, MUTED))
+    b.append(txt(70, 180, "ROPTIMER V4 · WINDOWS SETUP WIZARDS", 12, AMBER, 800, letter=2.2))
+    b.append(txt(70, 260, "Install once.", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
+    b.append(txt(70, 326, "Launch without a batch file.", 43, TEXT, 400, "Georgia, 'Times New Roman', serif"))
+    b.append(txt(72, 380, "Choose the primary Rust + Tauri app or optional Electron shell.", 16, MUTED))
+    b.append(txt(72, 408, "Both installers create shortcuts and keep settings local.", 16, MUTED))
     b.append(rect(70, 440, 190, 46, "#141418", 10, BORDER))
-    b.append(txt(165, 469, "Start with Roptimer", 13, TEXT, 700, anchor="middle"))
+    b.append(txt(165, 469, "Guided setup", 13, TEXT, 700, anchor="middle"))
     b.append(rect(274, 440, 160, 46, BG, 10, BORDER))
     b.append(txt(354, 469, "Read the docs", 13, MUTED, 700, anchor="middle"))
-    # Platform cards
+    # Primary Tauri and optional Electron installer cards.
     b.append(rect(650, 175, 230, 310, PANEL, 16, BORDER))
     b.append(rect(910, 175, 230, 310, PANEL, 16, BORDER))
-    b.append(txt(675, 215, "WINDOWS", 11, ACCENT_2, 800, letter=2))
-    b.append(txt(675, 265, "Roptimer.exe", 24, TEXT, 700))
-    b.append(txt(675, 300, ".NET 8 WPF app + Boost CLI", 13, MUTED))
+    b.append(txt(675, 215, "PRIMARY · TAURI", 11, ACCENT_2, 800, letter=1.5))
+    b.append(txt(675, 265, "Roptimer Setup", 22, TEXT, 700))
+    b.append(txt(675, 300, "Rust + Tauri · WebView2", 13, MUTED))
     b.append(rect(675, 330, 180, 1, BORDER))
-    for i, label in enumerate(["Allowlisted FastFlags", "Backups & restore", "Graphics tiers 0–21", "GitHub Release EXE"]):
-        b.append(txt(675, 362 + i * 28, "◆  " + label, 13, TEXT))
-    b.append(rect(675, 430, 180, 38, ACCENT, 9))
-    b.append(txt(765, 454, "Download EXE", 12, TEXT, 800, anchor="middle"))
-    b.append(txt(935, 215, "MACOS", 11, AMBER, 800, letter=2))
-    b.append(txt(935, 265, "Roptimer Mac", 24, TEXT, 700))
-    b.append(txt(935, 300, "Python/Tkinter companion", 13, MUTED))
+    for i, label in enumerate(["Guided x64 installer", "Main + grouped Settings", "Local backups & restore", "Shortcuts + uninstall"]):
+        b.append(txt(675, 360 + i * 22, "◆  " + label, 12, TEXT))
+    b.append(rect(675, 441, 180, 36, ACCENT, 9))
+    b.append(txt(765, 464, "Install Roptimer", 12, TEXT, 800, anchor="middle"))
+    b.append(txt(935, 215, "OPTIONAL · ELECTRON", 11, AMBER, 800, letter=1.5))
+    b.append(txt(935, 265, "Roptimer Electron", 22, TEXT, 700))
+    b.append(txt(935, 300, "Electron · Chromium", 13, MUTED))
     b.append(rect(935, 330, 180, 1, BORDER))
-    for i, label in enumerate(["Unsigned .app launcher", "Boost.command CLI", "Local JSON settings", "Backup / restore"]):
-        b.append(txt(935, 362 + i * 28, "◆  " + label, 13, TEXT))
-    b.append(rect(935, 430, 180, 38, "#17171b", 9, BORDER))
-    b.append(txt(1025, 454, "Download ZIP", 12, TEXT, 800, anchor="middle"))
+    for i, label in enumerate(["Guided x64 installer", "Same desktop interface", "No batch launcher", "Shortcuts + uninstall"]):
+        b.append(txt(935, 360 + i * 22, "◆  " + label, 12, TEXT))
+    b.append(rect(935, 441, 180, 36, "#17171b", 9, BORDER))
+    b.append(txt(1025, 464, "Install Electron", 12, TEXT, 800, anchor="middle"))
     b.append(line(0, 620, 1200, 620, BORDER))
-    b.append(txt(70, 665, "0 injected DLLs", 15, TEXT, 700))
-    b.append(txt(300, 665, "21 graphics tiers", 15, TEXT, 700))
-    b.append(txt(560, 665, "2 desktop platforms", 15, TEXT, 700))
-    b.append(txt(830, 665, "100% reversible JSON", 15, TEXT, 700))
-    return svg_doc("Roptimer Sirius dark Download tab", "".join(b))
+    b.append(txt(70, 665, "2 Windows app shells", 15, TEXT, 700))
+    b.append(txt(340, 665, "2 guided setup wizards", 15, TEXT, 700))
+    b.append(txt(620, 665, "0 batch launchers", 15, TEXT, 700))
+    b.append(txt(890, 665, "Local settings only", 15, TEXT, 700))
+    return svg_doc("Roptimer Windows installer choices", "".join(b))
 
 
 def cli_docs_svg() -> str:
@@ -333,7 +333,7 @@ def command_palette_svg() -> str:
     b.append(rect(875, 160, 56, 30, "#111116", 8, BORDER))
     b.append(txt(903, 180, "Esc", 10, DIM, 700, anchor="middle"))
     rows = [
-        ("01", "Go to Download", "Windows EXE, macOS app, source ZIP, and checksums"),
+        ("01", "Go to Download", "Windows setup wizards, macOS companion, source ZIP, and checksums"),
         ("02", "Go to Docs & How it works", "Local JSON, backups, CLI, settings builder, and safety"),
         (">_", "Copy Windows Boost command", "Copy the generated RoptimerBoost.exe apply command"),
         ("03", "Go to Scripts", "Script Hub, loading GUI preview, and screenshots"),
@@ -364,40 +364,33 @@ def starfield_svg() -> str:
     b.append(txt(280, 50, "Docs", 13, MUTED, 700))
     b.append(txt(340, 50, "Scripts", 13, MUTED, 700))
     b.append(rect(1040, 28, 120, 36, "#141418", 10, BORDER))
-    b.append(txt(1100, 51, "◆ 100× mode", 10, TEXT, 700, anchor="middle"))
-    # Cursor glow + orbit system.
-    b.append(circle(930, 330, 260, "url(#grad)", .9))
-    for r in (90, 150, 215):
-        b.append(circle(930, 330, r, "none", .55, BORDER, 1))
-    b.append(circle(930, 330, 62, "url(#grad)", 1, ACCENT, 2))
-    b.append(txt(930, 348, "R", 44, TEXT, 900, "Georgia, serif", "middle"))
-    b.append(circle(790, 190, 4, ACCENT_2, 1))
-    b.append(circle(1090, 470, 3, AMBER, 1))
-    b.append(circle(1085, 205, 2, "#ffffff", .8))
-    b.append(line(790, 190, 930, 330, BORDER, 1, .6))
-    b.append(line(930, 330, 1090, 470, BORDER, 1, .6))
-    b.append(txt(70, 180, "V3.2 · ANIMATED STARFIELD ENGINE", 12, AMBER, 800, letter=2.4))
+    b.append(txt(1100, 51, "CSS-only", 10, TEXT, 700, anchor="middle"))
+    # Static CSS backdrop preview: no canvas, WebGL, or 3D render loop.
+    b.append(rect(735, 150, 390, 410, PANEL, 18, BORDER))
+    b.append(circle(930, 330, 170, "url(#grad)", .5))
+    b.append(circle(930, 330, 97, "#111116", .95, BORDER, 1))
+    b.append(txt(930, 340, "CSS", 36, TEXT, 800, "Georgia, serif", "middle"))
+    b.append(txt(930, 375, "STATIC BACKDROP", 9, ACCENT_2, 800, anchor="middle", letter=1.4))
+    b.append(txt(70, 180, "V4 · LIGHTWEIGHT WEBSITE", 12, AMBER, 800, letter=2.4))
     b.append(txt(70, 260, "Serious", 72, TEXT, 400, "Georgia, serif"))
     b.append(txt(70, 338, "performance.", 72, TEXT, 400, "Georgia, serif"))
-    b.append(txt(72, 390, "Canvas starfield, cursor spotlight, counters, and scroll reveals.", 17, MUTED))
-    b.append(txt(72, 420, "Still zero game script execution and no green neon dots.", 15, MUTED))
+    b.append(txt(72, 390, "Static CSS gradients and a subtle star field.", 17, MUTED))
+    b.append(txt(72, 420, "No Three.js, WebGL renderer, or animated 3D scene.", 15, MUTED))
     b.append(rect(70, 460, 190, 46, ACCENT, 10))
     b.append(txt(165, 489, "Open command palette", 12, TEXT, 800, anchor="middle"))
     b.append(rect(274, 460, 140, 46, "#141418", 10, BORDER))
     b.append(txt(344, 489, "Read the docs", 12, TEXT, 700, anchor="middle"))
     b.append(rect(70, 540, 150, 32, "#101014", 999))
-    b.append(txt(145, 561, "◆ 100× cooler", 11, TEXT, 800, anchor="middle"))
+    b.append(txt(145, 561, "◆ 13 commands", 11, TEXT, 800, anchor="middle"))
     b.append(rect(232, 540, 210, 32, "#101014", 999))
     b.append(txt(337, 561, "● GitHub Pages ready", 11, TEXT, 800, anchor="middle"))
-    # Animated stat counters.
     b.append(line(0, 620, 1200, 620, BORDER))
-    stats = [("3", "main tabs"), ("14", "managed flags"), ("0", "game scripts run"), ("100×", "cooler engine")]
+    stats = [("3", "main tabs"), ("18", "allowlisted flags"), ("0", "game scripts run"), ("CSS", "only backdrop")]
     for i, (value, label) in enumerate(stats):
         x = 70 + i * 285
         b.append(txt(x, 665, value, 34, TEXT, 400, "Georgia, serif"))
         b.append(txt(x, 690, label, 10, MUTED, 800, letter=1.4))
-    return svg_doc("Roptimer 100x starfield website screenshot", "".join(b))
-
+    return svg_doc("Roptimer lightweight CSS-only website screenshot", "".join(b))
 
 
 def allowlist_svg() -> str:

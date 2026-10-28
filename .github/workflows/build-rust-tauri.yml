@@ -7,6 +7,7 @@ on:
       - main
       - arena/48fc7138-robloxclinetbooster
       - arena/f2b9b777-robloxclinetbooster
+      - arena/1443a973-robloxclinetbooster
     paths:
       - "rust/**"
       - "web/**"
@@ -56,31 +57,38 @@ jobs:
           python build_tauri_frontend.py
           python build_tauri_frontend.py --check
 
-      # A plain `cargo build --release` embeds the static frontend via the
-      # generate_context! macro and produces a single, lightweight .exe that
-      # uses the WebView2 runtime already present on Windows 10/11. No Node,
-      # npm, or JS bundler is required.
-      - name: Build release executable
-        working-directory: rust/src-tauri
-        run: cargo build --release
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
 
-      - name: Stage single-file Windows executable + checksum
+      - name: Run Rust safety tests
+        working-directory: rust/src-tauri
+        run: cargo test
+
+      - name: Build guided NSIS setup installer
+        working-directory: rust/src-tauri
+        run: cargo tauri build --bundles nsis
+
+      - name: Stage Windows setup wizard + checksum
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path rust/artifacts | Out-Null
-          Copy-Item rust/src-tauri/target/release/roptimer.exe rust/artifacts/Roptimer-Rust-x64.exe
-          $hash = (Get-FileHash rust/artifacts/Roptimer-Rust-x64.exe -Algorithm SHA256).Hash.ToLower()
-          "$hash  Roptimer-Rust-x64.exe" | Out-File -Encoding ascii rust/artifacts/Roptimer-Rust-x64.exe.sha256
+          $bundleDir = "rust/src-tauri/target/release/bundle/nsis"
+          $installer = Get-ChildItem -Path $bundleDir -Filter "*_x64-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw "Tauri NSIS installer was not produced in $bundleDir" }
+          Copy-Item $installer.FullName "rust/artifacts/Roptimer-Rust-Setup-x64.exe"
+          $hash = (Get-FileHash "rust/artifacts/Roptimer-Rust-Setup-x64.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hash  Roptimer-Rust-Setup-x64.exe" | Out-File -Encoding ascii "rust/artifacts/Roptimer-Rust-Setup-x64.exe.sha256"
           Get-ChildItem rust/artifacts | Format-Table Name,Length
 
-      - name: Upload build artifact
+      - name: Upload Tauri setup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Roptimer-Rust-x64
+          name: Roptimer-Rust-Setup-x64
           path: rust/artifacts/*
           if-no-files-found: error
 
       - name: Publish GitHub Release assets
+        if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,6 +98,14 @@ jobs:
           $tag = (Get-Content $flag -Raw).Trim()
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title "Roptimer $tag — Rust + Tauri Windows client" --notes "Single-file, lightweight Rust + Tauri v2 Windows client. On first launch it detects whether Roblox is installed and manages only Roblox-allowlisted, reversible ClientAppSettings.json settings."
+            gh release create $tag --title "Roptimer $tag — Rust + Tauri setup wizard" --notes "Guided x64 installer for the Rust + Tauri Windows client. On first launch it detects whether Roblox is installed and manages only Roblox-allowlisted, reversible ClientAppSettings.json settings."
           }
-          gh release upload $tag rust/artifacts/Roptimer-Rust-x64.exe rust/artifacts/Roptimer-Rust-x64.exe.sha256 --clobber
+          gh release upload $tag rust/artifacts/Roptimer-Rust-Setup-x64.exe rust/artifacts/Roptimer-Rust-Setup-x64.exe.sha256 --clobber
+          $publishedAssets = gh release view $tag --json assets --jq '.assets[].name'
+          if ($LASTEXITCODE -eq 0) {
+            foreach ($oldAsset in @("Roptimer-Rust-x64.exe", "Roptimer-Rust-x64.exe.sha256")) {
+              if ($publishedAssets -contains $oldAsset) {
+                gh release delete-asset $tag $oldAsset --yes
+              }
+            }
+          }

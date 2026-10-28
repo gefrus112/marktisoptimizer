@@ -1,7 +1,7 @@
 {
   "product": "Roptimer Hub",
   "version": "4.0.0",
-  "edition": "Rust + Tauri Windows Client",
+  "edition": "Windows Desktop Client (Rust + Tauri primary; Electron optional)",
   "allowlistVersion": 2,
   "platform": "windows",
   "windowsOnly": true,
@@ -9,14 +9,19 @@
   "source": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569",
   "client": {
     "name": "Roptimer",
-    "framework": "Rust + Tauri v2",
-    "webview": "Microsoft Edge WebView2 (Windows)",
-    "executable": "Roptimer-Rust-x64.exe",
+    "framework": "Rust + Tauri v2 (primary); Electron (optional)",
+    "webview": "Microsoft Edge WebView2 (Tauri) or Electron Chromium (Windows)",
+    "executable": "Roptimer-Rust-Setup-x64.exe; Roptimer-Electron-Setup-x64.exe (optional)",
     "architecture": "x86_64 (64-bit)",
     "minOS": "Windows 10 version 1803 or newer",
-    "singleFile": true,
+    "singleFile": false,
     "detectsRobloxOnLaunch": true,
-    "target": "ClientAppSettings.json"
+    "target": "ClientAppSettings.json",
+    "packaging": [
+      "Tauri NSIS x64 setup wizard",
+      "Electron NSIS x64 setup wizard"
+    ],
+    "installation": "Guided setup wizards create Start Menu/Desktop shortcuts and uninstall support; no batch launcher required."
   },
   "safety": {
     "localJsonOnly": true,

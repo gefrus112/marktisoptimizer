@@ -1,17 +1,20 @@
 # Roptimer — Rust + Tauri v2 Windows client (V4)
 
-Roptimer V4 is a **single, lightweight Windows 64-bit executable** built with
-**Rust + Tauri v2**. It has a purpose-built desktop interface, independent from
-the GitHub Pages website, while keeping the deployment simplicity of one `.exe`.
+Roptimer V4's primary Windows client is built with **Rust + Tauri v2** and is
+distributed through a guided x64 NSIS setup wizard. It has a purpose-built
+desktop interface, independent from the GitHub Pages website. An optional
+Electron setup wizard is also available; see [`electron/README.md`](../electron/README.md).
 
 ## Why Rust + Tauri
 
-- **One small file.** `Roptimer-Rust-x64.exe` embeds the whole UI. It uses the
-  Microsoft Edge **WebView2** runtime already present on Windows 10/11 — no
-  Electron/Chromium bundle, no .NET runtime to install, no Node at runtime.
+- **Guided installer.** `Roptimer-Rust-Setup-x64.exe` installs the primary
+  Tauri app, creates Start Menu/Desktop shortcuts, and registers a Windows
+  uninstaller. The app uses the Microsoft Edge **WebView2**
+  runtime; the setup bootstraps it if it is missing. No Electron/Chromium bundle
+  or .NET/Node runtime is required for this build.
 - **Standalone UI, offline.** The app has its own compact HTML/CSS/JS interface
   in `rust/desktop-ui/`, separate from `web/`. It bundles no website CSS/JS,
-  Three.js, CDN assets, or remote scripts.
+  CDN assets, or remote scripts.
 - **Rust backend, safe by design.** Detection and settings are Rust commands
   called over Tauri IPC. No eval, remote code, or network calls are used for
   core features.
@@ -54,14 +57,34 @@ loaded. It does not open a process handle or inspect command-line arguments,
 game state, game thumbnails, server IDs/addresses, account data, or memory. The **Open optimizations** button jumps to the local
 profile builder; it does not modify Roblox's in-game menu.
 
+## Local known-process safety check (Windows only)
+
+The Main page runs a lightweight local check at startup, every 30 seconds while
+the app is open, and on request for the exact process image names `Xeno.exe`,
+`Solara.exe`, and `JJSploit.exe`. The Rust command
+`scan_known_executor_processes` uses Windows' built-in `tasklist` filters and
+parses only the image-name field. `tasklist` may include a PID in its temporary
+CSV output for a matching process, but Roptimer ignores it: no PID is stored,
+logged, or returned. The check does not read paths, command lines, process
+handles, or memory, and sends no network requests. Any alert is displayed inside
+the app only.
+
+This is a **limited name match, not antivirus or a malware verdict**: names can
+be changed, spoofed, or used by unrelated files. A match is a prompt to review
+it. Roptimer never terminates a process or deletes software; buttons open the
+fixed Windows Installed Apps and Windows Security pages so the user can review
+or uninstall manually.
+
 ## Standalone desktop tabs (Windows only)
 
 The Tauri executable has its own interface and does not load the GitHub Pages
-UI or any Three.js assets. Navigation is **Main** plus a grouped **Settings**
+UI or its assets. Navigation is **Main** plus a grouped **Settings**
 area with four sections:
 
-- **Rendering** — choose Performance/Balanced, graphics quality, and texture
-  quality. Unsupported target-FPS flags are not written.
+- **Rendering** — choose Performance/Balanced, graphics quality, texture
+  quality, and a renderer preference from the allowlisted System default,
+  Direct3D 11, Vulkan, or OpenGL options. Direct3D 12 and unsupported target-FPS
+  flags are not written.
 - **Geometry** — set level-of-detail distance and optionally reduce approved
   sky/voxelizer effects. Distances affect rendering only; they do not delete
   objects or change collision/gameplay geometry.
@@ -89,8 +112,13 @@ to `ClientAppSettings.json`:
 
 **Never**: DLL injection, process hooks, memory reads/writes, executable
 patching, account-data extraction, telemetry/Crashpad/Backtrace disabling,
-anti-cheat bypass, gameplay automation, executor APIs, `loadstring`, or game
-script execution.
+anti-cheat bypass, gameplay automation, executor APIs, `loadstring`, game script
+execution, or automatic process termination/software deletion.
+
+Profiles are static local settings, not dynamic hardware control. The app does
+not monitor in-game FPS/GPU utilization, alter Roblox's internal resolution,
+change process CPU affinity, or reroute game traffic through a VPN/relay. Use
+Roblox's own graphics controls and Windows' normal scheduler/network settings.
 
 ## Rust commands (IPC)
 
@@ -99,6 +127,8 @@ script execution.
 | `app_info` | Product/version/framework/safety info | none |
 | `detect_roblox` | Detect Roblox installation | read-only filesystem scan |
 | `active_roblox_status` | Check whether the Roblox Player process name is present | read-only process-name check |
+| `scan_known_executor_processes` | Match exact Xeno, Solara, and JJSploit process names | local name-only check; no paths or command lines |
+| `open_windows_settings` | Open fixed Installed Apps or Windows Security page | launches Windows Settings |
 | `get_allowlist` | Return the canonical allowlist JSON | none |
 | `apply_settings` | Apply allowlisted settings | local JSON write + backup |
 | `restore_settings` | Restore managed keys | local JSON write + backup |
@@ -106,31 +136,34 @@ script execution.
 
 ## Build it yourself
 
-Prerequisites: Rust (stable), the WebView2 runtime (bundled with Windows), and
-Python 3 to assemble the desktop frontend.
+Prerequisites: Rust (stable) and Python 3 to assemble the desktop frontend.
+For users, the setup wizard installs the WebView2 runtime bootstrapper if it is
+not already present.
 
 ```powershell
 # From the repo root (Windows PowerShell):
 python build_tauri_frontend.py   # assembles rust/frontend/ from rust/desktop-ui/
 python build_tauri_frontend.py --check
 cd rust/src-tauri
-cargo build --release            # -> target/release/roptimer.exe
+cargo install tauri-cli --version "^2" --locked
+cargo tauri build --bundles nsis
 ```
 
-Rename `target/release/roptimer.exe` to `Roptimer-Rust-x64.exe` and ship it as a
-single file. `build.rs` embeds the repo-root `fastflags-allowlist.json` in Rust,
-and the frontend build embeds that same canonical list in the local UI.
+The build produces a guided NSIS setup wizard, staged in CI as
+`Roptimer-Rust-Setup-x64.exe`. The installer creates shortcuts and installs the
+Tauri app; users do not need a batch launcher. `build.rs` embeds the repo-root
+`fastflags-allowlist.json` in Rust, and the frontend build embeds that same
+canonical list in the local UI.
 
 ### CI
 
-`.github/workflows/build-rust-tauri.yml` builds on `windows-latest`, runs
-`build_website.py --check` and `build_tauri_frontend.py --check`, compiles the
-release exe, stages `Roptimer-Rust-x64.exe` + SHA256, and (when the
-`release-upload-rust.flag` is present) publishes the release assets.
+`.github/workflows/build-rust-tauri.yml` builds on `windows-latest`, validates
+the website and standalone desktop frontend, packages the NSIS installer, and
+stages `Roptimer-Rust-Setup-x64.exe` plus its SHA256 file. A release upload is
+limited to `main` and still respects `release-upload-rust.flag`.
 
-To also produce NSIS/MSI installers, install the Tauri CLI and run
-`cargo tauri build` — `tauri.conf.json` already declares the bundle targets and
-icons. The single-exe path above needs no Node/npm.
+A direct `cargo build --release` remains available for development, but the
+published Tauri distribution is the setup wizard.
 
 ## Project layout
 
