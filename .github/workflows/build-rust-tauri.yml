@@ -49,7 +49,7 @@ jobs:
             rust/src-tauri/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/src-tauri/Cargo.toml') }}
 
-      - name: Generate website and Tauri frontend (static, vendored Three.js)
+      - name: Validate website and assemble separate desktop UI
         run: |
           python build_website.py
           python build_website.py --check

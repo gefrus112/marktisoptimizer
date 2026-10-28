@@ -1,8 +1,9 @@
 # Third-party notices (root / website / Rust client)
 
 Roptimer's website, Rust + Tauri client, .NET app, and Python tools are original
-implementations. The website and the Tauri client bundle one third-party
-library, vendored locally so nothing is fetched from a CDN at runtime.
+implementations. The GitHub Pages website bundles one third-party library,
+vendored locally so nothing is fetched from a CDN at runtime. The standalone
+Tauri desktop UI does not bundle that library.
 
 ## three.js (MIT License)
 
@@ -27,8 +28,9 @@ network access. No library logic was changed.
 
 The MIT license requires that the copyright notice and permission notice be
 included in all copies or substantial portions of the software. The full text
-is preserved verbatim in `web/assets/vendor/three/LICENSE.txt`, shipped in the
-website, the Tauri `frontend/`, and the source packages.
+is preserved verbatim in `web/assets/vendor/three/LICENSE.txt` and is shipped
+with the website and source packages. The standalone Tauri frontend does not
+bundle Three.js.
 
 ## Other references (not bundled)
 

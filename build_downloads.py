@@ -232,7 +232,7 @@ def generate_website() -> None:
 
 
 def generate_tauri_frontend() -> None:
-    """Assemble rust/frontend/ (the Tauri app UI) from the generated website."""
+    """Assemble rust/frontend/ from the standalone rust/desktop-ui source."""
     subprocess.run([sys.executable, str(ROOT / "build_tauri_frontend.py")], cwd=str(ROOT), check=True)
 
 
@@ -289,12 +289,11 @@ def copy_docs_to_downloads() -> None:
 
 
 def sync_feature_catalog() -> None:
-    """Keep the C# core, website, and Tauri frontend copies in sync with the root catalog."""
+    """Keep the C# core and website downloads in sync with the root catalog."""
     source = ROOT / "feature-status.json"
     targets = [
         DOTNET / "src" / "Roptimer.Core" / "feature-status.json",
         DOWNLOADS / "feature-status.json",
-        RUST / "frontend" / "downloads" / "feature-status.json",
     ]
     for target in targets:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -302,12 +301,11 @@ def sync_feature_catalog() -> None:
 
 
 def sync_fastflag_allowlist() -> None:
-    """Keep the C# core, website, downloads, and Tauri frontend in sync with the root allowlist."""
+    """Keep the C# core and website downloads in sync with the root allowlist."""
     source = ROOT / "fastflags-allowlist.json"
     targets = [
         DOTNET / "src" / "Roptimer.Core" / "fastflags-allowlist.json",
         DOWNLOADS / "fastflags-allowlist.json",
-        RUST / "frontend" / "downloads" / "fastflags-allowlist.json",
     ]
     for target in targets:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -344,7 +342,6 @@ def build_dotnet_source_zip() -> Path:
             WEB / "assets/nebula.css",
             WEB / "assets/nebula.js",
             WEB / "assets/three-scene.js",
-            WEB / "assets/desktop.js",
             RUST / "src-tauri/Cargo.toml",
             RUST / "src-tauri/build.rs",
             RUST / "src-tauri/tauri.conf.json",
@@ -386,6 +383,7 @@ def build_dotnet_source_zip() -> Path:
             WEB / "assets" / "vendor" / "three" / "LICENSE.txt",
             WEB / "assets" / "vendor" / "three" / "VERSION.txt",
             *sorted((RUST / "src-tauri" / "icons").glob("*")),
+            *sorted((RUST / "desktop-ui").rglob("*")),
             *sorted(DOCS.glob("*.md")),
             *sorted(MAC.iterdir()),
         ]

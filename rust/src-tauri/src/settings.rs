@@ -57,6 +57,8 @@ pub struct Profile {
     pub fps: u32,
     #[serde(default)]
     pub legacy_fps: bool,
+    #[serde(default)]
+    pub geometry_distance: Option<u32>,
     #[serde(default = "default_true")]
     pub all_versions: bool,
     #[serde(default = "default_true")]
@@ -142,7 +144,10 @@ fn build_managed(profile: &Profile, allowed: &HashSet<String>) -> serde_json::Ma
 
     if lag || balanced || profile.vfx {
         // Geometry LOD switching distances — safe "reduce building lag".
-        let base = if lag { 64 } else { 128 };
+        let base = profile
+            .geometry_distance
+            .unwrap_or(if lag { 64 } else { 128 })
+            .clamp(32, 256);
         put!("DFIntCSGLevelOfDetailSwitchingDistance", Value::from(base));
         put!("DFIntCSGLevelOfDetailSwitchingDistanceL12", Value::from(base));
         put!("DFIntCSGLevelOfDetailSwitchingDistanceL23", Value::from(base / 2));

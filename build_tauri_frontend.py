@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Assemble the Rust + Tauri static frontend from the generated website.
+"""Build the standalone Rust + Tauri desktop interface.
 
-The Tauri app ships the SAME UI as the GitHub Pages site (nebula.html layout,
-glowing vendored Three.js scene, Windows-only Client tab, allowlist). This
-script copies the generated ``web/`` output into ``rust/frontend/`` and strips
-things only the website needs (large download zips, hero fallbacks), keeping
-the packaged executable small.
+The Windows executable has its own compact desktop UI under ``rust/desktop-ui``;
+it does not reuse the GitHub Pages website, website CSS, Three.js, or website JS.
+This script injects the canonical allowlist as local JSON and assembles the
+small static bundle embedded by Tauri under ``rust/frontend``.
 
 Usage:
     python3 build_tauri_frontend.py
@@ -14,110 +13,100 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-WEB = ROOT / "web"
-FRONTEND = ROOT / "rust" / "frontend"
+RUST = ROOT / "rust"
+SOURCE = RUST / "desktop-ui"
+FRONTEND = RUST / "frontend"
+ALLOWLIST = ROOT / "fastflags-allowlist.json"
+PLACEHOLDER = "__FASTFLAG_ALLOWLIST_JSON__"
 
-# Assets the app actually references. Kept deliberately small.
-ASSET_FILES = [
-    "nebula.css",
-    "nebula.js",
-    "three-scene.js",
-    "desktop.js",
-]
-SVG_ASSETS = [
-    "sirius-download.svg",
-    "sirius-cli-docs.svg",
-    "sirius-allowlist.svg",
-    "sirius-starfield.svg",
-    "sirius-command-palette.svg",
-    "sirius-script-hub.svg",
-]
-ICON_FILES = [
-    "favicon.ico",
-    "roptimzier-shield.png",
-    "roptimzier-shield.ico",
-    "roptimer-web.png",
-    "roptimzier-app.png",
-]
-# Small docs that local doc links point at (kept so `open_external` fallback
-# still has something to resolve to; the app otherwise opens the live site).
-DOC_FILES = [
-    "Roptimer-FastFlag-Allowlist.md",
-    "Roptimer-CLI-Docs.md",
-    "Roptimer-How-It-Works.md",
-    "Roptimer-Mac-README.md",
-    "fastflags-allowlist.json",
-    "feature-status.json",
-]
+
+def load_allowlist() -> dict:
+    try:
+        value = json.loads(ALLOWLIST.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"Could not read canonical allowlist: {exc}") from exc
+    if not isinstance(value, dict) or not isinstance(value.get("categories"), list):
+        raise SystemExit("Canonical allowlist must contain a categories array.")
+    return value
+
+
+def rendered_html() -> str:
+    template_path = SOURCE / "index.html"
+    if not template_path.is_file():
+        raise SystemExit("rust/desktop-ui/index.html is missing.")
+    template = template_path.read_text(encoding="utf-8")
+    if template.count(PLACEHOLDER) != 1:
+        raise SystemExit(f"Desktop HTML must contain exactly one {PLACEHOLDER} marker.")
+    # Keep the JSON safe inside an application/json script element.
+    data = json.dumps(load_allowlist(), ensure_ascii=False, separators=(",", ":"))
+    data = data.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return template.replace(PLACEHOLDER, data)
 
 
 def build() -> None:
-    source_index = WEB / "index.html"
-    if not source_index.exists():
-        raise SystemExit("web/index.html is missing — run `python3 build_website.py` first.")
+    for relative in (Path("index.html"), Path("assets/app.css"), Path("assets/app.js")):
+        if not (SOURCE / relative).is_file():
+            raise SystemExit(f"Desktop UI source is missing: {relative}")
     if FRONTEND.exists():
         shutil.rmtree(FRONTEND)
-    (FRONTEND / "assets" / "vendor" / "three").mkdir(parents=True, exist_ok=True)
-    (FRONTEND / "assets" / "icons").mkdir(parents=True, exist_ok=True)
-    (FRONTEND / "downloads").mkdir(parents=True, exist_ok=True)
-
-    shutil.copy2(source_index, FRONTEND / "index.html")
-    # Site support files the HTML references (manifest, 404, nojekyll).
-    for extra in ["site.webmanifest", "404.html", ".nojekyll"]:
-        src = WEB / extra
-        if src.exists():
-            shutil.copy2(src, FRONTEND / extra)
-
-    for name in ASSET_FILES + SVG_ASSETS:
-        src = WEB / "assets" / name
-        if src.exists():
-            shutil.copy2(src, FRONTEND / "assets" / name)
-    for name in ICON_FILES:
-        src = WEB / "assets" / "icons" / name
-        if src.exists():
-            shutil.copy2(src, FRONTEND / "assets" / "icons" / name)
-
-    # Vendored Three.js module graph (self-contained, no CDN).
-    vendor_src = WEB / "assets" / "vendor" / "three"
-    vendor_dst = FRONTEND / "assets" / "vendor" / "three"
-    if vendor_src.exists():
-        if vendor_dst.exists():
-            shutil.rmtree(vendor_dst)
-        shutil.copytree(vendor_src, vendor_dst)
-
-    for name in DOC_FILES:
-        src = WEB / "downloads" / name
-        if src.exists():
-            shutil.copy2(src, FRONTEND / "downloads" / name)
-
-    print(f"Built Tauri frontend at {FRONTEND.relative_to(ROOT)}")
+    (FRONTEND / "assets").mkdir(parents=True, exist_ok=True)
+    (FRONTEND / "index.html").write_text(rendered_html(), encoding="utf-8")
+    for name in ("app.css", "app.js"):
+        shutil.copy2(SOURCE / "assets" / name, FRONTEND / "assets" / name)
+    print("Built standalone Tauri desktop UI at rust/frontend (website assets are not bundled).")
 
 
 def check() -> None:
-    required = [
-        FRONTEND / "index.html",
-        FRONTEND / "assets" / "nebula.css",
-        FRONTEND / "assets" / "nebula.js",
-        FRONTEND / "assets" / "three-scene.js",
-        FRONTEND / "assets" / "desktop.js",
-        FRONTEND / "assets" / "vendor" / "three" / "three.module.min.js",
-    ]
-    missing = [str(p.relative_to(ROOT)) for p in required if not p.exists()]
+    required = [FRONTEND / "index.html", FRONTEND / "assets" / "app.css", FRONTEND / "assets" / "app.js"]
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
-        raise SystemExit("Tauri frontend is missing files: " + ", ".join(missing))
+        raise SystemExit("Tauri desktop frontend is missing files: " + ", ".join(missing))
     html = (FRONTEND / "index.html").read_text(encoding="utf-8")
-    if "three-scene.js" not in html or "detectPanel" not in html or "fastflagAllowlist" not in html:
-        raise SystemExit("Tauri frontend index.html does not look like the generated site.")
-    print("TAURI FRONTEND CHECK OK")
+    css = (FRONTEND / "assets" / "app.css").read_text(encoding="utf-8")
+    js = (FRONTEND / "assets" / "app.js").read_text(encoding="utf-8")
+    expected = {
+        "main view": 'id="mainView"',
+        "settings view": 'id="settingsView"',
+        "Rendering section": 'data-tab="rendering"',
+        "Geometry section": 'data-tab="geometry"',
+        "Icons section": 'data-tab="icons"',
+        "Allowlist section": 'data-tab="allowlist"',
+        "embedded canonical allowlist": 'id="fastflagAllowlist"',
+    }
+    absent = [label for label, marker in expected.items() if marker not in html]
+    if absent:
+        raise SystemExit("Tauri desktop index is missing: " + ", ".join(absent))
+    if PLACEHOLDER in html:
+        raise SystemExit("Tauri desktop index still contains the unrendered allowlist placeholder.")
+    if any(token in html for token in ("three-scene.js", "nebula.css", "nebula.js", "desktop.js")):
+        raise SystemExit("Tauri frontend must not include or link to the shared website UI.")
+    if "@import" in css or "https://" in css or "http://" in css:
+        raise SystemExit("Tauri desktop stylesheet must be self-contained and local.")
+    if "fetch(" in js or "XMLHttpRequest" in js:
+        raise SystemExit("Tauri desktop UI must not make network requests.")
+    if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "three-scene.js", "desktop.js")):
+        raise SystemExit("Old website UI assets remain in the generated Tauri bundle.")
+    try:
+        start = html.index('<script id="fastflagAllowlist" type="application/json">') + len('<script id="fastflagAllowlist" type="application/json">')
+        end = html.index("</script>", start)
+        embedded = json.loads(html[start:end])
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"Embedded allowlist JSON is invalid: {exc}") from exc
+    if embedded != load_allowlist():
+        raise SystemExit("Embedded UI allowlist differs from the canonical root allowlist.")
+    if "ROPTIMER DESKTOP" not in html or "data-icon-style" not in html or "data-accent" not in html:
+        raise SystemExit("Tauri frontend does not include the desktop appearance controls.")
+    print("TAURI DESKTOP FRONTEND CHECK OK: independent UI, local assets, canonical allowlist.")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="validate the assembled frontend")
+    parser.add_argument("--check", action="store_true", help="validate the assembled desktop frontend")
     args = parser.parse_args()
     if args.check:
         check()

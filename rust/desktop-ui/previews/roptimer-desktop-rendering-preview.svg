@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d1014"/><stop offset="1" stop-color="#11181a"/></linearGradient><linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#73d6ad" stop-opacity=".14"/><stop offset="1" stop-color="#73d6ad" stop-opacity=".025"/></linearGradient></defs>
+<title>Roptimer standalone desktop Rendering settings screen</title>
+<rect width="100%" height="100%" fill="url(#bg)"/>
+<rect x="0" y="0" width="236" height="900" rx="0" fill="#0a0d11"/>
+<path d="M236 0H236" stroke="#20272d" stroke-width="1"/>
+<rect x="24" y="25" width="40" height="40" rx="12" fill="url(#accent)" stroke="#345047" stroke-width="1"/>
+<text x="36" y="53" fill="#73d6ad" font-family="Consolas, monospace" font-size="24px" font-weight="800">R</text>
+<text x="76" y="42" fill="#edf2f1" font-family="Consolas, monospace" font-size="12px" font-weight="800" letter-spacing="1.6px">ROPTIMER</text>
+<text x="76" y="57" fill="#7c8988" font-family="Consolas, monospace" font-size="8px" font-weight="700" letter-spacing="1.2px">WINDOWS CLIENT</text>
+<path d="M20 84H216" stroke="#20272f" stroke-width="1"/>
+<text x="27" y="112" fill="#65716e" font-family="Consolas, monospace" font-size="9px" font-weight="800" letter-spacing="1.3px">WORKSPACE</text>
+<rect x="16" y="126" width="204" height="42" rx="9" fill="transparent"/>
+<text x="31" y="153" fill="#7b8886" font-family="Segoe UI, Arial, sans-serif" font-size="18px" font-weight="650">⌂</text>
+<text x="60" y="153" fill="#9aa5a4" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="650">Main</text>
+<rect x="16" y="173" width="204" height="42" rx="9" fill="rgba(115,214,173,.085)" stroke="#294038" stroke-width="1"/>
+<text x="31" y="200" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="650">☷</text>
+<text x="60" y="200" fill="#eef8f3" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="650">Settings</text>
+<text x="193" y="199" fill="#74807d" font-family="Segoe UI, Arial, sans-serif" font-size="13px" font-weight="600">⌄</text>
+<rect x="29" y="225" width="185" height="30" rx="7" fill="rgba(115,214,173,.07)"/>
+<text x="43" y="246" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">◉</text>
+<text x="68" y="246" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Rendering</text>
+<text x="43" y="280" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">◇</text>
+<text x="68" y="280" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Geometry</text>
+<text x="43" y="314" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">▦</text>
+<text x="68" y="314" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Icons</text>
+<text x="43" y="348" fill="#788481" font-family="Segoe UI, Arial, sans-serif" font-size="14px" font-weight="600">☷</text>
+<text x="68" y="348" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">Allowlist</text>
+<rect x="17" y="746" width="202" height="55" rx="10" fill="rgba(115,214,173,.045)" stroke="#263a32" stroke-width="1"/>
+<text x="30" y="769" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="16px" font-weight="600">◈</text>
+<text x="56" y="766" fill="#d1ddd6" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Local &amp; reversible</text>
+<text x="56" y="782" fill="#72807a" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">No injection · No memory access</text>
+<circle cx="23" cy="843" r="3" fill="#73d6ad"/>
+<text x="34" y="847" fill="#697473" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.7px">DESKTOP MODE</text>
+<text x="190" y="847" fill="#7c8988" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">V4</text>
+<rect x="236" y="0" width="1204" height="62" rx="0" fill="#0d1115"/>
+<path d="M236 62H1440" stroke="#20272d" stroke-width="1"/>
+<text x="274" y="37" fill="#63706d" font-family="Consolas, monospace" font-size="9px" font-weight="700" letter-spacing="1px">ROPTIMER</text>
+<text x="329" y="37" fill="#39413f" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="600">/</text>
+<text x="344" y="37" fill="#c6cecc" font-family="Consolas, monospace" font-size="10px" font-weight="700">Settings · Rendering</text>
+<circle cx="1170" cy="31" r="3" fill="#73d6ad"/>
+<text x="1180" y="34" fill="#77817f" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="0.6px">RUNNING LOCALLY</text>
+<path d="M1322 24H1322" stroke="#323a3f" stroke-width="1"/>
+<text x="1341" y="34" fill="#9da8a6" font-family="Consolas, monospace" font-size="9px" font-weight="800">V4.0.0</text>
+<text x="276" y="109" fill="#73d6ad" font-family="Consolas, monospace" font-size="9px" font-weight="800" letter-spacing="1.2px">LOCAL CONFIGURATION     ·     SAFE BY DEFAULT</text>
+<text x="276" y="158" fill="#edf2f1" font-family="Segoe UI, Arial, sans-serif" font-size="38px" font-weight="650">Settings</text>
+<text x="276" y="186" fill="#909b99" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="400">Choose a profile and review the exact groups Roptimer is allowed to manage.</text>
+<rect x="1123" y="127" width="254" height="34" rx="8" fill="#11171a" stroke="#2b3535" stroke-width="1"/>
+<circle cx="1140" cy="144" r="3" fill="#73d6ad"/>
+<text x="1151" y="147" fill="#8d9995" font-family="Consolas, monospace" font-size="8px" font-weight="700" letter-spacing="0.3px">CHANGES STAGED LOCALLY</text>
+<rect x="276" y="211" width="1100" height="48" rx="10" fill="#0b0f13" stroke="#283137" stroke-width="1"/>
+<rect x="282" y="216" width="265" height="38" rx="7" fill="rgba(115,214,173,.095)" stroke="#2e4a3d" stroke-width="1"/>
+<text x="358" y="241" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="600">◉</text>
+<text x="382" y="241" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Rendering</text>
+<text x="630" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="600">◇</text>
+<text x="654" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Geometry</text>
+<text x="902" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="600">▦</text>
+<text x="926" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Icons</text>
+<text x="1174" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="15px" font-weight="600">☷</text>
+<text x="1198" y="241" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="700">Allowlist</text>
+<text x="277" y="295" fill="#73d6ad" font-family="Consolas, monospace" font-size="8px" font-weight="800" letter-spacing="1.1px">01 / RENDERING</text>
+<text x="277" y="324" fill="#e5ecea" font-family="Segoe UI, Arial, sans-serif" font-size="21px" font-weight="630">Rendering profile</text>
+<text x="277" y="345" fill="#84908d" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="400">Adjust approved graphics and texture settings. Roblox in-game FPS control is not changed.</text>
+<rect x="276" y="366" width="1100" height="344" rx="12" fill="#151a20" stroke="#2a323b" stroke-width="1"/>
+<text x="300" y="407" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Optimization profile</text>
+<text x="300" y="426" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Sets safe defaults for graphics workload and level-of-detail.</text>
+<rect x="1010" y="388" width="334" height="37" rx="8" fill="#10151a" stroke="#3a4449" stroke-width="1"/>
+<text x="1026" y="412" fill="#d5dfdb" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="600">Reduce building lag</text>
+<text x="1318" y="412" fill="#87918f" font-family="Segoe UI, Arial, sans-serif" font-size="12px" font-weight="400">⌄</text>
+<path d="M298 444H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="300" y="479" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Graphics quality</text>
+<text x="300" y="498" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Lower values may reduce rendering workload. Range: 0–21.</text>
+<path d="M1007 484H1293" stroke="#34403c" stroke-width="4"/>
+<path d="M1007 484H1279" stroke="#73d6ad" stroke-width="4"/>
+<circle cx="1279" cy="484" r="8" fill="#73d6ad"/>
+<rect x="1310" y="468" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
+<text x="1321" y="488" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">21</text>
+<path d="M298 519H1352" stroke="#2a3238" stroke-width="1"/>
+<text x="300" y="555" fill="#d7e0dd" font-family="Segoe UI, Arial, sans-serif" font-size="11px" font-weight="700">Texture quality</text>
+<text x="300" y="574" fill="#7e8a87" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">Uses Roblox’s allowlisted texture-quality override. Range: 0–3.</text>
+<path d="M1007 560H1293" stroke="#34403c" stroke-width="4"/>
+<path d="M1007 560H1007" stroke="#73d6ad" stroke-width="4"/>
+<circle cx="1007" cy="560" r="8" fill="#73d6ad"/>
+<rect x="1310" y="544" width="37" height="31" rx="7" fill="#11171a" stroke="#35403f" stroke-width="1"/>
+<text x="1321" y="564" fill="#73d6ad" font-family="Consolas, monospace" font-size="10px" font-weight="700">0</text>
+<path d="M298 595H1352" stroke="#2a3238" stroke-width="1"/>
+<rect x="299" y="615" width="1053" height="75" rx="8" fill="rgba(115,214,173,.045)" stroke="#2b3b35" stroke-width="1"/>
+<text x="316" y="644" fill="#73d6ad" font-family="Segoe UI, Arial, sans-serif" font-size="17px" font-weight="600">◈</text>
+<text x="343" y="638" fill="#c7d7cf" font-family="Segoe UI, Arial, sans-serif" font-size="10px" font-weight="750">No unapproved FPS flags.</text>
+<text x="343" y="657" fill="#a0ada8" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="400">FPS limits stay in Roblox. Roptimer does not write legacy target-FPS settings.</text>
+<rect x="236" y="811" width="1204" height="89" rx="0" fill="#0d1115"/>
+<path d="M236 811H1440" stroke="#2c343a" stroke-width="1"/>
+<rect x="277" y="834" width="31" height="18" rx="11" fill="rgba(115,214,173,.27)" stroke="#668c79" stroke-width="1"/>
+<circle cx="299" cy="843" r="6" fill="#73d6ad"/>
+<text x="318" y="842" fill="#c2cdca" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="700">Apply to all detected versions</text>
+<text x="318" y="859" fill="#74807d" font-family="Segoe UI, Arial, sans-serif" font-size="8px" font-weight="400">Otherwise, use the first detected settings file.</text>
+<rect x="877" y="829" width="109" height="35" rx="8" fill="#171c22" stroke="#323b42" stroke-width="1"/>
+<text x="891" y="851" fill="#c2ccca" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="700">▣  Save profile</text>
+<rect x="996" y="829" width="151" height="35" rx="8" fill="#191918" stroke="#513936" stroke-width="1"/>
+<text x="1008" y="851" fill="#e8aaa2" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="700">↶  Restore managed</text>
+<rect x="1157" y="829" width="182" height="35" rx="8" fill="#73d6ad" stroke="#86dcb8" stroke-width="1"/>
+<text x="1175" y="851" fill="#11231c" font-family="Segoe UI, Arial, sans-serif" font-size="9px" font-weight="750">✓  Apply settings</text>
+</svg>
