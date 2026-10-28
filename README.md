@@ -5,9 +5,9 @@
 `V4` rebuilds the desktop app in **Rust + Tauri v2** and ships it as one small
 Windows 64-bit `.exe` that uses the WebView2 runtime already on Windows 10/11.
 On **first launch it detects whether Roblox is installed** (read-only). The
-website and the app share one UI whose main tab is the **Windows-only Client**,
-showing the **18 Roblox-allowlisted FastFlags** in Geometry, Rendering, and User
-Interface — each with what it improves.
+standalone desktop app has its own **Main** page and grouped **Settings** area
+for **Rendering**, **Geometry**, **Icons**, and **Allowlist**. The website has a
+separate interface and does not bundle the desktop UI.
 
 > **GitHub Pages is fixed and working.** The live site is served from the
 > generated root `index.html` (legacy `main /` source). The Three.js scene now
