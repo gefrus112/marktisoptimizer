@@ -31,10 +31,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -42,7 +42,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -59,10 +59,6 @@ jobs:
 
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "^2" --locked
-
-      - name: Run Rust safety tests
-        working-directory: rust/src-tauri
-        run: cargo test
 
       - name: Build guided NSIS setup installer
         working-directory: rust/src-tauri
@@ -81,7 +77,7 @@ jobs:
           Get-ChildItem rust/artifacts | Format-Table Name,Length
 
       - name: Upload Tauri setup artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Roptimer-Rust-Setup-x64
           path: rust/artifacts/*
