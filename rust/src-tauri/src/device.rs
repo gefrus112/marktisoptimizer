@@ -1,6 +1,7 @@
-//! Read-only Windows hardware inventory and an explicit Roblox web-latency probe.
+//! Read-only Windows hardware/storage inventory and an explicit Roblox web-latency probe.
 //!
 //! Hardware data is queried from local WMI and returned only to the app UI. The
+//! startup storage advisory reads fixed-drive capacity/free space only. The
 //! latency probe opens a TCP connection to www.roblox.com:443 only when the user
 //! presses the probe button; it sends no HTTP/TLS payload and is not game-server
 //! ping. Neither command reads Roblox memory or changes system settings.
@@ -36,6 +37,101 @@ pub fn device_snapshot() -> Value {
     {
         unavailable_device(false, "Read-only hardware inventory is available in the Windows desktop app.")
     }
+}
+
+fn unavailable_storage(supported: bool, message: &str) -> Value {
+    json!({
+        "supported": supported,
+        "available": false,
+        "message": message,
+        "volumes": [],
+        "safety": {
+            "readOnly": true,
+            "networkRequests": false,
+            "dataUploaded": false
+        }
+    })
+}
+
+/// Return only fixed local drive capacity/free-space details for the startup
+/// advisory. No files are scanned, opened, changed, or uploaded.
+#[tauri::command]
+pub fn storage_snapshot() -> Value {
+    #[cfg(target_os = "windows")]
+    {
+        return windows_storage_snapshot();
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        unavailable_storage(false, "The local storage check is available in the Windows desktop app.")
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn windows_storage_snapshot() -> Value {
+    use std::os::windows::process::CommandExt;
+    use std::path::PathBuf;
+    use std::process::Command;
+
+    const STORAGE_SCRIPT: &str = r#"
+$ErrorActionPreference = 'Stop'
+$Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = $Utf8NoBom
+$volumes = @(Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3' | Where-Object { $_.Size -gt 0 } | ForEach-Object {
+  [pscustomobject]@{
+    drive = [string]$_.DeviceID
+    label = [string]$_.VolumeName
+    sizeBytes = [uint64]$_.Size
+    freeBytes = [uint64]$_.FreeSpace
+  }
+})
+[pscustomobject]@{
+  systemDrive = [string]$env:SystemDrive
+  volumes = $volumes
+} | ConvertTo-Json -Depth 4 -Compress
+"#;
+
+    let root = std::env::var_os("SystemRoot")
+        .or_else(|| std::env::var_os("WINDIR"))
+        .map(PathBuf::from);
+    let Some(root) = root.filter(|path| path.is_absolute()) else {
+        return unavailable_storage(true, "The Windows system directory could not be located.");
+    };
+    let powershell = root
+        .join("System32")
+        .join("WindowsPowerShell")
+        .join("v1.0")
+        .join("powershell.exe");
+    if !powershell.is_file() {
+        return unavailable_storage(true, "Windows PowerShell is not available for the local storage check.");
+    }
+
+    let output = match Command::new(powershell)
+        .args(["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", STORAGE_SCRIPT])
+        .creation_flags(0x0800_0000)
+        .output()
+    {
+        Ok(output) if output.status.success() => output,
+        _ => return unavailable_storage(true, "Windows could not complete the local storage check."),
+    };
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let snapshot: Value = match serde_json::from_str(stdout.trim()) {
+        Ok(value) if value.is_object() && value.get("volumes").and_then(Value::as_array).is_some() => value,
+        _ => return unavailable_storage(true, "Windows returned unreadable local storage information."),
+    };
+    json!({
+        "supported": true,
+        "available": true,
+        "systemDrive": snapshot.get("systemDrive").and_then(Value::as_str).unwrap_or("C:"),
+        "volumes": snapshot.get("volumes").cloned().unwrap_or_else(|| json!([])),
+        "message": "Fixed local drive capacity and free space were read-only; no files were scanned or changed.",
+        "safety": {
+            "readOnly": true,
+            "networkRequests": false,
+            "dataUploaded": false
+        }
+    })
 }
 
 #[cfg(target_os = "windows")]

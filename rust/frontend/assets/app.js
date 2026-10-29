@@ -9,6 +9,13 @@
   const invoke = resolveInvoke();
   const profileKey = "roptimer.desktop.profile.v1";
   const appearanceKey = "roptimer.desktop.appearance.v1";
+  const benchmarkJournalKey = "roptimer.desktop.manualBenchmark.v1";
+  const robloxUserIdKey = "roptimer.desktop.robloxUserId.v1";
+  const notificationPreferencesKey = "roptimer.desktop.notifications.v1";
+  const notificationHistoryKey = "roptimer.desktop.notificationHistory.v1";
+  const notificationEventKeys = ["playerStatus", "safetyAlerts", "settingsChanges", "lowStorage"];
+  const lowStorageBytes = 10 * 1024 * 1024 * 1024;
+  const lowStoragePercent = 5;
   const animeThemes = [
     { id: "goku-ultra-instinct", name: "Ultra Instinct Goku", series: "Dragon Ball Super", file: "goku-ultra-instinct.jpg", accent: "blue" },
     { id: "vegeta-ultra-ego", name: "Ultra Ego Vegeta", series: "Dragon Ball Super", file: "vegeta-ultra-ego.jpg", accent: "violet" },
@@ -42,12 +49,21 @@
     activePlayer: null,
     executorScan: null,
     deviceSnapshot: null,
+    storageSnapshot: null,
+    storagePending: false,
+    storageNoticeShown: false,
     recommendedPreset: null,
     latencyPending: false,
     appInfo: null,
     allowlist: fallbackAllowlist,
     allowlistFilter: "all",
     geometryManuallyChanged: false,
+    devicePending: false,
+    quickRefreshPending: false,
+    benchmarkJournal: null,
+    notificationPrefs: null,
+    notificationHistory: [],
+    notificationPermission: "unsupported",
     pendingAction: null,
     confirmReturnFocus: null,
     statusPending: false,
@@ -107,6 +123,475 @@
 
   function safeStorageSet(key, value) {
     try { window.localStorage.setItem(key, value); } catch (_error) { /* Storage is a convenience only. */ }
+  }
+
+  function readNotificationPreferences() {
+    let stored = null;
+    try { stored = JSON.parse(safeStorageGet(notificationPreferencesKey) || "null"); } catch (_error) { stored = null; }
+    const values = stored && typeof stored === "object" ? stored : {};
+    const eventValues = values.events && typeof values.events === "object" ? values.events : {};
+    const events = {};
+    notificationEventKeys.forEach(function (key) { events[key] = eventValues[key] !== false; });
+    return { enabled: values.enabled === true, events: events };
+  }
+
+  function readNotificationHistory() {
+    let stored = null;
+    try { stored = JSON.parse(safeStorageGet(notificationHistoryKey) || "[]"); } catch (_error) { stored = null; }
+    if (!Array.isArray(stored)) return [];
+    return stored.map(function (item) {
+      if (!item || typeof item !== "object") return null;
+      const timestamp = Date.parse(item.createdAt);
+      const category = notificationEventKeys.includes(item.category) ? item.category : "settingsChanges";
+      return {
+        id: String(item.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 7)).slice(0, 64),
+        title: String(item.title || "Marktis Optimizer update").slice(0, 120),
+        body: String(item.body || "").slice(0, 500),
+        category: category,
+        tone: ["success", "warning", "error"].includes(item.tone) ? item.tone : "default",
+        createdAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : new Date().toISOString(),
+        read: item.read === true
+      };
+    }).filter(Boolean).slice(0, 50);
+  }
+
+  function writeNotificationPreferences() {
+    if (!state.notificationPrefs) return;
+    safeStorageSet(notificationPreferencesKey, JSON.stringify(state.notificationPrefs));
+  }
+
+  function writeNotificationHistory() {
+    safeStorageSet(notificationHistoryKey, JSON.stringify(state.notificationHistory.slice(0, 50)));
+  }
+
+  function getNotificationPermission() {
+    try {
+      const api = window.Notification;
+      if (!api || typeof api.requestPermission !== "function") return "unsupported";
+      return ["default", "granted", "denied"].includes(api.permission) ? api.permission : "unsupported";
+    } catch (_error) {
+      return "unsupported";
+    }
+  }
+
+  function renderNotificationPermission() {
+    state.notificationPermission = getNotificationPermission();
+    const badge = byId("notificationPermissionBadge");
+    const detail = byId("notificationPermissionDetail");
+    const button = byId("requestNotifications");
+    if (!badge || !detail || !button) return;
+    if (state.notificationPermission === "granted") {
+      badge.textContent = "ALLOWED";
+      badge.className = "state-pill state-found";
+      detail.textContent = "WebView permission is granted. Windows notification settings may still suppress toasts; choose events and enable app notifications below.";
+      button.textContent = "Desktop permission granted";
+      button.disabled = true;
+    } else if (state.notificationPermission === "denied") {
+      badge.textContent = "BLOCKED";
+      badge.className = "state-pill state-error";
+      detail.textContent = "Desktop alerts were denied by the browser or Windows. You can still use the in-app notification center.";
+      button.textContent = "Desktop permission blocked";
+      button.disabled = true;
+    } else if (state.notificationPermission === "default") {
+      badge.textContent = "NOT REQUESTED";
+      badge.className = "state-pill state-pending";
+      detail.textContent = "Request permission only when you choose. The in-app notification center works even if you say no.";
+      button.textContent = "Request desktop permission";
+      button.disabled = false;
+    } else {
+      badge.textContent = "IN-APP ONLY";
+      badge.className = "state-pill state-pending";
+      detail.textContent = "Desktop toasts are unavailable in this WebView. Local in-app notifications are still supported.";
+      button.textContent = "Desktop alerts unavailable";
+      button.disabled = true;
+    }
+  }
+
+  function renderNotificationPreferences() {
+    if (!state.notificationPrefs) state.notificationPrefs = readNotificationPreferences();
+    byId("notificationEnabled").checked = state.notificationPrefs.enabled;
+    byId("notifyPlayerStatus").checked = state.notificationPrefs.events.playerStatus;
+    byId("notifySafetyAlerts").checked = state.notificationPrefs.events.safetyAlerts;
+    byId("notifySettingsChanges").checked = state.notificationPrefs.events.settingsChanges;
+    byId("notifyLowStorage").checked = state.notificationPrefs.events.lowStorage;
+    renderNotificationPermission();
+  }
+
+  function notificationCategoryTitle(category) {
+    const titles = {
+      playerStatus: "Roblox Player",
+      safetyAlerts: "Local safety",
+      settingsChanges: "Settings",
+      lowStorage: "Storage"
+    };
+    return titles[category] || "App update";
+  }
+
+  function notificationIcon(category) {
+    const icons = { playerStatus: "i-roblox", safetyAlerts: "i-shield", settingsChanges: "i-settings", lowStorage: "i-memory" };
+    return icons[category] || "i-bell";
+  }
+
+  function formatNotificationTime(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "Just now";
+    return date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  }
+
+  function renderNotificationCenter() {
+    if (!Array.isArray(state.notificationHistory)) state.notificationHistory = [];
+    const list = byId("notificationList");
+    const badge = byId("notificationBadge");
+    const trigger = byId("toggleNotifications");
+    const summary = byId("notificationUnreadSummary");
+    if (!list || !badge || !trigger || !summary) return;
+    const unreadCount = state.notificationHistory.filter(function (item) { return !item.read; }).length;
+    byId("markNotificationsRead").disabled = unreadCount === 0;
+    byId("clearNotifications").disabled = state.notificationHistory.length === 0;
+    badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+    badge.hidden = unreadCount === 0;
+    trigger.setAttribute("aria-label", unreadCount ? "Open notifications, " + unreadCount + " unread" : "Open notifications");
+    summary.textContent = unreadCount ? unreadCount + " unread · " + state.notificationHistory.length + " saved locally" : state.notificationHistory.length ? "All caught up · " + state.notificationHistory.length + " saved locally" : "Your local updates will appear here.";
+    list.replaceChildren();
+    if (!state.notificationHistory.length) {
+      const empty = document.createElement("p");
+      empty.className = "notification-empty";
+      empty.textContent = state.notificationPrefs && state.notificationPrefs.enabled
+        ? "No notifications yet. Your selected local events will appear here."
+        : "Notifications are off. Enable them in Settings to collect local app updates.";
+      list.appendChild(empty);
+      return;
+    }
+    state.notificationHistory.slice(0, 30).forEach(function (item) {
+      const row = document.createElement("button");
+      row.className = "notification-item" + (item.read ? "" : " is-unread") + " tone-" + item.tone;
+      row.type = "button";
+      row.dataset.notificationId = item.id;
+      const mark = document.createElement("span");
+      mark.className = "notification-item-mark";
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "icon");
+      const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      use.setAttribute("href", "#" + notificationIcon(item.category));
+      svg.appendChild(use);
+      mark.appendChild(svg);
+      const copy = document.createElement("span");
+      copy.className = "notification-item-copy";
+      const heading = document.createElement("strong");
+      heading.textContent = item.title;
+      const body = document.createElement("span");
+      body.className = "notification-item-body";
+      body.textContent = item.body;
+      const meta = document.createElement("span");
+      meta.className = "notification-item-meta";
+      const category = document.createElement("span");
+      category.textContent = notificationCategoryTitle(item.category);
+      const time = document.createElement("time");
+      time.dateTime = item.createdAt;
+      time.textContent = formatNotificationTime(item.createdAt);
+      meta.append(category, time);
+      copy.append(heading, body, meta);
+      row.append(mark, copy);
+      row.addEventListener("click", function () { markNotificationRead(item.id); });
+      list.appendChild(row);
+    });
+  }
+
+  function addAppNotification(title, body, category, tone) {
+    if (!state.notificationPrefs || !state.notificationPrefs.enabled) return null;
+    if (!notificationEventKeys.includes(category) || !state.notificationPrefs.events[category]) return null;
+    const item = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      title: String(title || "Marktis Optimizer update").slice(0, 120),
+      body: String(body || "").slice(0, 500),
+      category: category,
+      tone: ["success", "warning", "error"].includes(tone) ? tone : "default",
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+    state.notificationHistory.unshift(item);
+    state.notificationHistory = state.notificationHistory.slice(0, 50);
+    writeNotificationHistory();
+    renderNotificationCenter();
+    if (state.notificationPermission === "granted") {
+      try {
+        const desktopAlert = new window.Notification(item.title, {
+          body: item.body || "A local app update is ready to review.",
+          tag: "marktis-" + item.category,
+          renotify: false
+        });
+        desktopAlert.onclick = function () {
+          window.focus();
+          if (byId("notificationDrawer").hidden) toggleNotificationDrawer();
+        };
+      } catch (_error) { /* The local notification center remains available if OS toasts fail. */ }
+    }
+    return item;
+  }
+
+  async function requestDesktopNotifications() {
+    const api = window.Notification;
+    if (!api || typeof api.requestPermission !== "function") {
+      renderNotificationPermission();
+      showToast("Desktop toasts are not available here. Enable in-app alerts to use the notification center.", "warning");
+      return;
+    }
+    const button = byId("requestNotifications");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    try {
+      await api.requestPermission();
+      renderNotificationPermission();
+      if (state.notificationPermission === "granted") {
+        showToast("Desktop notification permission granted. Choose event types and enable app notifications below.", "success");
+      } else if (state.notificationPermission === "denied") {
+        showToast("Desktop notifications were denied. The in-app notification center still works.", "warning");
+      } else {
+        showToast("No desktop permission was granted. You can still use in-app notifications.", "warning");
+      }
+    } catch (_error) {
+      renderNotificationPermission();
+      showToast("Desktop permission could not be requested. In-app notifications remain available.", "warning");
+    } finally {
+      button.removeAttribute("aria-busy");
+      renderNotificationPermission();
+    }
+  }
+
+  function setNotificationEnabled(enabled) {
+    if (!state.notificationPrefs) state.notificationPrefs = readNotificationPreferences();
+    state.notificationPrefs.enabled = Boolean(enabled);
+    writeNotificationPreferences();
+    renderNotificationPreferences();
+    renderNotificationCenter();
+    showToast(state.notificationPrefs.enabled ? "Local app notifications enabled." : "Local app notifications paused.", "success");
+  }
+
+  function setNotificationEventEnabled(key, enabled) {
+    if (!notificationEventKeys.includes(key)) return;
+    if (!state.notificationPrefs) state.notificationPrefs = readNotificationPreferences();
+    state.notificationPrefs.events[key] = Boolean(enabled);
+    writeNotificationPreferences();
+    renderNotificationPreferences();
+    showToast(notificationCategoryTitle(key) + " alerts " + (enabled ? "enabled." : "muted."), "success");
+  }
+
+  function toggleNotificationDrawer() {
+    const drawer = byId("notificationDrawer");
+    const trigger = byId("toggleNotifications");
+    const opening = drawer.hidden;
+    drawer.hidden = !opening;
+    trigger.setAttribute("aria-expanded", opening ? "true" : "false");
+    if (opening) {
+      renderNotificationCenter();
+      byId("closeNotifications").focus();
+    } else {
+      trigger.focus();
+    }
+  }
+
+  function closeNotificationDrawer(restoreFocus) {
+    const drawer = byId("notificationDrawer");
+    if (!drawer || drawer.hidden) return;
+    drawer.hidden = true;
+    byId("toggleNotifications").setAttribute("aria-expanded", "false");
+    if (restoreFocus !== false) byId("toggleNotifications").focus();
+  }
+
+  function markNotificationRead(id) {
+    const item = state.notificationHistory.find(function (entry) { return entry.id === id; });
+    if (!item || item.read) return;
+    item.read = true;
+    writeNotificationHistory();
+    renderNotificationCenter();
+  }
+
+  function markAllNotificationsRead() {
+    state.notificationHistory.forEach(function (item) { item.read = true; });
+    writeNotificationHistory();
+    renderNotificationCenter();
+  }
+
+  function clearNotificationHistory() {
+    state.notificationHistory = [];
+    writeNotificationHistory();
+    renderNotificationCenter();
+    showToast("Notification history cleared on this device.", "success");
+  }
+
+  function normalizeRobloxUserId(value) {
+    const digits = String(value == null ? "" : value).trim();
+    if (!/^\d{1,20}$/.test(digits) || /^0+$/.test(digits)) return "";
+    const normalized = digits.replace(/^0+(?=\d)/, "");
+    if (normalized.length === 20 && normalized > "18446744073709551615") return "";
+    return normalized;
+  }
+
+  function updateRobloxProfileButton() {
+    const input = byId("robloxUserId");
+    const button = byId("openRobloxProfile");
+    const note = byId("robloxProfileNote");
+    if (!input || !button || !note) return;
+    const userId = normalizeRobloxUserId(input.value);
+    button.disabled = !invoke || !userId;
+    if (!invoke) {
+      note.textContent = "The official profile opens from the packaged desktop app. No account login or private profile data is accessed.";
+    } else if (userId) {
+      note.textContent = "This opens the official public profile in your system browser. Only the numeric ID is saved locally; no login, cookies, or profile scraping.";
+    } else {
+      note.textContent = "Enter a positive numeric Roblox User ID. Only the public ID is saved locally; no login or private account data is accessed.";
+    }
+  }
+
+  function normalizeBenchmarkReading(value) {
+    if (!value || typeof value !== "object") return null;
+    const fps = Number(value.fps);
+    const ping = Number(value.ping);
+    if (!Number.isFinite(fps) || fps < 0 || fps > 1000 || !Number.isFinite(ping) || ping < 0 || ping > 10000) return null;
+    const timestamp = Date.parse(value.recordedAt);
+    const modes = ["Reduce building lag", "Maximum performance", "Balanced", "High quality"];
+    return {
+      fps: Math.round(fps * 10) / 10,
+      ping: Math.round(ping * 10) / 10,
+      recordedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : new Date().toISOString(),
+      profileMode: modes.includes(value.profileMode) ? value.profileMode : "Unknown profile"
+    };
+  }
+
+  function readBenchmarkJournal() {
+    let stored = null;
+    try { stored = JSON.parse(safeStorageGet(benchmarkJournalKey) || "null"); } catch (_error) { stored = null; }
+    const value = stored && typeof stored === "object" ? stored : {};
+    const history = Array.isArray(value.history) ? value.history.map(function (entry) {
+      if (!entry || typeof entry !== "object") return null;
+      const before = normalizeBenchmarkReading(entry.before);
+      const after = normalizeBenchmarkReading(entry.after);
+      return before && after ? { before: before, after: after } : null;
+    }).filter(Boolean).slice(0, 20) : [];
+    return { baseline: normalizeBenchmarkReading(value.baseline), history: history };
+  }
+
+  function formatBenchmarkNumber(value) {
+    return Number.isInteger(value) ? String(value) : Number(value).toFixed(1);
+  }
+
+  function formatBenchmarkDate(value, compact) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "Unknown time";
+    return date.toLocaleString(undefined, compact
+      ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+      : { dateStyle: "medium", timeStyle: "short" });
+  }
+
+  function formatBenchmarkDifference(after, before, unit) {
+    const difference = Math.round((after - before) * 10) / 10;
+    const sign = difference > 0 ? "+" : (difference < 0 ? "−" : "");
+    return sign + formatBenchmarkNumber(Math.abs(difference)) + (unit ? " " + unit : "");
+  }
+
+  function renderBenchmarkJournal() {
+    if (!state.benchmarkJournal) state.benchmarkJournal = readBenchmarkJournal();
+    const journal = state.benchmarkJournal;
+    const baselineSummary = byId("benchmarkBaselineSummary");
+    const latestSummary = byId("benchmarkLatestSummary");
+    const historyHost = byId("benchmarkHistory");
+    const afterButton = byId("saveBenchmarkAfter");
+    const clearButton = byId("clearBenchmarkJournal");
+    if (!baselineSummary || !latestSummary || !historyHost) return;
+
+    if (journal.baseline) {
+      const baseline = journal.baseline;
+      baselineSummary.textContent = "Baseline saved: " + formatBenchmarkNumber(baseline.fps) + " FPS · " + formatBenchmarkNumber(baseline.ping) + " ms ping · " + baseline.profileMode + " · " + formatBenchmarkDate(baseline.recordedAt, false) + ".";
+    } else {
+      baselineSummary.textContent = "No baseline saved yet. Enter the values shown in Roblox Shift+F5, then save a baseline.";
+    }
+    const latest = journal.history[0];
+    if (latest) {
+      latestSummary.textContent = "Latest difference: FPS " + formatBenchmarkDifference(latest.after.fps, latest.before.fps, "") + " · ping " + formatBenchmarkDifference(latest.after.ping, latest.before.ping, "ms") + ". Before " + latest.before.profileMode + " → after " + latest.after.profileMode + ".";
+    } else {
+      latestSummary.textContent = journal.baseline
+        ? "Baseline ready. Record an after reading when you have tested your changes."
+        : "A comparison will show the change in your manually entered FPS and ping.";
+    }
+
+    historyHost.replaceChildren();
+    if (journal.history.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "benchmark-history-empty";
+      empty.textContent = "No comparisons recorded.";
+      historyHost.appendChild(empty);
+    } else {
+      journal.history.slice(0, 5).forEach(function (entry) {
+        const row = document.createElement("div");
+        row.className = "benchmark-history-row";
+        const copy = document.createElement("p");
+        const title = document.createElement("strong");
+        title.textContent = "FPS " + formatBenchmarkNumber(entry.before.fps) + " → " + formatBenchmarkNumber(entry.after.fps) + " (" + formatBenchmarkDifference(entry.after.fps, entry.before.fps, "") + ") · ping " + formatBenchmarkNumber(entry.before.ping) + " → " + formatBenchmarkNumber(entry.after.ping) + " ms (" + formatBenchmarkDifference(entry.after.ping, entry.before.ping, "ms") + ")";
+        const details = document.createElement("span");
+        details.textContent = "Before " + entry.before.profileMode + " · after " + entry.after.profileMode;
+        copy.append(title, details);
+        const time = document.createElement("time");
+        time.dateTime = entry.after.recordedAt;
+        time.textContent = formatBenchmarkDate(entry.after.recordedAt, true);
+        row.append(copy, time);
+        historyHost.appendChild(row);
+      });
+    }
+    if (afterButton) afterButton.disabled = !journal.baseline;
+    if (clearButton) clearButton.disabled = !journal.baseline && journal.history.length === 0;
+  }
+
+  function readBenchmarkInputs(prefix) {
+    const fpsInput = byId(prefix + "Fps");
+    const pingInput = byId(prefix + "Ping");
+    if (!fpsInput || !pingInput || !fpsInput.value.trim() || !pingInput.value.trim()) {
+      showToast("Enter both FPS and ping values from Roblox Shift+F5.", "warning");
+      return null;
+    }
+    const fps = Number(fpsInput.value);
+    const ping = Number(pingInput.value);
+    if (!Number.isFinite(fps) || fps < 0 || fps > 1000 || !Number.isFinite(ping) || ping < 0 || ping > 10000) {
+      showToast("Enter FPS from 0–1000 and ping from 0–10000 ms.", "warning");
+      return null;
+    }
+    return {
+      fps: Math.round(fps * 10) / 10,
+      ping: Math.round(ping * 10) / 10,
+      recordedAt: new Date().toISOString(),
+      profileMode: currentProfile().mode
+    };
+  }
+
+  function saveBenchmarkBaseline() {
+    const reading = readBenchmarkInputs("benchmarkBefore");
+    if (!reading) return;
+    if (!state.benchmarkJournal) state.benchmarkJournal = readBenchmarkJournal();
+    state.benchmarkJournal.baseline = reading;
+    safeStorageSet(benchmarkJournalKey, JSON.stringify(state.benchmarkJournal));
+    renderBenchmarkJournal();
+    showToast("Baseline saved on this device. Compare using similar gameplay conditions.", "success");
+  }
+
+  function saveBenchmarkAfter() {
+    if (!state.benchmarkJournal) state.benchmarkJournal = readBenchmarkJournal();
+    if (!state.benchmarkJournal.baseline) {
+      showToast("Save a before-changes baseline first.", "warning");
+      return;
+    }
+    const reading = readBenchmarkInputs("benchmarkAfter");
+    if (!reading) return;
+    state.benchmarkJournal.history.unshift({ before: state.benchmarkJournal.baseline, after: reading });
+    state.benchmarkJournal.history = state.benchmarkJournal.history.slice(0, 20);
+    safeStorageSet(benchmarkJournalKey, JSON.stringify(state.benchmarkJournal));
+    renderBenchmarkJournal();
+    showToast("Comparison recorded locally. The app does not verify or measure these game values.", "success");
+  }
+
+  function clearBenchmarkJournal() {
+    state.benchmarkJournal = { baseline: null, history: [] };
+    safeStorageSet(benchmarkJournalKey, JSON.stringify(state.benchmarkJournal));
+    renderBenchmarkJournal();
+    showToast("Local benchmark journal cleared.", "success");
   }
 
   function readProfile() {
@@ -357,6 +842,15 @@
   }
 
   function renderActivePlayer(result, error) {
+    const previous = state.activePlayer;
+    if (previous && previous.supported && previous.available && result && result.supported && result.available && typeof previous.running === "boolean" && typeof result.running === "boolean" && previous.running !== result.running) {
+      addAppNotification(
+        result.running ? "Roblox Player opened" : "Roblox Player closed",
+        "Windows process-name check: " + (result.running ? "RobloxPlayerBeta.exe is running." : "RobloxPlayerBeta.exe is no longer running."),
+        "playerStatus",
+        "default"
+      );
+    }
     state.activePlayer = result || null;
     const badge = byId("playerBadge");
     const title = byId("playerTitle");
@@ -558,7 +1052,7 @@
 
   function formatBytes(value) {
     const bytes = Number(value);
-    if (!Number.isFinite(bytes) || bytes <= 0) return "Unknown";
+    if (!Number.isFinite(bytes) || bytes < 0) return "Unknown";
     const units = ["B", "KB", "MB", "GB", "TB"];
     let amount = bytes;
     let unit = 0;
@@ -688,6 +1182,8 @@
       renderDeviceSnapshot(null, "Local hardware inventory is available only in the packaged Windows desktop app.");
       return null;
     }
+    if (state.devicePending) return null;
+    state.devicePending = true;
     const button = byId("refreshDevice");
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
@@ -704,6 +1200,7 @@
       showToast("Local hardware scan failed: " + message, "warning");
       return null;
     } finally {
+      state.devicePending = false;
       button.disabled = false;
       button.removeAttribute("aria-busy");
     }
@@ -796,6 +1293,8 @@
         }).filter(Boolean).sort().join("|");
         if (alertSignature && alertSignature !== state.lastSafetyAlertSignature) {
           showToast("Local safety alert: review the possible process-name match on Main.", "warning");
+          const matchedNames = matches.map(function (match) { return String(match.productName || match.processName || "possible name"); }).slice(0, 4).join(", ");
+          addAppNotification("Review a local process-name match", matchedNames + ". A name match is not proof of malware; review the on-device scan.", "safetyAlerts", "warning");
         }
         if (alertSignature) state.lastSafetyAlertSignature = alertSignature;
       } else if (result && result.available) {
@@ -857,7 +1356,7 @@
   }
 
   function setSettingsTab(name) {
-    const selected = ["rendering", "geometry", "icons", "allowlist", "system"].includes(name) ? name : "rendering";
+    const selected = ["rendering", "geometry", "icons", "allowlist", "system", "notifications"].includes(name) ? name : "rendering";
     byId("settingsView").hidden = false;
     byId("mainView").hidden = true;
     byId("navMain").classList.remove("is-active");
@@ -866,6 +1365,8 @@
     byId("navSettings").setAttribute("aria-expanded", "true");
     byId("settingsSubnav").hidden = false;
     byId("breadcrumbTitle").textContent = "Settings · " + capitalize(selected);
+    byId("settingsHeaderStatusText").textContent = selected === "notifications" ? "Preferences save immediately on this device" : "Changes are staged locally";
+    byId("settingsFooter").hidden = selected === "notifications";
     document.querySelectorAll(".settings-tab").forEach(function (tab) {
       const active = tab.dataset.tab === selected;
       tab.classList.toggle("is-active", active);
@@ -886,6 +1387,7 @@
     byId("pageScroll").scrollTop = 0;
     renderSystemClientStatus();
     if (selected === "system" && !state.deviceSnapshot) refreshDeviceInfo();
+    if (selected === "notifications") renderNotificationPreferences();
   }
 
   function capitalize(value) { return value.charAt(0).toUpperCase() + value.slice(1); }
@@ -1094,11 +1596,31 @@
         ? "Settings applied with backups; Roblox launch requested through roblox://."
         : (result.message || (isRestore ? "Managed settings restored." : "Settings applied with backups."));
       showToast(message, "success");
+      addAppNotification(isRestore ? "Managed settings restored" : "Settings applied", message, "settingsChanges", "success");
     } else {
       showToast(result && result.message ? result.message : "No settings files were changed; Roblox was not launched.", "warning");
     }
     await detectRoblox();
     updateProfileDisplay();
+  }
+
+  async function openLatestRelease() {
+    const button = byId("openLatestRelease");
+    if (!invoke) {
+      showToast("Open the packaged Windows app to view the latest release link.", "warning");
+      return;
+    }
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    try {
+      await invoke("open_latest_release");
+      showToast("Opened the official GitHub Releases page. Download and install updates manually.", "success");
+    } catch (error) {
+      showToast("Could not open the releases page: " + (error && error.message ? error.message : String(error)), "warning");
+    } finally {
+      button.removeAttribute("aria-busy");
+      button.disabled = !invoke;
+    }
   }
 
   async function launchRoblox() {
@@ -1118,11 +1640,249 @@
     }
   }
 
+  async function openRobloxProfile() {
+    const button = byId("openRobloxProfile");
+    const userId = normalizeRobloxUserId(byId("robloxUserId").value);
+    if (!userId) {
+      showToast("Enter a valid positive numeric Roblox User ID.", "warning");
+      updateRobloxProfileButton();
+      return;
+    }
+    if (!invoke) {
+      showToast("Open the packaged Windows desktop app to open the official Roblox profile.", "warning");
+      return;
+    }
+    safeStorageSet(robloxUserIdKey, userId);
+    if (button) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+    }
+    try {
+      await invoke("open_roblox_profile", { userId: userId });
+      showToast("Opening the official Roblox profile in your system browser.", "success");
+    } catch (error) {
+      showToast("Could not open the Roblox profile: " + (error && error.message ? error.message : String(error)), "error");
+    } finally {
+      if (button) button.removeAttribute("aria-busy");
+      updateRobloxProfileButton();
+    }
+  }
+
   async function quickRefresh() {
+    if (state.quickRefreshPending) return;
+    state.quickRefreshPending = true;
     const button = byId("quickRefresh");
-    if (button) button.disabled = true;
-    await Promise.all([detectRoblox(), refreshPlayerStatus()]);
-    if (button) button.disabled = false;
+    if (button) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+    }
+    try {
+      await Promise.allSettled([
+        detectRoblox(),
+        refreshPlayerStatus(),
+        refreshDeviceInfo(),
+        refreshStorageSnapshot(),
+        scanKnownExecutorProcesses(true)
+      ]);
+    } finally {
+      state.quickRefreshPending = false;
+      if (button) {
+        button.disabled = false;
+        button.removeAttribute("aria-busy");
+      }
+      const updated = byId("quickRefreshTime");
+      if (updated) updated.textContent = "Updated " + new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+  }
+
+  async function refreshStorageSnapshot() {
+    if (!invoke || state.storagePending) return null;
+    state.storagePending = true;
+    try {
+      const result = await invoke("storage_snapshot");
+      state.storageSnapshot = result || null;
+      return result;
+    } catch (_error) {
+      state.storageSnapshot = null;
+      return null;
+    } finally {
+      state.storagePending = false;
+    }
+  }
+
+  function storageRecords(snapshot) {
+    const volumes = snapshot && Array.isArray(snapshot.volumes) ? snapshot.volumes : [];
+    const systemDrive = String(snapshot && snapshot.systemDrive || "").trim().toUpperCase();
+    return volumes.map(function (volume) {
+      if (!volume || typeof volume !== "object") return null;
+      const total = Number(volume.sizeBytes);
+      const rawFree = Number(volume.freeBytes);
+      if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(rawFree) || rawFree < 0) return null;
+      const free = Math.min(total, rawFree);
+      const used = Math.max(0, total - free);
+      const freePercent = free / total * 100;
+      const drive = String(volume.drive || "Local drive");
+      return {
+        drive: drive,
+        label: String(volume.label || "").trim(),
+        total: total,
+        free: free,
+        used: used,
+        usedPercent: Math.min(100, Math.max(0, used / total * 100)),
+        isSystem: drive.trim().toUpperCase() === systemDrive,
+        isLow: free < lowStorageBytes || freePercent < lowStoragePercent
+      };
+    }).filter(Boolean).sort(function (left, right) {
+      if (left.isSystem !== right.isSystem) return left.isSystem ? -1 : 1;
+      if (left.isLow !== right.isLow) return left.isLow ? -1 : 1;
+      return left.drive.localeCompare(right.drive);
+    });
+  }
+
+  function renderStorageVolume(record, host) {
+    const card = document.createElement("article");
+    card.className = "storage-volume-card" + (record.isLow ? " is-low" : "");
+    const heading = document.createElement("div");
+    heading.className = "storage-drive-heading";
+    const name = document.createElement("strong");
+    name.textContent = record.drive + (record.label ? " · " + record.label : "");
+    const badges = document.createElement("span");
+    badges.className = "storage-drive-badges";
+    if (record.isSystem) {
+      const systemBadge = document.createElement("span");
+      systemBadge.className = "storage-drive-badge is-system";
+      systemBadge.textContent = "SYSTEM";
+      badges.appendChild(systemBadge);
+    }
+    if (record.isLow) {
+      const lowBadge = document.createElement("span");
+      lowBadge.className = "storage-drive-badge is-low";
+      lowBadge.textContent = "LOW SPACE";
+      badges.appendChild(lowBadge);
+    }
+    heading.append(name, badges);
+    const detail = document.createElement("p");
+    detail.className = "storage-drive-detail";
+    detail.textContent = formatBytes(record.free) + " free · " + formatBytes(record.used) + " used · " + formatBytes(record.total) + " total";
+    const meter = document.createElement("div");
+    meter.className = "storage-meter";
+    meter.setAttribute("role", "progressbar");
+    meter.setAttribute("aria-label", record.drive + " storage used");
+    meter.setAttribute("aria-valuemin", "0");
+    meter.setAttribute("aria-valuemax", "100");
+    meter.setAttribute("aria-valuenow", String(Math.round(record.usedPercent)));
+    const fill = document.createElement("span");
+    fill.style.width = record.usedPercent.toFixed(1) + "%";
+    meter.appendChild(fill);
+    card.append(heading, detail, meter);
+    host.appendChild(card);
+  }
+
+  async function loadStartupStorageSnapshot() {
+    if (!invoke) return null;
+    let timeoutId = 0;
+    const timeout = new Promise(function (resolve) {
+      timeoutId = window.setTimeout(function () { resolve(null); }, 5000);
+    });
+    const result = await Promise.race([refreshStorageSnapshot(), timeout]);
+    window.clearTimeout(timeoutId);
+    if (!result && !state.storageSnapshot) {
+      state.storageSnapshot = {
+        supported: true,
+        available: false,
+        systemDrive: "",
+        volumes: [],
+        message: "The local storage check took too long to complete."
+      };
+    }
+    return state.storageSnapshot;
+  }
+
+  function showStartupStorageNotice() {
+    if (!invoke || state.storageNoticeShown) return;
+    state.storageNoticeShown = true;
+    const overlay = byId("storageNoticeOverlay");
+    const title = byId("storageNoticeTitle");
+    const message = byId("storageNoticeText");
+    const list = byId("storageVolumeList");
+    const icon = byId("storageNoticeIcon");
+    const continueButton = byId("continueAfterStorageCheck");
+    const records = state.storageSnapshot && state.storageSnapshot.available
+      ? storageRecords(state.storageSnapshot)
+      : [];
+    list.replaceChildren();
+    icon.classList.remove("is-low", "is-unavailable");
+
+    if (!records.length) {
+      title.textContent = "Storage check unavailable";
+      message.textContent = "Windows did not return usable local drive capacity details. You can still continue to Marktis Optimizer; no files were scanned or changed.";
+      icon.classList.add("is-unavailable");
+      const empty = document.createElement("p");
+      empty.className = "storage-volume-empty";
+      empty.textContent = "No fixed local drive details are available right now.";
+      list.appendChild(empty);
+      continueButton.textContent = "Run Marktis Optimizer";
+    } else {
+      records.forEach(function (record) { renderStorageVolume(record, list); });
+      const systemDrive = String(state.storageSnapshot.systemDrive || "").trim().toUpperCase();
+      const mainDrive = records.find(function (record) { return record.drive.trim().toUpperCase() === systemDrive; }) || records[0];
+      const lowDrive = records.find(function (record) { return record.isLow; });
+      if (lowDrive) {
+        title.textContent = "Oops, storage is running low 😢";
+        const storageMessage = lowDrive.drive + " has " + formatBytes(lowDrive.free) + " free of " + formatBytes(lowDrive.total) + " total. Consider deleting or moving a few files before continuing. Marktis Optimizer will not delete files for you.";
+        message.textContent = storageMessage + " Do you want to run it anyway?";
+        addAppNotification("Low storage advisory", storageMessage, "lowStorage", "warning");
+        icon.classList.add("is-low");
+        continueButton.textContent = "Run anyway";
+      } else {
+        title.textContent = "Storage check complete";
+        message.textContent = "No low-space drives were detected. " + mainDrive.drive + " has " + formatBytes(mainDrive.free) + " free of " + formatBytes(mainDrive.total) + " total (" + formatBytes(mainDrive.used) + " used). Would you like to continue to Marktis Optimizer?";
+        continueButton.textContent = "Run Marktis Optimizer";
+      }
+    }
+    overlay.hidden = false;
+    continueButton.focus();
+  }
+
+  function continueFromStorageNotice() {
+    byId("storageNoticeOverlay").hidden = true;
+    byId("quickRefresh").focus();
+  }
+
+  async function exitFromStorageNotice() {
+    const exitButton = byId("exitAfterStorageCheck");
+    const continueButton = byId("continueAfterStorageCheck");
+    exitButton.disabled = true;
+    continueButton.disabled = true;
+    exitButton.textContent = "Closing…";
+    try {
+      await invoke("exit_app");
+    } catch (error) {
+      exitButton.disabled = false;
+      continueButton.disabled = false;
+      exitButton.textContent = "Exit app";
+      showToast("The app could not close: " + (error && error.message ? error.message : String(error)), "error");
+    }
+  }
+
+  function trapStorageNoticeFocus(event) {
+    const dialog = byId("storageNoticeDialog");
+    const focusable = Array.from(dialog.querySelectorAll(
+      'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+    )).filter(function (element) { return !element.hidden; });
+    if (!focusable.length) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+    const index = focusable.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) {
+      event.preventDefault();
+      focusable[focusable.length - 1].focus();
+    } else if (!event.shiftKey && (index < 0 || index === focusable.length - 1)) {
+      event.preventDefault();
+      focusable[0].focus();
+    }
   }
 
   function trapConfirmationFocus(event) {
@@ -1176,6 +1936,20 @@
       });
     });
     byId("mainOpenSettings").addEventListener("click", function () { setView("settings"); });
+    byId("toggleNotifications").addEventListener("click", toggleNotificationDrawer);
+    byId("closeNotifications").addEventListener("click", closeNotificationDrawer);
+    byId("markNotificationsRead").addEventListener("click", markAllNotificationsRead);
+    byId("clearNotifications").addEventListener("click", clearNotificationHistory);
+    byId("requestNotifications").addEventListener("click", requestDesktopNotifications);
+    byId("notificationEnabled").addEventListener("change", function () { setNotificationEnabled(this.checked); });
+    byId("notifyPlayerStatus").addEventListener("change", function () { setNotificationEventEnabled("playerStatus", this.checked); });
+    byId("notifySafetyAlerts").addEventListener("change", function () { setNotificationEventEnabled("safetyAlerts", this.checked); });
+    byId("notifySettingsChanges").addEventListener("change", function () { setNotificationEventEnabled("settingsChanges", this.checked); });
+    byId("notifyLowStorage").addEventListener("change", function () { setNotificationEventEnabled("lowStorage", this.checked); });
+    document.addEventListener("click", function (event) {
+      const drawer = byId("notificationDrawer");
+      if (!drawer.hidden && !drawer.contains(event.target) && !byId("toggleNotifications").contains(event.target)) closeNotificationDrawer(false);
+    });
     byId("editProfile").addEventListener("click", function () { setSettingsTab("rendering"); });
     document.querySelectorAll("[data-preset]").forEach(function (button) {
       button.addEventListener("click", function () { applyRenderingPreset(button.dataset.preset, false); });
@@ -1187,7 +1961,25 @@
     byId("probeRobloxLatency").addEventListener("click", probeRobloxWebLatency);
     byId("scanSafetySystem").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
     byId("launchRoblox").addEventListener("click", launchRoblox);
+    byId("openLatestRelease").addEventListener("click", openLatestRelease);
+    byId("openRobloxProfile").addEventListener("click", openRobloxProfile);
+    byId("robloxUserId").addEventListener("input", updateRobloxProfileButton);
+    byId("robloxUserId").addEventListener("change", function () {
+      const userId = normalizeRobloxUserId(this.value);
+      if (userId) safeStorageSet(robloxUserIdKey, userId);
+    });
+    byId("robloxUserId").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        openRobloxProfile();
+      }
+    });
+    byId("saveBenchmarkBaseline").addEventListener("click", saveBenchmarkBaseline);
+    byId("saveBenchmarkAfter").addEventListener("click", saveBenchmarkAfter);
+    byId("clearBenchmarkJournal").addEventListener("click", clearBenchmarkJournal);
     byId("applyLaunch").addEventListener("click", function () { openConfirmation("apply-launch"); });
+    byId("continueAfterStorageCheck").addEventListener("click", continueFromStorageNotice);
+    byId("exitAfterStorageCheck").addEventListener("click", exitFromStorageNotice);
     byId("quickRefresh").addEventListener("click", quickRefresh);
     byId("scanAgain").addEventListener("click", detectRoblox);
     byId("refreshPlayer").addEventListener("click", refreshPlayerStatus);
@@ -1284,6 +2076,15 @@
 
     document.addEventListener("keydown", function (event) {
       const overlay = byId("confirmOverlay");
+      const storageOverlay = byId("storageNoticeOverlay");
+      if (!storageOverlay.hidden && event.key === "Tab") {
+        trapStorageNoticeFocus(event);
+        return;
+      }
+      if (!storageOverlay.hidden && event.key === "Escape") {
+        event.preventDefault();
+        return;
+      }
       if (!overlay.hidden && event.key === "Tab") {
         trapConfirmationFocus(event);
         return;
@@ -1293,7 +2094,17 @@
         if (!byId("acceptConfirm").disabled) closeConfirmation();
         return;
       }
-      if (overlay.hidden && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      if (!byId("notificationDrawer").hidden && event.key === "Escape") {
+        event.preventDefault();
+        closeNotificationDrawer();
+        return;
+      }
+      if (event.key === "F5") {
+        event.preventDefault();
+        if (overlay.hidden && storageOverlay.hidden && !event.repeat) quickRefresh();
+        return;
+      }
+      if (overlay.hidden && storageOverlay.hidden && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setSettingsTab("allowlist");
         byId("allowlistSearch").focus();
@@ -1310,11 +2121,19 @@
   }
 
   async function boot() {
+    state.notificationPrefs = readNotificationPreferences();
+    state.notificationHistory = readNotificationHistory();
+    renderNotificationPreferences();
+    renderNotificationCenter();
     const initialProfile = readProfile();
     const modeDefaultDistance = initialProfile.mode === "Balanced" ? 128 : (initialProfile.mode === "High quality" ? 256 : 64);
     state.geometryManuallyChanged = initialProfile.geometryDistance !== modeDefaultDistance;
     applyProfileToControls(initialProfile);
     applyAppearance(readAppearance());
+    byId("robloxUserId").value = normalizeRobloxUserId(safeStorageGet(robloxUserIdKey) || "");
+    updateRobloxProfileButton();
+    state.benchmarkJournal = readBenchmarkJournal();
+    renderBenchmarkJournal();
     const allowlistTask = loadAllowlist();
     if (!invoke) {
       await allowlistTask;
@@ -1333,6 +2152,7 @@
       byId("restoreSettings").disabled = true;
       byId("launchRoblox").disabled = true;
       byId("applyLaunch").disabled = true;
+      byId("openLatestRelease").disabled = true;
       byId("refreshPlayer").disabled = true;
       byId("refreshDevice").disabled = true;
       byId("probeRobloxLatency").disabled = true;
@@ -1357,9 +2177,11 @@
     const detectionTask = detectRoblox();
     const playerTask = refreshPlayerStatus();
     const safetyTask = scanKnownExecutorProcesses(true);
-    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask, safetyTask]).then(function () {
+    const storageTask = loadStartupStorageSnapshot();
+    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask, safetyTask, storageTask]).then(function () {
       window.clearTimeout(fallbackTimer);
       finishBoot();
+      showStartupStorageNotice();
     });
     window.setInterval(refreshPlayerStatus, 10000);
     window.setInterval(function () { scanKnownExecutorProcesses(true); }, 30000);

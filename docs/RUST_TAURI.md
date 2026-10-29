@@ -44,6 +44,18 @@ only the fixed `roblox://` protocol through Windows Explorer; Apply & launch
 asks for confirmation and runs the launcher only after a successful settings
 write. On non-Windows builds detection returns a clear "Windows client" message.
 
+The Main page's **F5 Quick Status** refreshes the local install scan, Player
+process-name check, Windows-reported hardware inventory, and the on-device
+known-process check. It does not read the current experience, thumbnail, game or
+server ID, player count, session time, or account data; it cannot rejoin an exact
+server session. For actual FPS and experience ping, read Roblox's own stats with
+`Shift+F5` and enter the values manually in the before/after journal. The journal
+stores only user-entered FPS/ping values and profile mode in local app storage.
+
+A separate profile shortcut accepts a numeric Roblox User ID and opens the fixed
+official `https://www.roblox.com/users/{id}/profile` page in the system browser.
+It does not log in, access cookies, fetch, or scrape profile/account details.
+
 ```
 Roblox detected: 2 version folders found. Marktis Optimizer can manage allowlisted
 local settings safely.
@@ -86,6 +98,13 @@ allowlisted local settings and timestamped JSON backups. A separate button can m
 no app-data payload, but the website receives the ordinary network connection
 and can see its source IP.
 
+On each app launch, a separate lightweight read-only storage check queries only
+fixed local drive capacity/free-space metadata from Windows. The branded startup
+prompt shows free, used, and total space and flags a drive below 10 GB free or
+below 5% free. The user can continue or exit. No file contents or names are
+read, and low space never blocks the app or triggers cleanup. F5 refreshes the
+storage snapshot along with other local status.
+
 ## Local known-process safety check (Windows only)
 
 The Main page runs a lightweight local check at startup, every 30 seconds while
@@ -95,8 +114,12 @@ the app is open, and on request for the exact process image names `Xeno.exe`,
 parses only the image-name field. `tasklist` may include a PID in its temporary
 CSV output for a matching process, but Marktis Optimizer ignores it: no PID is stored,
 logged, or returned. The check does not read paths, command lines, process
-handles, or memory, and sends no network requests. Any alert is displayed inside
-the app only.
+handles, or memory, and sends no network requests. A name match appears in the
+local in-app notification center when that event type is enabled. An OS desktop
+toast is optional and is attempted only after the user explicitly requests
+WebView notification permission and enables app notifications. Preferences and
+up to 50 history items stay in local app storage; there is no notification
+telemetry.
 
 This is a **limited name match, not antivirus or a malware verdict**: names can
 be changed, spoofed, or used by unrelated files. A match is a prompt to review
@@ -108,7 +131,8 @@ or uninstall manually.
 
 The Tauri executable has its own interface and does not load the GitHub Pages
 UI or its assets. Navigation remains **Main** plus a grouped **Settings** area
-with the original four sections and a new **System** section:
+with **Rendering**, **Geometry**, **Icons**, **Allowlist**, **System**, and
+**Notifications**:
 
 - **Rendering** — choose Max performance, Balanced, or High quality presets; adjust
 graphics and texture quality; and select an allowlisted renderer preference
@@ -131,6 +155,12 @@ a separate, opt-in request that Roblox may ignore; it is not actual FPS.
   A fixed shortcut opens Windows Advanced Graphics settings; it does not change
   GPU preference or HAGS itself. Actual in-game FPS and game-server ping are
   not read; use `Shift+F5` in Roblox.
+- **Notifications** — choose per-event local alerts for Player process changes,
+  known process-name matches, settings apply/restore, and low storage. App
+  notifications default off. The bell menu, preferences, and up to 50 history
+  entries stay on-device. Optional desktop toasts use Web Notifications only
+  after the user requests permission; in-app alerts still work when native
+  notifications are unsupported or denied. No event data is uploaded.
 
 The Windows settings manager is not included in the separate legacy
 Python/Tkinter macOS companion.
@@ -171,14 +201,18 @@ for live experience FPS/ping; the optional website probe is not a substitute.
 | `detect_roblox` | Detect official Roblox Player/Studio folders | read-only filesystem scan |
 | `active_roblox_status` | Check whether the Roblox Player process name is present | read-only process-name check |
 | `device_snapshot` | Read local device/CPU/RAM/GPU/drive details | read-only WMI query; no serial numbers or upload |
+| `storage_snapshot` | Report fixed-drive capacity/free space for the startup advisory | read-only local WMI query; no file names/content or upload |
 | `probe_roblox_latency` | Measure a fixed TCP connection to `www.roblox.com:443` | one user-triggered TCP handshake; no app-data payload; not game ping |
 | `scan_known_executor_processes` | Match exact Xeno, Solara, JJSploit, and Delta process names | local name-only check; no paths or command lines |
 | `open_windows_settings` | Open a fixed Installed Apps, Windows Security, or Advanced Graphics page | launches Windows Settings; no system values are changed |
+| `open_roblox_profile` | Open the official profile for a validated numeric User ID | opens a fixed Roblox URL in the system browser; no account data is read |
+| `exit_app` | Exit after the startup storage prompt | closes the desktop app |
 | `launch_roblox` | Dispatch fixed `roblox://` URI through Windows Explorer | requests normal Roblox protocol launch |
 | `get_allowlist` | Return the canonical allowlist JSON | none |
 | `apply_settings` | Apply allowlisted settings | local JSON write + backup |
 | `restore_settings` | Restore managed keys | local JSON write + backup |
 | `open_external` | Open an http(s) link in the browser | opens external browser |
+| `open_latest_release` | Open the fixed latest Marktis Optimizer GitHub release page | opens external browser; updates are installed manually |
 
 ## Build it yourself
 

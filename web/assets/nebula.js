@@ -23,6 +23,53 @@
     window.setTimeout(function () { el.classList.remove("show"); }, 2600);
   }
 
+  function detectDevicePlatform() {
+    var nav = window.navigator || {};
+    var userAgent = String(nav.userAgent || "");
+    var platform = String((nav.userAgentData && nav.userAgentData.platform) || nav.platform || "");
+    var combined = platform + " " + userAgent;
+    if (/android/i.test(combined)) return "android";
+    if (/iphone|ipad|ipod/i.test(combined)) return "ios";
+    if (/windows|win32|win64|winnt/i.test(combined)) return "windows";
+    if (/cros|chrome\s*os/i.test(combined)) return "chromeos";
+    if (/macintosh|mac\s*os\s*x|macintel|macppc|mac68k|macos/i.test(combined)) return "macos";
+    if (/linux|x11/i.test(combined)) return "linux";
+    return "unknown";
+  }
+
+  function initPlatformCompatibilityNotice() {
+    var notice = $("#platformCompatibilityNotice");
+    var message = $("#platformCompatibilityMessage");
+    if (!notice || !message) return;
+    var platform = detectDevicePlatform();
+    if (platform === "windows") {
+      notice.hidden = true;
+      return;
+    }
+    var platformNames = {
+      macos: "macOS",
+      linux: "Linux",
+      android: "Android",
+      ios: "iOS",
+      chromeos: "ChromeOS",
+      unknown: "an unrecognized platform"
+    };
+    var platformName = platformNames[platform] || platformNames.unknown;
+    var supportNote;
+    if (platform === "macos") {
+      supportNote = "The Windows launcher requires Windows 10/11 x64. A separate legacy macOS companion is available on the Downloads tab; unified macOS/Linux launcher support is planned.";
+    } else if (platform === "linux") {
+      supportNote = "The Windows launcher requires Windows 10/11 x64. A separate legacy macOS companion is available on the Downloads tab; Linux launcher support is planned.";
+    } else {
+      supportNote = "The desktop launcher requires Windows 10/11 x64. A separate legacy macOS companion is listed on the Downloads tab; unified macOS/Linux launcher support is planned.";
+    }
+    notice.dataset.platform = platform;
+    message.textContent = "Detected " + platformName + ". " + supportNote;
+    notice.hidden = false;
+  }
+
+  initPlatformCompatibilityNotice();
+
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () { toast("Copied to clipboard."); }, fallbackCopy);
@@ -395,7 +442,8 @@
 
   var URLS = {
     repo: "https://github.com/gefrus112/marktisoptimizer",
-    windows: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.0.0-windows",
+    latest: "https://github.com/gefrus112/marktisoptimizer/releases/latest",
+    windows: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v4.0.0-windows-rust",
     mac: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.1.0-mac",
     pages: "https://gefrus112.github.io/marktisoptimizer/",
     allowlist: "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"
@@ -409,7 +457,8 @@
     { title: "Copy Windows Boost command", hint: "Copy the generated RoptimerBoost.exe apply command", icon: ">_", keywords: "copy windows cli command boost apply fps tier", run: function () { copyText(windowsCommand(currentSettings())); } },
     { title: "Copy FastFlag allowlist", hint: "Copy the canonical Windows client allowlist JSON", icon: "{ }", keywords: "copy allowlist json flags", run: function () { copyText(JSON.stringify(allowlist, null, 2)); } },
     { title: "Download client settings", hint: "Save the current safe profile as JSON", icon: "↓", keywords: "download settings json profile", run: function () { var b = $("#downloadSettings"); if (b) b.click(); } },
-    { title: "Open Windows release", hint: "GitHub Releases · v3.0.0-windows", icon: "↗", keywords: "github release windows exe download", run: function () { openExternal(URLS.windows); } },
+    { title: "Open Windows release", hint: "Rust + Tauri desktop installer · v4.0.0", icon: "↗", keywords: "github release windows exe download", run: function () { openExternal(URLS.windows); } },
+    { title: "Check latest desktop release", hint: "Open the newest published GitHub release; install updates yourself", icon: "↗", keywords: "update latest release new version desktop launcher", run: function () { openExternal(URLS.latest); } },
     { title: "Open macOS companion release", hint: "Legacy Mac companion only · not the allowlist client", icon: "↗", keywords: "github release mac macos companion download", run: function () { openExternal(URLS.mac); } },
     { title: "Open official allowlist source", hint: "Roblox DevForum local FastFlag allowlist", icon: "◇", keywords: "official source roblox devforum fastflag allowlist", run: function () { openExternal(URLS.allowlist); } },
     { title: "View feature status", hint: "Jump to implemented, legacy, and rejected features", icon: "✓", keywords: "feature status audit safety rejected", run: function () { activateTab("docs"); scrollToAnchor("feature-status"); } },

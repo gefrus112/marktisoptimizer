@@ -16,7 +16,7 @@ const APP_ICON = app.isPackaged
 const ALLOWLIST_PATH = app.isPackaged
   ? path.join(process.resourcesPath, "fastflags-allowlist.json")
   : path.resolve(__dirname, "..", "fastflags-allowlist.json");
-const backend = createBackend({ allowlistPath: ALLOWLIST_PATH });
+const backend = createBackend({ allowlistPath: ALLOWLIST_PATH, exitApp: () => app.quit() });
 
 app.setAppUserModelId(APP_ID);
 
@@ -84,6 +84,17 @@ app.whenReady().then(() => {
     { urls: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"] },
     (_details, callback) => callback({ cancel: true })
   );
+  // The in-app control explicitly calls Notification.requestPermission(). Keep
+  // the grant limited to the trusted local UI and notification permission.
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => (
+    permission === "notifications"
+      && Boolean(webContents && isTrustedUiUrl(webContents.getURL()))
+  ));
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    const trustedUi = Boolean(webContents && isTrustedUiUrl(webContents.getURL()));
+    const mainFrame = !details || details.isMainFrame !== false;
+    callback(permission === "notifications" && trustedUi && mainFrame);
+  });
 
   if (!require("node:fs").existsSync(UI_ENTRY)) {
     dialog.showErrorBox("Marktis Optimizer could not start", `The packaged desktop interface is missing:\n${UI_ENTRY}`);
