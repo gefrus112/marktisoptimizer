@@ -1,4 +1,4 @@
-# Marktis Optimizer
+join discord server for more ideas https://www.youtube.com/@butterguff sub to my YouTube channel # Marktis Optimizer
 
 **A safe, reversible Roblox settings manager with a Rust + Tauri Windows app, an optional Electron build, and a fast CSS-only website.**
 
