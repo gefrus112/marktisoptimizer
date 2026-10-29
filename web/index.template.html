@@ -34,7 +34,6 @@
   </div>
 
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
-  <div class="ambient-glow" aria-hidden="true"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Marktis Optimizer home">
@@ -178,9 +177,10 @@
     <div class="tab-shell" id="tab-shell">
       <div class="tab-bar" role="tablist" aria-label="Marktis Optimizer sections">
         <button class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="panel-client" data-tab="client"><span>01</span> Client</button>
-        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-allowlist" data-tab="allowlist"><span>02</span> Allowlist</button>
-        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-downloads" data-tab="downloads"><span>03</span> Downloads</button>
-        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-docs" data-tab="docs"><span>04</span> Docs</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-how" data-tab="how"><span>02</span> How it works</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-allowlist" data-tab="allowlist"><span>03</span> Allowlist</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-downloads" data-tab="downloads"><span>04</span> Downloads</button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-docs" data-tab="docs"><span>05</span> Docs</button>
       </div>
 
       <!-- ============ CLIENT (main tab) ============ -->
@@ -286,6 +286,47 @@
           <a class="button ghost small" href="#allowlist" data-route="allowlist" data-jump="fastflag-allowlist">Full allowlist →</a>
         </div>
         <div class="allowlist-grid" id="clientAllowlistCards">__ALLOWLIST_CARDS__</div>
+      </section>
+
+      <!-- ============ HOW THE CLIENT JSON WORKS ============ -->
+      <section class="tab-panel" id="panel-how" role="tabpanel" aria-labelledby="clientJsonTitle">
+        <div class="section-head" id="client-json-workflow">
+          <div>
+            <span class="panel-label">Client file · plain-language guide</span>
+            <h2 id="clientJsonTitle">How the client JSON works</h2>
+            <p><code>ClientAppSettings.json</code> is a local settings file Roblox may read when its desktop client starts. It is structured data, not a script or an injector. This page explains what Marktis Optimizer changes and what it leaves alone.</p>
+          </div>
+          <span class="tag violet">Local JSON · reversible</span>
+        </div>
+
+        <div class="steps client-json-steps">
+          <div class="step"><span class="step-num">01 · FIND</span><h4>Find the settings file</h4><p>The Windows app scans normal Roblox version folders for <code>ClientSettings\ClientAppSettings.json</code>. It reports which local files were found; it does not read a running game's memory.</p></div>
+          <div class="step"><span class="step-num">02 · CHOOSE</span><h4>Choose allowed settings</h4><p>The app groups Roblox-allowlisted keys into Geometry, Rendering, and User Interface. Each JSON key has a typed value such as a number or <code>true</code>/<code>false</code>.</p></div>
+          <div class="step"><span class="step-num">03 · BACK UP</span><h4>Merge, back up, write</h4><p>On Apply, the desktop app preserves unrelated keys, backs up the previous file, and writes only its managed keys. Restore puts those settings back.</p></div>
+        </div>
+
+        <div class="docs-grid client-json-details">
+          <article class="panel">
+            <h3>A small JSON example</h3>
+            <p>Each property name is a FastFlag key. These example keys are in this project's allowlist; values are examples, not a promise of better FPS.</p>
+            <div class="code-card"><pre>{
+  "DFIntDebugFRMQualityLevelOverride": 10,
+  "DFFlagTextureQualityOverrideEnabled": true,
+  "DFIntTextureQualityOverride": 2
+}</pre></div>
+          </article>
+          <article class="panel">
+            <h3>Where it lives</h3>
+            <div class="code-card"><pre>%LOCALAPPDATA%\Roblox\Versions\version-*\ClientSettings\ClientAppSettings.json</pre></div>
+            <p class="dim">Some installs also use <code>%LOCALAPPDATA%\Roblox\ClientSettings\ClientAppSettings.json</code>. Roblox may ignore unsupported or outdated flags; restart the client to load changed settings.</p>
+          </article>
+        </div>
+
+        <div class="notice client-json-notice"><strong>Website vs. desktop app:</strong> this website only previews a command or downloadable profile. It cannot edit files on your computer. Apply and Restore happen in the installed Windows desktop app or the local Boost CLI. No game scripts, account data, or memory are involved.</div>
+        <div class="inline-actions client-json-actions">
+          <a class="button ghost small" href="#allowlist" data-route="allowlist" data-jump="fastflag-allowlist">Browse the allowlist →</a>
+          <a class="button ghost small" href="downloads/Roptimer-How-It-Works.md" download>Download full guide</a>
+        </div>
       </section>
 
       <!-- ============ ALLOWLIST ============ -->
@@ -487,9 +528,24 @@ RoptimerBoost.exe self-test</pre></div>
       <a href="__LATEST_RELEASE_PAGE__" data-external>Latest Windows release</a> ·
       <a href="__RELEASE_PAGE_MAC__" data-external>macOS release</a> ·
       <a href="downloads/Roptimer-CLI-Docs.md" download>Docs</a> ·
-      <a href="downloads/fastflags-allowlist.json" download>Allowlist JSON</a>
+      <a href="downloads/fastflags-allowlist.json" download>Allowlist JSON</a> ·
+      <a href="https://discord.gg/R3VC6E229" target="_blank" rel="noopener noreferrer" data-external>Credits · jojnsevrr · Join my Discord</a> ·
+      <a href="https://www.youtube.com/@butterguff" target="_blank" rel="noopener noreferrer" data-external>YouTube channel · @butterguff</a> ·
+      <button class="footer-link-button" id="openCookieSettings" type="button">Cookie settings</button>
     </div>
   </footer>
+
+  <section class="cookie-consent" id="cookieConsent" role="region" aria-labelledby="cookieConsentTitle" aria-describedby="cookieConsentCopy" hidden>
+    <div class="cookie-consent-copy">
+      <p class="cookie-consent-kicker">PRIVACY CHOICES</p>
+      <h2 id="cookieConsentTitle">Cookie preferences</h2>
+      <p id="cookieConsentCopy">This site does not currently use analytics, advertising, or YouTube/Google tracking cookies. It cannot read cookies from other sites. Your choice is saved locally in this browser; accepting does not start ad tracking.</p>
+    </div>
+    <div class="cookie-consent-actions">
+      <button class="button primary" id="acceptCookies" type="button">Accept optional</button>
+      <button class="button ghost" id="rejectCookies" type="button">Reject optional</button>
+    </div>
+  </section>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

@@ -231,7 +231,7 @@ endpoint sees the normal network connection.
   Three.js/WebGL rendering loop and its 737 KB vendored library were removed.
 - Three new overview cards make the local/reversible workflow, the Roblox
   allowlist, and the lightweight design easy to scan before opening a tab.
-- **Main tab = Client** (Windows-only). Then Allowlist, Downloads, Docs.
+- **Main tab = Client** (Windows-only). The site also has **How it works** (the ClientAppSettings.json walkthrough), Allowlist, Downloads, and Docs.
 - The homepage detects the browser platform locally and displays a red
   compatibility notice on non-Windows devices; the page does not store or upload
   the detected platform. The Windows installer follows the latest published GitHub release,
@@ -240,12 +240,13 @@ endpoint sees the normal network connection.
   into the HTML with a "what it improves" note per flag, so it is visible even
   without JavaScript.
 - The scroll indicator is frame-throttled and uses a transform; screenshot
-  previews decode lazily. The public website avoids continuous decorative
-  animations and broad backdrop blurs, while retaining short hover/reveal
-  transitions, `prefers-reduced-motion`, and Focus Mode.
-- Command palette, lightweight scroll reveals, reduced-motion + focus mode,
-  custom 404, manifest, robots.txt, sitemap. **No green neon dots.** These
-  website changes reduce UI work; they do not promise to remove in-game lag.
+  previews decode lazily. To keep the site responsive, the full-screen ambient
+  overlay and tab-switch fades were removed, reveal observers skip individual
+  allowlist/feature cards, and the consent panel avoids backdrop blur.
+- The site uses only local scripts/styles and static CSS visuals—no WebGL,
+  third-party runtime, or continuous decorative animation. Reduced-motion and
+  Focus Mode remain available. These changes reduce website work; they do not
+  affect or promise to remove in-game lag.
 - The website keeps `assets/nebula.js` for its tabs and settings builder; it is
   ordinary site UI code, not a Roblox client script. There is no `client.js` file.
 
@@ -315,6 +316,16 @@ screenshot/report disabling, anti-cheat bypass, gameplay automation, fullbright/
 x-ray, building removal, executor APIs, `loadstring`, remote exploit hubs, or
 game script execution. "Reduce building lag" = safe LOD/texture/grass/graphics
 reduction. The Script Hub is a **local UI/documentation preview only**.
+
+---
+
+## Credits & community
+
+Project credits: **jojnsevrr**. [Join my Discord](https://discord.gg/R3VC6E229) or visit my [YouTube channel](https://www.youtube.com/@butterguff).
+
+The website's cookie choices currently save only a local preference; no analytics
+or advertising tags are installed, and the site cannot read cookies from YouTube
+or other websites.
 
 ---
 

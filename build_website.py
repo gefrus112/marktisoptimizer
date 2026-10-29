@@ -413,6 +413,8 @@ def check() -> None:
         "id=\"fastflag-allowlist\"", "detectPanel", "allowlist-card", "al-improves", "Windows",
         "overview-grid", "overview-card-safe", "overview-card-flags", "overview-card-light",
         'id="platformCompatibilityNotice"', 'id="platformCompatibilityMessage"',
+        'data-tab="how"', 'id="panel-how"', 'id="clientJsonTitle"', 'DFIntDebugFRMQualityLevelOverride',
+        'id="cookieConsent"', 'id="acceptCookies"', 'id="rejectCookies"', 'id="openCookieSettings"',
         "/releases/latest",
         'loading=\"lazy\"',
     ):
@@ -420,6 +422,20 @@ def check() -> None:
             raise RuntimeError(f"Generated site is missing expected content: {token}")
     if "function detectdeviceplatform()" not in runtime_js or "initplatformcompatibilitynotice()" not in runtime_js:
         raise RuntimeError("Website must detect the device platform locally and show compatibility guidance")
+    if "marktis.cookieconsent.v1" not in runtime_js or "localstorage.setitem" not in runtime_js:
+        raise RuntimeError("Cookie consent must persist only the user's local choice")
+    forbidden_tracking_tags = ("googletagmanager.com/gtag/js", "google-analytics.com/analytics.js", "googleadservices.com/pagead")
+    if any(marker in text for marker in forbidden_tracking_tags for text in (template_html, web_html, root_html, runtime_js)):
+        raise RuntimeError("No analytics or advertising tracking tag may load without a reviewed consent integration")
+    if "ambient-glow" in template_html or "ambient-glow" in runtime_css:
+        raise RuntimeError("The website should not restore its full-screen ambient overlay")
+    if ".tab-panel { display: none; animation:" in runtime_css:
+        raise RuntimeError("Tab switching must remain free of full-panel fade animations")
+    reveal_start = runtime_js.find("function initreveal()")
+    reveal_end = runtime_js.find("function initcounters()", reveal_start)
+    reveal_code = runtime_js[reveal_start:reveal_end] if reveal_start >= 0 and reveal_end > reveal_start else ""
+    if "feature-card" in reveal_code or "allowlist-card" in reveal_code:
+        raise RuntimeError("Individual feature/allowlist cards must not add reveal-observer work")
     if 'platform === "windows" || platform === "macos"' not in runtime_js:
         raise RuntimeError("The compatibility notice must stay hidden on Windows and macOS")
     if "linux launcher support is planned" not in runtime_js or "legacy macos companion" not in runtime_js:

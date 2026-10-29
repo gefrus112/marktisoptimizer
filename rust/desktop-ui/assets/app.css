@@ -98,6 +98,14 @@ body.is-booting .app-shell { opacity: .18; filter: blur(2px); pointer-events: no
 .sidebar-safety strong { font-size: 10px; font-weight: 730; }
 .sidebar-safety small { margin-top: 4px; color: var(--muted); font-size: 8px; }
 .sidebar-bottom { display: flex; align-items: center; gap: 7px; padding: 0 8px; color: #697473; font-family: var(--mono); font-size: 8px; font-weight: 800; letter-spacing: .09em; }
+.sidebar-credit-row { display: flex; flex-direction: column; gap: 3px; margin: 9px 0 0; padding: 0 7px; color: #697473; font-size: 8px; line-height: 16px; }
+.sidebar-credit-label { overflow: hidden; font-family: var(--mono); letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-credit-label strong { color: #b5c1bc; font-weight: 700; letter-spacing: 0; }
+.sidebar-community-links { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sidebar-credit-link { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 3px; padding: 0; border: 0; background: transparent; color: var(--accent); cursor: pointer; font-size: 8px; font-weight: 700; white-space: nowrap; }
+.sidebar-credit-link:hover { color: color-mix(in srgb, var(--accent), white 20%); text-decoration: underline; }
+.sidebar-credit-link:disabled { cursor: progress; opacity: .65; }
+.sidebar-credit-link .icon { width: 11px; height: 11px; }
 .runtime-dot, .local-indicator i, .status-light, .footnote-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), .48); }
 .sidebar-version { margin-left: auto; color: var(--muted); }
 .workspace { display: flex; min-width: 0; flex: 1; flex-direction: column; }
