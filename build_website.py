@@ -420,6 +420,10 @@ def check() -> None:
             raise RuntimeError(f"Generated site is missing expected content: {token}")
     if "function detectdeviceplatform()" not in runtime_js or "initplatformcompatibilitynotice()" not in runtime_js:
         raise RuntimeError("Website must detect the device platform locally and show compatibility guidance")
+    if 'platform === "windows" || platform === "macos"' not in runtime_js:
+        raise RuntimeError("The compatibility notice must stay hidden on Windows and macOS")
+    if "linux launcher support is planned" not in runtime_js or "legacy macos companion" not in runtime_js:
+        raise RuntimeError("The notice must describe planned Linux support and acknowledge the legacy macOS companion")
     if ".platform-notice" not in runtime_css or "#ff626b" not in runtime_css:
         raise RuntimeError("Non-Windows compatibility notice must use the red warning style")
     if "releases/latest/download/" not in LATEST_RELEASE_RUST_SETUP:

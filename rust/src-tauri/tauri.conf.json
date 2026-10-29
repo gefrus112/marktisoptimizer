@@ -37,7 +37,7 @@
       "icons/icon.png"
     ],
     "shortDescription": "Marktis Optimizer — safe Roblox settings",
-    "longDescription": "Marktis Optimizer is a Rust + Tauri Windows client that detects your Roblox installation, displays read-only local hardware details, and manages reversible, Roblox-allowlisted ClientAppSettings.json graphics settings.",
+    "longDescription": "Marktis Optimizer is a Rust + Tauri Windows client that detects Roblox, displays read-only local hardware details, manages reversible allowlisted settings, and supports user-configured WireGuard tunnels from provider-supplied profiles through the official Windows client. It does not provide VPN service or servers.",
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"

@@ -2,7 +2,10 @@
 
 This is a proposal list, not a claim that the items below are implemented. The
 project stays a local, reversible Roblox settings manager: no DLL injection,
-process-memory access, anti-cheat bypass, or code execution inside Roblox.
+process-memory access, anti-cheat bypass, or code execution inside Roblox. The
+Windows desktop apps also include a user-controlled WireGuard integration that
+requires a provider-supplied `.conf` and the official WireGuard client; it does
+not supply VPN service or promise lower ping.
 
 ## Highest-value next features
 
@@ -43,9 +46,11 @@ GPU Scheduling (HAGS) remain under Windows/driver control.
   edits, RAM/standby-list cleaners, and forced system restore points are not
   needed for the app's reversible local JSON profile and can affect Windows
   stability or responsiveness.
-- IP/region filtering, DNS/MTU/QoS changes, VPN-style routing, and claims of
-  lower game ping are not supported. The optional TCP probe is only connection
-  time to `www.roblox.com:443`, not game-server ping.
+- IP/region filtering, optimizer-controlled DNS/MTU/QoS changes, game-specific
+  route optimization, and claims of lower game ping are not supported. The
+  separate WireGuard tunnel follows only a user/provider-supplied profile; it is
+  not an ExitLag-style relay. The optional TCP probe is only connection time to
+  `www.roblox.com:443`, not game-server ping.
 - Replacing Roblox textures, skyboxes, particles, or audio assets is outside the
   allowlisted settings boundary and is not planned.
 

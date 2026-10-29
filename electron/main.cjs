@@ -16,7 +16,15 @@ const APP_ICON = app.isPackaged
 const ALLOWLIST_PATH = app.isPackaged
   ? path.join(process.resourcesPath, "fastflags-allowlist.json")
   : path.resolve(__dirname, "..", "fastflags-allowlist.json");
-const backend = createBackend({ allowlistPath: ALLOWLIST_PATH, exitApp: () => app.quit() });
+const USER_PROFILE = process.env.USERPROFILE && path.isAbsolute(process.env.USERPROFILE)
+  ? process.env.USERPROFILE
+  : "C:\\Users\\Default";
+const LOCAL_APP_DATA = process.env.LOCALAPPDATA && path.isAbsolute(process.env.LOCALAPPDATA)
+  ? process.env.LOCALAPPDATA
+  : path.join(USER_PROFILE, "AppData", "Local");
+// Shared with the Rust/Tauri build so both desktop shells see the same encrypted tunnel profile.
+const VPN_DATA_DIR = path.join(LOCAL_APP_DATA, "MarktisOptimizer");
+const backend = createBackend({ allowlistPath: ALLOWLIST_PATH, vpnDataDir: VPN_DATA_DIR, exitApp: () => app.quit() });
 
 app.setAppUserModelId(APP_ID);
 

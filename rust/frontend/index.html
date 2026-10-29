@@ -18,6 +18,7 @@
     <symbol id="i-icons" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></symbol>
     <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.2 1.2L6.5 5M3 12l1.2 1.2L6.5 11M3 18l1.2 1.2L6.5 17"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.5-8 10-4.6-1.5-8-4.9-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a6.6 6.6 0 0 1 11.1-2L20 12M4 12l2.8 5a6.6 6.6 0 0 0 11.1-2"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
@@ -65,6 +66,8 @@
           <button class="subnav-item" type="button" data-tab="geometry"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
           <button class="subnav-item" type="button" data-tab="icons"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
           <button class="subnav-item" type="button" data-tab="allowlist"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+          <button class="subnav-item" type="button" data-tab="security"><svg class="icon"><use href="#i-shield"/></svg><span>Security</span></button>
+          <button class="subnav-item" type="button" data-tab="vpn"><svg class="icon"><use href="#i-network"/></svg><span>VPN</span></button>
           <button class="subnav-item" type="button" data-tab="system"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
           <button class="subnav-item" type="button" data-tab="notifications"><svg class="icon"><use href="#i-bell"/></svg><span>Notifications</span></button>
         </div>
@@ -129,6 +132,11 @@
               </div>
               <div class="process-chip"><span class="process-dot"></span><code>RobloxPlayerBeta.exe</code><span>NAME ONLY</span></div>
               <p class="process-note">This does not confirm an experience is loaded or collect game, server, account, command-line, or memory data.</p>
+              <div class="player-runtime-watch" id="playerRuntimeWatch" data-state="idle">
+                <div class="player-runtime-heading"><span>LOCAL PROCESS WATCH</span><span id="playerRuntimeState">STANDBY</span></div>
+                <strong id="playerObservedDuration">00:00:00</strong>
+                <p id="playerRuntimeNote">Windows desktop only. This is not a game-session timer.</p>
+              </div>
               <button class="text-action" id="refreshPlayer" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh Player status</button>
             </article>
 
@@ -211,10 +219,25 @@
               <button class="button button-soft" id="openLatestRelease" type="button"><svg class="icon"><use href="#i-arrow"/></svg>Get latest app version</button>
             </div>
           </section>
+          <section class="panel rejoin-panel" aria-labelledby="rejoinTitle">
+            <div class="rejoin-copy">
+              <p class="panel-kicker">EXACT SERVER TARGET · USER PROVIDED</p>
+              <h2 id="rejoinTitle">Rejoin a specific server</h2>
+              <p>Enter the numeric Place ID and exact server Job ID (<code>gameInstanceId</code>) from a Roblox join link that contains both. The app cannot read your active game or discover its server.</p>
+            </div>
+            <div class="rejoin-form-wrap">
+              <div class="rejoin-controls">
+                <label for="rejoinPlaceId">Place ID<input class="text-control" id="rejoinPlaceId" type="text" inputmode="numeric" pattern="[0-9]{1,20}" maxlength="20" placeholder="e.g. 1818" autocomplete="off" aria-describedby="rejoinStatus" /></label>
+                <label for="rejoinGameInstanceId">Server Job ID<input class="text-control" id="rejoinGameInstanceId" type="text" pattern="[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}" maxlength="36" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" spellcheck="false" aria-describedby="rejoinStatus" /></label>
+                <button class="button button-primary rejoin-button" id="rejoinSameServer" type="button" disabled><svg class="icon"><use href="#i-refresh"/></svg>Rejoin same server</button>
+              </div>
+              <p class="rejoin-note" id="rejoinStatus" role="status" aria-live="polite">Enter both server identifiers manually. They are saved only on this device after you request a rejoin.</p>
+            </div>
+          </section>
           <section class="panel safety-scan-panel" aria-labelledby="safetyScanTitle">
             <div class="safety-scan-top">
               <div class="safety-scan-copy">
-                <p class="panel-kicker">WINDOWS ONLY · LOCAL-ONLY CHECK</p>
+                <p class="panel-kicker">WINDOWS ONLY · LOCAL NAME CHECK + DEFENDER HANDOFF</p>
                 <h2 id="safetyScanTitle">Known executor process scan</h2>
                 <p id="safetyScanDetail">Checks exact Xeno, Solara, JJSploit, and Delta process names at startup, every 30 seconds, and on request. Alerts stay on this device.</p>
               </div>
@@ -223,12 +246,12 @@
             <div class="safety-scan-controls">
               <button class="button button-soft" id="scanSafety" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Scan running processes</button>
               <button class="button button-outline-warn" id="openInstalledApps" type="button" hidden><svg class="icon"><use href="#i-settings"/></svg>Open Installed Apps</button>
-              <button class="button button-soft" id="openWindowsSecurity" type="button" hidden><svg class="icon"><use href="#i-shield"/></svg>Open Windows Security</button>
+              <button class="button button-soft" id="openWindowsSecurity" type="button" aria-describedby="safetyScanHelp" hidden><svg class="icon"><use href="#i-shield"/></svg>Open Windows Security</button>
             </div>
             <div class="safety-match-list" id="safetyMatches" role="status" aria-live="polite"></div>
-            <p class="safety-scan-note">Automatic checks run at startup and every 30 seconds while the app is open. This is not antivirus: it checks only exact process names, not paths, command lines, files, or memory. No data is uploaded. A match is not proof of malware; Marktis Optimizer never stops or deletes anything. Review or uninstall programs yourself in Windows Settings or Windows Security.</p>
+            <p class="safety-scan-note" id="safetyScanHelp">Automatic checks run at startup and every 30 seconds while the app is open. This local check matches only exact process names—not paths, command lines, files, or memory—and is not antivirus. A match is not proof of malware; the app never stops processes or removes software. For a real file-based malware scan, open Windows Security and choose Virus &amp; threat protection → Quick scan; Windows controls any remediation.</p>
           </section>
-          <p class="page-footnote"><span class="footnote-dot"></span> Marktis Optimizer changes local client settings only. Restart Roblox normally after applying.</p>
+          <p class="page-footnote"><span class="footnote-dot"></span> Settings can be saved while Roblox is open, but they change only local files and may need a restart; the app never modifies the live game.</p>
         </section>
 
         <section class="view-section settings-view" id="settingsView" data-view-panel="settings" aria-labelledby="settingsTitle" hidden>
@@ -242,6 +265,8 @@
             <button class="settings-tab" id="tabGeometry" type="button" role="tab" data-tab="geometry" aria-controls="paneGeometry" aria-selected="false"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
             <button class="settings-tab" id="tabIcons" type="button" role="tab" data-tab="icons" aria-controls="paneIcons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
             <button class="settings-tab" id="tabAllowlist" type="button" role="tab" data-tab="allowlist" aria-controls="paneAllowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+            <button class="settings-tab" id="tabSecurity" type="button" role="tab" data-tab="security" aria-controls="paneSecurity" aria-selected="false"><svg class="icon"><use href="#i-shield"/></svg><span>Security</span></button>
+            <button class="settings-tab" id="tabVpn" type="button" role="tab" data-tab="vpn" aria-controls="paneVpn" aria-selected="false"><svg class="icon"><use href="#i-network"/></svg><span>VPN</span></button>
             <button class="settings-tab" id="tabSystem" type="button" role="tab" data-tab="system" aria-controls="paneSystem" aria-selected="false"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
             <button class="settings-tab" id="tabNotifications" type="button" role="tab" data-tab="notifications" aria-controls="paneNotifications" aria-selected="false"><svg class="icon"><use href="#i-bell"/></svg><span>Notifications</span></button>
           </div>
@@ -249,6 +274,14 @@
           <div class="settings-pane-stack">
             <section class="settings-pane is-active" id="paneRendering" data-pane="rendering" role="tabpanel" aria-labelledby="tabRendering">
               <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings, plus an optional experimental legacy FPS target request.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
+              <div class="form-card profile-library-card">
+                <div class="profile-library-heading"><div><p class="panel-kicker">ON-DEVICE PROFILE LIBRARY</p><h3>Keep multiple setups</h3><p>Save, import, and export up to 12 named configurations. Nothing is applied until you confirm below.</p></div><span class="profile-library-status" id="profileLibraryStatus" aria-live="polite">0 of 12 profiles saved on this device</span></div>
+                <div class="profile-library-grid">
+                  <div class="profile-library-save"><label for="profileNameInput">Name this setup</label><div class="profile-name-row"><input class="text-control" id="profileNameInput" type="text" maxlength="40" placeholder="e.g. Low-end laptop" autocomplete="off" /><button class="button button-primary profile-library-button" id="saveNamedProfile" type="button" disabled><svg class="icon"><use href="#i-save"/></svg>Save local</button></div><small>Reusing a name updates it; export JSON first to keep an older copy.</small></div>
+                  <div class="profile-library-load"><label for="profileLibrarySelect">Saved setups</label><select class="select-control" id="profileLibrarySelect" aria-describedby="profileLibraryHelp"><option value="">No saved profiles yet</option></select><div class="profile-library-actions"><button class="button button-soft profile-library-button" id="loadSavedProfile" type="button" disabled>Load to settings</button><button class="button button-soft profile-library-button" id="exportSavedProfile" type="button" disabled>Export JSON</button><button class="button button-outline-warn profile-library-button" id="deleteSavedProfile" type="button" disabled>Delete</button><button class="button button-soft profile-library-button" id="importSavedProfileButton" type="button">Import JSON</button><input id="importSavedProfileFile" type="file" accept="application/json,.json" hidden /></div></div>
+                </div>
+                <p class="profile-library-note" id="profileLibraryHelp">Loading a setup only stages approved values in this app; use Apply settings to make backed-up changes. Imported files are validated and never execute code.</p>
+              </div>
               <div class="form-card">
                 <div class="form-row mode-row">
                   <div class="field-copy"><label for="modeSelect">Optimization profile</label><p>Sets safe defaults for graphics workload and LOD.</p></div>
@@ -363,8 +396,63 @@
               <p class="allowlist-note"><svg class="icon"><use href="#i-shield"/></svg>This list is informational and read-only. Marktis Optimizer preserves any unrelated settings already in the local JSON file.</p>
             </section>
 
+            <section class="settings-pane" id="paneSecurity" data-pane="security" role="tabpanel" aria-labelledby="tabSecurity" hidden>
+              <div class="pane-heading"><div><span class="pane-index">05 / SECURITY</span><h2>Windows-managed protection</h2><p>Use the protection already built into Windows. Marktis does not pretend to be a replacement antivirus.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-shield"/></svg></span></div>
+              <div class="security-grid">
+                <article class="form-card system-card system-wide-card security-defender-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><p class="panel-kicker">MICROSOFT DEFENDER · USER CONTROLLED</p><h3>Scan files and review threats</h3></div><span class="state-pill state-pending">WINDOWS MANAGED</span></div>
+                  <p class="system-card-note">Open Virus &amp; threat protection to start a Quick scan, choose Scan options for a Full or Custom scan, and review Protection history. Windows Security displays findings and offers any available quarantine or remediation actions; Marktis never deletes or quarantines files.</p>
+                  <button class="button button-primary" id="securityOpenWindowsSecurity" type="button"><svg class="icon"><use href="#i-shield"/></svg>Open Windows Security</button>
+                  <p class="security-guidance">For a particular file or folder, choose Custom scan inside Windows Security. This app does not inspect file contents or run its own antivirus engine.</p>
+                </article>
+                <article class="form-card system-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-refresh"/></svg></span><div><p class="panel-kicker">LOCAL EXECUTOR WATCHLIST</p><h3>Exact process-name check</h3></div></div>
+                  <p class="system-card-note" id="securityScanStatus" role="status" aria-live="polite">Checks only Xeno.exe, Solara.exe, JJSploit.exe, and Delta.exe. A match is not a malware verdict.</p>
+                  <button class="button button-soft" id="securityRescanProcesses" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Run local name check</button>
+                </article>
+                <article class="form-card system-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-system"/></svg></span><div><p class="panel-kicker">REAL-TIME &amp; RANSOMWARE</p><h3>Check protection status in Windows</h3></div></div>
+                  <p class="system-card-note">Real-time protection, cloud/heuristic detection, security-intelligence updates, Controlled folder access, web/phishing protection (SmartScreen), and Firewall are managed by Windows and can vary by edition or settings. Review their actual status in Windows Security; Marktis does not toggle or certify them.</p>
+                  <button class="button button-soft" id="securityOpenProtection" type="button">Review Windows protection</button>
+                </article>
+                <article class="form-card system-card system-wide-card security-scope-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span><div><p class="panel-kicker">SCOPE</p><h3>No fake “Level 9” score</h3></div></div>
+                  <p class="system-card-note">There is no standard Level 9 antivirus rating. This app does not install a custom antivirus, intercept downloads or execution, scan memory, provide a password manager or dark-web monitor, or remove files. VPN setup lives in the separate WireGuard tab and is not Roblox-specific route optimization. Use Windows Security for malware scanning and remediation.</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="settings-pane" id="paneVpn" data-pane="vpn" role="tabpanel" aria-labelledby="tabVpn" hidden>
+              <div class="pane-heading"><div><span class="pane-index">06 / VPN</span><h2>WireGuard provider tunnel</h2><p>Use the official WireGuard for Windows client with a profile from a VPN provider you trust.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-network"/></svg></span></div>
+              <div class="vpn-grid">
+                <article class="form-card system-card vpn-control-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-network"/></svg></span><div><p class="panel-kicker">WINDOWS WIREGUARD TUNNEL</p><h3>Connection status</h3></div><span class="state-pill state-pending" id="wireguardStatusBadge">CHECKING</span></div>
+                  <p class="system-card-note" id="wireguardStatusDetail" role="status" aria-live="polite">Checking the official WireGuard client and local tunnel service…</p>
+                  <div class="vpn-actions">
+                    <button class="button button-primary" id="wireguardImportButton" type="button" disabled><svg class="icon"><use href="#i-folder"/></svg>Import &amp; connect</button>
+                    <input id="wireguardConfigFile" type="file" accept=".conf,text/plain" hidden />
+                    <button class="button button-soft" id="wireguardConnectButton" type="button" disabled>Connect</button>
+                    <button class="button button-soft" id="wireguardDisconnectButton" type="button" disabled>Disconnect</button>
+                    <button class="button button-outline-warn" id="wireguardRemoveButton" type="button" disabled>Remove profile</button>
+                    <button class="button button-soft" id="wireguardRefreshButton" type="button" disabled><svg class="icon"><use href="#i-refresh"/></svg>Refresh</button>
+                    <button class="button button-soft" id="wireguardDownloadButton" type="button" disabled>Get official WireGuard</button>
+                  </div>
+                  <p class="vpn-profile-detail" id="wireguardProfileDetail">The VPN provider’s .conf file is required. Import is on-device; it is not uploaded.</p>
+                </article>
+                <article class="form-card system-card vpn-guidance-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><p class="panel-kicker">BEFORE CONNECTING</p><h3>Know what the profile routes</h3></div></div>
+                  <p class="system-card-note">Your provider’s AllowedIPs and DNS settings decide which traffic uses the tunnel. A full-tunnel route (0.0.0.0/0 or ::/0) may carry all internet traffic and can trigger WireGuard’s Windows firewall/kill-switch behavior. This is not a Roblox-specific latency optimizer and may increase ping.</p>
+                  <p class="system-card-note">Administrator approval is required to install, connect, disconnect, or remove the Windows tunnel service. A connected tunnel stays active if Marktis closes and may remain after uninstall. Disconnect and remove it here before uninstalling; successful setup sets it not to auto-start after Windows restarts.</p>
+                </article>
+                <article class="form-card system-card vpn-privacy-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span><div><p class="panel-kicker">LOCAL PROFILE HANDLING</p><h3>Provider supplies the service</h3></div></div>
+                  <p class="system-card-note">The app does not provide a VPN server or subscription. It accepts standard WireGuard .conf settings, blocks custom PreUp/PostUp/PreDown/PostDown commands, encrypts the profile with Windows DPAPI in local app data, and does not save a plaintext copy. Never paste private keys into chat.</p>
+                </article>
+              </div>
+            </section>
+
             <section class="settings-pane" id="paneSystem" data-pane="system" role="tabpanel" aria-labelledby="tabSystem" hidden>
-              <div class="pane-heading system-pane-heading"><div><span class="pane-index">05 / SYSTEM</span><h2>Your device</h2><p>Read-only local inventory for laptop type, CPU, graphics adapters, memory, and storage. This information stays in the app and is not saved or uploaded.</p></div><button class="button button-soft" id="refreshDevice" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh device info</button></div>
+              <div class="pane-heading system-pane-heading"><div><span class="pane-index">07 / SYSTEM</span><h2>Your device</h2><p>Read-only local inventory for laptop type, CPU, graphics adapters, memory, and storage. This information stays in the app and is not saved or uploaded.</p></div><button class="button button-soft" id="refreshDevice" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh device info</button></div>
 
               <div class="system-grid">
                 <article class="form-card system-card system-device-card">
@@ -390,7 +478,7 @@
                 </article>
                 <article class="form-card system-card system-wide-card">
                   <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><p class="panel-kicker">SYSTEM SAFETY</p><h3>Manual, reversible by default</h3></div></div>
-                  <p class="system-card-note">This app will not silently delete Roblox cache, logs, or %TEMP% files; write fullscreen/priority registry tweaks; clear standby memory; force restore points; change DNS, MTU, or server routes; or replace Roblox textures, skyboxes, particles, or audio. It limits changes to allowlisted local settings with timestamped backups.</p>
+                  <p class="system-card-note">Roblox optimizer settings will not silently delete cache/log/temp files; write fullscreen/priority registry tweaks; clear standby memory; force restore points; alter DNS, MTU, or routes; or replace Roblox assets/audio. The separate WireGuard tab applies only the routes and DNS in your provider profile while its tunnel is connected.</p>
                 </article>
                 <article class="form-card system-card system-wide-card">
                   <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-folder"/></svg></span><div><p class="panel-kicker">LOCAL STORAGE</p><h3>Drives and free space</h3></div></div>
@@ -426,7 +514,7 @@
             </section>
 
             <section class="settings-pane" id="paneNotifications" data-pane="notifications" role="tabpanel" aria-labelledby="tabNotifications" hidden>
-              <div class="pane-heading"><div><span class="pane-index">06 / NOTIFICATIONS</span><h2>Stay in the loop.</h2><p>Choose which local events can appear in Marktis Optimizer and, if your Windows WebView allows it, as desktop notifications.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-bell"/></svg></span></div>
+              <div class="pane-heading"><div><span class="pane-index">08 / NOTIFICATIONS</span><h2>Stay in the loop.</h2><p>Choose which local events can appear in Marktis Optimizer and, if your Windows WebView allows it, as desktop notifications.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-bell"/></svg></span></div>
               <div class="notification-settings-grid">
                 <article class="form-card notification-setup-card">
                   <div class="notification-setup-top">
@@ -454,7 +542,7 @@
 
           <footer class="settings-footer" id="settingsFooter">
             <label class="scope-toggle" for="allVersionsToggle"><span class="switch"><input id="allVersionsToggle" type="checkbox" checked /><span></span></span><span><strong>Apply to all detected versions</strong><small>Otherwise, use the first detected settings file.</small></span></label>
-            <div class="footer-actions"><button class="button button-soft" id="saveProfile" type="button"><svg class="icon"><use href="#i-save"/></svg>Save profile</button><button class="button button-outline-warn" id="restoreSettings" type="button"><svg class="icon"><use href="#i-restore"/></svg>Restore managed</button><button class="button button-primary" id="applySettings" type="button"><svg class="icon"><use href="#i-check"/></svg>Apply settings</button></div>
+            <div class="footer-actions"><button class="button button-soft" id="saveProfile" type="button"><svg class="icon"><use href="#i-save"/></svg>Export current</button><button class="button button-outline-warn" id="restoreSettings" type="button"><svg class="icon"><use href="#i-restore"/></svg>Restore managed</button><button class="button button-primary" id="applySettings" type="button"><svg class="icon"><use href="#i-check"/></svg>Apply settings</button></div>
           </footer>
         </section>
       </div>

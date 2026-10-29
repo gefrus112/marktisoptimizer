@@ -21,7 +21,7 @@
     "automaticSoftwareRemoval": false,
     "hardwareTelemetry": false,
     "processAffinityChanges": false,
-    "networkRouteChanges": false,
+    "networkRouteChanges": true,
     "canonicalAllowlistDefault": true,
     "experimentalLegacyFpsOptIn": true,
     "networkProbeOnDemand": true,
@@ -90,7 +90,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "The V4 Windows client reports whether RobloxPlayerBeta.exe appears in the OS process list using the process image name only; it does not read command-line arguments, game titles, thumbnails, server IDs/addresses, account data, player lists, chat, or memory. The legacy .NET Session page also displays local process paths and window titles."
+      "details": "The V4 Windows client reports whether RobloxPlayerBeta.exe appears in the OS process list using the process image name only; its Player card also shows an approximate stopwatch from the app's first observation, not an exact process launch or game-session duration. It does not read command-line arguments, game titles, thumbnails, server IDs/addresses, account data, player lists, chat, or memory. The legacy .NET Session page also displays local process paths and window titles."
     },
     {
       "id": "bootstrapper",
@@ -351,7 +351,7 @@
       "implemented": false,
       "safe": false,
       "flag": null,
-      "details": "Not implemented. Route rerouting requires a VPN/relay, driver, or system network-path changes and may send traffic through a third party. Marktis Optimizer does not tunnel, intercept, reroute, or optimize Roblox network traffic; its opt-in website TCP measurement is not a game-server route optimizer."
+      "details": "ExitLag-style Roblox route optimization is not implemented. The Rust + Tauri and Electron Windows desktop apps separately include a user-controlled WireGuard integration that follows only a user/provider-supplied .conf profile; this changes Windows routes only after confirmation and administrator approval, provides no VPN server or credentials, and cannot guarantee lower ping. The static website, legacy .NET app, and macOS companion do not provide this integration. The optional website TCP measurement is not a game-server route optimizer."
     },
     {
       "id": "desktop-roblox-launcher",
@@ -370,6 +370,15 @@
       "safe": true,
       "flag": null,
       "details": "Optional Electron Windows desktop build for Marktis Optimizer, using the same independent local desktop UI and narrow IPC bridge as Tauri. It includes read-only device inventory, safe rendering presets, on-device name-only process alerts, standard roblox:// launch, and the same reversible settings boundary. The optional website TCP probe runs only on request and is not game-server ping. The shared UI bundles the same local anime theme gallery and Max performance profile."
+    },
+    {
+      "id": "wireguard-provider-vpn",
+      "name": "User-controlled WireGuard provider tunnel",
+      "status": "Implemented in Rust + Tauri and Electron Windows desktop apps",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The user imports a provider-supplied .conf profile and must install the official WireGuard for Windows client. The desktop apps protect the local profile with machine-scope DPAPI, block custom command hooks, and require confirmation plus administrator approval for service changes. Provider AllowedIPs/DNS determine routing; default routes can carry all internet traffic and trigger WireGuard firewall behavior. No VPN service, server, credentials, or lower-ping guarantee is provided."
     },
     {
       "id": "guided-windows-installers",
@@ -404,7 +413,7 @@
       "implemented": false,
       "safe": false,
       "flag": null,
-      "details": "The app does not automatically delete Roblox cache/logs or %TEMP% files, modify fullscreen/CPU-priority registry values, clear standby memory, force System Restore points, change DNS/MTU or route/filter game-server IPs, replace Roblox textures/skyboxes/particles, or bypass audio caches. These actions can delete useful data, affect system responsiveness or connectivity, or modify game assets. The optimizer remains limited to allowlisted local ClientAppSettings.json settings with timestamped backups."
+      "details": "The app does not automatically delete Roblox cache/logs or %TEMP% files, modify fullscreen/CPU-priority registry values, clear standby memory, or force System Restore points. It does not offer app-controlled DNS/MTU tuning, route/IP filtering, Roblox traffic optimization, or asset replacement. The separate user-configured WireGuard tunnel follows only the provider's DNS/routes after confirmation. The optimizer remains focused on allowlisted local ClientAppSettings.json settings with timestamped backups."
     },
     {
       "id": "roblox-web-latency-probe",

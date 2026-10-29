@@ -8,9 +8,11 @@ missing). An optional Electron Windows build is available as a separate
 installer wizard.
 On **first launch it detects whether Roblox is installed** (read-only). The
 standalone desktop app has its own **Main** page and grouped **Settings** area
-for **Rendering**, **Geometry**, **Icons**, **Allowlist**, **System**, and
-**Notifications**. The System tab displays read-only local hardware and Roblox
-client status. The website has a separate interface and does not bundle the
+for **Rendering**, **Geometry**, **Icons**, **Allowlist**, **Security**,
+**VPN**, **System**, and **Notifications**. The Security tab links to Windows Security
+for Defender scans and remediation; the VPN tab integrates the official WireGuard
+Windows client with a user-supplied provider profile (the app is not a VPN provider).
+The System tab displays read-only local hardware and Roblox client status. The website has a separate interface and does not bundle the
 desktop UI. A custom red tilted-square mark nods to classic Roblox-era
 iconography without using Roblox’s official application logo.
 
@@ -81,17 +83,19 @@ captured from a running Windows executable—and example counts are shown.
 
 The app starts with its own loading screen, then opens **Main** plus grouped
 **Settings** sections for **Rendering**, **Geometry**, **Icons**, **Allowlist**,
-**System**, and **Notifications**. Rendering includes Max performance, Balanced,
+**Security**, **VPN**, **System**, and **Notifications**. Rendering includes Max performance, Balanced,
 and High quality presets plus adjustable graphics/texture quality and
 allowlisted renderer preferences. Max performance lowers selected detail but
 cannot guarantee lag-free play or increase hardware limits. Presets only stage
 local values; applying them still requires confirmation and creates a backup.
-The experimental legacy FPS target remains off by default and may be ignored by
-Roblox. The Icons page customizes only the app's local interface, not Roblox
-icons or game assets. Its theme gallery currently bundles 10 original anime
-illustrations with matching UI accent colors; the remaining 30 requested images
-are pending generation. Themes stay on-device. Profiles can be saved, applied,
-or restored.
+The Rendering page includes an on-device library for up to 12 named setups, with
+validated JSON import/export. Loading a saved setup only stages values in the UI;
+applying still requires confirmation and creates a backup. The experimental
+legacy FPS target remains off by default and may be ignored by Roblox. The Icons
+page customizes only the app's local interface, not Roblox icons or game assets.
+Its theme gallery currently bundles 10 original anime illustrations with
+matching UI accent colors; the remaining 30 requested images are pending
+generation. Themes stay on-device.
 
 The **Notifications** tab offers a local in-app activity center for Player
 process changes, known process-name matches, settings apply/restore, and low
@@ -104,25 +108,52 @@ The Main page also checks exact running process names `Xeno.exe`, `Solara.exe`,
 `JJSploit.exe`, and `Delta.exe` on-device at startup, every 30 seconds, and on
 request. A match can appear in the local notification center; an optional OS
 toast requires an explicit permission request and enabled notification settings.
-This is **not antivirus**; it does not inspect paths, command lines, files, or
-memory, and it never kills processes or removes software. A name match is not
-proof of malware.
+The **Security** settings tab and Main safety panel open Windows Security. There,
+choose **Virus & threat protection → Quick scan**, or **Scan options** for a Full
+or Custom scan; review detections in **Protection history**. Microsoft Defender
+performs file scanning and controls any quarantine/remediation under Windows'
+settings. Marktis does not inspect file contents, remove threats, or run a custom
+antivirus engine. The local executor-name check is **not antivirus**, and a name
+match is not proof of malware. Real-time/cloud protection, ransomware controls,
+web/phishing protection (SmartScreen), firewall, and updates are Windows-managed;
+check their actual state
+in Windows Security. The VPN tab uses the official WireGuard for Windows client
+with a provider-supplied `.conf` profile. Windows requests administrator approval;
+the profile is encrypted locally, and the tunnel follows the provider's routes and
+DNS. After setup the service stays active when Marktis closes and may remain after
+uninstall; disconnect and remove the profile before uninstalling. It is set not
+to auto-start after a Windows restart. The app supplies no VPN service, server,
+subscription, or credentials, and cannot guarantee a working tunnel or lower ping.
+No custom password manager or dark-web-monitoring engine is included.
 
 > **Current V4 scope:** the Main page detects installed Roblox versions and
 > local settings files. Its live status card checks only whether
 > `RobloxPlayerBeta.exe` appears in the Windows process list; this reports that
-> the Player process is open, not that an experience is actively loaded. It
-> does not read command-line arguments, game title/thumbnail, server address or
-> ID, account data, or memory. The app does not overlay or replace Roblox's
-> in-game menu. Its launcher uses the fixed standard `roblox://` protocol; the
-> Apply & launch action asks for confirmation and launches only after settings
-> are written successfully. The separate legacy Boost CLI also has an optional
-> `bootstrap --launch` command ([CLI guide](docs/CLI.md)).
+> the Player process is open, not that an experience is actively loaded. The
+> Player card includes an approximate stopwatch from the first time this app
+> observes `RobloxPlayerBeta.exe`; it resets when the process is not detected,
+> status becomes unavailable, or the app closes. It is not game/session time.
+> The app does not read command-line arguments, game title/thumbnail, server
+> address or ID, account data, or memory, and does not overlay or replace Roblox's
+> in-game menu. Its normal launcher uses the fixed standard `roblox://`
+> protocol; Apply & launch asks for confirmation and launches only after settings
+> are written successfully. A manual server-rejoin action accepts a user-provided
+> Place ID and Job ID, but never discovers those values from a running game. The
+> separate legacy Boost CLI also has an optional `bootstrap --launch` command
+> ([CLI guide](docs/CLI.md)).
+
+Settings files can be written while Roblox Player is open, but the app does not
+modify the live game. The current session may ignore or overwrite those values;
+restart Roblox after the session to load them.
 
 The Main page's **F5 Quick Status** refreshes only safe local install,
 Player-process, hardware, and local safety information. It never reads the game
-thumbnail/ID, server, player count, exact session duration, or account data; it
-cannot rejoin an exact server session. A manual before/after journal stores only
+thumbnail/ID, server, player count, exact session duration, or account data, and
+cannot automatically rejoin the running session. The manual **Rejoin a specific
+server** control accepts a numeric Place ID plus a UUID Job ID supplied by the
+user, stores those IDs only on-device, and asks Roblox to join that target using
+the normal protocol. It is not guaranteed if the server is full, private,
+closed, or unavailable. A manual before/after journal stores only
 FPS and experience-ping values that the user reads from Roblox `Shift+F5` and
 enters. The optional Roblox profile shortcut takes a numeric User ID and opens
 the fixed official public page in the system browser; no login, cookies, or
@@ -136,7 +167,10 @@ for review and does not benchmark or automatically tune the device. The System
 tab can open Windows Advanced Graphics settings so you can choose Roblox’s GPU;
 HAGS stays under Windows/driver control. The app does not silently delete cache
 or temp files, edit fullscreen/priority registry values, clear standby memory,
-force restore points, change DNS/MTU or server routes, or replace Roblox assets.
+force restore points, or replace Roblox assets. WireGuard networking is separate:
+the official client applies only the provider's imported DNS/routes after explicit
+confirmation. The optimizer does not invent routes or offer app-controlled DNS/MTU
+tuning.
 Actual in-game FPS and server ping are not read by the app—use Roblox
 Performance Stats with `Shift+F5`. The optional one-shot `www.roblox.com:443` TCP measurement is
 website connection time, not game ping; it sends no app-data payload, and the
@@ -161,8 +195,13 @@ endpoint sees the normal network connection.
   `RobloxPlayerBeta.exe` appears in the Windows process list; no command line,
   game/session details, thumbnail, server ID, or address is read.
 - Main plus grouped Settings tabs for Rendering, Geometry, Icons, Allowlist,
-  System, and Notifications. The System tab shows read-only hardware/drive
-  details and official Roblox Player/Studio folders. The Notifications tab keeps
+  Security, VPN, System, and Notifications. The Security tab opens Windows Security
+  for user-selected Defender scans; the VPN tab manages an app-named WireGuard
+  tunnel from a provider `.conf` profile using the official Windows client,
+  machine-scope DPAPI protection, and an administrator prompt. It provides no
+  VPN service or server and cannot verify provider handshakes. The System tab
+  shows read-only hardware/drive details and official Roblox Player/Studio folders.
+  The Notifications tab keeps
   event preferences and history on-device; native desktop alerts require an
   explicit user permission request. The desktop interface is independent from
   the website and bundles no website CSS or JavaScript.
@@ -220,10 +259,12 @@ this feature. See [`docs/MAC.md`](docs/MAC.md).
 
 The System tab reports hardware read-only; profiles are static, user-selected
 local settings. Marktis Optimizer does not measure actual in-game FPS, change
-Roblox's internal render scale, force CPU affinity, or reroute game traffic
-through a VPN/relay. Its optional website TCP probe is not game-server ping.
-Use Roblox's own graphics controls and Performance Stats (`Shift+F5`) for live
-game measurements.
+Roblox's internal render scale, force CPU affinity, or optimize routes to Roblox
+like a game relay. The separate VPN tab can start a user-configured WireGuard
+tunnel, whose routes are determined by the provider's `.conf` file and may carry
+all internet traffic; it does not promise lower ping. Its optional website TCP
+probe is not game-server ping. Use Roblox's own graphics controls and Performance
+Stats (`Shift+F5`) for live game measurements.
 
 ---
 
