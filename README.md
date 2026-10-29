@@ -39,6 +39,15 @@ Roblox’s official application logo.
 
 ---
 
+## Quick start — Windows
+
+1. Download the recommended [Rust + Tauri setup wizard](https://github.com/gefrus112/marktisoptimizer/releases/tag/v4.0.0-windows-rust). The optional Electron setup is a separate build.
+2. On first open, the app checks the standard Roblox install folders **read-only**. Detection does not apply or change settings.
+3. Review a preset and the selected settings. Applying requires your confirmation and creates a timestamped local backup; unrelated JSON keys are preserved.
+4. Use **Restore** in the app to put managed settings back from the backup. For actual game FPS and experience ping, open Roblox Performance Stats with **Shift+F5**; the app does not read those live game values.
+
+> Presets only adjust selected, allowlisted settings. They cannot guarantee higher FPS, eliminate stutter, or reduce game-server latency on every device.
+
 ## Windows x64 desktop app previews (V4)
 
 The Rust + Tauri and optional Electron builds use a **purpose-built desktop
@@ -148,12 +157,19 @@ endpoint sees the normal network connection.
 
 - Near-black **nebula** layout with static CSS gradients and stars; the
   Three.js/WebGL rendering loop and its 737 KB vendored library were removed.
+- Three new overview cards make the local/reversible workflow, the Roblox
+  allowlist, and the lightweight design easy to scan before opening a tab.
 - **Main tab = Client** (Windows-only). Then Allowlist, Downloads, Docs.
 - The **allowlist** (Geometry / Rendering / User Interface) is server-rendered
   into the HTML with a "what it improves" note per flag, so it is visible even
   without JavaScript.
+- The scroll indicator is frame-throttled and uses a transform; screenshot
+  previews decode lazily. The public website avoids continuous decorative
+  animations and broad backdrop blurs, while retaining short hover/reveal
+  transitions, `prefers-reduced-motion`, and Focus Mode.
 - Command palette, lightweight scroll reveals, reduced-motion + focus mode,
-  custom 404, manifest, robots.txt, sitemap. **No green neon dots.**
+  custom 404, manifest, robots.txt, sitemap. **No green neon dots.** These
+  website changes reduce UI work; they do not promise to remove in-game lag.
 - The website keeps `assets/nebula.js` for its tabs and settings builder; it is
   ordinary site UI code, not a Roblox client script. There is no `client.js` file.
 

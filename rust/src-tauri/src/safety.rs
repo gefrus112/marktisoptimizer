@@ -87,6 +87,7 @@ fn tasklist_path() -> Option<std::path::PathBuf> {
 
 #[cfg(target_os = "windows")]
 fn scan_windows_process_names() -> LocalSafetyScan {
+    use std::os::windows::process::CommandExt;
     use std::process::Command;
 
     let mut matches = Vec::new();
@@ -105,6 +106,7 @@ fn scan_windows_process_names() -> LocalSafetyScan {
         let filter = format!("IMAGENAME eq {process_name}");
         let output = match Command::new(&tasklist)
             .args(["/FI", filter.as_str(), "/FO", "CSV", "/NH"])
+            .creation_flags(0x0800_0000)
             .output()
         {
             Ok(output) if output.status.success() => output,

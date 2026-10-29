@@ -54,6 +54,7 @@ fn has_player_process_row(output: &str) -> bool {
 
 #[cfg(target_os = "windows")]
 fn detect() -> ActiveRobloxStatus {
+    use std::os::windows::process::CommandExt;
     use std::path::PathBuf;
     use std::process::Command;
 
@@ -66,6 +67,7 @@ fn detect() -> ActiveRobloxStatus {
         .unwrap_or_else(|| PathBuf::from("tasklist.exe"));
     let output = match Command::new(tasklist)
         .args(["/FI", "IMAGENAME eq RobloxPlayerBeta.exe", "/FO", "CSV", "/NH"])
+        .creation_flags(0x0800_0000)
         .output()
     {
         Ok(output) if output.status.success() => output,

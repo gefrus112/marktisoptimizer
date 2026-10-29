@@ -528,7 +528,7 @@
   }
 
   function initReveal() {
-    var items = $$(".glass, .panel, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
+    var items = $$(".glass, .panel, .overview-card, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
     items.forEach(function (el) { el.classList.add("reveal"); });
     function showAll() { items.forEach(function (el) { el.classList.add("revealed"); }); }
     if (prefersReducedMotion() || !("IntersectionObserver" in window)) { showAll(); return; }
@@ -566,12 +566,20 @@
     counters.forEach(function (el) { observer.observe(el); });
   }
 
+  var scrollProgressFrame = null;
   function updateScrollProgress() {
-    var bar = $("#scrollProgress");
-    if (!bar) return;
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
-    bar.style.width = Math.min(100, Math.max(0, pct)) + "%";
+    if (scrollProgressFrame !== null) return;
+    var requestFrame = window.requestAnimationFrame || function (callback) {
+      return window.setTimeout(callback, 16);
+    };
+    scrollProgressFrame = requestFrame(function () {
+      scrollProgressFrame = null;
+      var bar = $("#scrollProgress");
+      if (!bar) return;
+      var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      var progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      bar.style.transform = "scaleX(" + progress + ")";
+    });
   }
 
   initReveal();

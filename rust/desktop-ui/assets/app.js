@@ -52,6 +52,7 @@
     confirmReturnFocus: null,
     statusPending: false,
     safetyScanPending: false,
+    lastSafetyScanSignature: "",
     lastSafetyAlertSignature: "",
     toastTimer: 0,
     saveTimer: 0
@@ -742,49 +743,79 @@
     }
   }
 
+  function safetyScanSignature(result, error) {
+    if (error) return "error|" + String(error);
+    if (!result) return "no-result";
+    const names = (Array.isArray(result.matches) ? result.matches : []).map(function (match) {
+      return String(match.processName || match.productName || "").toLowerCase();
+    }).filter(Boolean).sort();
+    return [result.supported ? "supported" : "unsupported", result.available ? "available" : "unavailable", String(result.message || ""), names.join("|")].join("\u001f");
+  }
+
   async function scanKnownExecutorProcesses(silent) {
+    const unavailableMessage = "Open the packaged Windows app to scan local process names.";
     if (!invoke) {
+      const signature = safetyScanSignature(null, unavailableMessage);
       state.executorScan = null;
-      renderSafetyScan(null, "Open the packaged Windows app to scan local process names.");
-      renderSystemClientStatus();
+      if (!silent || signature !== state.lastSafetyScanSignature) {
+        renderSafetyScan(null, unavailableMessage);
+        renderSystemClientStatus();
+      }
+      state.lastSafetyScanSignature = signature;
       return null;
     }
-    if (state.safetyScanPending) return null;
+    if (state.safetyScanPending) {
+      if (!silent) showToast("A local process-name scan is already running.");
+      return null;
+    }
+
     state.safetyScanPending = true;
     const button = byId("scanSafety");
-    button.disabled = true;
-    button.setAttribute("aria-busy", "true");
-    byId("safetyScanBadge").textContent = "SCANNING";
-    byId("safetyScanBadge").className = "state-pill state-pending";
-    byId("safetyScanDetail").textContent = "Checking only the allowlisted process names on this device…";
+    if (!silent) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      byId("safetyScanBadge").textContent = "SCANNING";
+      byId("safetyScanBadge").className = "state-pill state-pending";
+      byId("safetyScanDetail").textContent = "Checking only the allowlisted process names on this device…";
+    }
     try {
       const result = await invoke("scan_known_executor_processes");
+      const signature = safetyScanSignature(result);
+      const changed = signature !== state.lastSafetyScanSignature;
       state.executorScan = result;
-      renderSafetyScan(result);
-      renderSystemClientStatus();
+      state.lastSafetyScanSignature = signature;
+      if (!silent || changed) {
+        renderSafetyScan(result);
+        renderSystemClientStatus();
+      }
+
       const matches = result && Array.isArray(result.matches) ? result.matches : [];
       if (matches.length) {
-        const signature = matches.map(function (match) {
+        const alertSignature = matches.map(function (match) {
           return String(match.processName || match.productName || "").toLowerCase();
         }).filter(Boolean).sort().join("|");
-        if (signature && signature !== state.lastSafetyAlertSignature) {
+        if (alertSignature && alertSignature !== state.lastSafetyAlertSignature) {
           showToast("Local safety alert: review the possible process-name match on Main.", "warning");
         }
-        if (signature) state.lastSafetyAlertSignature = signature;
+        if (alertSignature) state.lastSafetyAlertSignature = alertSignature;
       } else if (result && result.available) {
         state.lastSafetyAlertSignature = "";
       }
       return result;
     } catch (error) {
       const message = error && error.message ? error.message : String(error);
+      const signature = safetyScanSignature(null, message);
       state.executorScan = null;
-      renderSafetyScan(null, message);
-      renderSystemClientStatus();
+      if (!silent || signature !== state.lastSafetyScanSignature) {
+        renderSafetyScan(null, message);
+        renderSystemClientStatus();
+      }
+      state.lastSafetyScanSignature = signature;
       if (!silent) showToast("Local process scan unavailable: " + message, "warning");
       return null;
     } finally {
       state.safetyScanPending = false;
-      button.disabled = false;
+      button.disabled = !invoke;
       button.removeAttribute("aria-busy");
     }
   }

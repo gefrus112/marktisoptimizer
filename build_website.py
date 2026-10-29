@@ -188,7 +188,7 @@ def render_allowlist_cards(allowlist: dict) -> str:
 
 def feature_state(status: str) -> str:
     s = (status or "").lower()
-    if "reject" in s:
+    if "reject" in s or "removed" in s:
         return "rejected"
     if "legacy" in s:
         return "legacy"
@@ -352,6 +352,15 @@ def check() -> None:
     catalog = json.loads(match.group(1))
     if not isinstance(catalog.get("features"), list) or not catalog["features"]:
         raise RuntimeError("featureCatalog has no features")
+    if feature_state("Removed at user request") != "rejected":
+        raise RuntimeError("Removed features must not be presented as implemented")
+    removed_card = (
+        '<article class="feature-card" data-state="rejected">'
+        '<span class="status">Removed at user request</span>'
+        '<h4>Three.js / WebGL website scene</h4>'
+    )
+    if removed_card not in web_html:
+        raise RuntimeError("Server-rendered feature status does not mark removed work as rejected")
 
     allowlist_match = re.search(
         r'<script id="fastflagAllowlist" type="application/json">(.*?)</script>', web_html, re.S
@@ -396,7 +405,11 @@ def check() -> None:
             raise RuntimeError(f"Website still contains removed 3D runtime code: {marker}")
     if (WEB / "assets" / "three-scene.js").exists() or (WEB / "assets" / "vendor" / "three").exists():
         raise RuntimeError("Three.js runtime assets must be removed from web/assets")
-    for token in ("id=\"fastflag-allowlist\"", "detectPanel", "allowlist-card", "al-improves", "Windows"):
+    for token in (
+        "id=\"fastflag-allowlist\"", "detectPanel", "allowlist-card", "al-improves", "Windows",
+        "overview-grid", "overview-card-safe", "overview-card-flags", "overview-card-light",
+        'loading=\"lazy\"',
+    ):
         if token not in web_html or token not in root_html:
             raise RuntimeError(f"Generated site is missing expected content: {token}")
     if allowlist.get("windowsOnly") is not True or allowlist.get("platform") != "windows":
