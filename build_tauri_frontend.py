@@ -2,7 +2,7 @@
 """Build the standalone Rust + Tauri desktop interface.
 
 The Windows executable has its own compact desktop UI under ``rust/desktop-ui``;
-it does not reuse the GitHub Pages website, website CSS, Three.js, or website JS.
+it does not reuse the GitHub Pages frontend, CSS, or JavaScript.
 This script injects the canonical allowlist as local JSON and assembles the
 small static bundle embedded by Tauri under ``rust/frontend``.
 
@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -58,7 +59,10 @@ def build() -> None:
     (FRONTEND / "index.html").write_text(rendered_html(), encoding="utf-8")
     for name in ("app.css", "app.js"):
         shutil.copy2(SOURCE / "assets" / name, FRONTEND / "assets" / name)
-    print("Built standalone Tauri desktop UI at rust/frontend (website assets are not bundled).")
+    theme_source = SOURCE / "assets" / "themes"
+    if theme_source.is_dir():
+        shutil.copytree(theme_source, FRONTEND / "assets" / "themes")
+    print("Built standalone Tauri desktop UI at rust/frontend (local theme assets only; website assets are not bundled).")
 
 
 def check() -> None:
@@ -76,20 +80,52 @@ def check() -> None:
         "Geometry section": 'data-tab="geometry"',
         "Icons section": 'data-tab="icons"',
         "Allowlist section": 'data-tab="allowlist"',
+        "local System tab": 'data-tab="system"',
+        "read-only hardware inventory": 'id="refreshDevice"',
+        "on-demand Roblox latency probe": 'id="probeRobloxLatency"',
+        "Windows Graphics settings shortcut": 'id="openGraphicsSettings"',
+        "safe rendering presets": 'data-preset="quality"',
+        "anime theme gallery": 'id="animeThemeGrid"',
+        "theme search": 'id="animeThemeSearch"',
+        "actual FPS guidance": 'Performance Stats',
+        "renderer preference control": 'id="rendererSelect"',
+        "local safety scan": 'id="scanSafety"',
+        "Roblox launcher": 'id="launchRoblox"',
+        "apply-and-launch confirmation action": 'id="applyLaunch"',
+        "opt-in experimental FPS toggle": 'id="legacyFpsToggle"',
+        "experimental FPS slider": 'id="fpsTarget"',
         "embedded canonical allowlist": 'id="fastflagAllowlist"',
     }
     absent = [label for label, marker in expected.items() if marker not in html]
     if absent:
         raise SystemExit("Tauri desktop index is missing: " + ", ".join(absent))
+    theme_files = set(re.findall(r'file:\s*"([^"]+\.jpg)"', js))
+    source_theme_files = {path.name for path in (SOURCE / "assets" / "themes").glob("*.jpg")}
+    output_theme_files = {path.name for path in (FRONTEND / "assets" / "themes").glob("*.jpg")}
+    if not theme_files or theme_files != source_theme_files or theme_files != output_theme_files:
+        raise SystemExit("Bundled anime theme images must match the local gallery registry and generated frontend assets.")
     if PLACEHOLDER in html:
         raise SystemExit("Tauri desktop index still contains the unrendered allowlist placeholder.")
-    if any(token in html for token in ("three-scene.js", "nebula.css", "nebula.js", "desktop.js")):
+    if any(token in html for token in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Tauri frontend must not include or link to the shared website UI.")
     if "@import" in css or "https://" in css or "http://" in css:
         raise SystemExit("Tauri desktop stylesheet must be self-contained and local.")
     if "fetch(" in js or "XMLHttpRequest" in js:
         raise SystemExit("Tauri desktop UI must not make network requests.")
-    if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "three-scene.js", "desktop.js")):
+    required_commands = (
+        "scan_known_executor_processes",
+        "device_snapshot",
+        "probe_roblox_latency",
+        "open_windows_settings",
+        "launch_roblox",
+        "apply_settings",
+        "restore_settings",
+    )
+    if any(command not in js for command in required_commands):
+        raise SystemExit("Tauri desktop local commands are not wired to the UI.")
+    if "legacyFps: false" not in js or "Experimental legacy FPS target" not in html:
+        raise SystemExit("The experimental legacy FPS request must remain explicitly opt-in by default.")
+    if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Old website UI assets remain in the generated Tauri bundle.")
     try:
         start = html.index('<script id="fastflagAllowlist" type="application/json">') + len('<script id="fastflagAllowlist" type="application/json">')
@@ -99,7 +135,7 @@ def check() -> None:
         raise SystemExit(f"Embedded allowlist JSON is invalid: {exc}") from exc
     if embedded != load_allowlist():
         raise SystemExit("Embedded UI allowlist differs from the canonical root allowlist.")
-    if "ROPTIMER DESKTOP" not in html or "data-icon-style" not in html or "data-accent" not in html:
+    if "MARKTIS OPTIMIZER DESKTOP" not in html or "data-icon-style" not in html or "data-accent" not in html:
         raise SystemExit("Tauri frontend does not include the desktop appearance controls.")
     print("TAURI DESKTOP FRONTEND CHECK OK: independent UI, local assets, canonical allowlist.")
 

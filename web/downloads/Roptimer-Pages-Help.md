@@ -2,7 +2,7 @@
 
 The live Roptimer website is a static site built from `web/`. It should appear at:
 
-<https://gefrus112.github.io/robloxclinetbooster/>
+<https://gefrus112.github.io/marktisoptimizer/>
 
 If GitHub Pages shows the repository README instead of the website, Pages is serving the repository root in legacy mode and cannot find `index.html`. This repository now fixes that in three ways.
 
@@ -33,7 +33,7 @@ It runs on pushes to `main` and `arena/ebd36b53-robloxclinetbooster` when websit
 ### Configure with the GitHub CLI
 
 ```bash
-gh api repos/gefrus112/robloxclinetbooster/pages \
+gh api repos/gefrus112/marktisoptimizer/pages \
   -X PUT \
   --field build_type=workflow \
   --field source.branch=main \
@@ -43,7 +43,7 @@ gh api repos/gefrus112/robloxclinetbooster/pages \
 Verify:
 
 ```bash
-gh api repos/gefrus112/robloxclinetbooster/pages \
+gh api repos/gefrus112/marktisoptimizer/pages \
   --jq '{status,build_type,html_url,source}'
 ```
 
@@ -92,13 +92,13 @@ Check these in order:
 5. `.nojekyll` and `web/.nojekyll` exist.
 6. Hard-refresh the site with `Ctrl/Cmd + Shift + R`.
 7. Wait 1–2 minutes for the Pages CDN.
-8. Open the site URL directly: <https://gefrus112.github.io/robloxclinetbooster/>.
+8. Open the site URL directly: <https://gefrus112.github.io/marktisoptimizer/>.
 
 In GitHub CLI:
 
 ```bash
 gh run list --workflow deploy-pages.yml --limit 5
-gh api repos/gefrus112/robloxclinetbooster/pages/builds/latest \
+gh api repos/gefrus112/marktisoptimizer/pages/builds/latest \
   --jq '{status,created_at,commit}'
 ```
 

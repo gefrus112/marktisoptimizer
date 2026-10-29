@@ -1,0 +1,67 @@
+{
+  "name": "marktisoptimizer-electron-client",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Optional Electron Windows desktop build for Marktis Optimizer",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.cjs && node --check preload.cjs && node --check backend.cjs",
+    "test": "node --test",
+    "build:win": "npm run check && npm test && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.roptimer.electron",
+    "productName": "Marktis Optimizer Electron",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "backend.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../rust/frontend",
+        "to": "frontend",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../fastflags-allowlist.json",
+        "to": "fastflags-allowlist.json"
+      },
+      {
+        "from": "../rust/src-tauri/icons/icon.ico",
+        "to": "Marktis-Optimizer.ico"
+      }
+    ],
+    "win": {
+      "icon": "../rust/src-tauri/icons/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "Marktis-Optimizer-Electron-Setup-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Marktis Optimizer Electron",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "displayLanguageSelector": true,
+      "uninstallDisplayName": "Marktis Optimizer Electron"
+    }
+  }
+}

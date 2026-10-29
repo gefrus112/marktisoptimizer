@@ -13,6 +13,7 @@ pub struct RobloxVersion {
     pub name: String,
     pub path: String,
     pub has_player: bool,
+    pub has_studio: bool,
     pub has_settings: bool,
     pub settings_path: Option<String>,
 }
@@ -104,12 +105,13 @@ pub fn detect() -> Detection {
             // accept any folder that actually contains the player binary.
             let player = path.join("RobloxPlayerBeta.exe");
             let studio = path.join("RobloxStudioBeta.exe");
-            let has_player = player.exists() || studio.exists();
+            let has_player = player.exists();
+            let has_studio = studio.exists();
             let settings_path = path.join("ClientSettings").join("ClientAppSettings.json");
             let has_settings = settings_path.exists();
             let name = entry.file_name().to_string_lossy().to_string();
 
-            if !has_player && !name.to_lowercase().starts_with("version-") && !has_settings {
+            if !has_player && !has_studio && !name.to_lowercase().starts_with("version-") && !has_settings {
                 continue;
             }
             if has_settings {
@@ -124,6 +126,7 @@ pub fn detect() -> Detection {
                 name,
                 path: key,
                 has_player,
+                has_studio,
                 has_settings,
                 settings_path: Some(settings_path.to_string_lossy().to_string()),
             });
@@ -131,11 +134,11 @@ pub fn detect() -> Detection {
     }
 
     versions.sort_by(|a, b| a.name.cmp(&b.name));
-    let installed = versions.iter().any(|v| v.has_player) || !settings_paths.is_empty();
+    let installed = versions.iter().any(|v| v.has_player || v.has_studio) || !settings_paths.is_empty();
     let count = versions.len();
     let message = if installed {
         format!(
-            "Roblox detected: {} version folder{} found. Roptimer can manage allowlisted local settings safely.",
+            "Roblox detected: {} version folder{} found. Marktis Optimizer can manage allowlisted local settings safely.",
             count,
             if count == 1 { "" } else { "s" }
         )

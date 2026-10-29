@@ -1,6 +1,6 @@
-/* Roptimer standalone Tauri desktop UI.
- * No website bundle, remote code, network calls, process handles, or game memory.
- * All app settings are local; Roblox writes go through the Rust allowlist commands.
+/* Marktis Optimizer standalone Windows desktop UI, shared by the Tauri and Electron builds.
+ * No website bundle or remote code. A fixed TCP probe is user-triggered in the local backend.
+ * No process handles or game-memory access; settings use the narrow local bridge.
  */
 (function () {
   "use strict";
@@ -9,15 +9,30 @@
   const invoke = resolveInvoke();
   const profileKey = "roptimer.desktop.profile.v1";
   const appearanceKey = "roptimer.desktop.appearance.v1";
+  const animeThemes = [
+    { id: "goku-ultra-instinct", name: "Ultra Instinct Goku", series: "Dragon Ball Super", file: "goku-ultra-instinct.jpg", accent: "blue" },
+    { id: "vegeta-ultra-ego", name: "Ultra Ego Vegeta", series: "Dragon Ball Super", file: "vegeta-ultra-ego.jpg", accent: "violet" },
+    { id: "broly-legendary", name: "Legendary Broly", series: "Dragon Ball Super", file: "broly-legendary.jpg", accent: "emerald" },
+    { id: "gohan-beast", name: "Beast Gohan", series: "Dragon Ball Super", file: "gohan-beast.jpg", accent: "violet" },
+    { id: "naruto-sage", name: "Sage Mode Naruto", series: "Naruto", file: "naruto-sage.jpg", accent: "amber" },
+    { id: "sasuke-rinnegan", name: "Rinnegan Sasuke", series: "Naruto Shippuden", file: "sasuke-rinnegan.jpg", accent: "violet" },
+    { id: "luffy-gear-five", name: "Gear Five Luffy", series: "One Piece", file: "luffy-gear-five.jpg", accent: "rose" },
+    { id: "zoro-swordsman", name: "Three-Sword Zoro", series: "One Piece", file: "zoro-swordsman.jpg", accent: "emerald" },
+    { id: "gojo-limitless", name: "Limitless Gojo", series: "Jujutsu Kaisen", file: "gojo-limitless.jpg", accent: "cyan" },
+    { id: "sukuna-cursed", name: "Cursed Sukuna", series: "Jujutsu Kaisen", file: "sukuna-cursed.jpg", accent: "crimson" }
+  ];
   const defaultProfile = {
     mode: "Reduce building lag",
     tier: 21,
     texture: 0,
+    renderer: "Auto",
+    fps: 240,
+    legacyFps: false,
     geometryDistance: 64,
     vfx: true,
     allVersions: true
   };
-  const defaultAppearance = { accent: "mint", iconStyle: "outline" };
+  const defaultAppearance = { accent: "mint", iconStyle: "outline", animeTheme: "none" };
   const fallbackAllowlist = readEmbeddedAllowlist();
   let bootFinishScheduled = false;
   const bootStartedAt = Date.now();
@@ -25,6 +40,10 @@
   const state = {
     detection: null,
     activePlayer: null,
+    executorScan: null,
+    deviceSnapshot: null,
+    recommendedPreset: null,
+    latencyPending: false,
     appInfo: null,
     allowlist: fallbackAllowlist,
     allowlistFilter: "all",
@@ -32,6 +51,9 @@
     pendingAction: null,
     confirmReturnFocus: null,
     statusPending: false,
+    safetyScanPending: false,
+    lastSafetyScanSignature: "",
+    lastSafetyAlertSignature: "",
     toastTimer: 0,
     saveTimer: 0
   };
@@ -46,7 +68,7 @@
       if (window.__TAURI_INTERNALS__ && typeof window.__TAURI_INTERNALS__.invoke === "function") {
         return window.__TAURI_INTERNALS__.invoke.bind(window.__TAURI_INTERNALS__);
       }
-    } catch (_error) { /* Tauri bridge is not exposed in a browser preview. */ }
+    } catch (_error) { /* Desktop-shell IPC is not exposed in a browser preview. */ }
     return null;
   }
 
@@ -92,9 +114,12 @@
     try { stored = JSON.parse(safeStorageGet(profileKey) || "null"); } catch (_error) { stored = null; }
     const values = stored && typeof stored === "object" ? stored : {};
     return {
-      mode: values.mode === "Balanced" ? "Balanced" : defaultProfile.mode,
+      mode: ["Reduce building lag", "Maximum performance", "Balanced", "High quality"].includes(values.mode) ? values.mode : defaultProfile.mode,
       tier: clampInteger(values.tier, 0, 21, defaultProfile.tier),
       texture: clampInteger(values.texture, 0, 3, defaultProfile.texture),
+      renderer: ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(values.renderer) ? values.renderer : defaultProfile.renderer,
+      fps: clampInteger(values.fps, 60, 1000, defaultProfile.fps),
+      legacyFps: typeof values.legacyFps === "boolean" ? values.legacyFps : defaultProfile.legacyFps,
       geometryDistance: clampInteger(values.geometryDistance, 32, 256, defaultProfile.geometryDistance),
       vfx: typeof values.vfx === "boolean" ? values.vfx : defaultProfile.vfx,
       allVersions: typeof values.allVersions === "boolean" ? values.allVersions : defaultProfile.allVersions
@@ -105,9 +130,12 @@
     let stored = null;
     try { stored = JSON.parse(safeStorageGet(appearanceKey) || "null"); } catch (_error) { stored = null; }
     const values = stored && typeof stored === "object" ? stored : {};
+    const accents = ["mint", "amber", "blue", "crimson", "violet", "emerald", "rose", "cyan", "gold"];
+    const theme = animeThemes.find(function (item) { return item.id === values.animeTheme; });
     return {
-      accent: ["mint", "amber", "blue"].includes(values.accent) ? values.accent : defaultAppearance.accent,
-      iconStyle: ["outline", "bold", "minimal"].includes(values.iconStyle) ? values.iconStyle : defaultAppearance.iconStyle
+      accent: accents.includes(values.accent) ? values.accent : defaultAppearance.accent,
+      iconStyle: ["outline", "bold", "minimal"].includes(values.iconStyle) ? values.iconStyle : defaultAppearance.iconStyle,
+      animeTheme: theme ? theme.id : "none"
     };
   }
 
@@ -130,6 +158,9 @@
       mode: byId("modeSelect").value,
       tier: clampInteger(byId("graphicsQuality").value, 0, 21, defaultProfile.tier),
       texture: clampInteger(byId("textureQuality").value, 0, 3, defaultProfile.texture),
+      renderer: byId("rendererSelect").value,
+      fps: clampInteger(byId("fpsTarget").value, 60, 1000, defaultProfile.fps),
+      legacyFps: byId("legacyFpsToggle").checked,
       geometryDistance: clampInteger(byId("geometryDistance").value, 32, 256, defaultProfile.geometryDistance),
       vfx: byId("vfxToggle").checked,
       allVersions: byId("allVersionsToggle").checked
@@ -140,6 +171,10 @@
     byId("modeSelect").value = profile.mode;
     byId("graphicsQuality").value = String(profile.tier);
     byId("textureQuality").value = String(profile.texture);
+    byId("rendererSelect").value = profile.renderer;
+    byId("legacyFpsToggle").checked = profile.legacyFps;
+    byId("fpsTarget").value = String(profile.fps);
+    byId("fpsTarget").disabled = !profile.legacyFps;
     byId("geometryDistance").value = String(profile.geometryDistance);
     byId("vfxToggle").checked = profile.vfx;
     byId("allVersionsToggle").checked = profile.allVersions;
@@ -155,24 +190,125 @@
     const profile = currentProfile();
     const graphicsOut = byId("graphicsQualityValue");
     const textureOut = byId("textureQualityValue");
+    const fpsOut = byId("fpsTargetValue");
     if (graphicsOut) graphicsOut.value = String(profile.tier);
     if (textureOut) textureOut.value = String(profile.texture);
+    if (fpsOut) fpsOut.value = String(profile.fps);
+    const textureNames = ["Lowest", "Low", "Medium", "Highest"];
+    byId("textureQualityName").textContent = textureNames[profile.texture] || "Custom";
+    byId("fpsTarget").disabled = !profile.legacyFps;
     byId("geometryDistanceValue").textContent = String(profile.geometryDistance);
     byId("lodBase").textContent = String(profile.geometryDistance);
     byId("lodL12").textContent = String(profile.geometryDistance);
     byId("lodL23").textContent = String(Math.floor(profile.geometryDistance / 2));
     byId("lodL34").textContent = String(Math.floor(profile.geometryDistance / 4));
     byId("profileTitle").textContent = profile.mode;
-    byId("profileModeLabel").textContent = profile.mode === "Balanced" ? "BALANCED" : "PERFORMANCE";
+    byId("profileModeLabel").textContent = profile.mode === "Balanced" ? "BALANCED" : (profile.mode === "High quality" ? "HIGH DETAIL" : "PERFORMANCE");
     byId("summaryGraphics").textContent = profile.tier + " / 21";
-    byId("summaryTexture").textContent = profile.texture + " / 3";
+    byId("summaryTexture").textContent = profile.texture + " / 3 · " + (textureNames[profile.texture] || "Custom");
+    byId("summaryRenderer").textContent = profile.renderer === "Auto" ? "System default" : profile.renderer;
     byId("summaryGeometry").textContent = profile.geometryDistance + " studs";
+    byId("summaryFps").textContent = profile.legacyFps ? profile.fps + " FPS · request" : "Off";
+    byId("systemFpsTarget").textContent = profile.legacyFps ? profile.fps + " FPS requested · not measured" : "Off";
+    updatePresetButtons(profile);
     scheduleProfileSave();
   }
 
+  const renderingPresets = {
+    low: { mode: "Maximum performance", tier: 6, texture: 0, renderer: "Auto", geometryDistance: 64, vfx: true },
+    balanced: { mode: "Balanced", tier: 12, texture: 1, renderer: "Auto", geometryDistance: 128, vfx: false },
+    quality: { mode: "High quality", tier: 21, texture: 3, renderer: "Auto", geometryDistance: 256, vfx: false }
+  };
+
+  function presetMatches(profile, preset) {
+    return profile.mode === preset.mode
+      && profile.tier === preset.tier
+      && profile.texture === preset.texture
+      && profile.geometryDistance === preset.geometryDistance
+      && profile.vfx === preset.vfx;
+  }
+
+  function updatePresetButtons(profile) {
+    document.querySelectorAll("[data-preset]").forEach(function (button) {
+      const preset = renderingPresets[button.dataset.preset];
+      const selected = Boolean(preset && presetMatches(profile, preset));
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+  }
+
+  function applyRenderingPreset(name, fromRecommendation) {
+    const preset = renderingPresets[name];
+    if (!preset) return;
+    state.geometryManuallyChanged = true;
+    const profile = Object.assign({}, currentProfile(), preset);
+    applyProfileToControls(profile);
+    showToast(fromRecommendation
+      ? "Suggested graphics preset staged. Review it, then confirm Apply to write local settings."
+      : "Graphics preset staged locally. Review it, then confirm Apply to write local settings.", "success");
+  }
+
+  function renderAnimeThemes(selectedOverride) {
+    const host = byId("animeThemeGrid");
+    if (!host) return;
+    const count = byId("animeThemeCount");
+    const clearButton = byId("clearAnimeTheme");
+    const needle = byId("animeThemeSearch").value.trim().toLowerCase();
+    const selected = typeof selectedOverride === "string" ? selectedOverride : readAppearance().animeTheme;
+    const matches = animeThemes.filter(function (theme) {
+      return !needle || (theme.name + " " + theme.series).toLowerCase().includes(needle);
+    });
+    host.replaceChildren();
+    if (count) count.textContent = needle
+      ? matches.length + " of " + animeThemes.length + " themes"
+      : animeThemes.length + " local themes";
+    if (clearButton) clearButton.disabled = selected === "none";
+    if (!matches.length) {
+      const empty = document.createElement("p");
+      empty.className = "anime-theme-empty";
+      empty.textContent = "No matching themes. Try a character name or anime series.";
+      host.appendChild(empty);
+      return;
+    }
+    matches.forEach(function (theme) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "anime-theme-card" + (selected === theme.id ? " is-selected" : "");
+      button.dataset.animeThemeId = theme.id;
+      button.setAttribute("aria-pressed", selected === theme.id ? "true" : "false");
+      button.setAttribute("aria-label", "Use " + theme.name + " theme from " + theme.series);
+      const image = document.createElement("img");
+      image.src = "assets/themes/" + theme.file;
+      image.alt = "";
+      image.loading = "lazy";
+      image.draggable = false;
+      const copy = document.createElement("span");
+      copy.className = "anime-theme-copy";
+      const title = document.createElement("strong");
+      title.textContent = theme.name;
+      const series = document.createElement("small");
+      series.textContent = theme.series;
+      copy.append(title, series);
+      button.append(image, copy);
+      host.appendChild(button);
+    });
+  }
+
+  function selectAnimeTheme(id) {
+    const theme = animeThemes.find(function (item) { return item.id === id; });
+    const appearance = readAppearance();
+    appearance.animeTheme = theme ? theme.id : "none";
+    if (theme) appearance.accent = theme.accent;
+    applyAppearance(appearance);
+    showToast(theme ? theme.name + " theme applied locally." : "Anime background cleared; the local accent is unchanged.", "success");
+  }
+
   function applyAppearance(appearance) {
+    const theme = animeThemes.find(function (item) { return item.id === appearance.animeTheme; });
     document.documentElement.dataset.accent = appearance.accent;
     document.documentElement.dataset.iconStyle = appearance.iconStyle;
+    document.documentElement.dataset.animeTheme = theme ? theme.id : "none";
+    document.documentElement.style.setProperty("--anime-theme-image", theme ? "url(assets/themes/" + theme.file + ")" : "none");
     document.querySelectorAll("[data-accent-choice]").forEach(function (button) {
       button.classList.toggle("is-selected", button.dataset.accentChoice === appearance.accent);
       button.setAttribute("aria-pressed", button.dataset.accentChoice === appearance.accent ? "true" : "false");
@@ -181,6 +317,7 @@
       button.classList.toggle("is-selected", button.dataset.iconStyleChoice === appearance.iconStyle);
       button.setAttribute("aria-pressed", button.dataset.iconStyleChoice === appearance.iconStyle ? "true" : "false");
     });
+    renderAnimeThemes(appearance.animeTheme);
     writeAppearance(appearance);
   }
 
@@ -198,6 +335,7 @@
       detail.textContent = error || "The Windows app could not read the standard Roblox install folders.";
       versionCount.textContent = "—";
       settingsCount.textContent = "—";
+      renderSystemClientStatus();
       return;
     }
     const versions = Array.isArray(result.versions) ? result.versions : [];
@@ -215,6 +353,7 @@
       title.textContent = "Roblox wasn't detected";
       detail.textContent = result.message || "Install the Roblox desktop client, then scan again.";
     }
+    renderSystemClientStatus();
   }
 
   function renderActivePlayer(result, error) {
@@ -227,6 +366,7 @@
       badge.className = "state-pill state-error";
       title.textContent = "Player status unavailable";
       detail.textContent = error || "The Player process could not be checked.";
+      renderSystemClientStatus();
       return;
     }
     if (!result.supported) {
@@ -250,6 +390,7 @@
       title.textContent = "Roblox Player is not running";
       detail.textContent = "The read-only process-name check did not find RobloxPlayerBeta.exe.";
     }
+    renderSystemClientStatus();
   }
 
   async function detectRoblox() {
@@ -294,6 +435,403 @@
     }
   }
 
+  function renderSafetyScan(result, error) {
+    const badge = byId("safetyScanBadge");
+    const detail = byId("safetyScanDetail");
+    const matchesHost = byId("safetyMatches");
+    const scanButton = byId("scanSafety");
+    const appsButton = byId("openInstalledApps");
+    const securityButton = byId("openWindowsSecurity");
+    const matches = result && Array.isArray(result.matches) ? result.matches : [];
+    matchesHost.replaceChildren();
+    appsButton.hidden = true;
+    securityButton.hidden = true;
+    scanButton.disabled = !invoke || state.safetyScanPending;
+
+    function addSummary(message) {
+      const summary = document.createElement("p");
+      summary.className = "safety-match-summary";
+      summary.textContent = message;
+      matchesHost.appendChild(summary);
+    }
+
+    if (!invoke || (result && !result.supported)) {
+      badge.textContent = "DESKTOP ONLY";
+      badge.className = "state-pill state-pending";
+      detail.textContent = "The local process-name check runs only in the packaged Windows app.";
+      addSummary(error || "No process scan runs in the website preview.");
+      return;
+    }
+
+    if (matches.length) {
+      badge.textContent = result.available ? "REVIEW MATCH" : "PARTIAL SCAN";
+      badge.className = "state-pill state-missing";
+      detail.textContent = result.message || "Review the possible process-name match before launching Roblox.";
+      matches.forEach(function (match) {
+        const row = document.createElement("div");
+        row.className = "safety-match-item";
+        const product = document.createElement("strong");
+        product.textContent = String(match.productName || "Known process name");
+        const process = document.createElement("code");
+        process.textContent = String(match.processName || "");
+        row.append(product, process);
+        matchesHost.appendChild(row);
+      });
+      if (!result.available) addSummary("The scan was incomplete; displayed matches are still name-only results.");
+      appsButton.hidden = false;
+      securityButton.hidden = false;
+      scanButton.disabled = state.safetyScanPending;
+      return;
+    }
+
+    if (error || !result || !result.available) {
+      badge.textContent = "UNAVAILABLE";
+      badge.className = "state-pill state-error";
+      detail.textContent = error || (result && result.message) || "The local process-name check could not complete.";
+      addSummary("No clean result is claimed when a scan is unavailable.");
+      return;
+    }
+
+    badge.textContent = "NO MATCH";
+    badge.className = "state-pill state-found";
+    detail.textContent = result.message;
+    addSummary("No exact Xeno.exe, Solara.exe, JJSploit.exe, or Delta.exe process name was found. This is not an antivirus verdict.");
+  }
+
+  function appendSystemRow(host, titleText, detailText) {
+    const row = document.createElement("div");
+    row.className = "system-info-row";
+    const title = document.createElement("strong");
+    title.textContent = titleText;
+    const detail = document.createElement("span");
+    detail.textContent = detailText;
+    row.append(title, detail);
+    host.appendChild(row);
+  }
+
+  function renderSystemClientStatus() {
+    const statusHost = byId("systemClientStatus");
+    const versionsHost = byId("systemClientVersions");
+    const executorHost = byId("systemExecutorStatus");
+    if (!statusHost || !versionsHost || !executorHost) return;
+    statusHost.replaceChildren();
+    versionsHost.replaceChildren();
+
+    if (!state.activePlayer) {
+      appendSystemRow(statusHost, "Player process", "Waiting for a local process-name check.");
+    } else if (!state.activePlayer.supported || !state.activePlayer.available) {
+      appendSystemRow(statusHost, "Player process", state.activePlayer.message || "Status unavailable.");
+    } else {
+      appendSystemRow(statusHost, "Roblox Player", state.activePlayer.running ? "RobloxPlayerBeta.exe is running." : "RobloxPlayerBeta.exe is not running.");
+    }
+
+    const versions = state.detection && Array.isArray(state.detection.versions) ? state.detection.versions : [];
+    if (!state.detection) {
+      appendSystemRow(versionsHost, "Installed client folders", "Waiting for the standard Roblox install-folder scan.");
+    } else if (!versions.length) {
+      appendSystemRow(versionsHost, "Installed client folders", "No standard Roblox Player or Studio version folder was found.");
+    } else {
+      versions.forEach(function (version) {
+        const kinds = [];
+        if (version.hasPlayer) kinds.push("Player");
+        if (version.hasStudio) kinds.push("Studio");
+        if (version.hasSettings) kinds.push("settings file");
+        appendSystemRow(versionsHost, String(version.name || "Roblox version"), kinds.length ? kinds.join(" · ") : "Standard version folder");
+      });
+    }
+
+    const scan = state.executorScan;
+    executorHost.className = "system-executor-status";
+    if (!scan || !scan.supported || !scan.available) {
+      executorHost.textContent = scan && scan.message ? scan.message : "Known process-name scan is waiting for its local result.";
+    } else if (Array.isArray(scan.matches) && scan.matches.length) {
+      const names = scan.matches.map(function (match) {
+        return String(match.productName || "Possible tool") + " (" + String(match.processName || "") + ")";
+      });
+      executorHost.textContent = "Possible executor-like process name(s): " + names.join(", ") + ". A name match is not proof of malware.";
+      executorHost.classList.add("is-warning");
+    } else {
+      executorHost.textContent = "No exact Xeno, Solara, JJSploit, or Delta process name was found in the limited scan. This is not antivirus.";
+      executorHost.classList.add("is-clean");
+    }
+  }
+
+  function formatBytes(value) {
+    const bytes = Number(value);
+    if (!Number.isFinite(bytes) || bytes <= 0) return "Unknown";
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let amount = bytes;
+    let unit = 0;
+    while (amount >= 1024 && unit < units.length - 1) {
+      amount /= 1024;
+      unit += 1;
+    }
+    return amount.toFixed(unit >= 2 ? 1 : 0) + " " + units[unit];
+  }
+
+  function formatDeviceType(value) {
+    const types = {
+      1: "Desktop",
+      2: "Laptop / mobile",
+      3: "Workstation",
+      4: "Enterprise server",
+      5: "Small-office server",
+      6: "Appliance PC",
+      7: "Performance server",
+      8: "Slate / tablet",
+      9: "Maximum",
+      10: "Mini PC",
+      11: "Stick PC"
+    };
+    return types[Number(value)] || "Other / not reported";
+  }
+
+  function renderSystemRows(host, rows, emptyMessage) {
+    host.replaceChildren();
+    if (!rows.length) {
+      const placeholder = document.createElement("p");
+      placeholder.className = "system-placeholder";
+      placeholder.textContent = emptyMessage;
+      host.appendChild(placeholder);
+      return;
+    }
+    rows.forEach(function (row) { appendSystemRow(host, row.title, row.detail); });
+  }
+
+  function recommendedPresetFor(snapshot) {
+    const memory = Number(snapshot && snapshot.memoryBytes);
+    const names = (Array.isArray(snapshot && snapshot.graphicsAdapters) ? snapshot.graphicsAdapters : [])
+      .map(function (adapter) { return String(adapter && adapter.name || "").toLowerCase(); })
+      .join(" ");
+    const hasDiscreteGpuName = /(geforce\s*(rtx|gtx)|radeon\s*rx|intel\s*arc)/i.test(names);
+    if (Number.isFinite(memory) && memory > 0 && memory < 8 * 1024 * 1024 * 1024) return "low";
+    if (Number.isFinite(memory) && memory >= 16 * 1024 * 1024 * 1024 && hasDiscreteGpuName) return "quality";
+    return "balanced";
+  }
+
+  function renderDeviceSnapshot(result, error) {
+    state.deviceSnapshot = result || null;
+    const badge = byId("deviceBadge");
+    const model = byId("deviceModel");
+    const manufacturer = byId("deviceManufacturer");
+    const type = byId("deviceType");
+    const os = byId("deviceOs");
+    const processorList = byId("processorList");
+    const graphicsList = byId("graphicsList");
+    const driveList = byId("driveList");
+    const memory = byId("memoryValue");
+    const recommendation = byId("recommendationTitle");
+    const recommendationButton = byId("useRecommendedPreset");
+
+    if (error || !result || !result.supported || !result.available) {
+      badge.textContent = result && !result.supported ? "WINDOWS ONLY" : "UNAVAILABLE";
+      badge.className = "state-pill " + (result && !result.supported ? "state-pending" : "state-error");
+      model.textContent = "Hardware details unavailable";
+      manufacturer.textContent = "—";
+      type.textContent = "—";
+      os.textContent = error || (result && result.message) || "Open the Windows desktop app to scan this device locally.";
+      memory.textContent = "—";
+      renderSystemRows(processorList, [], "No processor information available.");
+      renderSystemRows(graphicsList, [], "No graphics information available.");
+      renderSystemRows(driveList, [], "No local storage information available.");
+      recommendation.textContent = "Scan device to get a rough suggestion";
+      recommendationButton.disabled = true;
+      return;
+    }
+
+    badge.textContent = "READ ONLY";
+    badge.className = "state-pill state-found";
+    model.textContent = [result.manufacturer, result.model].filter(Boolean).join(" ") || "Device model not reported";
+    manufacturer.textContent = result.manufacturer || "Not reported";
+    type.textContent = formatDeviceType(result.pcSystemType);
+    const operatingSystem = result.operatingSystem || {};
+    os.textContent = [operatingSystem.name, operatingSystem.version, operatingSystem.architecture].filter(Boolean).join(" · ") || "Windows version not reported";
+    memory.textContent = formatBytes(result.memoryBytes);
+
+    const processors = Array.isArray(result.processors) ? result.processors : [];
+    renderSystemRows(processorList, processors.map(function (processor) {
+      const topology = [processor.cores ? processor.cores + " cores" : "", processor.logicalProcessors ? processor.logicalProcessors + " threads" : ""].filter(Boolean).join(" · ");
+      return { title: processor.name || "Processor", detail: topology || "Windows did not report core counts." };
+    }), "No processor information was returned by Windows.");
+
+    const adapters = Array.isArray(result.graphicsAdapters) ? result.graphicsAdapters : [];
+    renderSystemRows(graphicsList, adapters.map(function (adapter) {
+      const details = [];
+      if (adapter.driverVersion) details.push("Driver " + adapter.driverVersion);
+      if (Number(adapter.adapterRamBytes) > 0) details.push("Windows-reported adapter memory " + formatBytes(adapter.adapterRamBytes));
+      return { title: adapter.name || "Display adapter", detail: details.join(" · ") || "Adapter detected; driver details not reported." };
+    }), "No graphics adapters were returned by Windows.");
+
+    const physicalDrives = Array.isArray(result.physicalDrives) ? result.physicalDrives : [];
+    const volumes = Array.isArray(result.volumes) ? result.volumes : [];
+    const storageRows = physicalDrives.map(function (drive) {
+      const detail = [formatBytes(drive.sizeBytes), drive.interfaceType, drive.mediaType].filter(function (value) { return value && value !== "Unknown"; }).join(" · ");
+      return { title: drive.model || "Physical drive", detail: detail || "Physical drive detected." };
+    }).concat(volumes.map(function (volume) {
+      const name = [volume.drive || "Local volume", volume.label].filter(Boolean).join(" · ");
+      const detail = formatBytes(volume.freeBytes) + " free of " + formatBytes(volume.sizeBytes) + (volume.fileSystem ? " · " + volume.fileSystem : "");
+      return { title: name, detail: detail };
+    }));
+    renderSystemRows(driveList, storageRows, "Windows did not report any local physical drives or volumes.");
+
+    state.recommendedPreset = recommendedPresetFor(result);
+    const presetLabels = { low: "Maximum performance", balanced: "Balanced", quality: "High quality" };
+    const reason = state.recommendedPreset === "low"
+      ? "based on less than 8 GB of reported RAM"
+      : (state.recommendedPreset === "quality" ? "based on RAM and a discrete-GPU model name" : "a conservative middle-ground estimate");
+    recommendation.textContent = "Suggested: " + presetLabels[state.recommendedPreset] + " · " + reason;
+    recommendationButton.disabled = false;
+  }
+
+  async function refreshDeviceInfo() {
+    if (!invoke) {
+      renderDeviceSnapshot(null, "Local hardware inventory is available only in the packaged Windows desktop app.");
+      return null;
+    }
+    const button = byId("refreshDevice");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    byId("deviceBadge").textContent = "SCANNING";
+    byId("deviceBadge").className = "state-pill state-pending";
+    try {
+      const result = await invoke("device_snapshot");
+      renderDeviceSnapshot(result);
+      if (!result.available) showToast(result.message || "Windows could not read this hardware snapshot.", "warning");
+      return result;
+    } catch (error) {
+      const message = error && error.message ? error.message : String(error);
+      renderDeviceSnapshot(null, message);
+      showToast("Local hardware scan failed: " + message, "warning");
+      return null;
+    } finally {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+    }
+  }
+
+  async function probeRobloxWebLatency() {
+    if (!invoke) {
+      byId("webLatencyValue").textContent = "Windows app required";
+      return null;
+    }
+    if (state.latencyPending) return null;
+    state.latencyPending = true;
+    const button = byId("probeRobloxLatency");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    byId("webLatencyValue").textContent = "Measuring…";
+    byId("webLatencyDetail").textContent = "Opening one TCP connection to www.roblox.com:443; no game or account data is sent.";
+    try {
+      const result = await invoke("probe_roblox_latency");
+      if (result && result.available && Number.isFinite(Number(result.latencyMs))) {
+        byId("webLatencyValue").textContent = Number(result.latencyMs).toFixed(1) + " ms";
+      } else {
+        byId("webLatencyValue").textContent = "Unavailable";
+      }
+      byId("webLatencyDetail").textContent = result && result.message
+        ? result.message
+        : "This is a Roblox website TCP connect-time estimate, not game-server ping.";
+      return result;
+    } catch (error) {
+      byId("webLatencyValue").textContent = "Unavailable";
+      byId("webLatencyDetail").textContent = error && error.message ? error.message : "The Roblox web endpoint could not be reached.";
+      return null;
+    } finally {
+      state.latencyPending = false;
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+    }
+  }
+
+  function safetyScanSignature(result, error) {
+    if (error) return "error|" + String(error);
+    if (!result) return "no-result";
+    const names = (Array.isArray(result.matches) ? result.matches : []).map(function (match) {
+      return String(match.processName || match.productName || "").toLowerCase();
+    }).filter(Boolean).sort();
+    return [result.supported ? "supported" : "unsupported", result.available ? "available" : "unavailable", String(result.message || ""), names.join("|")].join("\u001f");
+  }
+
+  async function scanKnownExecutorProcesses(silent) {
+    const unavailableMessage = "Open the packaged Windows app to scan local process names.";
+    if (!invoke) {
+      const signature = safetyScanSignature(null, unavailableMessage);
+      state.executorScan = null;
+      if (!silent || signature !== state.lastSafetyScanSignature) {
+        renderSafetyScan(null, unavailableMessage);
+        renderSystemClientStatus();
+      }
+      state.lastSafetyScanSignature = signature;
+      return null;
+    }
+    if (state.safetyScanPending) {
+      if (!silent) showToast("A local process-name scan is already running.");
+      return null;
+    }
+
+    state.safetyScanPending = true;
+    const button = byId("scanSafety");
+    if (!silent) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      byId("safetyScanBadge").textContent = "SCANNING";
+      byId("safetyScanBadge").className = "state-pill state-pending";
+      byId("safetyScanDetail").textContent = "Checking only the allowlisted process names on this device…";
+    }
+    try {
+      const result = await invoke("scan_known_executor_processes");
+      const signature = safetyScanSignature(result);
+      const changed = signature !== state.lastSafetyScanSignature;
+      state.executorScan = result;
+      state.lastSafetyScanSignature = signature;
+      if (!silent || changed) {
+        renderSafetyScan(result);
+        renderSystemClientStatus();
+      }
+
+      const matches = result && Array.isArray(result.matches) ? result.matches : [];
+      if (matches.length) {
+        const alertSignature = matches.map(function (match) {
+          return String(match.processName || match.productName || "").toLowerCase();
+        }).filter(Boolean).sort().join("|");
+        if (alertSignature && alertSignature !== state.lastSafetyAlertSignature) {
+          showToast("Local safety alert: review the possible process-name match on Main.", "warning");
+        }
+        if (alertSignature) state.lastSafetyAlertSignature = alertSignature;
+      } else if (result && result.available) {
+        state.lastSafetyAlertSignature = "";
+      }
+      return result;
+    } catch (error) {
+      const message = error && error.message ? error.message : String(error);
+      const signature = safetyScanSignature(null, message);
+      state.executorScan = null;
+      if (!silent || signature !== state.lastSafetyScanSignature) {
+        renderSafetyScan(null, message);
+        renderSystemClientStatus();
+      }
+      state.lastSafetyScanSignature = signature;
+      if (!silent) showToast("Local process scan unavailable: " + message, "warning");
+      return null;
+    } finally {
+      state.safetyScanPending = false;
+      button.disabled = !invoke;
+      button.removeAttribute("aria-busy");
+    }
+  }
+
+  async function openWindowsSettings(section) {
+    if (!invoke) {
+      showToast("Windows Settings links are available in the packaged app.", "warning");
+      return;
+    }
+    try {
+      await invoke("open_windows_settings", { section: section });
+    } catch (error) {
+      showToast("Could not open Windows Settings: " + (error && error.message ? error.message : String(error)), "warning");
+    }
+  }
+
   function setView(name) {
     const view = name === "settings" ? "settings" : "main";
     byId("mainView").hidden = view !== "main";
@@ -319,7 +857,7 @@
   }
 
   function setSettingsTab(name) {
-    const selected = ["rendering", "geometry", "icons", "allowlist"].includes(name) ? name : "rendering";
+    const selected = ["rendering", "geometry", "icons", "allowlist", "system"].includes(name) ? name : "rendering";
     byId("settingsView").hidden = false;
     byId("mainView").hidden = true;
     byId("navMain").classList.remove("is-active");
@@ -346,6 +884,8 @@
       pane.classList.toggle("is-active", active);
     });
     byId("pageScroll").scrollTop = 0;
+    renderSystemClientStatus();
+    if (selected === "system" && !state.deviceSnapshot) refreshDeviceInfo();
   }
 
   function capitalize(value) { return value.charAt(0).toUpperCase() + value.slice(1); }
@@ -480,12 +1020,19 @@
     }
     state.pendingAction = action;
     state.confirmReturnFocus = document.activeElement;
-    const isApply = action === "apply";
-    byId("confirmEyebrow").textContent = isApply ? "LOCAL SETTINGS · BACKUP FIRST" : "LOCAL SETTINGS · RESTORE";
-    byId("confirmTitle").textContent = isApply ? "Apply this profile?" : "Restore managed settings?";
-    byId("confirmText").textContent = isApply
-      ? "Roptimer will back up each target file, then update only canonical allowlisted keys. Unrelated JSON keys stay untouched."
-      : "Roptimer will remove only the keys it manages from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+    const isRestore = action === "restore";
+    const isApplyLaunch = action === "apply-launch";
+    const profile = currentProfile();
+    byId("confirmEyebrow").textContent = isRestore ? "LOCAL SETTINGS · RESTORE" : "LOCAL SETTINGS · BACKUP FIRST";
+    byId("confirmTitle").textContent = isRestore ? "Restore managed settings?" : (isApplyLaunch ? "Apply and launch Roblox?" : "Apply this profile?");
+    if (isRestore) {
+      byId("confirmText").textContent = "Marktis Optimizer will remove canonical managed keys and the separate legacy FPS key from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+    } else {
+      let message = "Marktis Optimizer will back up each target file, then apply your local profile. Unrelated JSON keys stay untouched.";
+      if (profile.legacyFps) message += " The opt-in legacy FPS target (" + profile.fps + ") is outside Roblox's current allowlist and may be ignored.";
+      if (isApplyLaunch) message += " If settings are applied successfully, Roblox will open through the normal roblox:// protocol.";
+      byId("confirmText").textContent = message;
+    }
     byId("confirmOverlay").hidden = false;
     byId("cancelConfirm").focus();
   }
@@ -501,6 +1048,8 @@
   async function confirmAction() {
     const action = state.pendingAction;
     if (!action || !invoke) return closeConfirmation();
+    const isRestore = action === "restore";
+    const isApplyLaunch = action === "apply-launch";
     const accept = byId("acceptConfirm");
     const cancel = byId("cancelConfirm");
     const dialog = byId("confirmDialog");
@@ -508,12 +1057,20 @@
     cancel.disabled = true;
     dialog.setAttribute("aria-busy", "true");
     dialog.focus();
-    accept.textContent = action === "apply" ? "Applying…" : "Restoring…";
+    accept.textContent = isRestore ? "Restoring…" : (isApplyLaunch ? "Applying & launching…" : "Applying…");
     let result = null;
     let failure = null;
+    let launchRequested = false;
     try {
-      if (action === "apply") result = await invoke("apply_settings", { profile: currentProfile() });
-      else result = await invoke("restore_settings");
+      if (isRestore) {
+        result = await invoke("restore_settings");
+      } else {
+        result = await invoke("apply_settings", { profile: currentProfile() });
+        if (isApplyLaunch && result && result.applied) {
+          await invoke("launch_roblox");
+          launchRequested = true;
+        }
+      }
     } catch (error) {
       failure = error;
     } finally {
@@ -524,16 +1081,41 @@
     }
     closeConfirmation();
     if (failure) {
-      showToast((action === "apply" ? "Apply failed: " : "Restore failed: ") + (failure && failure.message ? failure.message : String(failure)), "error");
+      const message = failure && failure.message ? failure.message : String(failure);
+      const prefix = isApplyLaunch && result && result.applied
+        ? "Settings were applied, but Roblox could not be launched: "
+        : (isRestore ? "Restore failed: " : "Apply failed: ");
+      showToast(prefix + message, "error");
+      await detectRoblox();
       return;
     }
     if (result && result.applied) {
-      showToast(result.message || (action === "apply" ? "Settings applied with backups." : "Managed settings restored."), "success");
+      const message = isApplyLaunch && launchRequested
+        ? "Settings applied with backups; Roblox launch requested through roblox://."
+        : (result.message || (isRestore ? "Managed settings restored." : "Settings applied with backups."));
+      showToast(message, "success");
     } else {
-      showToast(result && result.message ? result.message : "No settings files were changed.", "warning");
+      showToast(result && result.message ? result.message : "No settings files were changed; Roblox was not launched.", "warning");
     }
     await detectRoblox();
     updateProfileDisplay();
+  }
+
+  async function launchRoblox() {
+    const button = byId("launchRoblox");
+    if (!invoke) {
+      showToast("Launch Roblox from the packaged Windows desktop app.", "warning");
+      return;
+    }
+    if (button) button.disabled = true;
+    try {
+      await invoke("launch_roblox");
+      showToast("Roblox launch requested through the standard roblox:// protocol.", "success");
+    } catch (error) {
+      showToast("Roblox could not be launched: " + (error && error.message ? error.message : String(error)), "error");
+    } finally {
+      if (button) button.disabled = false;
+    }
   }
 
   async function quickRefresh() {
@@ -595,17 +1177,47 @@
     });
     byId("mainOpenSettings").addEventListener("click", function () { setView("settings"); });
     byId("editProfile").addEventListener("click", function () { setSettingsTab("rendering"); });
+    document.querySelectorAll("[data-preset]").forEach(function (button) {
+      button.addEventListener("click", function () { applyRenderingPreset(button.dataset.preset, false); });
+    });
+    byId("useRecommendedPreset").addEventListener("click", function () {
+      if (state.recommendedPreset) applyRenderingPreset(state.recommendedPreset, true);
+    });
+    byId("refreshDevice").addEventListener("click", refreshDeviceInfo);
+    byId("probeRobloxLatency").addEventListener("click", probeRobloxWebLatency);
+    byId("scanSafetySystem").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
+    byId("launchRoblox").addEventListener("click", launchRoblox);
+    byId("applyLaunch").addEventListener("click", function () { openConfirmation("apply-launch"); });
     byId("quickRefresh").addEventListener("click", quickRefresh);
     byId("scanAgain").addEventListener("click", detectRoblox);
     byId("refreshPlayer").addEventListener("click", refreshPlayerStatus);
+    byId("scanSafety").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
+    byId("openInstalledApps").addEventListener("click", function () { openWindowsSettings("apps"); });
+    byId("openWindowsSecurity").addEventListener("click", function () { openWindowsSettings("security"); });
+    byId("openGraphicsSettings").addEventListener("click", function () { openWindowsSettings("graphics"); });
 
     byId("modeSelect").addEventListener("change", function () {
-      if (!state.geometryManuallyChanged) {
-        byId("geometryDistance").value = this.value === "Balanced" ? "128" : "64";
+      const values = {
+        "Maximum performance": { tier: 6, texture: 0, geometryDistance: 64, vfx: true },
+        "Balanced": { tier: 12, texture: 1, geometryDistance: 128, vfx: false },
+        "High quality": { tier: 21, texture: 3, geometryDistance: 256, vfx: false }
+      }[this.value];
+      if (values) {
+        byId("graphicsQuality").value = String(values.tier);
+        byId("textureQuality").value = String(values.texture);
+        byId("vfxToggle").checked = values.vfx;
+        if (!state.geometryManuallyChanged) byId("geometryDistance").value = String(values.geometryDistance);
+      } else if (!state.geometryManuallyChanged) {
+        byId("geometryDistance").value = "64";
       }
       updateProfileDisplay();
     });
-    ["graphicsQuality", "textureQuality", "geometryDistance"].forEach(function (id) {
+    byId("rendererSelect").addEventListener("change", updateProfileDisplay);
+    byId("legacyFpsToggle").addEventListener("change", function () {
+      updateProfileDisplay();
+      if (this.checked) showToast("Experimental legacy FPS target enabled. Roblox may ignore it.", "warning");
+    });
+    ["graphicsQuality", "textureQuality", "fpsTarget", "geometryDistance"].forEach(function (id) {
       byId(id).addEventListener("input", function () {
         if (id === "geometryDistance") state.geometryManuallyChanged = true;
         updateProfileDisplay();
@@ -618,7 +1230,7 @@
     byId("saveProfile").addEventListener("click", function () {
       const profile = currentProfile();
       writeProfile(profile);
-      downloadJson("roptimer-profile.json", { schemaVersion: 1, product: "Roptimer", profile: profile });
+      downloadJson("marktis-optimizer-profile.json", { schemaVersion: 1, product: "Marktis Optimizer", profile: profile });
       showToast("Profile saved locally and exported as JSON.", "success");
     });
     byId("restoreSettings").addEventListener("click", function () { openConfirmation("restore"); });
@@ -642,9 +1254,16 @@
       renderAllowlist();
     });
     byId("exportAllowlist").addEventListener("click", function () {
-      downloadJson("roptimer-fastflags-allowlist.json", state.allowlist);
+      downloadJson("marktis-optimizer-fastflags-allowlist.json", state.allowlist);
       showToast("Canonical allowlist exported.", "success");
     });
+
+    byId("animeThemeSearch").addEventListener("input", renderAnimeThemes);
+    byId("animeThemeGrid").addEventListener("click", function (event) {
+      const button = event.target.closest("[data-anime-theme-id]");
+      if (button) selectAnimeTheme(button.dataset.animeThemeId);
+    });
+    byId("clearAnimeTheme").addEventListener("click", function () { selectAnimeTheme("none"); });
 
     document.querySelectorAll("[data-icon-style-choice]").forEach(function (button) {
       button.addEventListener("click", function () {
@@ -692,7 +1311,7 @@
 
   async function boot() {
     const initialProfile = readProfile();
-    const modeDefaultDistance = initialProfile.mode === "Balanced" ? 128 : 64;
+    const modeDefaultDistance = initialProfile.mode === "Balanced" ? 128 : (initialProfile.mode === "High quality" ? 256 : 64);
     state.geometryManuallyChanged = initialProfile.geometryDistance !== modeDefaultDistance;
     applyProfileToControls(initialProfile);
     applyAppearance(readAppearance());
@@ -703,7 +1322,7 @@
       byId("installBadge").textContent = "DESKTOP ONLY";
       byId("installBadge").className = "state-pill state-pending";
       byId("installTitle").textContent = "Packaged Windows app required";
-      byId("installDetail").textContent = "This standalone layout previews the desktop client. Local detection and writes run only in the packaged Tauri executable.";
+      byId("installDetail").textContent = "This standalone layout previews the desktop client. Local detection and settings writes run only in the packaged Windows desktop app.";
       byId("playerBadge").textContent = "DESKTOP ONLY";
       byId("playerBadge").className = "state-pill state-pending";
       byId("playerTitle").textContent = "Windows desktop runtime required";
@@ -712,7 +1331,16 @@
       byId("settingsCount").textContent = "—";
       byId("applySettings").disabled = true;
       byId("restoreSettings").disabled = true;
+      byId("launchRoblox").disabled = true;
+      byId("applyLaunch").disabled = true;
       byId("refreshPlayer").disabled = true;
+      byId("refreshDevice").disabled = true;
+      byId("probeRobloxLatency").disabled = true;
+      byId("useRecommendedPreset").disabled = true;
+      byId("scanSafetySystem").disabled = true;
+      renderDeviceSnapshot(null, "Local hardware inventory is available only in the packaged Windows app.");
+      renderSafetyScan(null, "Local process scanning is available only in the packaged Windows app.");
+      renderSystemClientStatus();
       setBoot("Standalone desktop layout ready · no remote assets", 100);
       finishBoot();
       return;
@@ -728,11 +1356,13 @@
     }).catch(function () { /* Product metadata is non-critical. */ });
     const detectionTask = detectRoblox();
     const playerTask = refreshPlayerStatus();
-    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask]).then(function () {
+    const safetyTask = scanKnownExecutorProcesses(true);
+    Promise.allSettled([allowlistTask, infoTask, detectionTask, playerTask, safetyTask]).then(function () {
       window.clearTimeout(fallbackTimer);
       finishBoot();
     });
     window.setInterval(refreshPlayerStatus, 10000);
+    window.setInterval(function () { scanKnownExecutorProcesses(true); }, 30000);
   }
 
   wireEvents();

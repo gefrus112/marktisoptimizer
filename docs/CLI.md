@@ -8,7 +8,7 @@
 
 ### Windows
 
-Download `Roptimer-Windows-x64.zip` from the [Windows release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows), extract it, then open a terminal in that folder:
+Download `Roptimer-Windows-x64.zip` from the [Windows release](https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.0.0-windows), extract it, then open a terminal in that folder:
 
 ```powershell
 RoptimerBoost.exe open
@@ -21,7 +21,7 @@ RoptimerBoost.exe allowlist
 
 ### macOS
 
-Download `Roptimer-Mac-Companion.zip` or `Roptimer-Mac.zip` from the [macOS release](https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac), extract it, then run:
+Download `Roptimer-Mac-Companion.zip` or `Roptimer-Mac.zip` from the [macOS release](https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.1.0-mac), extract it, then run:
 
 ```bash
 ./Roptimer\ Boost.command --help

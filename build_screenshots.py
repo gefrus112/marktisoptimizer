@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate crisp SVG product screenshots for the Sirius-style Roptimer website.
+"""Generate crisp SVG product screenshots for the Marktis Optimizer website.
 
 The SVGs are original design previews. They contain no Roblox game screenshots,
 no executable code, and no exploit/script-executor content.
@@ -29,7 +29,7 @@ GREEN_OK = "#7cc6ff"  # cool blue, never neon green
 STARS = [
     (45, 60, 1.0), (130, 120, .7), (210, 44, .8), (330, 90, .5), (470, 55, .9),
     (610, 130, .6), (720, 45, 1.0), (850, 105, .7), (990, 60, .8), (1130, 140, .6),
-    (75, 250, .6), (250, 310, .8), (420, 240, .5), (580, 330, 9), (760, 270, .6),
+    (75, 250, .6), (250, 310, .8), (420, 240, .5), (580, 330, .9), (760, 270, .6),
     (920, 350, .8), (1080, 260, .5), (60, 470, .8), (190, 550, .6), (360, 490, .7),
     (520, 610, .5), (690, 520, .8), (840, 600, .6), (1010, 500, .9), (1160, 620, .5),
     (35, 680, .7), (275, 665, .5), (455, 700, .8), (635, 685, .6), (805, 710, .5),
@@ -64,6 +64,17 @@ def line(x1: int, y1: int, x2: int, y2: int, stroke: str = BORDER, sw: int = 1, 
 def circle(x: int, y: int, r: int, fill: str, opacity: float = 1, stroke: str = "", sw: int = 1) -> str:
     border = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
     return f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fill}" opacity="{opacity}"{border}/>'
+
+
+def brand_mark(x: int, y: int, size: int) -> str:
+    scale = size / 512
+    return "".join([
+        rect(x, y, size, size, "#11151b", max(5, round(size * .22)), "#e2231a"),
+        f'<g transform="translate({x} {y}) scale({scale:.6f})">',
+        '<g transform="translate(0 8) rotate(15 256 256)"><path fill="#651b1c" fill-rule="evenodd" d="M104 104h304v304H104z M218 218h76v76h-76z"/></g>',
+        '<g transform="rotate(15 256 256)"><path fill="#e2231a" fill-rule="evenodd" d="M104 104h304v304H104z M218 218h76v76h-76z"/></g>',
+        '</g>',
+    ])
 
 
 def code_lines(x: int, y: int, lines: list[tuple[str, str]], step: int = 24, size: int = 14) -> str:
@@ -119,53 +130,52 @@ def window(x: int, y: int, w: int, h: int, title: str) -> str:
 def download_svg() -> str:
     b: list[str] = []
     b.append(rect(0, 0, 1200, 86, "#070708", 0, BORDER))
-    b.append(rect(34, 26, 34, 34, ACCENT, 10))
-    b.append(txt(51, 50, "R", 21, TEXT, 900, "Georgia, serif", "middle"))
-    b.append(txt(82, 50, "Roptimer", 17, TEXT, 700))
+    b.append(brand_mark(34, 26, 34))
+    b.append(txt(82, 50, "Marktis", 17, TEXT, 700))
     b.append(txt(188, 50, "Download", 13, TEXT, 700))
     b.append(txt(282, 50, "Docs", 13, MUTED, 700))
     b.append(txt(344, 50, "Scripts", 13, MUTED, 700))
     b.append(txt(1000, 50, "GitHub", 13, MUTED, 700))
     b.append(rect(1080, 28, 90, 36, "#141418", 10, BORDER))
-    b.append(txt(1125, 51, "Get Roptimer", 11, TEXT, 700, anchor="middle"))
-    b.append(txt(70, 180, "ROPTIMER HUB V3.2 · 100× COOLER", 12, AMBER, 800, letter=2.5))
-    b.append(txt(70, 260, "Serious performance", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
-    b.append(txt(70, 326, "for every player.", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
-    b.append(txt(72, 380, "Safe local Roblox settings for Windows and macOS.", 17, MUTED))
-    b.append(txt(72, 408, "No executor. No injection. No memory edits.", 17, MUTED))
+    b.append(txt(1125, 51, "Get Marktis", 11, TEXT, 700, anchor="middle"))
+    b.append(txt(70, 180, "MARKTIS OPTIMIZER V4 · WINDOWS SETUP WIZARDS", 12, AMBER, 800, letter=2.2))
+    b.append(txt(70, 260, "Install once.", 58, TEXT, 400, "Georgia, 'Times New Roman', serif"))
+    b.append(txt(70, 326, "Launch without a batch file.", 43, TEXT, 400, "Georgia, 'Times New Roman', serif"))
+    b.append(txt(72, 380, "Choose the primary Rust + Tauri app or optional Electron shell.", 16, MUTED))
+    b.append(txt(72, 408, "Both installers create shortcuts and keep settings local.", 16, MUTED))
     b.append(rect(70, 440, 190, 46, "#141418", 10, BORDER))
-    b.append(txt(165, 469, "Start with Roptimer", 13, TEXT, 700, anchor="middle"))
+    b.append(txt(165, 469, "Guided setup", 13, TEXT, 700, anchor="middle"))
     b.append(rect(274, 440, 160, 46, BG, 10, BORDER))
     b.append(txt(354, 469, "Read the docs", 13, MUTED, 700, anchor="middle"))
-    # Platform cards
+    # Primary Tauri and optional Electron installer cards.
     b.append(rect(650, 175, 230, 310, PANEL, 16, BORDER))
     b.append(rect(910, 175, 230, 310, PANEL, 16, BORDER))
-    b.append(txt(675, 215, "WINDOWS", 11, ACCENT_2, 800, letter=2))
-    b.append(txt(675, 265, "Roptimer.exe", 24, TEXT, 700))
-    b.append(txt(675, 300, ".NET 8 WPF app + Boost CLI", 13, MUTED))
+    b.append(txt(675, 215, "PRIMARY · TAURI", 11, ACCENT_2, 800, letter=1.5))
+    b.append(txt(675, 265, "Marktis Setup", 22, TEXT, 700))
+    b.append(txt(675, 300, "Rust + Tauri · WebView2", 13, MUTED))
     b.append(rect(675, 330, 180, 1, BORDER))
-    for i, label in enumerate(["Allowlisted FastFlags", "Backups & restore", "Graphics tiers 0–21", "GitHub Release EXE"]):
-        b.append(txt(675, 362 + i * 28, "◆  " + label, 13, TEXT))
-    b.append(rect(675, 430, 180, 38, ACCENT, 9))
-    b.append(txt(765, 454, "Download EXE", 12, TEXT, 800, anchor="middle"))
-    b.append(txt(935, 215, "MACOS", 11, AMBER, 800, letter=2))
-    b.append(txt(935, 265, "Roptimer Mac", 24, TEXT, 700))
-    b.append(txt(935, 300, "Python/Tkinter companion", 13, MUTED))
+    for i, label in enumerate(["Guided x64 installer", "Main + grouped Settings", "Local backups & restore", "Shortcuts + uninstall"]):
+        b.append(txt(675, 360 + i * 22, "◆  " + label, 12, TEXT))
+    b.append(rect(675, 441, 180, 36, ACCENT, 9))
+    b.append(txt(765, 464, "Install Marktis", 12, TEXT, 800, anchor="middle"))
+    b.append(txt(935, 215, "OPTIONAL · ELECTRON", 11, AMBER, 800, letter=1.5))
+    b.append(txt(935, 265, "Marktis Electron", 22, TEXT, 700))
+    b.append(txt(935, 300, "Electron · Chromium", 13, MUTED))
     b.append(rect(935, 330, 180, 1, BORDER))
-    for i, label in enumerate(["Unsigned .app launcher", "Boost.command CLI", "Local JSON settings", "Backup / restore"]):
-        b.append(txt(935, 362 + i * 28, "◆  " + label, 13, TEXT))
-    b.append(rect(935, 430, 180, 38, "#17171b", 9, BORDER))
-    b.append(txt(1025, 454, "Download ZIP", 12, TEXT, 800, anchor="middle"))
+    for i, label in enumerate(["Guided x64 installer", "Same desktop interface", "No batch launcher", "Shortcuts + uninstall"]):
+        b.append(txt(935, 360 + i * 22, "◆  " + label, 12, TEXT))
+    b.append(rect(935, 441, 180, 36, "#17171b", 9, BORDER))
+    b.append(txt(1025, 464, "Install Electron", 12, TEXT, 800, anchor="middle"))
     b.append(line(0, 620, 1200, 620, BORDER))
-    b.append(txt(70, 665, "0 injected DLLs", 15, TEXT, 700))
-    b.append(txt(300, 665, "21 graphics tiers", 15, TEXT, 700))
-    b.append(txt(560, 665, "2 desktop platforms", 15, TEXT, 700))
-    b.append(txt(830, 665, "100% reversible JSON", 15, TEXT, 700))
-    return svg_doc("Roptimer Sirius dark Download tab", "".join(b))
+    b.append(txt(70, 665, "2 Windows app shells", 15, TEXT, 700))
+    b.append(txt(340, 665, "2 guided setup wizards", 15, TEXT, 700))
+    b.append(txt(620, 665, "0 batch launchers", 15, TEXT, 700))
+    b.append(txt(890, 665, "Local settings only", 15, TEXT, 700))
+    return svg_doc("Marktis Optimizer Windows installer choices", "".join(b))
 
 
 def cli_docs_svg() -> str:
-    b: list[str] = [window(50, 50, 1100, 620, "Roptimer — Docs & How it works")]
+    b: list[str] = [window(50, 50, 1100, 620, "Marktis Optimizer — Docs & How it works")]
     # left docs nav
     b.append(rect(50, 98, 250, 572, "#08080a"))
     b.append(line(300, 98, 300, 670, BORDER))
@@ -194,14 +204,14 @@ def cli_docs_svg() -> str:
         b.append(rect(500, yy, width, 18, color, 9))
     b.append(rect(340, 620, 760, 1, BORDER))
     b.append(txt(340, 650, "Legacy FPS flag may be ignored • Use Roblox Settings → Maximum Framerate", 12, MUTED))
-    return svg_doc("Roptimer Boost CLI docs screenshot", "".join(b))
+    return svg_doc("Marktis Optimizer legacy CLI docs screenshot", "".join(b))
 
 
 def script_hub_svg() -> str:
-    b: list[str] = [window(60, 55, 1080, 610, "Roptimer Script Hub — local UI preview only")]
+    b: list[str] = [window(60, 55, 1080, 610, "Marktis Optimizer Script Hub — local UI preview only")]
     b.append(rect(60, 103, 220, 562, "#08080a"))
     b.append(line(280, 103, 280, 665, BORDER))
-    b.append(txt(84, 140, "ROPTIMER UI", 11, AMBER, 800, letter=2))
+    b.append(txt(84, 140, "MARKTIS UI", 11, AMBER, 800, letter=2))
     for i, label in enumerate(["Script Hub", "Loading GUI", "Performance", "Session Toast", "Backups", "Safety"]):
         active = i == 0
         if active:
@@ -209,7 +219,7 @@ def script_hub_svg() -> str:
         b.append(txt(92, 182 + i * 48, label, 13, TEXT if active else MUTED, 700 if active else 400))
     b.append(txt(310, 140, "Script Hub", 28, TEXT, 400, "Georgia, serif"))
     b.append(txt(310, 166, "Original local UI recipes · no game execution · no executor APIs", 12, MUTED))
-    cards = [("Sirius Loading GUI", "Loader + steps"), ("Performance Preset", "Mode card"),
+    cards = [("Marktis Loading GUI", "Loader + steps"), ("Performance Preset", "Mode card"),
              ("Session Ready Toast", "Notification"), ("Backup Status", "Local log")]
     for i, (name, detail) in enumerate(cards):
         x = 310 + (i % 2) * 240
@@ -222,7 +232,7 @@ def script_hub_svg() -> str:
     b.append(rect(310, 390, 370, 230, "#070709", 12, BORDER))
     b.append(txt(330, 420, "loading-gui.luau", 12, ACCENT_2, 700, "SFMono-Regular, Consolas, monospace"))
     b.append(code_lines(330, 450, [
-        ("local", "ui = Roptimer.UI.new({"),
+        ("local", "ui = Marktis.UI.new({"),
         ("", "  theme = 'Sirius Dark'"),
         ("", "})"),
         ("", "ui:Loader({ steps = {"),
@@ -235,12 +245,12 @@ def script_hub_svg() -> str:
     b.append(txt(730, 420, "LOCAL PREVIEW", 10, DIM, 800, letter=2))
     b.append(rect(730, 440, 360, 1, BORDER))
     b.append(circle(910, 485, 26, "url(#grad)", 1, ACCENT, 2))
-    b.append(txt(910, 492, "R", 22, TEXT, 900, "Georgia, serif", "middle"))
+    b.append(brand_mark(894, 469, 32))
     b.append(txt(910, 532, "Preparing safe profile", 13, TEXT, 700, anchor="middle"))
     b.append(rect(760, 550, 300, 10, "#101014", 5))
     b.append(rect(760, 550, 216, 10, "url(#progress)", 5))
     b.append(txt(910, 590, "Not sent to Roblox · local animation only", 11, MUTED, anchor="middle"))
-    return svg_doc("Roptimer Script Hub screenshot", "".join(b))
+    return svg_doc("Marktis Optimizer Script Hub screenshot", "".join(b))
 
 
 def loading_gui_svg() -> str:
@@ -251,11 +261,11 @@ def loading_gui_svg() -> str:
     b.append(circle(290, 168, 6, RED))
     b.append(circle(312, 168, 6, AMBER))
     b.append(circle(334, 168, 6, GREEN_OK))
-    b.append(txt(380, 174, "Roptimer UI · Loading GUI", 13, MUTED, 700))
+    b.append(txt(380, 174, "Marktis UI · Loading GUI", 13, MUTED, 700))
     b.append(txt(600, 250, "Optimizing your local settings", 28, TEXT, 400, "Georgia, serif", "middle"))
     b.append(txt(600, 282, "This preview runs in the website only.", 14, MUTED, anchor="middle"))
     b.append(circle(600, 340, 48, "url(#grad)", 1, ACCENT, 2))
-    b.append(txt(600, 352, "R", 36, TEXT, 900, "Georgia, serif", "middle"))
+    b.append(brand_mark(576, 316, 48))
     b.append(rect(360, 420, 480, 14, "#101014", 7))
     b.append(rect(360, 420, 360, 14, "url(#progress)", 7))
     steps = ["Scan local settings", "Back up JSON", "Preview flags", "Apply safe profile"]
@@ -267,11 +277,11 @@ def loading_gui_svg() -> str:
     b.append(rect(470, 515, 260, 42, ACCENT, 10))
     b.append(txt(600, 541, "Open preview", 13, TEXT, 800, anchor="middle"))
     b.append(txt(600, 600, "No loadstring · no executor · no Roblox process attachment", 12, MUTED, anchor="middle"))
-    return svg_doc("Roptimer loading GUI preview screenshot", "".join(b))
+    return svg_doc("Marktis Optimizer loading GUI preview screenshot", "".join(b))
 
 
 def mac_svg() -> str:
-    b: list[str] = [window(80, 80, 1040, 560, "Roptimer Mac — safe local companion")]
+    b: list[str] = [window(80, 80, 1040, 560, "Legacy Roptimer Mac — safe local companion")]
     b.append(rect(80, 128, 1040, 1, BORDER))
     # app icon
     b.append(rect(130, 180, 160, 160, "url(#grad)", 36, BORDER))
@@ -306,20 +316,19 @@ def command_palette_svg() -> str:
     b: list[str] = []
     # Dimmed website behind the palette.
     b.append(rect(0, 0, 1200, 86, "#070708", 0, BORDER))
-    b.append(rect(34, 26, 34, 34, ACCENT, 10))
-    b.append(txt(51, 50, "R", 21, TEXT, 900, "Georgia, serif", "middle"))
-    b.append(txt(82, 50, "Roptimer", 17, TEXT, 700))
+    b.append(brand_mark(34, 26, 34))
+    b.append(txt(82, 50, "Marktis", 17, TEXT, 700))
     b.append(txt(190, 50, "Download", 13, TEXT, 700))
     b.append(txt(280, 50, "Docs", 13, MUTED, 700))
     b.append(txt(340, 50, "Scripts", 13, MUTED, 700))
     b.append(rect(1020, 28, 140, 36, "#141418", 10, BORDER))
     b.append(txt(1090, 51, "Ctrl K  ◆", 11, TEXT, 700, anchor="middle"))
-    b.append(txt(70, 190, "ROPTIMER HUB V3.2 · 100× COOLER SITE ENGINE", 12, AMBER, 800, letter=2.2))
+    b.append(txt(70, 190, "MARKTIS OPTIMIZER V4 · LIGHTWEIGHT CSS-ONLY WEBSITE", 12, AMBER, 800, letter=2.2))
     b.append(txt(70, 270, "Serious performance", 58, TEXT, 400, "Georgia, serif"))
     b.append(txt(70, 336, "for every player.", 58, TEXT, 400, "Georgia, serif"))
     b.append(txt(72, 390, "Search downloads, docs, scripts, and CLI commands from anywhere.", 17, MUTED))
     b.append(rect(70, 430, 190, 46, "#141418", 10, BORDER))
-    b.append(txt(165, 459, "Start with Roptimer", 13, TEXT, 700, anchor="middle"))
+    b.append(txt(165, 459, "Explore Marktis", 13, TEXT, 700, anchor="middle"))
     b.append(rect(70, 500, 230, 30, "#101014", 999))
     b.append(txt(185, 520, "100× cooler  ·  Pages ready", 11, MUTED, 700, anchor="middle"))
     # Overlay.
@@ -333,7 +342,7 @@ def command_palette_svg() -> str:
     b.append(rect(875, 160, 56, 30, "#111116", 8, BORDER))
     b.append(txt(903, 180, "Esc", 10, DIM, 700, anchor="middle"))
     rows = [
-        ("01", "Go to Download", "Windows EXE, macOS app, source ZIP, and checksums"),
+        ("01", "Go to Download", "Windows setup wizards, macOS companion, source ZIP, and checksums"),
         ("02", "Go to Docs & How it works", "Local JSON, backups, CLI, settings builder, and safety"),
         (">_", "Copy Windows Boost command", "Copy the generated RoptimerBoost.exe apply command"),
         ("03", "Go to Scripts", "Script Hub, loading GUI preview, and screenshots"),
@@ -351,57 +360,49 @@ def command_palette_svg() -> str:
     b.append(rect(245, 528, 710, 47, "#08080a", 0, BORDER))
     b.append(txt(270, 557, "↑ ↓ navigate     ↵ run     / or Ctrl+K open", 11, DIM, 700))
     b.append(txt(935, 557, "13 commands", 10, AMBER, 700, anchor="end"))
-    return svg_doc("Roptimer command palette screenshot", "".join(b))
+    return svg_doc("Marktis Optimizer command palette screenshot", "".join(b))
 
 
 def starfield_svg() -> str:
     b: list[str] = []
     b.append(rect(0, 0, 1200, 86, "#070708", 0, BORDER))
-    b.append(rect(34, 26, 34, 34, ACCENT, 10))
-    b.append(txt(51, 50, "R", 21, TEXT, 900, "Georgia, serif", "middle"))
-    b.append(txt(82, 50, "Roptimer", 17, TEXT, 700))
+    b.append(brand_mark(34, 26, 34))
+    b.append(txt(82, 50, "Marktis", 17, TEXT, 700))
     b.append(txt(190, 50, "Download", 13, TEXT, 700))
     b.append(txt(280, 50, "Docs", 13, MUTED, 700))
     b.append(txt(340, 50, "Scripts", 13, MUTED, 700))
     b.append(rect(1040, 28, 120, 36, "#141418", 10, BORDER))
-    b.append(txt(1100, 51, "◆ 100× mode", 10, TEXT, 700, anchor="middle"))
-    # Cursor glow + orbit system.
-    b.append(circle(930, 330, 260, "url(#grad)", .9))
-    for r in (90, 150, 215):
-        b.append(circle(930, 330, r, "none", .55, BORDER, 1))
-    b.append(circle(930, 330, 62, "url(#grad)", 1, ACCENT, 2))
-    b.append(txt(930, 348, "R", 44, TEXT, 900, "Georgia, serif", "middle"))
-    b.append(circle(790, 190, 4, ACCENT_2, 1))
-    b.append(circle(1090, 470, 3, AMBER, 1))
-    b.append(circle(1085, 205, 2, "#ffffff", .8))
-    b.append(line(790, 190, 930, 330, BORDER, 1, .6))
-    b.append(line(930, 330, 1090, 470, BORDER, 1, .6))
-    b.append(txt(70, 180, "V3.2 · ANIMATED STARFIELD ENGINE", 12, AMBER, 800, letter=2.4))
+    b.append(txt(1100, 51, "CSS-only", 10, TEXT, 700, anchor="middle"))
+    # Static CSS backdrop preview: no canvas, WebGL, or 3D render loop.
+    b.append(rect(735, 150, 390, 410, PANEL, 18, BORDER))
+    b.append(circle(930, 330, 170, "url(#grad)", .5))
+    b.append(circle(930, 330, 97, "#111116", .95, BORDER, 1))
+    b.append(txt(930, 340, "CSS", 36, TEXT, 800, "Georgia, serif", "middle"))
+    b.append(txt(930, 375, "STATIC BACKDROP", 9, ACCENT_2, 800, anchor="middle", letter=1.4))
+    b.append(txt(70, 180, "V4 · LIGHTWEIGHT WEBSITE", 12, AMBER, 800, letter=2.4))
     b.append(txt(70, 260, "Serious", 72, TEXT, 400, "Georgia, serif"))
     b.append(txt(70, 338, "performance.", 72, TEXT, 400, "Georgia, serif"))
-    b.append(txt(72, 390, "Canvas starfield, cursor spotlight, counters, and scroll reveals.", 17, MUTED))
-    b.append(txt(72, 420, "Still zero game script execution and no green neon dots.", 15, MUTED))
+    b.append(txt(72, 390, "Static CSS gradients and a subtle star field.", 17, MUTED))
+    b.append(txt(72, 420, "No Three.js, WebGL renderer, or animated 3D scene.", 15, MUTED))
     b.append(rect(70, 460, 190, 46, ACCENT, 10))
     b.append(txt(165, 489, "Open command palette", 12, TEXT, 800, anchor="middle"))
     b.append(rect(274, 460, 140, 46, "#141418", 10, BORDER))
     b.append(txt(344, 489, "Read the docs", 12, TEXT, 700, anchor="middle"))
     b.append(rect(70, 540, 150, 32, "#101014", 999))
-    b.append(txt(145, 561, "◆ 100× cooler", 11, TEXT, 800, anchor="middle"))
+    b.append(txt(145, 561, "◆ 13 commands", 11, TEXT, 800, anchor="middle"))
     b.append(rect(232, 540, 210, 32, "#101014", 999))
     b.append(txt(337, 561, "● GitHub Pages ready", 11, TEXT, 800, anchor="middle"))
-    # Animated stat counters.
     b.append(line(0, 620, 1200, 620, BORDER))
-    stats = [("3", "main tabs"), ("14", "managed flags"), ("0", "game scripts run"), ("100×", "cooler engine")]
+    stats = [("3", "main tabs"), ("18", "allowlisted flags"), ("0", "game scripts run"), ("CSS", "only backdrop")]
     for i, (value, label) in enumerate(stats):
         x = 70 + i * 285
         b.append(txt(x, 665, value, 34, TEXT, 400, "Georgia, serif"))
         b.append(txt(x, 690, label, 10, MUTED, 800, letter=1.4))
-    return svg_doc("Roptimer 100x starfield website screenshot", "".join(b))
-
+    return svg_doc("Marktis Optimizer lightweight CSS-only website screenshot", "".join(b))
 
 
 def allowlist_svg() -> str:
-    b: list[str] = [window(40, 40, 1120, 640, "Roptimer — FastFlag allowlist")]
+    b: list[str] = [window(40, 40, 1120, 640, "Marktis Optimizer — FastFlag allowlist")]
     b.append(rect(40, 88, 220, 592, "#08080a"))
     b.append(line(260, 88, 260, 680, BORDER))
     nav = ["Overview", "How it works", "Boost CLI", "Allowlist", "Settings", "Safety"]
@@ -456,9 +457,9 @@ def allowlist_svg() -> str:
         b.append(rect(690, 236 + i * 24, 420, 19, "#070709", 5, BORDER))
         b.append(txt(698, 250 + i * 24, flag, 9.6, TEXT, 400, "SFMono-Regular, Consolas, monospace"))
     b.append(rect(290, 580, 840, 60, "#070709", 12, BORDER))
-    b.append(txt(310, 605, "Legacy: DFIntTaskSchedulerTargetFps is NOT allowlisted", 12, MUTED, 700))
+    b.append(txt(310, 605, "Legacy FPS target is a separate opt-in and may be ignored by Roblox", 12, MUTED, 700))
     b.append(txt(310, 625, "No telemetry, Crashpad/Backtrace, fullbright, x-ray, building removal, anti-cheat bypass, or game script execution flags.", 10, DIM))
-    return svg_doc("Roptimer FastFlag allowlist screenshot", "".join(b))
+    return svg_doc("Marktis Optimizer FastFlag allowlist screenshot", "".join(b))
 
 
 def build() -> None:

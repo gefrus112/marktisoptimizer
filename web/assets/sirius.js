@@ -567,10 +567,10 @@
   /* --------------------------------------------------------------------- */
 
   var URLS = {
-    repo: "https://github.com/gefrus112/robloxclinetbooster",
-    windows: "https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows",
-    mac: "https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac",
-    pages: "https://gefrus112.github.io/robloxclinetbooster/"
+    repo: "https://github.com/gefrus112/marktisoptimizer",
+    windows: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.0.0-windows",
+    mac: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.1.0-mac",
+    pages: "https://gefrus112.github.io/marktisoptimizer/"
   };
 
   function prefersReducedMotion() {

@@ -1,7 +1,7 @@
 {
-  "product": "Roptimer Hub V4",
+  "product": "Marktis Optimizer",
   "version": "4.0.0",
-  "platform": "Rust + Tauri v2 / Windows 10+ (single-file standalone desktop UI); .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with vendored Three.js",
+  "platform": "Rust + Tauri v2 / Windows 10+ (primary desktop client); optional Electron / Windows x64 setup wizard; .NET 8 / WPF (legacy), Python/Tkinter macOS companion (legacy), static GitHub Pages website with a CSS-only backdrop",
   "safety": {
     "injection": false,
     "memoryReads": false,
@@ -13,17 +13,30 @@
     "robloxTelemetryDisable": false,
     "appTelemetry": false,
     "gameScriptExecution": false,
-    "allowlistOnly": true
+    "allowlistOnly": false,
+    "localProcessNameScan": true,
+    "networkRequests": true,
+    "fullMalwareScan": false,
+    "automaticProcessTermination": false,
+    "automaticSoftwareRemoval": false,
+    "hardwareTelemetry": false,
+    "processAffinityChanges": false,
+    "networkRouteChanges": false,
+    "canonicalAllowlistDefault": true,
+    "experimentalLegacyFpsOptIn": true,
+    "networkProbeOnDemand": true,
+    "networkProbeEndpoint": "www.roblox.com:443",
+    "networkProbePayloadSent": false
   },
   "features": [
     {
       "id": "fps-unlock",
-      "name": "Unlocking FPS",
-      "status": "Legacy / may be ignored",
+      "name": "Experimental legacy FPS target request",
+      "status": "Experimental legacy / opt-in / may be ignored",
       "implemented": true,
       "safe": true,
       "flag": "DFIntTaskSchedulerTargetFps",
-      "details": "Writes the legacy FPS flag for older client builds. Current Roblox clients use an allowlist and may silently ignore this flag. Use Roblox Settings > Maximum Framerate for the supported cap up to 240 FPS."
+      "details": "The Tauri/Electron desktop profile keeps DFIntTaskSchedulerTargetFps off by default and writes it only after explicit opt-in, separately from the canonical 18-key allowlist. The request is clamped to 60-1000 FPS, backed up, and removed by Restore. Current Roblox clients may ignore or cap it; no FPS gain or unlock is guaranteed. The saved request is not actual FPS; use Roblox Performance Stats (Shift+F5) for live in-game FPS and game-server ping."
     },
     {
       "id": "texture-cache",
@@ -41,7 +54,7 @@
       "implemented": false,
       "safe": false,
       "flag": null,
-      "details": "Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Roptimer sends no analytics of its own, but it does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems."
+      "details": "Hidden diagnostic and abuse-reporting flags are not on the local allowlist and are not written. Marktis Optimizer sends no analytics of its own; its optional website TCP connection check runs only when requested. It does not disable Roblox diagnostics, crash handlers, or background screenshot/reporting systems."
     },
     {
       "id": "graphics-tiers",
@@ -59,7 +72,7 @@
       "implemented": true,
       "safe": true,
       "flag": "multiple allowlisted flags",
-      "details": "Better FPS, Reduce building lag, Balanced, Maximum performance, Visual quality, and auto-selected mode. All modes write reversible local JSON settings only."
+      "details": "Maximum performance lowers selected graphics/texture and geometry detail, Balanced provides a middle ground, and High quality retains more detail. Presets stage local allowlisted settings; they cannot guarantee lag-free play or increase hardware limits. Any legacy FPS target remains a separate experimental opt-in and may be ignored."
     },
     {
       "id": "building-lag",
@@ -113,7 +126,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Dependency-free WPF desktop app with a Bubblestrap-inspired settings layout, custom shield icon, blue Lumina theme, and local-settings-only bootstrapper."
+      "details": "Legacy dependency-free WPF desktop client with a local-settings-only bootstrapper. The current Rust + Tauri and Electron releases are the primary desktop apps and use a separate Marktis Optimizer interface."
     },
     {
       "id": "settings-tab",
@@ -126,12 +139,12 @@
     },
     {
       "id": "blue-ui",
-      "name": "Blue Lumina desktop interface",
+      "name": "Marktis standalone desktop interface",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Blue/purple/cyan desktop app theme inspired by the provided Lumina Hub reference. No green neon status dots."
+      "details": "The primary Rust + Tauri and optional Electron clients use a purpose-built Marktis desktop interface, separate from the website. Users can customize local accent colors and select bundled anime background themes."
     },
     {
       "id": "bootstrapper-exe",
@@ -153,12 +166,12 @@
     },
     {
       "id": "sirius-website",
-      "name": "Sirius-style dark website, 100× edition",
+      "name": "Lightweight Sirius-style CSS-only website",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, animated canvas starfield, command palette, counters, scroll reveals, Windows/macOS download cards, FastFlag allowlist docs, and no green neon dots."
+      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, static CSS starfield and gradients, command palette, counters, scroll reveals, Windows/macOS download cards, and FastFlag allowlist docs. No WebGL renderer or Three.js runtime is loaded."
     },
     {
       "id": "cli-docs",
@@ -171,7 +184,7 @@
     },
     {
       "id": "script-hub",
-      "name": "Roptimer Script Hub",
+      "name": "Marktis Optimizer Script Hub",
       "status": "Implemented safely",
       "implemented": true,
       "safe": true,
@@ -212,16 +225,16 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 14 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, focus mode, and the local Script Hub preview. No dynamic code execution."
+      "details": "Ctrl/Cmd+K or / opens a keyboard-navigable palette with 13 actions for tabs, generated CLI commands, downloads, releases, the FastFlag allowlist, safety docs, low-motion focus mode, and the local Script Hub preview. No dynamic code execution."
     },
     {
       "id": "starfield-fx",
-      "name": "100× animated starfield and spotlight FX",
+      "name": "Lightweight CSS starfield and visual effects",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Adds a canvas starfield, cursor-follow spotlight, animated gradient headline, live Pages badge, count-up stats, staggered scroll reveals, focus mode, and reduced-motion handling. All effects are local and purely visual."
+      "details": "Uses a static CSS starfield and gradient backdrop, modest tab/reveal/counter interactions, and an optional low-motion focus mode. No canvas rendering loop, WebGL, GPU bloom, or cursor-follow spotlight."
     },
     {
       "id": "fastflag-allowlist",
@@ -248,7 +261,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Single lightweight Roptimer-Rust-x64.exe with its own standalone Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist). It is independent from the website and bundles no website UI, CSS, JavaScript, or Three.js. Uses the built-in WebView2 runtime."
+      "details": "Guided x64 NSIS setup wizard for the primary Marktis Optimizer Rust + Tauri Windows client. It uses WebView2, has its own Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist, System), detects Roblox locally, manages canonical allowlisted settings by default, and shows read-only hardware details. It also offers a fixed roblox:// launcher, confirmed Apply & launch, safe rendering presets, and a separately opted-in experimental legacy FPS request. The Icons tab also offers local anime background themes that tint the app UI; actual game FPS and experience ping are not read."
     },
     {
       "id": "roblox-detect-on-launch",
@@ -257,7 +270,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "On first open the Windows client detects whether Roblox is installed by scanning standard version folders and ClientSettings paths (read-only, OS-level). No process attachment, memory reads, or launching Roblox. Results appear on the standalone Main page."
+      "details": "The Windows client detects standard Roblox installation/version folders and ClientSettings paths (read-only, OS-level), distinguishing Player and Studio. Detection itself does not launch Roblox. A separate user-triggered launcher dispatches the fixed roblox:// protocol through Windows Explorer. Apply & launch requires confirmation and runs only after a successful settings write."
     },
     {
       "id": "windows-only-client-tab",
@@ -279,12 +292,12 @@
     },
     {
       "id": "vendored-threejs-website",
-      "name": "Glowing Three.js website (offline, no CDN)",
-      "status": "Implemented",
-      "implemented": true,
+      "name": "Three.js / WebGL website scene",
+      "status": "Removed at user request",
+      "implemented": false,
       "safe": true,
       "flag": null,
-      "details": "New dark nebula layout with a vendored Three.js 0.169.0 scene (bloom, orbiting rings, particles) using only relative ES-module imports so it loads on GitHub Pages without an import map or network. Graceful CSS fallback when WebGL is unavailable."
+      "details": "Removed from the website to reduce rendering load. The site no longer ships or imports Three.js, a WebGL canvas, or a 3D scene; lightweight CSS gradients and static stars remain."
     },
     {
       "id": "rust-safe-apply-restore",
@@ -292,8 +305,130 @@
       "status": "Implemented safely",
       "implemented": true,
       "safe": true,
-      "flag": "allowlisted keys only",
-      "details": "Rust backend writes only canonical allowlisted ClientAppSettings.json keys, preserves unrelated keys, creates timestamped backups, and can restore managed keys. Legacy FPS flag is not written."
+      "flag": "18 canonical allowlisted keys + opt-in legacy FPS key",
+      "details": "Rust writes canonical allowlisted ClientAppSettings.json keys by default, preserves unrelated keys, and creates timestamped backups. The experimental legacy FPS target is a separate opt-in and is removed by Restore; it may be ignored by Roblox."
+    },
+    {
+      "id": "renderer-preference",
+      "name": "Allowlisted rendering API preference",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": "FFlagDebugGraphicsPreferD3D11 / FFlagDebugGraphicsPreferVulkan / FFlagDebugGraphicsPreferOpenGL",
+      "details": "The standalone Windows app selects System default, Direct3D 11, Vulkan, or OpenGL using only the mutually exclusive canonical allowlisted switches. Direct3D 12 is not included in the allowlist; unsupported renderer flags are never written."
+    },
+    {
+      "id": "local-executor-name-scan",
+      "name": "Local known-executor process-name check",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "At startup, every 30 seconds while open, and on request, the Windows app checks exact process image names Xeno.exe, Solara.exe, JJSploit.exe, and Delta.exe. Alerts stay on-device/in-app; only the image-name field is parsed. Any PID present in tasklist temporary output is ignored and not retained or reported; no paths, command lines, process memory, or network data are collected by this scan. This is not antivirus or a complete malware scan. Matches lead to Windows Settings/Windows Security for user review; no process is terminated and no files/software are deleted automatically."
+    },
+    {
+      "id": "dynamic-resolution-scaling",
+      "name": "Dynamic in-game resolution scaling",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. The canonical Roblox allowlist has no supported runtime render-scale control. Monitoring game-frame/GPU conditions and changing internal render resolution would cross the app’s no-process-inspection/no-hook boundary. Use Roblox’s official graphics controls instead."
+    },
+    {
+      "id": "core-affinity-optimization",
+      "name": "Force Roblox onto selected CPU cores",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. Setting per-process P-core/E-core affinity requires opening and changing the Roblox process, which is outside the local allowlisted-settings boundary. Windows and Roblox retain control of CPU scheduling."
+    },
+    {
+      "id": "intelligent-network-routing",
+      "name": "ExitLag-style route optimization / jitter mitigation",
+      "status": "Rejected",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "Not implemented. Route rerouting requires a VPN/relay, driver, or system network-path changes and may send traffic through a third party. Marktis Optimizer does not tunnel, intercept, reroute, or optimize Roblox network traffic; its opt-in website TCP measurement is not a game-server route optimizer."
+    },
+    {
+      "id": "desktop-roblox-launcher",
+      "name": "Fixed-protocol Roblox desktop launcher",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The Tauri and Electron Main pages can ask Windows Explorer to dispatch the fixed roblox:// URI. Apply & launch requires confirmation and launches only after settings are successfully written. No shell command, arbitrary URL, game join, injection, or process manipulation is performed."
+    },
+    {
+      "id": "electron-desktop-client",
+      "name": "Optional Electron Windows desktop client",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Optional Electron Windows desktop build for Marktis Optimizer, using the same independent local desktop UI and narrow IPC bridge as Tauri. It includes read-only device inventory, safe rendering presets, on-device name-only process alerts, standard roblox:// launch, and the same reversible settings boundary. The optional website TCP probe runs only on request and is not game-server ping. The shared UI bundles the same local anime theme gallery and Max performance profile."
+    },
+    {
+      "id": "guided-windows-installers",
+      "name": "Guided x64 Windows setup wizards",
+      "status": "Implemented",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Configures separate NSIS setup wizards for the Rust + Tauri and Electron apps. Both installers create Start Menu shortcuts and register Windows uninstallers; the Tauri wizard offers a Desktop shortcut option, and the Electron wizard creates a Desktop shortcut. Both can launch the app after setup; no batch launcher is required. The new distribution stops staging the old portable Rust x64 executable."
+    },
+    {
+      "id": "local-device-inventory",
+      "name": "Read-only local device and storage inventory",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "details": "The System tab uses a fixed PowerShell/WMI query to show manufacturer/model and device type, CPU, RAM, graphics adapters, physical drives, and logical-volume free space. The snapshot is read-only, remains in the UI, does not query serial numbers, is not saved by the app, and is not uploaded."
+    },
+    {
+      "id": "windows-graphics-settings-shortcut",
+      "name": "Windows Advanced Graphics settings shortcut",
+      "status": "Implemented safely — navigation only",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The System tab opens the fixed Windows Advanced Graphics settings page so the user can choose a preferred GPU for Roblox. It does not toggle HAGS, change drivers, or write system settings."
+    },
+    {
+      "id": "unsupported-system-boosters",
+      "name": "Automatic cache cleaners and system/network/game-file tweaks",
+      "status": "Not implemented by design",
+      "implemented": false,
+      "safe": false,
+      "flag": null,
+      "details": "The app does not automatically delete Roblox cache/logs or %TEMP% files, modify fullscreen/CPU-priority registry values, clear standby memory, force System Restore points, change DNS/MTU or route/filter game-server IPs, replace Roblox textures/skyboxes/particles, or bypass audio caches. These actions can delete useful data, affect system responsiveness or connectivity, or modify game assets. The optimizer remains limited to allowlisted local ClientAppSettings.json settings with timestamped backups."
+    },
+    {
+      "id": "roblox-web-latency-probe",
+      "name": "Optional Roblox website TCP connection-time check",
+      "status": "Implemented safely / on-demand / limited",
+      "implemented": true,
+      "safe": true,
+      "details": "A user-triggered TCP handshake to www.roblox.com:443 shows website connection time only. It sends no application payload or account/game data, but the endpoint sees the normal network connection and source IP. It is not ping to a Roblox game server."
+    },
+    {
+      "id": "actual-game-fps-ping",
+      "name": "Read actual in-game FPS and experience ping",
+      "status": "Not read by this app",
+      "implemented": false,
+      "safe": true,
+      "details": "The app does not read Roblox memory, process telemetry, or live game statistics. Use Roblox Performance Stats (Shift+F5) for actual in-game FPS and server ping. The experimental legacy FPS value is only a request, not a measurement."
+    },
+    {
+      "id": "desktop-anime-themes",
+      "name": "Local anime desktop theme gallery",
+      "status": "Partially implemented — 10 of 40 images",
+      "implemented": true,
+      "safe": true,
+      "details": "The standalone desktop UI bundles original anime-inspired fan-art backgrounds that stay local and apply a matching accent color. Selecting a theme changes only the app appearance, not Roblox content or graphics settings. Ten images are currently bundled; thirty requested images remain pending generation."
     }
   ],
   "sources": [

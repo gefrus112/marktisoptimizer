@@ -1,4 +1,4 @@
-/* Roptimer Hub V3.2 — Nebula Client interactions.
+/* Marktis Optimizer — lightweight website interactions.
    Safe static site logic only: no eval, no remote code, no Roblox process access. */
 (function () {
   "use strict";
@@ -191,7 +191,7 @@
 
   function featureState(status) {
     var value = String(status || "").toLowerCase();
-    if (value.indexOf("reject") !== -1) return "rejected";
+    if (value.indexOf("reject") !== -1 || value.indexOf("removed") !== -1) return "rejected";
     if (value.indexOf("legacy") !== -1) return "legacy";
     return "implemented";
   }
@@ -337,7 +337,7 @@
   $("#downloadSettings") && $("#downloadSettings").addEventListener("click", function () {
     var s = currentSettings();
     var payload = {
-      product: "Roptimer Windows Client",
+      product: "Marktis Optimizer Windows Client",
       platform: "windows",
       mode: s.mode,
       fpsTarget: Number(s.fps),
@@ -378,7 +378,7 @@
   function openLightbox(button) {
     if (!lightbox || !lightboxImage) return;
     lightboxImage.src = button.getAttribute("data-src") || "";
-    lightboxImage.alt = button.getAttribute("data-alt") || "Roptimer screenshot";
+    lightboxImage.alt = button.getAttribute("data-alt") || "Marktis Optimizer screenshot";
     if (lightboxCaption) lightboxCaption.textContent = button.getAttribute("data-caption") || "";
     lightbox.hidden = false;
   }
@@ -394,10 +394,10 @@
   /* ------------------------------------------------------------------ */
 
   var URLS = {
-    repo: "https://github.com/gefrus112/robloxclinetbooster",
-    windows: "https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.0.0-windows",
-    mac: "https://github.com/gefrus112/robloxclinetbooster/releases/tag/v3.1.0-mac",
-    pages: "https://gefrus112.github.io/robloxclinetbooster/",
+    repo: "https://github.com/gefrus112/marktisoptimizer",
+    windows: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.0.0-windows",
+    mac: "https://github.com/gefrus112/marktisoptimizer/releases/tag/v3.1.0-mac",
+    pages: "https://gefrus112.github.io/marktisoptimizer/",
     allowlist: "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"
   };
 
@@ -413,8 +413,7 @@
     { title: "Open macOS companion release", hint: "Legacy Mac companion only · not the allowlist client", icon: "↗", keywords: "github release mac macos companion download", run: function () { openExternal(URLS.mac); } },
     { title: "Open official allowlist source", hint: "Roblox DevForum local FastFlag allowlist", icon: "◇", keywords: "official source roblox devforum fastflag allowlist", run: function () { openExternal(URLS.allowlist); } },
     { title: "View feature status", hint: "Jump to implemented, legacy, and rejected features", icon: "✓", keywords: "feature status audit safety rejected", run: function () { activateTab("docs"); scrollToAnchor("feature-status"); } },
-    { title: "Pulse the Three.js glow", hint: "Trigger a brief bloom pulse in the 3D scene", icon: "✦", keywords: "three.js glow bloom pulse webgl scene", run: function () { document.body.classList.add("glow-boost"); window.dispatchEvent(new CustomEvent("roptimer:glow-boost")); toast("Glow pulse sent to the Three.js scene."); window.setTimeout(function () { document.body.classList.remove("glow-boost"); }, 1800); } },
-    { title: "Toggle focus mode", hint: "Hide the 3D canvas and reduce visual motion", icon: "◐", keywords: "focus mode calm reduce motion webgl canvas", run: function () { document.body.classList.toggle("focus-mode"); toast(document.body.classList.contains("focus-mode") ? "Focus mode on." : "Focus mode off."); } },
+    { title: "Toggle focus mode", hint: "Pause decorative animations and dim the static CSS backdrop", icon: "◐", keywords: "focus mode calm reduce motion performance css", run: function () { document.body.classList.toggle("focus-mode"); toast(document.body.classList.contains("focus-mode") ? "Low-motion focus mode on." : "Low-motion focus mode off."); } },
     { title: "Open GitHub repository", hint: "Source, workflows, docs, and issues", icon: "⌥", keywords: "github repo source code repository", run: function () { openExternal(URLS.repo); } }
   ];
 
@@ -528,18 +527,8 @@
     return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
-  function initCursorGlow() {
-    var glow = $("#cursorGlow");
-    if (!glow) return;
-    window.addEventListener("pointermove", function (event) {
-      document.body.classList.add("pointer-active");
-      glow.style.transform = "translate3d(" + event.clientX + "px," + event.clientY + "px,0) translate(-50%,-50%)";
-    }, { passive: true });
-    window.addEventListener("pointerleave", function () { document.body.classList.remove("pointer-active"); });
-  }
-
   function initReveal() {
-    var items = $$(".glass, .panel, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
+    var items = $$(".glass, .panel, .overview-card, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
     items.forEach(function (el) { el.classList.add("reveal"); });
     function showAll() { items.forEach(function (el) { el.classList.add("revealed"); }); }
     if (prefersReducedMotion() || !("IntersectionObserver" in window)) { showAll(); return; }
@@ -577,15 +566,22 @@
     counters.forEach(function (el) { observer.observe(el); });
   }
 
+  var scrollProgressFrame = null;
   function updateScrollProgress() {
-    var bar = $("#scrollProgress");
-    if (!bar) return;
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
-    bar.style.width = Math.min(100, Math.max(0, pct)) + "%";
+    if (scrollProgressFrame !== null) return;
+    var requestFrame = window.requestAnimationFrame || function (callback) {
+      return window.setTimeout(callback, 16);
+    };
+    scrollProgressFrame = requestFrame(function () {
+      scrollProgressFrame = null;
+      var bar = $("#scrollProgress");
+      if (!bar) return;
+      var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      var progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      bar.style.transform = "scaleX(" + progress + ")";
+    });
   }
 
-  initCursorGlow();
   initReveal();
   initCounters();
   window.addEventListener("scroll", updateScrollProgress, { passive: true });
@@ -603,7 +599,7 @@
     commandCount: commands.length,
     allowlistFlagCount: allowlistFlags.length,
     allowlistCategoryCount: (allowlist.categories || []).length,
-    threeCanvas: !!$("#three-canvas"),
+    visualRenderer: "css-only",
     platform: (allowlist.platform || "windows").toLowerCase(),
     activeTab: function () {
       var active = $(".tab-button.active");

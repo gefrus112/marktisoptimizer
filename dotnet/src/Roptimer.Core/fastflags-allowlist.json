@@ -1,22 +1,27 @@
 {
-  "product": "Roptimer Hub",
+  "product": "Marktis Optimizer",
   "version": "4.0.0",
-  "edition": "Rust + Tauri Windows Client",
+  "edition": "Windows Desktop Client (Rust + Tauri primary; Electron optional)",
   "allowlistVersion": 2,
   "platform": "windows",
   "windowsOnly": true,
-  "description": "Canonical list of Roblox local ClientAppSettings.json FastFlags that the Roptimer Windows client may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.",
+  "description": "Canonical list of Roblox local ClientAppSettings.json FastFlags that Marktis Optimizer may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.",
   "source": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569",
   "client": {
-    "name": "Roptimer",
-    "framework": "Rust + Tauri v2",
-    "webview": "Microsoft Edge WebView2 (Windows)",
-    "executable": "Roptimer-Rust-x64.exe",
+    "name": "Marktis Optimizer",
+    "framework": "Rust + Tauri v2 (primary); Electron (optional)",
+    "webview": "Microsoft Edge WebView2 (Tauri) or Electron Chromium (Windows)",
+    "executable": "Marktis-Optimizer-Rust-Setup-x64.exe; Marktis-Optimizer-Electron-Setup-x64.exe (optional)",
     "architecture": "x86_64 (64-bit)",
     "minOS": "Windows 10 version 1803 or newer",
-    "singleFile": true,
+    "singleFile": false,
     "detectsRobloxOnLaunch": true,
-    "target": "ClientAppSettings.json"
+    "target": "ClientAppSettings.json",
+    "packaging": [
+      "Tauri NSIS x64 setup wizard",
+      "Electron NSIS x64 setup wizard"
+    ],
+    "installation": "Guided wizards create Start Menu shortcuts and uninstall support; Tauri offers a Desktop shortcut option, Electron creates one; no batch launcher required."
   },
   "safety": {
     "localJsonOnly": true,

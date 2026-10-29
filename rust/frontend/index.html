@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
-  <meta name="description" content="Roptimer Windows desktop client for safe, reversible local Roblox settings." />
-  <title>Roptimer — Windows Client</title>
+  <meta name="description" content="Marktis Optimizer Windows desktop client for safe, reversible local Roblox settings." />
+  <title>Marktis Optimizer — Windows Client</title>
   <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body class="is-booting">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <symbol id="i-brand" viewBox="0 0 40 40"><path d="M20 2.8 36.5 12v16L20 37.2 3.5 28V12L20 2.8Z"/><path d="M12.5 30V10H21a6 6 0 0 1 0 12h-8.5M19 22l9 8"/></symbol>
+    <symbol id="i-brand" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
     <symbol id="i-rendering" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></symbol>
@@ -26,6 +26,9 @@
     <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 7v5h5M5 12a7 7 0 1 0 2-5"/><path d="M12 8v4l3 2"/></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 4h7v7m0-7-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></symbol>
     <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-system" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h8v8H8zM2 8h2m-2 4h2m-2 4h2m16-8h2m-2 4h2m-2 4h2M8 2v2m4-2v2m4-2v2m-8 16v2m4-2v2m4-2v2"/></symbol>
+    <symbol id="i-memory" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6V3m5 3V3m5 3V3M7 18v3m5-3v3m5-3v3M7 10h3v4H7zM14 10h3v4h-3z"/></symbol>
+    <symbol id="i-roblox" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
@@ -33,7 +36,7 @@
 
   <div class="boot-screen" id="bootScreen" role="status" aria-live="polite">
     <div class="boot-mark"><svg class="icon"><use href="#i-brand"/></svg></div>
-    <p class="eyebrow">ROPTIMER · WINDOWS CLIENT</p>
+    <p class="eyebrow">MARKTIS OPTIMIZER · WINDOWS CLIENT</p>
     <h1>Preparing your workspace<span>.</span></h1>
     <p class="boot-message" id="bootMessage">Starting the local settings service…</p>
     <div class="boot-track"><span id="bootProgress"></span></div>
@@ -42,9 +45,9 @@
 
   <div class="app-shell" id="appShell">
     <aside class="sidebar" aria-label="Application navigation">
-      <a class="brand-lockup" href="#main" aria-label="Roptimer main page">
+      <a class="brand-lockup" href="#main" aria-label="Marktis Optimizer main page">
         <span class="brand-mark"><svg class="icon"><use href="#i-brand"/></svg></span>
-        <span class="brand-copy"><strong>ROPTIMER</strong><small>WINDOWS CLIENT</small></span>
+        <span class="brand-copy"><strong>MARKTIS</strong><small>OPTIMIZER · WINDOWS</small></span>
       </a>
 
       <div class="side-divider"></div>
@@ -61,6 +64,7 @@
           <button class="subnav-item" type="button" data-tab="geometry"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
           <button class="subnav-item" type="button" data-tab="icons"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
           <button class="subnav-item" type="button" data-tab="allowlist"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+          <button class="subnav-item" type="button" data-tab="system"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
         </div>
       </nav>
 
@@ -76,7 +80,7 @@
 
     <main class="workspace">
       <header class="topbar">
-        <div class="breadcrumb"><span>ROPTIMER</span><span class="crumb-slash">/</span><strong id="breadcrumbTitle">Main</strong></div>
+        <div class="breadcrumb"><span>MARKTIS OPTIMIZER</span><span class="crumb-slash">/</span><strong id="breadcrumbTitle">Main</strong></div>
         <div class="topbar-meta"><span class="local-indicator"><i></i> RUNNING LOCALLY</span><span class="topbar-separator"></span><span class="build-label" id="buildLabel">V4.0.0</span></div>
       </header>
 
@@ -112,7 +116,7 @@
             <article class="panel status-panel player-panel" aria-labelledby="playerTitle">
               <div class="panel-topline"><span class="panel-index">02</span><span class="panel-kicker">PLAYER PRESENCE</span><span class="state-pill state-pending" id="playerBadge">CHECKING</span></div>
               <div class="status-main-row">
-                <span class="large-icon player-icon"><svg class="icon"><use href="#i-monitor"/></svg></span>
+                <span class="large-icon player-icon" aria-hidden="true"><svg class="icon"><use href="#i-roblox"/></svg></span>
                 <div class="status-copy"><h2 id="playerTitle">Checking Player process</h2><p id="playerDetail">Windows-only process-name check.</p></div>
               </div>
               <div class="process-chip"><span class="process-dot"></span><code>RobloxPlayerBeta.exe</code><span>NAME ONLY</span></div>
@@ -126,23 +130,53 @@
               <div class="profile-chips" id="profileSummary">
                 <span>Graphics <b id="summaryGraphics">21 / 21</b></span>
                 <span>Texture <b id="summaryTexture">0 / 3</b></span>
+                <span>Renderer <b id="summaryRenderer">Auto</b></span>
                 <span>Geometry <b id="summaryGeometry">64 studs</b></span>
+                <span>Legacy FPS <b id="summaryFps">Off</b></span>
               </div>
               <button class="text-action" id="editProfile" type="button"><svg class="icon"><use href="#i-settings"/></svg>Configure this profile</button>
             </article>
 
             <article class="safety-panel">
               <span class="safety-emblem"><svg class="icon"><use href="#i-shield"/></svg></span>
-              <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Roptimer creates a timestamped backup, preserves unrelated JSON keys, and touches only keys on the canonical allowlist.</p></div>
+              <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Marktis Optimizer creates a timestamped backup and preserves unrelated JSON keys. Canonical allowlist keys are the default; the legacy FPS request is a separate opt-in.</p></div>
               <div class="safety-checks"><span><svg class="icon"><use href="#i-check"/></svg>Local files only</span><span><svg class="icon"><use href="#i-check"/></svg>Restore available</span><span><svg class="icon"><use href="#i-check"/></svg>No game injection</span></div>
             </article>
           </div>
-          <p class="page-footnote"><span class="footnote-dot"></span> Roptimer changes local client settings only. Restart Roblox normally after applying.</p>
+          <section class="panel launcher-panel" aria-labelledby="launcherTitle">
+            <div class="launcher-copy">
+              <p class="panel-kicker">STANDARD ROBLOX LAUNCH · USER CONTROLLED</p>
+              <h2 id="launcherTitle">Start with your settings.</h2>
+              <p>Launch the installed Roblox client through Windows’ normal <code>roblox://</code> protocol, or confirm your local profile and launch in one step.</p>
+            </div>
+            <div class="launcher-actions">
+              <button class="button button-soft" id="launchRoblox" type="button">Launch Roblox</button>
+              <button class="button button-primary" id="applyLaunch" type="button">Apply &amp; launch</button>
+            </div>
+          </section>
+          <section class="panel safety-scan-panel" aria-labelledby="safetyScanTitle">
+            <div class="safety-scan-top">
+              <div class="safety-scan-copy">
+                <p class="panel-kicker">WINDOWS ONLY · LOCAL-ONLY CHECK</p>
+                <h2 id="safetyScanTitle">Known executor process scan</h2>
+                <p id="safetyScanDetail">Checks exact Xeno, Solara, JJSploit, and Delta process names at startup, every 30 seconds, and on request. Alerts stay on this device.</p>
+              </div>
+              <span class="state-pill state-pending" id="safetyScanBadge">NOT CHECKED</span>
+            </div>
+            <div class="safety-scan-controls">
+              <button class="button button-soft" id="scanSafety" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Scan running processes</button>
+              <button class="button button-outline-warn" id="openInstalledApps" type="button" hidden><svg class="icon"><use href="#i-settings"/></svg>Open Installed Apps</button>
+              <button class="button button-soft" id="openWindowsSecurity" type="button" hidden><svg class="icon"><use href="#i-shield"/></svg>Open Windows Security</button>
+            </div>
+            <div class="safety-match-list" id="safetyMatches" role="status" aria-live="polite"></div>
+            <p class="safety-scan-note">Automatic checks run at startup and every 30 seconds while the app is open. This is not antivirus: it checks only exact process names, not paths, command lines, files, or memory. No data is uploaded. A match is not proof of malware; Marktis Optimizer never stops or deletes anything. Review or uninstall programs yourself in Windows Settings or Windows Security.</p>
+          </section>
+          <p class="page-footnote"><span class="footnote-dot"></span> Marktis Optimizer changes local client settings only. Restart Roblox normally after applying.</p>
         </section>
 
         <section class="view-section settings-view" id="settingsView" data-view-panel="settings" aria-labelledby="settingsTitle" hidden>
           <div class="page-heading settings-heading">
-            <div><p class="eyebrow">LOCAL CONFIGURATION <span class="eyebrow-rule"></span> SAFE BY DEFAULT</p><h1 id="settingsTitle">Settings</h1><p class="heading-copy">Choose a profile and review the exact groups Roptimer is allowed to manage.</p></div>
+            <div><p class="eyebrow">LOCAL CONFIGURATION <span class="eyebrow-rule"></span> SAFE BY DEFAULT</p><h1 id="settingsTitle">Settings</h1><p class="heading-copy">Choose a profile and review the exact groups Marktis Optimizer is allowed to manage.</p></div>
             <div class="settings-header-status"><span class="status-light"></span> Changes are staged locally</div>
           </div>
 
@@ -151,17 +185,40 @@
             <button class="settings-tab" id="tabGeometry" type="button" role="tab" data-tab="geometry" aria-controls="paneGeometry" aria-selected="false"><svg class="icon"><use href="#i-geometry"/></svg><span>Geometry</span></button>
             <button class="settings-tab" id="tabIcons" type="button" role="tab" data-tab="icons" aria-controls="paneIcons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
             <button class="settings-tab" id="tabAllowlist" type="button" role="tab" data-tab="allowlist" aria-controls="paneAllowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
+            <button class="settings-tab" id="tabSystem" type="button" role="tab" data-tab="system" aria-controls="paneSystem" aria-selected="false"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
           </div>
 
           <div class="settings-pane-stack">
             <section class="settings-pane is-active" id="paneRendering" data-pane="rendering" role="tabpanel" aria-labelledby="tabRendering">
-              <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings. Roblox's in-game FPS control is not changed.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
+              <div class="pane-heading"><div><span class="pane-index">01 / RENDERING</span><h2>Rendering profile</h2><p>Adjust approved graphics and texture settings, plus an optional experimental legacy FPS target request.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span></div>
               <div class="form-card">
                 <div class="form-row mode-row">
                   <div class="field-copy"><label for="modeSelect">Optimization profile</label><p>Sets safe defaults for graphics workload and LOD.</p></div>
                   <select id="modeSelect" class="select-control">
                     <option value="Reduce building lag">Reduce building lag</option>
+                    <option value="Maximum performance">Maximum performance · lower detail</option>
                     <option value="Balanced">Balanced</option>
+                    <option value="High quality">High quality</option>
+                  </select>
+                </div>
+                  <div class="form-divider"></div>
+                <div class="safe-preset-block">
+                  <div class="safe-preset-heading"><strong>Safe rendering presets</strong><small>Stage values only; nothing is written until you confirm Apply.</small></div>
+                  <div class="safe-preset-grid" role="group" aria-label="Safe graphics presets">
+                    <button class="safe-preset" type="button" data-preset="low"><strong>Max performance</strong><small>Lowest workload; less visual detail</small></button>
+                    <button class="safe-preset" type="button" data-preset="balanced"><strong>Balanced</strong><small>Middle-ground detail</small></button>
+                    <button class="safe-preset" type="button" data-preset="quality"><strong>High quality</strong><small>Keep more visual detail</small></button>
+                  </div>
+                  <p class="safe-preset-note">Max performance lowers selected graphics workload; it cannot guarantee lag-free play or increase hardware limits. These are local settings, not mods, scripts, or injected content.</p>
+                </div>
+                <div class="form-divider"></div>
+                <div class="form-row mode-row">
+                  <div class="field-copy"><label for="rendererSelect">Rendering API preference</label><p>Uses only allowlisted backend preferences. Direct3D 12 is not on the current allowlist.</p></div>
+                  <select id="rendererSelect" class="select-control">
+                    <option value="Auto">System default</option>
+                    <option value="Direct3D 11">Direct3D 11</option>
+                    <option value="Vulkan">Vulkan</option>
+                    <option value="OpenGL">OpenGL</option>
                   </select>
                 </div>
                 <div class="form-divider"></div>
@@ -171,11 +228,16 @@
                 </div>
                 <div class="form-divider"></div>
                 <div class="form-row slider-row">
-                  <div class="field-copy"><label for="textureQuality">Texture quality</label><p>Uses Roblox's allowlisted texture-quality override. Range: 0–3.</p></div>
+                  <div class="field-copy"><label for="textureQuality">Texture quality · <b id="textureQualityName">Lowest</b></label><p>0 = lowest memory use; 3 = highest detail. Roblox may clamp or ignore settings on some clients.</p></div>
                   <div class="range-control"><input id="textureQuality" type="range" min="0" max="3" step="1" value="0" /><output id="textureQualityValue" for="textureQuality">0</output></div>
                 </div>
                 <div class="form-divider"></div>
-                <div class="info-callout"><svg class="icon"><use href="#i-shield"/></svg><p><strong>No unapproved FPS flags.</strong> FPS limits are controlled inside Roblox. Roptimer does not write the legacy target-FPS flag.</p></div>
+                <label class="toggle-row" for="legacyFpsToggle"><span class="toggle-copy"><strong>Experimental legacy FPS target</strong><small id="legacyFpsWarning">Off by default. Opt in to <code>DFIntTaskSchedulerTargetFps</code>, a legacy setting outside Roblox’s current 18-key allowlist.</small></span><span class="switch"><input id="legacyFpsToggle" type="checkbox" aria-describedby="legacyFpsWarning" /><span></span></span></label>
+                <div class="form-row slider-row fps-target-row">
+                  <div class="field-copy"><label for="fpsTarget">Requested frame-rate target</label><p>Choose 60–1000 FPS. Roblox may ignore or cap this legacy request; results depend on the client and hardware.</p></div>
+                  <div class="range-control"><input id="fpsTarget" type="range" min="60" max="1000" step="10" value="240" disabled aria-describedby="experimentalFpsNote" /><output id="fpsTargetValue" for="fpsTarget">240</output></div>
+                </div>
+                <div class="info-callout experimental-callout"><svg class="icon"><use href="#i-shield"/></svg><p id="experimentalFpsNote"><strong>Not a guaranteed unlock.</strong> This single setting is opt-in, backed up, and removed by Restore; Roblox may ignore or cap it. It does not bypass anti-cheat or change game memory. For supported limits, use Roblox’s in-game frame-rate setting.</p></div>
               </div>
             </section>
 
@@ -198,7 +260,7 @@
             </section>
 
             <section class="settings-pane" id="paneIcons" data-pane="icons" role="tabpanel" aria-labelledby="tabIcons" hidden>
-              <div class="pane-heading"><div><span class="pane-index">03 / ICONS</span><h2>Desktop appearance</h2><p>These preferences customize Roptimer's own interface and stay on this device.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-icons"/></svg></span></div>
+              <div class="pane-heading"><div><span class="pane-index">03 / ICONS</span><h2>Desktop appearance</h2><p>These preferences customize Marktis Optimizer's own interface and stay on this device.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-icons"/></svg></span></div>
               <div class="appearance-grid">
                 <div class="form-card appearance-card">
                   <div class="section-title"><div><h3>Icon weight</h3><p>Choose how navigation icons are drawn in the desktop app.</p></div></div>
@@ -208,27 +270,101 @@
                     <button class="icon-style-option" type="button" data-icon-style-choice="minimal"><span class="style-preview"><svg class="icon"><use href="#i-geometry"/></svg><svg class="icon"><use href="#i-rendering"/></svg><svg class="icon"><use href="#i-icons"/></svg></span><strong>Minimal</strong><small>Quiet accents</small></button>
                   </div>
                   <div class="form-divider"></div>
-                  <div class="section-title"><div><h3>Accent color</h3><p>Applied to Roptimer UI highlights only.</p></div></div>
+                  <div class="section-title"><div><h3>Accent color</h3><p>Applied to Marktis Optimizer UI highlights only.</p></div></div>
                   <div class="accent-options" role="group" aria-label="Desktop accent color">
                     <button class="accent-choice is-selected" type="button" data-accent-choice="mint"><i class="accent-swatch swatch-mint"></i><span>Mint</span></button>
                     <button class="accent-choice" type="button" data-accent-choice="amber"><i class="accent-swatch swatch-amber"></i><span>Amber</span></button>
                     <button class="accent-choice" type="button" data-accent-choice="blue"><i class="accent-swatch swatch-blue"></i><span>Blue</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="crimson"><i class="accent-swatch swatch-crimson"></i><span>Crimson</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="violet"><i class="accent-swatch swatch-violet"></i><span>Violet</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="emerald"><i class="accent-swatch swatch-emerald"></i><span>Emerald</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="rose"><i class="accent-swatch swatch-rose"></i><span>Rose</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="cyan"><i class="accent-swatch swatch-cyan"></i><span>Cyan</span></button>
+                    <button class="accent-choice" type="button" data-accent-choice="gold"><i class="accent-swatch swatch-gold"></i><span>Gold</span></button>
                   </div>
                 </div>
                 <div class="appearance-preview-card">
-                  <div class="preview-window-head"><span class="window-lights"><i></i><i></i><i></i></span><span>ROPTIMER DESKTOP</span><svg class="icon"><use href="#i-icons"/></svg></div>
-                  <div class="preview-window-body"><div class="preview-side"><span class="preview-logo">R</span><i class="preview-selected"><svg class="icon"><use href="#i-home"/></svg></i><i><svg class="icon"><use href="#i-settings"/></svg></i><i><svg class="icon"><use href="#i-list"/></svg></i></div><div class="preview-content"><span class="preview-line"></span><span class="preview-line short"></span><div class="preview-tile"><svg class="icon"><use href="#i-shield"/></svg><b>Local & reversible</b></div></div></div>
-                  <p>Appearance settings do not change Roblox icons, game assets, or the bundled Windows application icon.</p>
+                  <div class="preview-window-head"><span class="window-lights"><i></i><i></i><i></i></span><span>MARKTIS OPTIMIZER DESKTOP</span><svg class="icon"><use href="#i-icons"/></svg></div>
+                  <div class="preview-window-body"><div class="preview-side"><span class="preview-logo"><svg class="icon"><use href="#i-brand"/></svg></span><i class="preview-selected"><svg class="icon"><use href="#i-home"/></svg></i><i><svg class="icon"><use href="#i-settings"/></svg></i><i><svg class="icon"><use href="#i-list"/></svg></i></div><div class="preview-content"><span class="preview-line"></span><span class="preview-line short"></span><div class="preview-tile"><svg class="icon"><use href="#i-shield"/></svg><b>Local & reversible</b></div></div></div>
+                  <p>Appearance settings and background art change only this app; Roblox icons, game assets, and the Windows application icon are untouched.</p>
                 </div>
+              </div>
+              <div class="form-card anime-theme-library">
+                <div class="section-title anime-theme-heading"><div><h3>Anime desktop themes</h3><p>Bundled illustrations stay on this device and tint the app UI to match.</p></div><button class="button button-soft" id="clearAnimeTheme" type="button">Clear artwork</button></div>
+                <div class="anime-theme-toolbar"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="animeThemeSearch" type="search" placeholder="Find a character or series…" autocomplete="off" /></label><span class="theme-count" id="animeThemeCount">10 local themes</span></div>
+                <div class="anime-theme-grid" id="animeThemeGrid" role="group" aria-label="Bundled anime desktop themes"></div>
+                <p class="system-card-note">Artwork is local. Selecting a theme changes only Marktis Optimizer’s background and accent colors; it does not alter Roblox or affect performance settings.</p>
               </div>
             </section>
 
             <section class="settings-pane" id="paneAllowlist" data-pane="allowlist" role="tabpanel" aria-labelledby="tabAllowlist" hidden>
-              <div class="pane-heading"><div><span class="pane-index">04 / ALLOWLIST</span><h2>Approved settings only</h2><p>Read-only reference for the canonical local FastFlag allowlist included with Roptimer.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span></div>
+              <div class="pane-heading"><div><span class="pane-index">04 / ALLOWLIST</span><h2>Approved settings only</h2><p>Read-only reference for the canonical local FastFlag allowlist included with Marktis Optimizer.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-list"/></svg></span></div>
               <div class="allowlist-toolbar"><div class="allowlist-count"><strong id="allowlistTotal">18</strong><span>approved keys</span></div><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="allowlistSearch" type="search" placeholder="Search flags…" autocomplete="off" /><kbd>CTRL K</kbd></label><button class="button button-soft" id="exportAllowlist" type="button"><svg class="icon"><use href="#i-save"/></svg>Export JSON</button></div>
               <div class="filter-row" id="allowlistFilters" role="group" aria-label="Filter allowlist category"></div>
               <div class="allowlist-groups" id="allowlistGroups" aria-live="polite"></div>
-              <p class="allowlist-note"><svg class="icon"><use href="#i-shield"/></svg>This list is informational and read-only. Roptimer preserves any unrelated settings already in the local JSON file.</p>
+              <p class="allowlist-note"><svg class="icon"><use href="#i-shield"/></svg>This list is informational and read-only. Marktis Optimizer preserves any unrelated settings already in the local JSON file.</p>
+            </section>
+
+            <section class="settings-pane" id="paneSystem" data-pane="system" role="tabpanel" aria-labelledby="tabSystem" hidden>
+              <div class="pane-heading system-pane-heading"><div><span class="pane-index">05 / SYSTEM</span><h2>Your device</h2><p>Read-only local inventory for laptop type, CPU, graphics adapters, memory, and storage. This information stays in the app and is not saved or uploaded.</p></div><button class="button button-soft" id="refreshDevice" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh device info</button></div>
+
+              <div class="system-grid">
+                <article class="form-card system-card system-device-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-monitor"/></svg></span><div><p class="panel-kicker">DEVICE</p><h3 id="deviceModel">Waiting for local scan</h3></div><span class="state-pill state-pending" id="deviceBadge">NOT SCANNED</span></div>
+                  <div class="system-facts"><div><span>Manufacturer</span><strong id="deviceManufacturer">—</strong></div><div><span>Form factor</span><strong id="deviceType">—</strong></div><div><span>Windows</span><strong id="deviceOs">—</strong></div></div>
+                </article>
+                <article class="form-card system-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-system"/></svg></span><div><p class="panel-kicker">PROCESSOR</p><h3>CPU</h3></div></div>
+                  <div class="system-list" id="processorList"><p class="system-placeholder">Run a local scan to view your processor.</p></div>
+                </article>
+                <article class="form-card system-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-memory"/></svg></span><div><p class="panel-kicker">MEMORY</p><h3>Installed RAM</h3></div></div>
+                  <strong class="system-big-value" id="memoryValue">—</strong><p class="system-card-note">Physical memory reported by Windows WMI.</p>
+                </article>
+                <article class="form-card system-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-rendering"/></svg></span><div><p class="panel-kicker">DISPLAY ADAPTERS</p><h3>Graphics cards</h3></div></div>
+                  <div class="system-list" id="graphicsList"><p class="system-placeholder">Run a local scan to view display adapters.</p></div>
+                </article>
+                <article class="form-card system-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-monitor"/></svg></span><div><p class="panel-kicker">WINDOWS GRAPHICS SETTINGS</p><h3>Choose a preferred GPU</h3></div></div>
+                  <p class="system-card-note">Open Windows Advanced graphics settings to set Roblox to High performance when supported. HAGS is controlled by Windows and your GPU driver; Marktis does not force scheduling or change driver settings.</p>
+                  <button class="button button-soft" id="openGraphicsSettings" type="button">Open Graphics settings</button>
+                </article>
+                <article class="form-card system-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><p class="panel-kicker">SYSTEM SAFETY</p><h3>Manual, reversible by default</h3></div></div>
+                  <p class="system-card-note">This app will not silently delete Roblox cache, logs, or %TEMP% files; write fullscreen/priority registry tweaks; clear standby memory; force restore points; change DNS, MTU, or server routes; or replace Roblox textures, skyboxes, particles, or audio. It limits changes to allowlisted local settings with timestamped backups.</p>
+                </article>
+                <article class="form-card system-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-folder"/></svg></span><div><p class="panel-kicker">LOCAL STORAGE</p><h3>Drives and free space</h3></div></div>
+                  <div class="system-list" id="driveList"><p class="system-placeholder">Run a local scan to view physical drives and volumes.</p></div>
+                </article>
+                <article class="form-card system-card recommendation-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-spark"/></svg></span><div><p class="panel-kicker">OPTIONAL PROFILE SUGGESTION</p><h3 id="recommendationTitle">Scan device to get a rough suggestion</h3></div></div>
+                  <p class="system-card-note">A simple RAM/GPU-name heuristic, not a benchmark. It only stages a local graphics preset; review everything and confirm Apply separately.</p>
+                  <button class="button button-soft" id="useRecommendedPreset" type="button" disabled>Stage suggested preset</button>
+                </article>
+                <article class="form-card system-card performance-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-monitor"/></svg></span><div><p class="panel-kicker">LIVE GAME STATS</p><h3>FPS and game ping</h3></div></div>
+                  <div class="performance-stat-row"><span>Actual Roblox FPS</span><strong>Not read by this app</strong></div>
+                  <div class="performance-stat-row"><span>Game-server ping</span><strong>Not read by this app</strong></div>
+                  <p class="system-card-note">Press <kbd>Shift</kbd> + <kbd>F5</kbd> in Roblox for its live Performance Stats. No safe actual-FPS counter is available to this app without reading game memory.</p>
+                  <div class="performance-stat-row"><span>Saved legacy target request</span><strong id="systemFpsTarget">Off</strong></div>
+                </article>
+                <article class="form-card system-card performance-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-refresh"/></svg></span><div><p class="panel-kicker">OPTIONAL NETWORK CHECK</p><h3>Roblox website connection time</h3></div></div>
+                  <div class="web-latency-value" id="webLatencyValue">Not measured</div>
+                  <p class="system-card-note" id="webLatencyDetail">A one-time TCP handshake to www.roblox.com:443 only. It sends no app-data payload and is not ping to the Roblox game server.</p>
+                  <button class="button button-soft" id="probeRobloxLatency" type="button">Measure website connection</button>
+                </article>
+                <article class="form-card system-card system-wide-card">
+                  <div class="system-card-heading"><span class="pane-icon"><svg class="icon"><use href="#i-roblox"/></svg></span><div><p class="panel-kicker">CLIENT & LOCAL SAFETY</p><h3>Roblox client status</h3></div></div>
+                  <div class="system-list" id="systemClientStatus"><p class="system-placeholder">Checking the standard Roblox Player process…</p></div>
+                  <div class="system-list" id="systemClientVersions"><p class="system-placeholder">Detected Roblox version folders will appear here.</p></div>
+                  <div class="system-executor-status" id="systemExecutorStatus">Known process-name scan: waiting for local result.</div>
+                  <p class="system-card-note">The check can identify only the listed exact process names (Xeno, Solara, JJSploit, Delta). It is not antivirus, may miss renamed apps, and a match does not prove malware. No process is stopped or removed.</p>
+                  <button class="button button-soft" id="scanSafetySystem" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Rescan local process names</button>
+                </article>
+              </div>
             </section>
           </div>
 
@@ -251,7 +387,7 @@
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script id="fastflagAllowlist" type="application/json">{"product":"Roptimer Hub","version":"4.0.0","edition":"Rust + Tauri Windows Client","allowlistVersion":2,"platform":"windows","windowsOnly":true,"description":"Canonical list of Roblox local ClientAppSettings.json FastFlags that the Roptimer Windows client may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.","source":"https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569","client":{"name":"Roptimer","framework":"Rust + Tauri v2","webview":"Microsoft Edge WebView2 (Windows)","executable":"Roptimer-Rust-x64.exe","architecture":"x86_64 (64-bit)","minOS":"Windows 10 version 1803 or newer","singleFile":true,"detectsRobloxOnLaunch":true,"target":"ClientAppSettings.json"},"safety":{"localJsonOnly":true,"injection":false,"memoryReads":false,"memoryWrites":false,"telemetryDisable":false,"antiCheatBypass":false,"gameScriptExecution":false},"categories":[{"name":"Geometry","flags":["DFIntCSGLevelOfDetailSwitchingDistance","DFIntCSGLevelOfDetailSwitchingDistanceL12","DFIntCSGLevelOfDetailSwitchingDistanceL23","DFIntCSGLevelOfDetailSwitchingDistanceL34"]},{"name":"Rendering","flags":["FFlagHandleAltEnterFullscreenManually","DFFlagTextureQualityOverrideEnabled","DFIntTextureQualityOverride","FIntDebugForceMSAASamples","DFFlagDisableDPIScale","FFlagDebugGraphicsPreferD3D11","FFlagDebugSkyGray","DFFlagDebugPauseVoxelizer","DFIntDebugFRMQualityLevelOverride","FIntFRMMaxGrassDistance","FIntFRMMinGrassDistance","FFlagDebugGraphicsPreferVulkan","FFlagDebugGraphicsPreferOpenGL"]},{"name":"User Interface","flags":["FIntGrassMovementReducedMotionFactor"]}],"categoryDescriptions":{"Geometry":{"summary":"Level-of-detail (LOD) switching distances for CSG / solid geometry.","improves":"Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce 'building lag' — it never deletes buildings, changes collisions, or edits gameplay geometry.","accent":"blue"},"Rendering":{"summary":"Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.","improves":"The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.","accent":"violet"},"User Interface":{"summary":"Client-side motion / environmental detail reduction.","improves":"Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.","accent":"amber"}},"flagFeatures":{"DFIntCSGLevelOfDetailSwitchingDistance":{"feature":"Base LOD distance","category":"Geometry","valueHint":"Distance in studs; lower = switch sooner","improves":"Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places."},"DFIntCSGLevelOfDetailSwitchingDistanceL12":{"feature":"LOD tier 1 to 2 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner."},"DFIntCSGLevelOfDetailSwitchingDistanceL23":{"feature":"LOD tier 2 to 3 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the second downgrade for far-away geometry detail."},"DFIntCSGLevelOfDetailSwitchingDistanceL34":{"feature":"LOD tier 3 to 4 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the final downgrade so the most distant geometry costs less to draw."},"FFlagHandleAltEnterFullscreenManually":{"feature":"Manual Alt+Enter fullscreen","category":"Rendering","valueHint":"true / false","improves":"Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset."},"DFFlagTextureQualityOverrideEnabled":{"feature":"Texture override switch","category":"Rendering","valueHint":"true / false","improves":"Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play."},"DFIntTextureQualityOverride":{"feature":"Texture quality tier","category":"Rendering","valueHint":"0-3 (lower = fewer texture bytes)","improves":"Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS."},"FIntDebugForceMSAASamples":{"feature":"Force MSAA sample count","category":"Rendering","valueHint":"1, 2, 4 (lower = faster)","improves":"Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions."},"DFFlagDisableDPIScale":{"feature":"Disable DPI scaling","category":"Rendering","valueHint":"true / false","improves":"Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead."},"FFlagDebugGraphicsPreferD3D11":{"feature":"Prefer Direct3D 11","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the D3D11 renderer for stability on older GPUs."},"FFlagDebugSkyGray":{"feature":"Neutral gray sky","category":"Rendering","valueHint":"true / false","improves":"Replaces the detailed sky with a flat color to save fill-rate."},"DFFlagDebugPauseVoxelizer":{"feature":"Pause voxelizer","category":"Rendering","valueHint":"true / false","improves":"Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places."},"DFIntDebugFRMQualityLevelOverride":{"feature":"FRM quality level","category":"Rendering","valueHint":"0-21 (values above 10 are legacy/micro levels)","improves":"Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing."},"FIntFRMMaxGrassDistance":{"feature":"Max grass draw distance","category":"Rendering","valueHint":"Distance in studs; lower = less grass","improves":"Limits how far grass is drawn so distant grass stops costing GPU time."},"FIntFRMMinGrassDistance":{"feature":"Min grass detail distance","category":"Rendering","valueHint":"Distance in studs","improves":"Controls how close grass must be before full detail is used."},"FFlagDebugGraphicsPreferVulkan":{"feature":"Prefer Vulkan","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the Vulkan renderer where supported as a lower-overhead graphics path."},"FFlagDebugGraphicsPreferOpenGL":{"feature":"Prefer OpenGL","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the OpenGL renderer where supported (legacy GPUs)."},"FIntGrassMovementReducedMotionFactor":{"feature":"Reduced grass motion","category":"User Interface","valueHint":"0-100 (higher = less movement)","improves":"Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene."}},"legacyNotInAllowlist":["DFIntTaskSchedulerTargetFps"],"rejected":["Telemetry suppression flags","Crashpad or Backtrace disabling flags","Screenshot/report upload disabling flags","Fullbright, x-ray, building removal, or anti-cheat bypass flags"]}</script>
+  <script id="fastflagAllowlist" type="application/json">{"product":"Marktis Optimizer","version":"4.0.0","edition":"Windows Desktop Client (Rust + Tauri primary; Electron optional)","allowlistVersion":2,"platform":"windows","windowsOnly":true,"description":"Canonical list of Roblox local ClientAppSettings.json FastFlags that Marktis Optimizer may recognize, preserve, back up, and restore. Only these Geometry, Rendering, and User Interface keys are allowlisted for local management. This client/allowlist feature is Windows-only; the macOS companion is a separate, legacy tool. The legacy FPS flag is tracked separately and is not part of this allowlist.","source":"https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569","client":{"name":"Marktis Optimizer","framework":"Rust + Tauri v2 (primary); Electron (optional)","webview":"Microsoft Edge WebView2 (Tauri) or Electron Chromium (Windows)","executable":"Marktis-Optimizer-Rust-Setup-x64.exe; Marktis-Optimizer-Electron-Setup-x64.exe (optional)","architecture":"x86_64 (64-bit)","minOS":"Windows 10 version 1803 or newer","singleFile":false,"detectsRobloxOnLaunch":true,"target":"ClientAppSettings.json","packaging":["Tauri NSIS x64 setup wizard","Electron NSIS x64 setup wizard"],"installation":"Guided wizards create Start Menu shortcuts and uninstall support; Tauri offers a Desktop shortcut option, Electron creates one; no batch launcher required."},"safety":{"localJsonOnly":true,"injection":false,"memoryReads":false,"memoryWrites":false,"telemetryDisable":false,"antiCheatBypass":false,"gameScriptExecution":false},"categories":[{"name":"Geometry","flags":["DFIntCSGLevelOfDetailSwitchingDistance","DFIntCSGLevelOfDetailSwitchingDistanceL12","DFIntCSGLevelOfDetailSwitchingDistanceL23","DFIntCSGLevelOfDetailSwitchingDistanceL34"]},{"name":"Rendering","flags":["FFlagHandleAltEnterFullscreenManually","DFFlagTextureQualityOverrideEnabled","DFIntTextureQualityOverride","FIntDebugForceMSAASamples","DFFlagDisableDPIScale","FFlagDebugGraphicsPreferD3D11","FFlagDebugSkyGray","DFFlagDebugPauseVoxelizer","DFIntDebugFRMQualityLevelOverride","FIntFRMMaxGrassDistance","FIntFRMMinGrassDistance","FFlagDebugGraphicsPreferVulkan","FFlagDebugGraphicsPreferOpenGL"]},{"name":"User Interface","flags":["FIntGrassMovementReducedMotionFactor"]}],"categoryDescriptions":{"Geometry":{"summary":"Level-of-detail (LOD) switching distances for CSG / solid geometry.","improves":"Reduce how far detailed geometry is kept before the client swaps in cheaper meshes. Cuts GPU and CPU work in complex places and is the safe way to reduce 'building lag' — it never deletes buildings, changes collisions, or edits gameplay geometry.","accent":"blue"},"Rendering":{"summary":"Graphics pipeline switches: textures, anti-aliasing, DPI, sky, voxel lighting, FRM quality, grass, and the Direct3D / Vulkan / OpenGL renderer choice.","improves":"The biggest FPS levers. Lower texture resolution, cap MSAA samples, disable DPI scaling, simplify the sky and voxel lighting, set an FRM quality level, shorten grass draw distance, or pick a stable renderer. All are local, reversible rendering settings.","accent":"violet"},"User Interface":{"summary":"Client-side motion / environmental detail reduction.","improves":"Reduce animated grass movement for a calmer, cheaper scene. A reduced-motion setting, not gameplay automation and not an executor feature.","accent":"amber"}},"flagFeatures":{"DFIntCSGLevelOfDetailSwitchingDistance":{"feature":"Base LOD distance","category":"Geometry","valueHint":"Distance in studs; lower = switch sooner","improves":"Sets the base distance at which detailed CSG geometry switches to a cheaper mesh. Lower values reduce GPU/CPU load in dense places."},"DFIntCSGLevelOfDetailSwitchingDistanceL12":{"feature":"LOD tier 1 to 2 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the first level-of-detail downgrade so mid-range parts simplify sooner."},"DFIntCSGLevelOfDetailSwitchingDistanceL23":{"feature":"LOD tier 2 to 3 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the second downgrade for far-away geometry detail."},"DFIntCSGLevelOfDetailSwitchingDistanceL34":{"feature":"LOD tier 3 to 4 distance","category":"Geometry","valueHint":"Distance in studs","improves":"Fine-tunes the final downgrade so the most distant geometry costs less to draw."},"FFlagHandleAltEnterFullscreenManually":{"feature":"Manual Alt+Enter fullscreen","category":"Rendering","valueHint":"true / false","improves":"Lets the client handle Alt+Enter fullscreen toggling itself, avoiding an automatic display mode reset."},"DFFlagTextureQualityOverrideEnabled":{"feature":"Texture override switch","category":"Rendering","valueHint":"true / false","improves":"Enables a fixed texture-quality tier so Roblox stops auto-raising texture detail during play."},"DFIntTextureQualityOverride":{"feature":"Texture quality tier","category":"Rendering","valueHint":"0-3 (lower = fewer texture bytes)","improves":"Sets texture resolution. Lower tiers use less VRAM and bandwidth for steadier FPS."},"FIntDebugForceMSAASamples":{"feature":"Force MSAA sample count","category":"Rendering","valueHint":"1, 2, 4 (lower = faster)","improves":"Caps anti-aliasing samples to cut per-frame GPU cost at high resolutions."},"DFFlagDisableDPIScale":{"feature":"Disable DPI scaling","category":"Rendering","valueHint":"true / false","improves":"Renders at native pixels instead of Windows DPI scaling, reducing blur and overhead."},"FFlagDebugGraphicsPreferD3D11":{"feature":"Prefer Direct3D 11","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the D3D11 renderer for stability on older GPUs."},"FFlagDebugSkyGray":{"feature":"Neutral gray sky","category":"Rendering","valueHint":"true / false","improves":"Replaces the detailed sky with a flat color to save fill-rate."},"DFFlagDebugPauseVoxelizer":{"feature":"Pause voxelizer","category":"Rendering","valueHint":"true / false","improves":"Stops the lighting/voxel rebuild pass to reduce CPU spikes in busy places."},"DFIntDebugFRMQualityLevelOverride":{"feature":"FRM quality level","category":"Rendering","valueHint":"0-21 (values above 10 are legacy/micro levels)","improves":"Overrides overall graphics quality; lower levels cut shadows, effects, and post-processing."},"FIntFRMMaxGrassDistance":{"feature":"Max grass draw distance","category":"Rendering","valueHint":"Distance in studs; lower = less grass","improves":"Limits how far grass is drawn so distant grass stops costing GPU time."},"FIntFRMMinGrassDistance":{"feature":"Min grass detail distance","category":"Rendering","valueHint":"Distance in studs","improves":"Controls how close grass must be before full detail is used."},"FFlagDebugGraphicsPreferVulkan":{"feature":"Prefer Vulkan","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the Vulkan renderer where supported as a lower-overhead graphics path."},"FFlagDebugGraphicsPreferOpenGL":{"feature":"Prefer OpenGL","category":"Rendering","valueHint":"true / false (mutually exclusive)","improves":"Selects the OpenGL renderer where supported (legacy GPUs)."},"FIntGrassMovementReducedMotionFactor":{"feature":"Reduced grass motion","category":"User Interface","valueHint":"0-100 (higher = less movement)","improves":"Reduces animated grass sway/movement for a calmer, cheaper, reduced-motion-friendly scene."}},"legacyNotInAllowlist":["DFIntTaskSchedulerTargetFps"],"rejected":["Telemetry suppression flags","Crashpad or Backtrace disabling flags","Screenshot/report upload disabling flags","Fullbright, x-ray, building removal, or anti-cheat bypass flags"]}</script>
   <script src="assets/app.js"></script>
 </body>
 </html>
