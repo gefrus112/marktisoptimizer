@@ -55,6 +55,8 @@ pub struct AppSafety {
 const ALLOWLIST_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/fastflags-allowlist.json"));
 const LATEST_RELEASE_URL: &str = "https://github.com/gefrus112/marktisoptimizer/releases/latest";
 const WIREGUARD_DOWNLOAD_URL: &str = "https://www.wireguard.com/install/";
+const COMMUNITY_DISCORD_URL: &str = "https://discord.gg/R3VC6E229";
+const YOUTUBE_CHANNEL_URL: &str = "https://www.youtube.com/@butterguff";
 
 fn flag_count() -> usize {
     serde_json::from_str::<serde_json::Value>(ALLOWLIST_JSON)
@@ -148,6 +150,18 @@ fn open_latest_release() -> Result<(), String> {
 #[tauri::command]
 fn open_wireguard_download() -> Result<(), String> {
     open_external(WIREGUARD_DOWNLOAD_URL.to_string())
+}
+
+/// Open the fixed project Discord invite in the system browser.
+#[tauri::command]
+fn open_community_discord() -> Result<(), String> {
+    open_external(COMMUNITY_DISCORD_URL.to_string())
+}
+
+/// Open the fixed project YouTube channel in the system browser.
+#[tauri::command]
+fn open_youtube_channel() -> Result<(), String> {
+    open_external(YOUTUBE_CHANNEL_URL.to_string())
 }
 
 fn roblox_profile_url(user_id: &str) -> Result<String, String> {
@@ -246,6 +260,8 @@ pub fn run() {
             open_external,
             open_latest_release,
             open_wireguard_download,
+            open_community_discord,
+            open_youtube_channel,
             open_roblox_profile,
             launch_roblox,
             rejoin_roblox_server,

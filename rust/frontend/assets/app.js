@@ -2193,6 +2193,33 @@
     }
   }
 
+  async function openCommunityLink(buttonId, command, label) {
+    const button = byId(buttonId);
+    if (!invoke) {
+      showToast("Open the packaged Windows desktop app to open the " + label + ".", "warning");
+      return;
+    }
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    try {
+      await invoke(command);
+      showToast("Opened the " + label + " in your default browser.", "success");
+    } catch (error) {
+      showToast("Could not open the " + label + ": " + (error && error.message ? error.message : String(error)), "warning");
+    } finally {
+      button.removeAttribute("aria-busy");
+      button.disabled = !invoke;
+    }
+  }
+
+  function openCommunityDiscord() {
+    return openCommunityLink("joinDiscord", "open_community_discord", "Discord invite");
+  }
+
+  function openYoutubeChannel() {
+    return openCommunityLink("openYoutubeChannel", "open_youtube_channel", "YouTube channel");
+  }
+
   async function launchRoblox() {
     const button = byId("launchRoblox");
     if (!invoke) {
@@ -2576,6 +2603,8 @@
     });
     byId("rejoinSameServer").addEventListener("click", rejoinSameServer);
     byId("openLatestRelease").addEventListener("click", openLatestRelease);
+    byId("joinDiscord").addEventListener("click", openCommunityDiscord);
+    byId("openYoutubeChannel").addEventListener("click", openYoutubeChannel);
     byId("openRobloxProfile").addEventListener("click", openRobloxProfile);
     byId("robloxUserId").addEventListener("input", updateRobloxProfileButton);
     byId("robloxUserId").addEventListener("change", function () {

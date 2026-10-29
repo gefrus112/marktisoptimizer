@@ -14,7 +14,9 @@ const {
   parseTasklistImageName,
   restoredObject,
   validateWireGuardConfig,
-  WIREGUARD_DOWNLOAD_URL
+  COMMUNITY_DISCORD_URL,
+  WIREGUARD_DOWNLOAD_URL,
+  YOUTUBE_CHANNEL_URL
 } = require("../backend.cjs");
 
 const allowlist = loadAllowlist(path.resolve(__dirname, "../../fastflags-allowlist.json"));
@@ -557,6 +559,50 @@ test("WireGuard download shortcut opens only the official installer page", async
   await backend.invoke("open_wireguard_download", { url: "https://example.com/" });
   assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
   assert.deepEqual(spawnCalls[0].args, [WIREGUARD_DOWNLOAD_URL]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+});
+
+test("Discord community shortcut opens only the fixed invite in the system browser", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+  await backend.invoke("open_community_discord", { url: "https://example.com/" });
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, [COMMUNITY_DISCORD_URL]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+});
+
+test("YouTube channel shortcut opens only the fixed channel URL in the system browser", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+  await backend.invoke("open_youtube_channel", { url: "https://example.com/" });
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, [YOUTUBE_CHANNEL_URL]);
   assert.equal(spawnCalls[0].options.shell, false);
   assert.equal(child.wasUnrefed, true);
 });

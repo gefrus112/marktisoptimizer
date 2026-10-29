@@ -171,7 +171,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Rebuilt the portal as a near-black starfield site with a Sirius-like top menu, serif hero, three main tabs, static CSS starfield and gradients, command palette, counters, scroll reveals, Windows/macOS download cards, and FastFlag allowlist docs. No WebGL renderer or Three.js runtime is loaded."
+      "details": "The lightweight portal has five main tabs: Client, How it works, Allowlist, Downloads, and Docs. It uses a static CSS starfield, frame-throttled scroll progress, lazy screenshot images, and no WebGL/Three.js runtime, full-screen ambient overlay, tab-switch fade, or per-flag reveal animation. All website scripts and styles are local."
     },
     {
       "id": "cli-docs",
@@ -180,7 +180,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Adds a complete CLI reference, performance guide, canonical FastFlag allowlist guide, local JSON/backup explanation, macOS setup guide, GitHub Pages help, downloadable markdown docs, and a docs tab with generated commands."
+      "details": "Adds a complete CLI reference, performance guide, canonical FastFlag allowlist guide, local JSON/backup explanation, macOS setup guide, and GitHub Pages help. The new How it works tab explains the Windows ClientAppSettings.json path, allowlisted key/value format, backup/merge/restore flow, and what the website builder can and cannot change; full markdown guides remain downloadable."
     },
     {
       "id": "script-hub",

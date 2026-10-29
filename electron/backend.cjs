@@ -12,6 +12,8 @@ const LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps";
 const ROBLOX_URI = "roblox://";
 const LATEST_RELEASE_URL = "https://github.com/gefrus112/marktisoptimizer/releases/latest";
 const WIREGUARD_DOWNLOAD_URL = "https://www.wireguard.com/install/";
+const COMMUNITY_DISCORD_URL = "https://discord.gg/R3VC6E229";
+const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@butterguff";
 const WIREGUARD_CONFIG_FILE = "MarktisOptimizer.conf.dpapi";
 const MAX_WIREGUARD_CONFIG_BYTES = 64 * 1024;
 const ROBLOX_PROFILE_HOST = "https://www.roblox.com/users/";
@@ -194,6 +196,8 @@ const ALLOWED_COMMANDS = new Set([
   "open_windows_settings",
   "open_roblox_profile",
   "open_latest_release",
+  "open_community_discord",
+  "open_youtube_channel",
   "exit_app",
   "launch_roblox",
   "rejoin_roblox_server",
@@ -1029,6 +1033,37 @@ function createBackend(options = {}) {
     });
   }
 
+  async function openFixedCommunityUrl(url, label) {
+    if (!isWindows()) throw new Error(`The ${label} is available only in the Windows desktop app.`);
+    const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
+    if (!root || !path.win32.isAbsolute(root)) throw new Error("Windows Explorer could not be found in the system directory.");
+    const explorer = path.win32.join(root, "explorer.exe");
+    try {
+      if (!fileSystem.statSync(explorer).isFile()) throw new Error("not a file");
+    } catch (_error) {
+      throw new Error("Windows Explorer could not be found in the system directory.");
+    }
+    return new Promise((resolve, reject) => {
+      let child;
+      try {
+        child = spawnImpl(explorer, [url], { detached: true, windowsHide: true, stdio: "ignore", shell: false });
+      } catch (error) {
+        reject(new Error(`Could not open the ${label}: ${error.message}`));
+        return;
+      }
+      child.once("error", (error) => reject(new Error(`Could not open the ${label}: ${error.message}`)));
+      child.once("spawn", () => { child.unref(); resolve(); });
+    });
+  }
+
+  async function openCommunityDiscord() {
+    return openFixedCommunityUrl(COMMUNITY_DISCORD_URL, "Discord invite");
+  }
+
+  async function openYoutubeChannel() {
+    return openFixedCommunityUrl(YOUTUBE_CHANNEL_URL, "YouTube channel");
+  }
+
   async function launchRoblox() {
     if (!isWindows()) throw new Error("Roblox launch is available only in the Windows desktop app.");
     const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
@@ -1380,6 +1415,8 @@ function createBackend(options = {}) {
       case "open_windows_settings": return openWindowsSettings(args);
       case "open_roblox_profile": return openRobloxProfile(args);
       case "open_latest_release": return openLatestRelease();
+      case "open_community_discord": return openCommunityDiscord();
+      case "open_youtube_channel": return openYoutubeChannel();
       case "open_wireguard_download": return openWireGuardDownload();
       case "wireguard_vpn_status": return wireGuardStatus();
       case "wireguard_vpn_import": return importWireGuardProfile(args);
@@ -1411,7 +1448,9 @@ module.exports = {
   ALLOWED_COMMANDS,
   KNOWN_EXECUTORS,
   SETTINGS_URIS,
+  COMMUNITY_DISCORD_URL,
   WIREGUARD_DOWNLOAD_URL,
+  YOUTUBE_CHANNEL_URL,
   validateWireGuardConfig,
   allowlistedKeys,
   buildManaged,

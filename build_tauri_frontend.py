@@ -116,6 +116,8 @@ def check() -> None:
         "Roblox launcher": 'id="launchRoblox"',
         "latest app release link": 'id="openLatestRelease"',
         "manual exact-server rejoin action": 'id="rejoinSameServer"',
+        "project credits and Discord action": 'id="joinDiscord"',
+        "project YouTube channel action": 'id="openYoutubeChannel"',
         "local Player-process observation timer": 'id="playerRuntimeWatch"',
         "Player timer disclaimer": 'This is not a game-session timer.',
         "apply-and-launch confirmation action": 'id="applyLaunch"',
@@ -150,6 +152,8 @@ def check() -> None:
         "exit_app",
         "launch_roblox",
         "rejoin_roblox_server",
+        "open_community_discord",
+        "open_youtube_channel",
         "open_wireguard_download",
         "wireguard_vpn_status",
         "wireguard_vpn_import",
@@ -164,6 +168,10 @@ def check() -> None:
     tauri_source = (RUST / "src-tauri" / "src" / "lib.rs").read_text(encoding="utf-8")
     if "fn rejoin_roblox_server" not in tauri_source or "            rejoin_roblox_server," not in tauri_source:
         raise SystemExit("The manual server-rejoin command must be registered in the Tauri bridge.")
+    if "fn open_community_discord" not in tauri_source or "            open_community_discord," not in tauri_source:
+        raise SystemExit("The fixed Discord invite must be registered in the Tauri bridge.")
+    if "fn open_youtube_channel" not in tauri_source or "            open_youtube_channel," not in tauri_source:
+        raise SystemExit("The fixed YouTube channel link must be registered in the Tauri bridge.")
     vpn_source = (RUST / "src-tauri" / "src" / "vpn.rs").read_text(encoding="utf-8")
     vpn_command_names = (
         "wireguard_vpn_status",

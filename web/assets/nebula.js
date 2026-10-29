@@ -23,6 +23,31 @@
     window.setTimeout(function () { el.classList.remove("show"); }, 2600);
   }
 
+  function initCookieConsent() {
+    var panel = $("#cookieConsent");
+    if (!panel) return;
+    var choiceKey = "marktis.cookieConsent.v1";
+    var savedChoice = "";
+    try { savedChoice = window.localStorage.getItem(choiceKey) || ""; } catch (_error) { /* Storage may be disabled. */ }
+    panel.hidden = savedChoice === "accepted" || savedChoice === "rejected";
+
+    function saveChoice(choice) {
+      try { window.localStorage.setItem(choiceKey, choice); } catch (_error) { /* Keep the choice for this page view. */ }
+      panel.hidden = true;
+      toast("Cookie preference saved locally. No advertising tag is active.");
+    }
+
+    var accept = $("#acceptCookies");
+    var reject = $("#rejectCookies");
+    var settings = $("#openCookieSettings");
+    if (accept) accept.addEventListener("click", function () { saveChoice("accepted"); });
+    if (reject) reject.addEventListener("click", function () { saveChoice("rejected"); });
+    if (settings) settings.addEventListener("click", function () {
+      panel.hidden = false;
+      if (accept) accept.focus();
+    });
+  }
+
   function detectDevicePlatform() {
     var nav = window.navigator || {};
     var userAgent = String(nav.userAgent || "");
@@ -67,6 +92,7 @@
   }
 
   initPlatformCompatibilityNotice();
+  initCookieConsent();
 
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -132,7 +158,7 @@
   /* Tabs / navigation                                                    */
   /* ------------------------------------------------------------------ */
 
-  var TAB_NAMES = ["client", "allowlist", "downloads", "docs"];
+  var TAB_NAMES = ["client", "how", "allowlist", "downloads", "docs"];
 
   function activateTab(name, options) {
     var opts = options || {};
@@ -451,7 +477,7 @@
     { title: "Go to Client", hint: "Main Windows client tab with safe settings", icon: "01", keywords: "client windows main tab settings", run: function () { activateTab("client"); scrollToAnchor("tab-shell"); } },
     { title: "Go to Allowlist", hint: "18 Geometry, Rendering, and UI FastFlags", icon: "02", keywords: "allowlist fastflags geometry rendering user interface", run: function () { activateTab("allowlist"); scrollToAnchor("tab-shell"); } },
     { title: "Go to Downloads", hint: "Windows EXE, Boost CLI, source ZIP, and checksums", icon: "03", keywords: "download windows exe zip github release", run: function () { activateTab("downloads"); scrollToAnchor("tab-shell"); } },
-    { title: "Go to Docs", hint: "How it works, feature status, and safety", icon: "04", keywords: "docs how it works cli safety features", run: function () { activateTab("docs"); scrollToAnchor("tab-shell"); } },
+    { title: "Go to Docs", hint: "CLI reference, feature status, and safety", icon: "05", keywords: "docs cli safety features", run: function () { activateTab("docs"); scrollToAnchor("tab-shell"); } },
     { title: "Copy Windows Boost command", hint: "Copy the generated RoptimerBoost.exe apply command", icon: ">_", keywords: "copy windows cli command boost apply fps tier", run: function () { copyText(windowsCommand(currentSettings())); } },
     { title: "Copy FastFlag allowlist", hint: "Copy the canonical Windows client allowlist JSON", icon: "{ }", keywords: "copy allowlist json flags", run: function () { copyText(JSON.stringify(allowlist, null, 2)); } },
     { title: "Download client settings", hint: "Save the current safe profile as JSON", icon: "↓", keywords: "download settings json profile", run: function () { var b = $("#downloadSettings"); if (b) b.click(); } },
@@ -575,7 +601,7 @@
   }
 
   function initReveal() {
-    var items = $$(".glass, .panel, .overview-card, .allowlist-card, .feature-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
+    var items = $$(".glass, .panel, .overview-card, .mini-card, .step, .screenshot-card, .stat-band > div, .orbit-card");
     items.forEach(function (el) { el.classList.add("reveal"); });
     function showAll() { items.forEach(function (el) { el.classList.add("revealed"); }); }
     if (prefersReducedMotion() || !("IntersectionObserver" in window)) { showAll(); return; }
