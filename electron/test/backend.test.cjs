@@ -12,7 +12,9 @@ const {
   loadAllowlist,
   mergeAllowlistedObject,
   parseTasklistImageName,
-  restoredObject
+  restoredObject,
+  validateWireGuardConfig,
+  WIREGUARD_DOWNLOAD_URL
 } = require("../backend.cjs");
 
 const allowlist = loadAllowlist(path.resolve(__dirname, "../../fastflags-allowlist.json"));
@@ -214,6 +216,39 @@ test("Roblox launch dispatches a fixed roblox:// URI through system Explorer", a
   await assert.rejects(() => unsupported.invoke("launch_roblox"), /Windows desktop app\./);
 });
 
+test("server rejoin dispatches only a validated Place ID and UUID through Roblox", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const windowsRoot = String.raw`C:\Windows`;
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: windowsRoot },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  const gameInstanceId = "d37c0e7b-4233-4b6f-8e3b-a53d8b64f60b";
+  await backend.invoke("rejoin_roblox_server", { placeId: "0001818", gameInstanceId: gameInstanceId.toUpperCase() });
+  assert.equal(spawnCalls.length, 1);
+  assert.equal(spawnCalls[0].executable, path.win32.join(windowsRoot, "explorer.exe"));
+  assert.deepEqual(spawnCalls[0].args, ["roblox://experiences/start?placeId=1818&gameInstanceId=" + gameInstanceId]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+  await assert.rejects(() => backend.invoke("rejoin_roblox_server", { placeId: "1818&bad=1", gameInstanceId }), /valid positive numeric Roblox Place ID/);
+  await assert.rejects(() => backend.invoke("rejoin_roblox_server", { placeId: "1818", gameInstanceId: gameInstanceId + "&bad=1" }), /Job ID as a UUID/);
+  await assert.rejects(() => backend.invoke("rejoin_roblox_server", { placeId: "18446744073709551616", gameInstanceId }), /outside the supported numeric range/);
+  assert.equal(spawnCalls.length, 1);
+
+  const unsupported = createBackend({ platform: "linux", allowlist });
+  await assert.rejects(() => unsupported.invoke("rejoin_roblox_server", { placeId: "1818", gameInstanceId }), /only in the Windows desktop app/);
+});
+
 test("Roblox profile shortcut opens only a validated numeric ID in the system browser", async () => {
   const spawnCalls = [];
   const child = new EventEmitter();
@@ -401,6 +436,129 @@ test("Delta process scan uses an exact local image-name match", async () => {
   assert.deepEqual(result.matches, [{ productName: "Delta", processName: "Delta.exe" }]);
   assert.equal(result.networkRequests, false);
   assert.equal(result.automaticRemoval, false);
+});
+
+const providerWireGuardProfile = `[Interface]\nPrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nAddress = 10.64.0.2/32\nDNS = 10.64.0.1\n\n[Peer]\nPublicKey = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=\nAllowedIPs = 0.0.0.0/0, ::/0\nEndpoint = vpn.example.test:51820\nPersistentKeepalive = 25\n`;
+
+test("WireGuard profile validator accepts provider configs and identifies full-tunnel routes", () => {
+  assert.deepEqual(validateWireGuardConfig(providerWireGuardProfile), { peerCount: 1, fullTunnel: true });
+  const splitTunnel = providerWireGuardProfile.replace("AllowedIPs = 0.0.0.0/0, ::/0", "AllowedIPs = 10.64.0.0/10");
+  assert.deepEqual(validateWireGuardConfig(splitTunnel), { peerCount: 1, fullTunnel: false });
+});
+
+test("WireGuard profile validator rejects custom commands and incomplete peers", () => {
+  const hook = providerWireGuardProfile.replace("DNS = 10.64.0.1", "DNS = 10.64.0.1\nPostUp = powershell.exe");
+  assert.throws(() => validateWireGuardConfig(hook), /blocked for safety/);
+  assert.throws(() => validateWireGuardConfig(providerWireGuardProfile.replace("Endpoint = vpn.example.test:51820\n", "")), /Endpoint/);
+  assert.throws(() => validateWireGuardConfig("x".repeat(64 * 1024 + 1)), /64 KB/);
+});
+
+test("WireGuard integration is Windows-only and refuses to invent a provider", async () => {
+  const backend = createBackend({ platform: "linux", allowlist });
+  const status = await backend.invoke("wireguard_vpn_status");
+  assert.equal(status.supported, false);
+  assert.equal(status.serviceManaged, false);
+  assert.equal(status.wireguardInstalled, false);
+  await assert.rejects(() => backend.invoke("wireguard_vpn_import", { config: providerWireGuardProfile }), /only in the Windows desktop app/);
+});
+
+test("WireGuard refuses to treat a same-name foreign service as app-managed", async () => {
+  const dataDir = "C:\\Users\\Tester\\AppData\\Local\\MarktisOptimizer";
+  const profilePath = path.win32.join(dataDir, "wireguard", "MarktisOptimizer.conf.dpapi");
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows", ProgramFiles: "C:\\Program Files" },
+    vpnDataDir: dataDir,
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    execFile: async () => ({
+      stdout: JSON.stringify({ present: true, running: true, matchesProfile: false }),
+      stderr: ""
+    })
+  });
+  const status = await backend.invoke("wireguard_vpn_status");
+  assert.equal(status.servicePresent, true);
+  assert.equal(status.serviceManaged, false);
+  assert.equal(status.profileFilePresent, true);
+  assert.equal(status.profileInstalled, false);
+  assert.match(status.message, /could not be verified as this app's installed profile/);
+  await assert.rejects(() => backend.invoke("wireguard_vpn_connect"), /could not be verified as this app's profile/);
+  await assert.rejects(() => backend.invoke("wireguard_vpn_remove"), /could not be verified as this app's profile/);
+  assert.ok(profilePath.endsWith("MarktisOptimizer.conf.dpapi"));
+});
+
+test("WireGuard recognizes only a service matched to the shared encrypted profile path", async () => {
+  const dataDir = "C:\\Users\\Tester\\AppData\\Local\\MarktisOptimizer";
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows", ProgramFiles: "C:\\Program Files" },
+    vpnDataDir: dataDir,
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    execFile: async (_executable, _args, options) => {
+      assert.equal(options.env.ROPTIMER_WG_EXE, "C:\\Program Files\\WireGuard\\wireguard.exe");
+      assert.equal(options.env.ROPTIMER_WG_CONFIG, path.win32.join(dataDir, "wireguard", "MarktisOptimizer.conf.dpapi"));
+      return { stdout: JSON.stringify({ present: true, running: true, matchesProfile: true }), stderr: "" };
+    }
+  });
+  const status = await backend.invoke("wireguard_vpn_status");
+  assert.equal(status.wireguardInstalled, true);
+  assert.equal(status.serviceQueryAvailable, true);
+  assert.equal(status.serviceManaged, true);
+  assert.equal(status.profileFilePresent, true);
+  assert.equal(status.profileInstalled, true);
+  assert.equal(status.serviceRunning, true);
+});
+
+test("WireGuard can stop its verified service even if the encrypted profile file is missing", async () => {
+  const dataDir = "C:\\Users\\Tester\\AppData\\Local\\MarktisOptimizer";
+  const profilePath = path.win32.join(dataDir, "wireguard", "MarktisOptimizer.conf.dpapi");
+  const actions = [];
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows", ProgramFiles: "C:\\Program Files" },
+    vpnDataDir: dataDir,
+    allowlist,
+    fs: {
+      statSync(file) {
+        if (path.win32.normalize(file).toLowerCase() === path.win32.normalize(profilePath).toLowerCase()) throw new Error("missing profile");
+        return { isFile: () => true };
+      }
+    },
+    execFile: async (_executable, _args, options) => {
+      if (options.env.ROPTIMER_WG_ACTION) {
+        actions.push(options.env.ROPTIMER_WG_ACTION);
+        return { stdout: "", stderr: "" };
+      }
+      return { stdout: JSON.stringify({ present: true, running: true, matchesProfile: true }), stderr: "" };
+    }
+  });
+  const status = await backend.invoke("wireguard_vpn_disconnect");
+  assert.deepEqual(actions, ["stop"]);
+  assert.equal(status.serviceManaged, true);
+  assert.equal(status.profileFilePresent, false);
+});
+
+test("WireGuard download shortcut opens only the official installer page", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+  await backend.invoke("open_wireguard_download", { url: "https://example.com/" });
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, [WIREGUARD_DOWNLOAD_URL]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
 });
 
 test("Electron command bridge rejects unknown commands and reports its shell", async () => {

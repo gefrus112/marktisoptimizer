@@ -39,16 +39,24 @@ level**:
 - Returns `installed`, the version list, settings paths, and a human message.
 
 The detection command **never** attaches to a process, reads memory, injects
-anything, or launches Roblox. A separate, user-triggered launcher dispatches
-only the fixed `roblox://` protocol through Windows Explorer; Apply & launch
-asks for confirmation and runs the launcher only after a successful settings
-write. On non-Windows builds detection returns a clear "Windows client" message.
+anything, or launches Roblox. Normal launch dispatches the fixed `roblox://`
+protocol through Windows Explorer; Apply & launch asks for confirmation and
+runs the launcher only after a successful settings write. A separate manual
+server-rejoin action accepts a positive numeric Place ID and UUID Job ID from
+the user, then dispatches a standard `roblox://experiences/start` URI. It does
+not discover server IDs from a running game, and Roblox may reject a server
+that is unavailable, full, private, or closed. On non-Windows builds detection
+returns a clear "Windows client" message.
+
+Settings can be written while Roblox is running, but the app never modifies the
+live game. The current session may ignore or overwrite local settings; a normal
+restart may be required to load them.
 
 The Main page's **F5 Quick Status** refreshes the local install scan, Player
 process-name check, Windows-reported hardware inventory, and the on-device
 known-process check. It does not read the current experience, thumbnail, game or
-server ID, player count, session time, or account data; it cannot rejoin an exact
-server session. For actual FPS and experience ping, read Roblox's own stats with
+server ID, player count, session time, or account data; it cannot automatically
+rejoin the current session. For actual FPS and experience ping, read Roblox's own stats with
 `Shift+F5` and enter the values manually in the before/after journal. The journal
 stores only user-entered FPS/ping values and profile mode in local app storage.
 
@@ -70,9 +78,13 @@ The Main page also checks whether `RobloxPlayerBeta.exe` is present in the
 Windows process list when the app opens, on request, and every ten seconds while
 it is open. The Rust command `active_roblox_status` returns only a running/not
 running result and a timestamp; this does not confirm that an experience is
-loaded. It does not open a process handle or inspect command-line arguments,
-game state, game thumbnails, server IDs/addresses, account data, or memory. The **Configure this profile** button opens local Rendering settings; it does
-not modify Roblox's in-game menu.
+  loaded. The Main card also shows an approximate elapsed stopwatch since this
+  app first observed the Player process. It resets when the process is no longer
+  found, a status check becomes unavailable, or Marktis closes; it is not exact
+  process-launch time or game/experience session duration. The app does not open
+  a process handle or inspect command-line arguments, game state, game thumbnails,
+  server IDs/addresses, account data, or memory. The **Configure this profile**
+  button opens local Rendering settings; it does not modify Roblox's in-game menu.
 
 ## Device, performance, and network details (Windows only)
 
@@ -92,8 +104,10 @@ Actual game FPS and experience/server ping are not read from Roblox memory or
 otherwise inferred. Users can see Roblox's own live performance overlay with
 `Shift+F5`. The app does not automatically delete caches, logs, or `%TEMP%` files,
 write fullscreen/priority registry values, clear standby memory, force restore
-points, change DNS/MTU or server routes, or replace Roblox assets. It sticks to
-allowlisted local settings and timestamped JSON backups. A separate button can measure one TCP connection to
+points, tune DNS/MTU directly, or invent Roblox server routes. A separate opt-in
+WireGuard VPN tab delegates DNS/routes to the official client using a
+user-supplied profile; that network change is explained below. Otherwise, the
+optimizer sticks to allowlisted local settings and timestamped JSON backups. A separate button can measure one TCP connection to
 `www.roblox.com:443`; this is website connection time, not game ping. It sends
 no app-data payload, but the website receives the ordinary network connection
 and can see its source IP.
@@ -123,16 +137,19 @@ telemetry.
 
 This is a **limited name match, not antivirus or a malware verdict**: names can
 be changed, spoofed, or used by unrelated files. A match is a prompt to review
-it. Marktis Optimizer never terminates a process or deletes software; buttons open the
-fixed Windows Installed Apps and Windows Security pages so the user can review
-or uninstall manually.
+it. Marktis Optimizer never terminates a process or deletes software. The
+Security tab and Main safety panel open Windows Security. The user can choose a
+Defender Quick scan or select Full/Custom under Scan options, then review
+Protection history. Defender controls file scanning and any quarantine or
+remediation under Windows settings. The app does not inspect file contents, run
+a custom antivirus engine, or automatically remove threats.
 
 ## Standalone desktop tabs (Windows only)
 
 The Tauri executable has its own interface and does not load the GitHub Pages
 UI or its assets. Navigation remains **Main** plus a grouped **Settings** area
-with **Rendering**, **Geometry**, **Icons**, **Allowlist**, **System**, and
-**Notifications**:
+with **Rendering**, **Geometry**, **Icons**, **Allowlist**, **Security**, **VPN**,
+**System**, and **Notifications**:
 
 - **Rendering** — choose Max performance, Balanced, or High quality presets; adjust
 graphics and texture quality; and select an allowlisted renderer preference
@@ -150,6 +167,25 @@ a separate, opt-in request that Roblox may ignore; it is not actual FPS.
 - **Allowlist** — search/filter the canonical **18 allowed flags**, read-only,
   grouped into Geometry, Rendering, and User Interface. See
   [`FASTFLAG_ALLOWLIST.md`](FASTFLAG_ALLOWLIST.md) for the full table.
+- **Security** — show the on-device exact process-name watchlist and open
+  Windows Security for user-selected Defender Quick, Full, or Custom scans and
+  Protection history. Windows controls scanning and remediation; this app does
+  not inspect file contents, quarantine/delete threats, or implement real-time
+  antivirus. Defender, firewall, web/phishing protection (SmartScreen),
+  ransomware controls, and updates remain Windows-managed.
+- **VPN** — use the official WireGuard for Windows client with a profile supplied
+  by the user's VPN provider. The app accepts a `.conf` file without saving its
+  plaintext, validates/blocks custom command hooks, protects the profile with
+  machine-scope DPAPI in local app data, and uses an app-reserved tunnel service
+  name. Import/connect/disconnect/remove require confirmation and the Windows
+  administrator prompt. It confirms Windows service state only, not provider
+  reachability or a WireGuard handshake. The app provides no VPN server,
+  subscription, account, or credentials. Provider `AllowedIPs` and DNS define
+  routing; a default route can carry all internet traffic and invoke WireGuard's
+  firewall/kill-switch behavior. The tunnel is set not to auto-start after
+  Windows restarts, and can remain active after Marktis closes or is uninstalled.
+  Disconnect and remove the tunnel/profile before uninstalling Marktis. Do not
+  import a profile unless you trust its provider and routes.
 - **System** — view local hardware, Roblox Player/Studio version folders,
   process-name scan status, and the optional website TCP connection-time probe.
   A fixed shortcut opens Windows Advanced Graphics settings; it does not change
@@ -189,9 +225,11 @@ execution, or automatic process termination/software deletion.
 
 Profiles are static local settings, not dynamic hardware control. The app does
 not measure in-game FPS or game-server ping, monitor live GPU utilization,
-alter Roblox's internal resolution, change process CPU affinity, or reroute
-game traffic through a VPN/relay. Use Roblox's own Performance Stats (`Shift+F5`)
-for live experience FPS/ping; the optional website probe is not a substitute.
+alter Roblox's internal resolution, change process CPU affinity, or optimize
+Roblox routes through a relay. The separate WireGuard tab can start a
+user-configured VPN; its provider profile determines routes, and no reduction in
+ping is promised. Use Roblox's own Performance Stats (`Shift+F5`) for live
+experience FPS/ping; the optional website probe is not a substitute.
 
 ## Rust commands (IPC)
 
@@ -205,6 +243,12 @@ for live experience FPS/ping; the optional website probe is not a substitute.
 | `probe_roblox_latency` | Measure a fixed TCP connection to `www.roblox.com:443` | one user-triggered TCP handshake; no app-data payload; not game ping |
 | `scan_known_executor_processes` | Match exact Xeno, Solara, JJSploit, and Delta process names | local name-only check; no paths or command lines |
 | `open_windows_settings` | Open a fixed Installed Apps, Windows Security, or Advanced Graphics page | launches Windows Settings; no system values are changed |
+| `open_wireguard_download` | Open WireGuard's official Windows download page | opens a fixed upstream page in the system browser |
+| `wireguard_vpn_status` | Inspect WireGuard installation, the app's encrypted profile, and its reserved service path/state | read-only local file/service query |
+| `wireguard_vpn_import` | Validate, protect, install, and start a provider `.conf` tunnel | stores only machine-DPAPI-protected profile data; asks for administrator approval |
+| `wireguard_vpn_connect` | Start or reinstall the app-managed WireGuard service | changes network routes according to the provider profile; asks for administrator approval |
+| `wireguard_vpn_disconnect` | Stop the app-managed WireGuard service | restores normal Windows routes; asks for administrator approval |
+| `wireguard_vpn_remove` | Uninstall the matching app-managed service and delete its encrypted profile | removes only a service whose image path matches the app's profile; administrator approval |
 | `open_roblox_profile` | Open the official profile for a validated numeric User ID | opens a fixed Roblox URL in the system browser; no account data is read |
 | `exit_app` | Exit after the startup storage prompt | closes the desktop app |
 | `launch_roblox` | Dispatch fixed `roblox://` URI through Windows Explorer | requests normal Roblox protocol launch |

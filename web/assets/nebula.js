@@ -29,7 +29,7 @@
     var platform = String((nav.userAgentData && nav.userAgentData.platform) || nav.platform || "");
     var combined = platform + " " + userAgent;
     if (/android/i.test(combined)) return "android";
-    if (/iphone|ipad|ipod/i.test(combined)) return "ios";
+    if (/iphone|ipad|ipod/i.test(combined) || (/macintosh|macintel/i.test(combined) && Number(nav.maxTouchPoints) > 1)) return "ios";
     if (/windows|win32|win64|winnt/i.test(combined)) return "windows";
     if (/cros|chrome\s*os/i.test(combined)) return "chromeos";
     if (/macintosh|mac\s*os\s*x|macintel|macppc|mac68k|macos/i.test(combined)) return "macos";
@@ -42,7 +42,7 @@
     var message = $("#platformCompatibilityMessage");
     if (!notice || !message) return;
     var platform = detectDevicePlatform();
-    if (platform === "windows") {
+    if (platform === "windows" || platform === "macos") {
       notice.hidden = true;
       return;
     }
@@ -56,9 +56,7 @@
     };
     var platformName = platformNames[platform] || platformNames.unknown;
     var supportNote;
-    if (platform === "macos") {
-      supportNote = "The Windows launcher requires Windows 10/11 x64. A separate legacy macOS companion is available on the Downloads tab; unified macOS/Linux launcher support is planned.";
-    } else if (platform === "linux") {
+    if (platform === "linux") {
       supportNote = "The Windows launcher requires Windows 10/11 x64. A separate legacy macOS companion is available on the Downloads tab; Linux launcher support is planned.";
     } else {
       supportNote = "The desktop launcher requires Windows 10/11 x64. A separate legacy macOS companion is listed on the Downloads tab; unified macOS/Linux launcher support is planned.";

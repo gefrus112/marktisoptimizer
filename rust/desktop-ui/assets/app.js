@@ -8,11 +8,15 @@
   const byId = (id) => document.getElementById(id);
   const invoke = resolveInvoke();
   const profileKey = "roptimer.desktop.profile.v1";
+  const profileLibraryKey = "roptimer.desktop.profileLibrary.v1";
+  const maxSavedProfiles = 12;
+  const maxProfileImportBytes = 64 * 1024;
   const appearanceKey = "roptimer.desktop.appearance.v1";
   const benchmarkJournalKey = "roptimer.desktop.manualBenchmark.v1";
   const robloxUserIdKey = "roptimer.desktop.robloxUserId.v1";
   const notificationPreferencesKey = "roptimer.desktop.notifications.v1";
   const notificationHistoryKey = "roptimer.desktop.notificationHistory.v1";
+  const rejoinTargetKey = "roptimer.desktop.rejoinTarget.v1";
   const notificationEventKeys = ["playerStatus", "safetyAlerts", "settingsChanges", "lowStorage"];
   const lowStorageBytes = 10 * 1024 * 1024 * 1024;
   const lowStoragePercent = 5;
@@ -57,6 +61,8 @@
     appInfo: null,
     allowlist: fallbackAllowlist,
     allowlistFilter: "all",
+    savedProfiles: [],
+    selectedSavedProfileId: "",
     geometryManuallyChanged: false,
     devicePending: false,
     quickRefreshPending: false,
@@ -66,6 +72,11 @@
     notificationPermission: "unsupported",
     pendingAction: null,
     confirmReturnFocus: null,
+    wireguardStatus: null,
+    wireguardPending: false,
+    playerObservedAt: null,
+    pendingWireguardConfig: "",
+    pendingWireguardFilename: "",
     statusPending: false,
     safetyScanPending: false,
     lastSafetyScanSignature: "",
@@ -123,6 +134,10 @@
 
   function safeStorageSet(key, value) {
     try { window.localStorage.setItem(key, value); } catch (_error) { /* Storage is a convenience only. */ }
+  }
+
+  function safeStorageRemove(key) {
+    try { window.localStorage.removeItem(key); } catch (_error) { /* Storage is a convenience only. */ }
   }
 
   function readNotificationPreferences() {
@@ -427,6 +442,46 @@
     return normalized;
   }
 
+  function normalizeRobloxPlaceId(value) {
+    const digits = String(value == null ? "" : value).trim();
+    if (!/^[0-9]{1,20}$/.test(digits) || /^0+$/.test(digits)) return "";
+    const normalized = digits.replace(/^0+(?=[0-9])/, "");
+    if (normalized.length === 20 && normalized > "18446744073709551615") return "";
+    return normalized;
+  }
+
+  function normalizeRobloxGameInstanceId(value) {
+    const id = String(value == null ? "" : value).trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id.toLowerCase() : "";
+  }
+
+  function readRejoinTarget() {
+    let stored = null;
+    try { stored = JSON.parse(safeStorageGet(rejoinTargetKey) || "null"); } catch (_error) { stored = null; }
+    const placeId = normalizeRobloxPlaceId(stored && stored.placeId);
+    const gameInstanceId = normalizeRobloxGameInstanceId(stored && stored.gameInstanceId);
+    return placeId && gameInstanceId ? { placeId: placeId, gameInstanceId: gameInstanceId } : { placeId: "", gameInstanceId: "" };
+  }
+
+  function updateRejoinButton() {
+    const placeInput = byId("rejoinPlaceId");
+    const instanceInput = byId("rejoinGameInstanceId");
+    const button = byId("rejoinSameServer");
+    const status = byId("rejoinStatus");
+    if (!placeInput || !instanceInput || !button || !status) return;
+    const placeId = normalizeRobloxPlaceId(placeInput.value);
+    const gameInstanceId = normalizeRobloxGameInstanceId(instanceInput.value);
+    if (!String(placeInput.value || "").trim() && !String(instanceInput.value || "").trim()) safeStorageRemove(rejoinTargetKey);
+    button.disabled = !invoke || !placeId || !gameInstanceId;
+    if (!invoke) {
+      status.textContent = "A packaged Windows desktop app is required to send a rejoin request; this preview cannot launch Roblox.";
+    } else if (placeId && gameInstanceId) {
+      status.textContent = "Target ready. IDs stay on this device; Roblox may reject a full, private, closed, or unavailable server.";
+    } else {
+      status.textContent = "Enter a numeric Place ID and the exact server Job ID (UUID). The app cannot read these from a running game.";
+    }
+  }
+
   function updateRobloxProfileButton() {
     const input = byId("robloxUserId");
     const button = byId("openRobloxProfile");
@@ -594,21 +649,25 @@
     showToast("Local benchmark journal cleared.", "success");
   }
 
+  function normalizeProfile(values) {
+    const source = values && typeof values === "object" && !Array.isArray(values) ? values : {};
+    return {
+      mode: ["Reduce building lag", "Maximum performance", "Balanced", "High quality"].includes(source.mode) ? source.mode : defaultProfile.mode,
+      tier: clampInteger(source.tier, 0, 21, defaultProfile.tier),
+      texture: clampInteger(source.texture, 0, 3, defaultProfile.texture),
+      renderer: ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(source.renderer) ? source.renderer : defaultProfile.renderer,
+      fps: clampInteger(source.fps, 60, 1000, defaultProfile.fps),
+      legacyFps: typeof source.legacyFps === "boolean" ? source.legacyFps : defaultProfile.legacyFps,
+      geometryDistance: clampInteger(source.geometryDistance, 32, 256, defaultProfile.geometryDistance),
+      vfx: typeof source.vfx === "boolean" ? source.vfx : defaultProfile.vfx,
+      allVersions: typeof source.allVersions === "boolean" ? source.allVersions : defaultProfile.allVersions
+    };
+  }
+
   function readProfile() {
     let stored = null;
     try { stored = JSON.parse(safeStorageGet(profileKey) || "null"); } catch (_error) { stored = null; }
-    const values = stored && typeof stored === "object" ? stored : {};
-    return {
-      mode: ["Reduce building lag", "Maximum performance", "Balanced", "High quality"].includes(values.mode) ? values.mode : defaultProfile.mode,
-      tier: clampInteger(values.tier, 0, 21, defaultProfile.tier),
-      texture: clampInteger(values.texture, 0, 3, defaultProfile.texture),
-      renderer: ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(values.renderer) ? values.renderer : defaultProfile.renderer,
-      fps: clampInteger(values.fps, 60, 1000, defaultProfile.fps),
-      legacyFps: typeof values.legacyFps === "boolean" ? values.legacyFps : defaultProfile.legacyFps,
-      geometryDistance: clampInteger(values.geometryDistance, 32, 256, defaultProfile.geometryDistance),
-      vfx: typeof values.vfx === "boolean" ? values.vfx : defaultProfile.vfx,
-      allVersions: typeof values.allVersions === "boolean" ? values.allVersions : defaultProfile.allVersions
-    };
+    return normalizeProfile(stored);
   }
 
   function readAppearance() {
@@ -632,6 +691,198 @@
 
   function writeProfile(profile) {
     safeStorageSet(profileKey, JSON.stringify(profile));
+  }
+
+  function normalizeProfileName(value) {
+    return String(value || "")
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 40);
+  }
+
+  function newSavedProfileId() {
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+  }
+
+  function normalizedTimestamp(value) {
+    const time = Date.parse(value);
+    return Number.isFinite(time) ? new Date(time).toISOString() : new Date().toISOString();
+  }
+
+  function readSavedProfiles() {
+    let stored = null;
+    try { stored = JSON.parse(safeStorageGet(profileLibraryKey) || "null"); } catch (_error) { stored = null; }
+    const entries = Array.isArray(stored) ? stored : (stored && Array.isArray(stored.profiles) ? stored.profiles : []);
+    const profiles = [];
+    const usedNames = new Set();
+    const usedIds = new Set();
+    entries.forEach(function (entry) {
+      if (profiles.length >= maxSavedProfiles || !entry || typeof entry !== "object") return;
+      const name = normalizeProfileName(entry.name);
+      const key = name.toLocaleLowerCase();
+      if (!name || usedNames.has(key) || !entry.profile || typeof entry.profile !== "object" || Array.isArray(entry.profile)) return;
+      usedNames.add(key);
+      let id = typeof entry.id === "string" && /^[a-z0-9-]{1,64}$/i.test(entry.id) && !usedIds.has(entry.id) ? entry.id : newSavedProfileId();
+      while (usedIds.has(id)) id = newSavedProfileId();
+      usedIds.add(id);
+      profiles.push({
+        id: id,
+        name: name,
+        profile: normalizeProfile(entry.profile),
+        createdAt: normalizedTimestamp(entry.createdAt),
+        updatedAt: normalizedTimestamp(entry.updatedAt)
+      });
+    });
+    return profiles;
+  }
+
+  function writeSavedProfiles() {
+    safeStorageSet(profileLibraryKey, JSON.stringify({ schemaVersion: 1, profiles: state.savedProfiles }));
+  }
+
+  function updateSavedProfileControls() {
+    const selected = state.savedProfiles.find(function (item) { return item.id === state.selectedSavedProfileId; });
+    const name = normalizeProfileName(byId("profileNameInput").value);
+    const duplicate = name && state.savedProfiles.some(function (item) { return item.name.toLocaleLowerCase() === name.toLocaleLowerCase(); });
+    byId("saveNamedProfile").disabled = !name || (state.savedProfiles.length >= maxSavedProfiles && !duplicate);
+    byId("loadSavedProfile").disabled = !selected;
+    byId("exportSavedProfile").disabled = !selected;
+    byId("deleteSavedProfile").disabled = !selected;
+  }
+
+  function renderSavedProfiles() {
+    const select = byId("profileLibrarySelect");
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = state.savedProfiles.length ? "Choose a saved profile…" : "No saved profiles yet";
+    select.replaceChildren(placeholder);
+    state.savedProfiles.forEach(function (item) {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.name;
+      select.appendChild(option);
+    });
+    if (!state.savedProfiles.some(function (item) { return item.id === state.selectedSavedProfileId; })) {
+      state.selectedSavedProfileId = "";
+    }
+    select.value = state.selectedSavedProfileId;
+    byId("profileLibraryStatus").textContent = state.savedProfiles.length + " of " + maxSavedProfiles + " profiles saved on this device";
+    updateSavedProfileControls();
+  }
+
+  function upsertSavedProfile(nameValue, profileValue) {
+    const name = normalizeProfileName(nameValue);
+    if (!name) return "invalid";
+    const existing = state.savedProfiles.find(function (item) { return item.name.toLocaleLowerCase() === name.toLocaleLowerCase(); });
+    const now = new Date().toISOString();
+    if (existing) {
+      existing.name = name;
+      existing.profile = normalizeProfile(profileValue);
+      existing.updatedAt = now;
+      state.selectedSavedProfileId = existing.id;
+      writeSavedProfiles();
+      renderSavedProfiles();
+      return "updated";
+    }
+    if (state.savedProfiles.length >= maxSavedProfiles) return "limit";
+    const item = { id: newSavedProfileId(), name: name, profile: normalizeProfile(profileValue), createdAt: now, updatedAt: now };
+    state.savedProfiles.push(item);
+    state.selectedSavedProfileId = item.id;
+    writeSavedProfiles();
+    renderSavedProfiles();
+    return "created";
+  }
+
+  function saveNamedProfile() {
+    const input = byId("profileNameInput");
+    const name = normalizeProfileName(input.value);
+    if (!name) {
+      showToast("Enter a name for this local profile first.", "warning");
+      input.focus();
+      return;
+    }
+    const result = upsertSavedProfile(name, currentProfile());
+    if (result === "limit") {
+      showToast("The local library is full. Delete a profile before saving another.", "warning");
+      return;
+    }
+    input.value = name;
+    showToast(result === "updated" ? "Saved profile updated on this device." : "Named profile saved on this device.", "success");
+  }
+
+  function loadSelectedProfile() {
+    const item = state.savedProfiles.find(function (entry) { return entry.id === state.selectedSavedProfileId; });
+    if (!item) return;
+    state.geometryManuallyChanged = true;
+    applyProfileToControls(normalizeProfile(item.profile));
+    byId("profileNameInput").value = item.name;
+    updateSavedProfileControls();
+    showToast("Profile loaded and staged. Review it, then use Apply settings to write changes.", "success");
+  }
+
+  function exportSelectedProfile() {
+    const item = state.savedProfiles.find(function (entry) { return entry.id === state.selectedSavedProfileId; });
+    if (!item) return;
+    const slug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "profile";
+    downloadJson("marktis-profile-" + slug + ".json", {
+      schemaVersion: 1,
+      product: "Marktis Optimizer",
+      name: item.name,
+      profile: item.profile
+    });
+    showToast("Profile exported as a JSON file.", "success");
+  }
+
+  function isValidImportedProfile(profile) {
+    return profile && typeof profile === "object" && !Array.isArray(profile)
+      && ["Reduce building lag", "Maximum performance", "Balanced", "High quality"].includes(profile.mode)
+      && Number.isInteger(profile.tier) && profile.tier >= 0 && profile.tier <= 21
+      && Number.isInteger(profile.texture) && profile.texture >= 0 && profile.texture <= 3
+      && ["Auto", "Direct3D 11", "Vulkan", "OpenGL"].includes(profile.renderer)
+      && Number.isInteger(profile.fps) && profile.fps >= 60 && profile.fps <= 1000
+      && typeof profile.legacyFps === "boolean"
+      && Number.isInteger(profile.geometryDistance) && profile.geometryDistance >= 32 && profile.geometryDistance <= 256
+      && typeof profile.vfx === "boolean"
+      && typeof profile.allVersions === "boolean";
+  }
+
+  async function importSavedProfile(file) {
+    if (!file) return;
+    try {
+      if (file.size > maxProfileImportBytes) throw new Error("Profile files must be 64 KB or smaller.");
+      if (typeof file.text !== "function") throw new Error("This desktop runtime cannot read the selected file.");
+      const imported = JSON.parse(await file.text());
+      if (!imported || imported.schemaVersion !== 1 || imported.product !== "Marktis Optimizer" || !isValidImportedProfile(imported.profile)) {
+        throw new Error("Choose a valid Marktis Optimizer profile JSON file.");
+      }
+      const fileName = String(file.name || "").replace(/\.json$/i, "");
+      const name = normalizeProfileName(imported.name || fileName || "Imported profile");
+      if (!name) throw new Error("The profile name is empty or invalid.");
+      const result = upsertSavedProfile(name, imported.profile);
+      if (result === "limit") {
+        showToast("The local library is full. Delete a profile before importing another.", "warning");
+        return;
+      }
+      byId("profileNameInput").value = name;
+      updateSavedProfileControls();
+      showToast(result === "updated" ? "Imported profile updated the matching local entry." : "Profile imported to this device. Load it when you are ready.", "success");
+    } catch (error) {
+      showToast(error && error.message ? error.message : "Could not import the profile file.", "error");
+    } finally {
+      byId("importSavedProfileFile").value = "";
+    }
+  }
+
+  function deleteSelectedProfile() {
+    const item = state.savedProfiles.find(function (entry) { return entry.id === state.selectedSavedProfileId; });
+    if (!item) return false;
+    state.savedProfiles = state.savedProfiles.filter(function (entry) { return entry.id !== item.id; });
+    state.selectedSavedProfileId = "";
+    writeSavedProfiles();
+    renderSavedProfiles();
+    showToast("Saved profile deleted from this device; Roblox settings were not changed.", "success");
+    return true;
   }
 
   function writeAppearance(appearance) {
@@ -841,6 +1092,57 @@
     renderSystemClientStatus();
   }
 
+  function formatPlayerObservationDuration(milliseconds) {
+    const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [hours, minutes, seconds].map(function (value) { return String(value).padStart(2, "0"); }).join(":");
+  }
+
+  function renderPlayerRuntime(result, error) {
+    const watch = byId("playerRuntimeWatch");
+    const stateLabel = byId("playerRuntimeState");
+    const duration = byId("playerObservedDuration");
+    const note = byId("playerRuntimeNote");
+    if (!watch || !stateLabel || !duration || !note) return;
+    if (!invoke || (result && !result.supported)) {
+      state.playerObservedAt = null;
+      watch.dataset.state = "idle";
+      stateLabel.textContent = "DESKTOP ONLY";
+      duration.textContent = "00:00:00";
+      note.textContent = "Available in the packaged Windows app; this is never exact game-session time.";
+      return;
+    }
+    if (error || !result || !result.available) {
+      state.playerObservedAt = null;
+      watch.dataset.state = "paused";
+      stateLabel.textContent = "CHECK UNAVAILABLE";
+      duration.textContent = "00:00:00";
+      note.textContent = "The local process check could not confirm status; the observation timer has reset.";
+      return;
+    }
+    if (!result.running) {
+      state.playerObservedAt = null;
+      watch.dataset.state = "idle";
+      stateLabel.textContent = "STANDBY";
+      duration.textContent = "00:00:00";
+      note.textContent = "Waiting for RobloxPlayerBeta.exe. An open Player process does not mean an experience is loaded.";
+      return;
+    }
+    if (state.playerObservedAt === null) state.playerObservedAt = performance.now();
+    watch.dataset.state = "running";
+    stateLabel.textContent = "PROCESS OBSERVED";
+    duration.textContent = formatPlayerObservationDuration(performance.now() - state.playerObservedAt);
+    note.textContent = "Approximate time since this app first observed RobloxPlayerBeta.exe running. Resets if the process is not detected, a status check fails, or the app closes; not an in-game session timer.";
+  }
+
+  function updatePlayerRuntime() {
+    if (state.playerObservedAt === null) return;
+    const duration = byId("playerObservedDuration");
+    if (duration) duration.textContent = formatPlayerObservationDuration(performance.now() - state.playerObservedAt);
+  }
+
   function renderActivePlayer(result, error) {
     const previous = state.activePlayer;
     if (previous && previous.supported && previous.available && result && result.supported && result.available && typeof previous.running === "boolean" && typeof result.running === "boolean" && previous.running !== result.running) {
@@ -852,6 +1154,7 @@
       );
     }
     state.activePlayer = result || null;
+    renderPlayerRuntime(result, error);
     const badge = byId("playerBadge");
     const title = byId("playerTitle");
     const detail = byId("playerDetail");
@@ -936,11 +1239,18 @@
     const scanButton = byId("scanSafety");
     const appsButton = byId("openInstalledApps");
     const securityButton = byId("openWindowsSecurity");
+    const securityStatus = byId("securityScanStatus");
+    const securityScanButton = byId("securityRescanProcesses");
+    const securityOpenButton = byId("securityOpenWindowsSecurity");
+    const securityProtectionButton = byId("securityOpenProtection");
     const matches = result && Array.isArray(result.matches) ? result.matches : [];
     matchesHost.replaceChildren();
     appsButton.hidden = true;
-    securityButton.hidden = true;
+    securityButton.hidden = !invoke;
     scanButton.disabled = !invoke || state.safetyScanPending;
+    if (securityScanButton) securityScanButton.disabled = !invoke || state.safetyScanPending;
+    if (securityOpenButton) securityOpenButton.disabled = !invoke;
+    if (securityProtectionButton) securityProtectionButton.disabled = !invoke;
 
     function addSummary(message) {
       const summary = document.createElement("p");
@@ -954,6 +1264,7 @@
       badge.className = "state-pill state-pending";
       detail.textContent = "The local process-name check runs only in the packaged Windows app.";
       addSummary(error || "No process scan runs in the website preview.");
+      if (securityStatus) securityStatus.textContent = "The exact-name watchlist runs only in the packaged Windows app; it is not a file or malware scan.";
       return;
     }
 
@@ -971,7 +1282,12 @@
         row.append(product, process);
         matchesHost.appendChild(row);
       });
+      addSummary("Potential malware/executor warning: a watched process name is present. This is not a malware verdict; use Windows Security → Virus & threat protection → Quick scan to check files.");
       if (!result.available) addSummary("The scan was incomplete; displayed matches are still name-only results.");
+      if (securityStatus) {
+        const matchedNames = matches.map(function (match) { return String(match.productName || match.processName || "watched name"); });
+        securityStatus.textContent = "Potential process-name match: " + matchedNames.join(", ") + ". This does not prove malware; use Defender to scan files.";
+      }
       appsButton.hidden = false;
       securityButton.hidden = false;
       scanButton.disabled = state.safetyScanPending;
@@ -983,6 +1299,7 @@
       badge.className = "state-pill state-error";
       detail.textContent = error || (result && result.message) || "The local process-name check could not complete.";
       addSummary("No clean result is claimed when a scan is unavailable.");
+      if (securityStatus) securityStatus.textContent = "The limited process-name check could not complete: " + (error || (result && result.message) || "result unavailable") + ". This is not an antivirus scan.";
       return;
     }
 
@@ -990,6 +1307,146 @@
     badge.className = "state-pill state-found";
     detail.textContent = result.message;
     addSummary("No exact Xeno.exe, Solara.exe, JJSploit.exe, or Delta.exe process name was found. This is not an antivirus verdict.");
+    if (securityStatus) securityStatus.textContent = "No watched exact process name was found in this limited check. Files, inactive apps, and renamed processes are not scanned.";
+  }
+
+  function renderWireGuardStatus(result, error) {
+    const badge = byId("wireguardStatusBadge");
+    const detail = byId("wireguardStatusDetail");
+    const profileDetail = byId("wireguardProfileDetail");
+    const importButton = byId("wireguardImportButton");
+    const connectButton = byId("wireguardConnectButton");
+    const disconnectButton = byId("wireguardDisconnectButton");
+    const removeButton = byId("wireguardRemoveButton");
+    const refreshButton = byId("wireguardRefreshButton");
+    const downloadButton = byId("wireguardDownloadButton");
+    state.wireguardStatus = result || null;
+
+    if (!invoke) {
+      badge.textContent = "DESKTOP ONLY";
+      badge.className = "state-pill state-pending";
+      detail.textContent = "WireGuard integration is available only in the packaged Windows desktop app.";
+      profileDetail.textContent = "No provider profile is read or stored in the website preview.";
+    } else if (error || !result) {
+      badge.textContent = "STATUS UNAVAILABLE";
+      badge.className = "state-pill state-error";
+      detail.textContent = error || "Windows could not return the WireGuard status.";
+      profileDetail.textContent = "No connection or profile status is assumed when Windows cannot be queried.";
+    } else if (!result.supported) {
+      badge.textContent = "WINDOWS ONLY";
+      badge.className = "state-pill state-pending";
+      detail.textContent = result.message || "WireGuard integration is available only on Windows.";
+      profileDetail.textContent = "Use the official WireGuard app on a supported Windows device.";
+    } else if (!result.serviceQueryAvailable) {
+      badge.textContent = "STATUS UNAVAILABLE";
+      badge.className = "state-pill state-error";
+      detail.textContent = result.message || "Windows could not confirm tunnel-service state.";
+      profileDetail.textContent = "VPN actions are disabled until the current service status can be verified.";
+    } else if (result.servicePresent && !result.serviceManaged) {
+      badge.textContent = "NAME CONFLICT";
+      badge.className = "state-pill state-error";
+      detail.textContent = result.message || "A tunnel uses the reserved service name but cannot be verified as this app's profile.";
+      profileDetail.textContent = "Marktis leaves unrecognized WireGuard services untouched. Resolve the name conflict in WireGuard for Windows, then refresh.";
+    } else if (!result.wireguardInstalled) {
+      badge.textContent = "CLIENT REQUIRED";
+      badge.className = "state-pill state-pending";
+      detail.textContent = result.message || "Install the official WireGuard for Windows client first.";
+      profileDetail.textContent = "The app does not bundle WireGuard binaries or a VPN provider subscription.";
+    } else if (result.serviceManaged && !result.profileFilePresent) {
+      badge.textContent = "PROFILE MISSING";
+      badge.className = "state-pill state-error";
+      detail.textContent = result.message || "The app-managed service references a missing encrypted profile.";
+      profileDetail.textContent = "Disconnect the verified tunnel, or remove its service. Import is disabled until the service is removed.";
+    } else if (result.profileInstalled && result.serviceRunning) {
+      badge.textContent = "TUNNEL RUNNING";
+      badge.className = "state-pill state-found";
+      detail.textContent = result.message;
+      profileDetail.textContent = "WireGuard reports its tunnel service as running; this does not verify a recent handshake or internet reachability.";
+    } else if (result.profileInstalled) {
+      badge.textContent = "DISCONNECTED";
+      badge.className = "state-pill state-pending";
+      detail.textContent = result.message;
+      profileDetail.textContent = "The provider profile remains encrypted locally. Connect starts it; Remove deletes the service and local profile.";
+    } else if (result.profileFilePresent) {
+      badge.textContent = "PROFILE SAVED";
+      badge.className = "state-pill state-pending";
+      detail.textContent = result.message;
+      profileDetail.textContent = "The encrypted profile is present, but no managed tunnel service is installed. Connect can retry installation.";
+    } else {
+      badge.textContent = "NO PROFILE";
+      badge.className = "state-pill state-idle";
+      detail.textContent = result.message || "Import a provider .conf file to configure a tunnel.";
+      profileDetail.textContent = "The selected .conf is held in memory until you confirm import; the plaintext file is not copied into app data.";
+    }
+
+    const unavailable = !invoke || !result || !result.supported || !result.serviceQueryAvailable || state.wireguardPending;
+    const clientMissing = !result || !result.wireguardInstalled;
+    const foreignService = Boolean(result && result.servicePresent && !result.serviceManaged);
+    const removeNeedsWireGuard = Boolean(result && result.serviceManaged);
+    const removeHasTarget = Boolean(result && (result.profileFilePresent || result.serviceManaged));
+    importButton.disabled = unavailable || clientMissing || Boolean(result && (result.servicePresent || result.profileFilePresent));
+    connectButton.disabled = unavailable || clientMissing || !result || !result.profileFilePresent || foreignService || Boolean(result && result.serviceRunning);
+    disconnectButton.disabled = unavailable || clientMissing || !result || !result.serviceManaged || !result.serviceRunning;
+    removeButton.disabled = unavailable || !result || foreignService || !removeHasTarget || (clientMissing && removeNeedsWireGuard);
+    refreshButton.disabled = !invoke || state.wireguardPending;
+    downloadButton.disabled = !invoke || state.wireguardPending;
+  }
+
+  async function refreshWireGuardStatus() {
+    if (!invoke) {
+      renderWireGuardStatus(null, "The packaged Windows desktop app is required.");
+      return null;
+    }
+    if (state.wireguardPending) return state.wireguardStatus;
+    const refreshButton = byId("wireguardRefreshButton");
+    if (refreshButton) refreshButton.disabled = true;
+    try {
+      const result = await invoke("wireguard_vpn_status");
+      renderWireGuardStatus(result);
+      return result;
+    } catch (error) {
+      renderWireGuardStatus(null, error && error.message ? error.message : String(error));
+      return null;
+    } finally {
+      if (refreshButton) refreshButton.disabled = !invoke || state.wireguardPending;
+    }
+  }
+
+  async function selectWireGuardConfig() {
+    const input = byId("wireguardConfigFile");
+    const file = input && input.files && input.files[0];
+    if (input) input.value = "";
+    if (!file) return;
+    if (!/\.conf$/i.test(file.name || "")) {
+      showToast("Choose a WireGuard provider .conf file.", "warning");
+      return;
+    }
+    if (file.size > 64 * 1024) {
+      showToast("WireGuard profiles must be 64 KB or smaller.", "warning");
+      return;
+    }
+    try {
+      state.pendingWireguardConfig = await file.text();
+      state.pendingWireguardFilename = String(file.name || "provider.conf").slice(0, 100);
+      byId("wireguardImportButton").focus();
+      openConfirmation("wireguard-import");
+    } catch (error) {
+      state.pendingWireguardConfig = "";
+      state.pendingWireguardFilename = "";
+      showToast("Could not read the selected WireGuard profile: " + (error && error.message ? error.message : String(error)), "error");
+    }
+  }
+
+  async function openWireGuardDownload() {
+    if (!invoke) {
+      showToast("WireGuard setup is available in the packaged Windows app.", "warning");
+      return;
+    }
+    try {
+      await invoke("open_wireguard_download");
+    } catch (error) {
+      showToast("Could not open the official WireGuard page: " + (error && error.message ? error.message : String(error)), "warning");
+    }
   }
 
   function appendSystemRow(host, titleText, detailText) {
@@ -1268,12 +1725,20 @@
 
     state.safetyScanPending = true;
     const button = byId("scanSafety");
+    const securityScanButton = byId("securityRescanProcesses");
+    const systemScanButton = byId("scanSafetySystem");
+    [button, securityScanButton, systemScanButton].forEach(function (scanAction) {
+      if (scanAction) {
+        scanAction.disabled = true;
+        scanAction.setAttribute("aria-busy", "true");
+      }
+    });
     if (!silent) {
-      button.disabled = true;
-      button.setAttribute("aria-busy", "true");
       byId("safetyScanBadge").textContent = "SCANNING";
       byId("safetyScanBadge").className = "state-pill state-pending";
       byId("safetyScanDetail").textContent = "Checking only the allowlisted process names on this device…";
+      const securityStatus = byId("securityScanStatus");
+      if (securityStatus) securityStatus.textContent = "Checking only the exact watched process names…";
     }
     try {
       const result = await invoke("scan_known_executor_processes");
@@ -1292,9 +1757,9 @@
           return String(match.processName || match.productName || "").toLowerCase();
         }).filter(Boolean).sort().join("|");
         if (alertSignature && alertSignature !== state.lastSafetyAlertSignature) {
-          showToast("Local safety alert: review the possible process-name match on Main.", "warning");
+          showToast("Potential malware/executor warning: review the watched process-name match and run a Defender scan.", "warning");
           const matchedNames = matches.map(function (match) { return String(match.productName || match.processName || "possible name"); }).slice(0, 4).join(", ");
-          addAppNotification("Review a local process-name match", matchedNames + ". A name match is not proof of malware; review the on-device scan.", "safetyAlerts", "warning");
+          addAppNotification("Potential executor/malware warning", matchedNames + " matched the local name watchlist. This does not prove malware; run Microsoft Defender Quick scan in Windows Security.", "safetyAlerts", "warning");
         }
         if (alertSignature) state.lastSafetyAlertSignature = alertSignature;
       } else if (result && result.available) {
@@ -1314,8 +1779,12 @@
       return null;
     } finally {
       state.safetyScanPending = false;
-      button.disabled = !invoke;
-      button.removeAttribute("aria-busy");
+      [button, securityScanButton, systemScanButton].forEach(function (scanAction) {
+        if (scanAction) {
+          scanAction.disabled = !invoke;
+          scanAction.removeAttribute("aria-busy");
+        }
+      });
     }
   }
 
@@ -1356,7 +1825,7 @@
   }
 
   function setSettingsTab(name) {
-    const selected = ["rendering", "geometry", "icons", "allowlist", "system", "notifications"].includes(name) ? name : "rendering";
+    const selected = ["rendering", "geometry", "icons", "allowlist", "security", "vpn", "system", "notifications"].includes(name) ? name : "rendering";
     byId("settingsView").hidden = false;
     byId("mainView").hidden = true;
     byId("navMain").classList.remove("is-active");
@@ -1365,8 +1834,8 @@
     byId("navSettings").setAttribute("aria-expanded", "true");
     byId("settingsSubnav").hidden = false;
     byId("breadcrumbTitle").textContent = "Settings · " + capitalize(selected);
-    byId("settingsHeaderStatusText").textContent = selected === "notifications" ? "Preferences save immediately on this device" : "Changes are staged locally";
-    byId("settingsFooter").hidden = selected === "notifications";
+    byId("settingsHeaderStatusText").textContent = selected === "notifications" ? "Preferences save immediately on this device" : selected === "security" ? "Windows controls scanning and remediation" : selected === "vpn" ? "Provider profile stays on this device" : "Changes are staged locally";
+    byId("settingsFooter").hidden = ["notifications", "security", "vpn"].includes(selected);
     document.querySelectorAll(".settings-tab").forEach(function (tab) {
       const active = tab.dataset.tab === selected;
       tab.classList.toggle("is-active", active);
@@ -1388,6 +1857,7 @@
     renderSystemClientStatus();
     if (selected === "system" && !state.deviceSnapshot) refreshDeviceInfo();
     if (selected === "notifications") renderNotificationPreferences();
+    if (selected === "vpn") refreshWireGuardStatus();
   }
 
   function capitalize(value) { return value.charAt(0).toUpperCase() + value.slice(1); }
@@ -1516,8 +1986,15 @@
   }
 
   function openConfirmation(action) {
-    if (!invoke) {
-      showToast("Open the packaged Windows desktop app to apply local Roblox settings.", "warning");
+    const isDeleteProfile = action === "delete-profile";
+    const isWireGuardAction = ["wireguard-import", "wireguard-connect", "wireguard-disconnect", "wireguard-remove"].includes(action);
+    const isWireGuardRemove = action === "wireguard-remove";
+    if (!invoke && !isDeleteProfile) {
+      showToast(isWireGuardAction ? "WireGuard VPN actions require the packaged Windows desktop app." : "Open the packaged Windows desktop app to apply local Roblox settings.", "warning");
+      return;
+    }
+    if (action === "wireguard-import" && !state.pendingWireguardConfig) {
+      showToast("Select a provider WireGuard .conf file first.", "warning");
       return;
     }
     state.pendingAction = action;
@@ -1525,15 +2002,44 @@
     const isRestore = action === "restore";
     const isApplyLaunch = action === "apply-launch";
     const profile = currentProfile();
-    byId("confirmEyebrow").textContent = isRestore ? "LOCAL SETTINGS · RESTORE" : "LOCAL SETTINGS · BACKUP FIRST";
-    byId("confirmTitle").textContent = isRestore ? "Restore managed settings?" : (isApplyLaunch ? "Apply and launch Roblox?" : "Apply this profile?");
-    if (isRestore) {
-      byId("confirmText").textContent = "Marktis Optimizer will remove canonical managed keys and the separate legacy FPS key from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+    const savedProfile = state.savedProfiles.find(function (item) { return item.id === state.selectedSavedProfileId; });
+    const isWarnAction = isDeleteProfile || isWireGuardRemove;
+    byId("acceptConfirm").classList.toggle("button-outline-warn", isWarnAction);
+    byId("acceptConfirm").classList.toggle("button-primary", !isWarnAction);
+    byId("acceptConfirm").textContent = isDeleteProfile ? "Delete profile" : isWireGuardRemove ? "Remove VPN profile" : isWireGuardAction ? (action === "wireguard-import" ? "Import & connect" : action === "wireguard-connect" ? "Connect VPN" : "Disconnect VPN") : "Confirm";
+    if (isDeleteProfile) {
+      byId("confirmEyebrow").textContent = "LOCAL PROFILE LIBRARY · DELETE";
+      byId("confirmTitle").textContent = "Delete this saved profile?";
+      byId("confirmText").textContent = savedProfile
+        ? "Delete “" + savedProfile.name + "” from this device? This does not change the currently staged or applied Roblox settings."
+        : "This profile is no longer available.";
+    } else if (isWireGuardAction) {
+      byId("confirmEyebrow").textContent = "WIREGUARD VPN · WINDOWS NETWORK CHANGE";
+      if (action === "wireguard-import") {
+        byId("confirmTitle").textContent = "Import and connect this provider profile?";
+        byId("confirmText").textContent = "Import “" + state.pendingWireguardFilename + "” and install a Windows WireGuard tunnel service? Your provider’s AllowedIPs and DNS determine routed traffic; a default route can carry all internet traffic and may enable WireGuard’s firewall/kill-switch behavior. Windows will ask for administrator approval. The encrypted profile is stored on this device; after successful setup, the tunnel remains active if Marktis closes and may remain after uninstall; disconnect and remove it before uninstalling. The service is set not to auto-start after a Windows restart. Only use a configuration from a provider you trust.";
+      } else if (action === "wireguard-connect") {
+        byId("confirmTitle").textContent = "Connect the provider tunnel?";
+        byId("confirmText").textContent = "WireGuard will start the installed tunnel using its provider-defined routes and DNS. This changes the device’s network path, may affect all internet traffic, and can change Roblox ping. Windows will ask for administrator approval. On success, the service is set to manual start. The tunnel stays connected after this app closes and may remain after uninstall; disconnect and remove it before uninstalling. It will not auto-start after a Windows restart.";
+      } else if (action === "wireguard-disconnect") {
+        byId("confirmTitle").textContent = "Disconnect the provider tunnel?";
+        byId("confirmText").textContent = "WireGuard will stop this app-managed tunnel and Windows will return to its normal network routes. Active connections may be interrupted. The encrypted provider profile remains stored locally.";
+      } else {
+        byId("confirmTitle").textContent = "Remove the WireGuard profile?";
+        byId("confirmText").textContent = "This stops and removes the app-managed Windows tunnel service, then deletes its encrypted local profile. You will need the provider’s original .conf file to set it up again. Any other WireGuard tunnel is left untouched.";
+      }
     } else {
-      let message = "Marktis Optimizer will back up each target file, then apply your local profile. Unrelated JSON keys stay untouched.";
-      if (profile.legacyFps) message += " The opt-in legacy FPS target (" + profile.fps + ") is outside Roblox's current allowlist and may be ignored.";
-      if (isApplyLaunch) message += " If settings are applied successfully, Roblox will open through the normal roblox:// protocol.";
-      byId("confirmText").textContent = message;
+      byId("confirmEyebrow").textContent = isRestore ? "LOCAL SETTINGS · RESTORE" : "LOCAL SETTINGS · BACKUP FIRST";
+      byId("confirmTitle").textContent = isRestore ? "Restore managed settings?" : (isApplyLaunch ? "Apply and launch Roblox?" : "Apply this profile?");
+      if (isRestore) {
+        byId("confirmText").textContent = "Marktis Optimizer will remove canonical managed keys and the separate legacy FPS key from detected settings files. Unrelated JSON keys stay untouched; new backups are created first.";
+      } else {
+        let message = "Marktis Optimizer will back up each target file, then apply your local profile. Unrelated JSON keys stay untouched.";
+        if (profile.legacyFps) message += " The opt-in legacy FPS target (" + profile.fps + ") is outside Roblox's current allowlist and may be ignored.";
+        if (isApplyLaunch) message += " If settings are applied successfully, Roblox will open through the normal roblox:// protocol.";
+        if (state.activePlayer && state.activePlayer.running) message += " Roblox Player is already running. This writes a backed-up local settings file, not the live game; the current session may ignore or overwrite it. Restart Roblox after the session to load these settings.";
+        byId("confirmText").textContent = message;
+      }
     }
     byId("confirmOverlay").hidden = false;
     byId("cancelConfirm").focus();
@@ -1541,15 +2047,79 @@
 
   function closeConfirmation() {
     byId("confirmOverlay").hidden = true;
+    byId("acceptConfirm").classList.remove("button-outline-warn");
+    byId("acceptConfirm").classList.add("button-primary");
+    byId("acceptConfirm").textContent = "Confirm";
     state.pendingAction = null;
+    state.pendingWireguardConfig = "";
+    state.pendingWireguardFilename = "";
     const returnFocus = state.confirmReturnFocus;
     state.confirmReturnFocus = null;
     if (returnFocus && returnFocus.isConnected && typeof returnFocus.focus === "function") returnFocus.focus();
   }
 
+  async function confirmWireGuardAction(action) {
+    const commands = {
+      "wireguard-import": "wireguard_vpn_import",
+      "wireguard-connect": "wireguard_vpn_connect",
+      "wireguard-disconnect": "wireguard_vpn_disconnect",
+      "wireguard-remove": "wireguard_vpn_remove"
+    };
+    const command = commands[action];
+    if (!command || !invoke) return closeConfirmation();
+    const config = action === "wireguard-import" ? state.pendingWireguardConfig : "";
+    const accept = byId("acceptConfirm");
+    const cancel = byId("cancelConfirm");
+    const dialog = byId("confirmDialog");
+    state.wireguardPending = true;
+    accept.disabled = true;
+    cancel.disabled = true;
+    dialog.setAttribute("aria-busy", "true");
+    dialog.focus();
+    accept.textContent = action === "wireguard-import" ? "Installing tunnel…" : action === "wireguard-remove" ? "Removing profile…" : action === "wireguard-connect" ? "Connecting…" : "Disconnecting…";
+    renderWireGuardStatus(state.wireguardStatus);
+    let result = null;
+    let failure = null;
+    try {
+      result = await invoke(command, action === "wireguard-import" ? { config: config } : {});
+      state.wireguardStatus = result;
+    } catch (error) {
+      failure = error;
+    } finally {
+      state.wireguardPending = false;
+      accept.disabled = false;
+      cancel.disabled = false;
+      dialog.removeAttribute("aria-busy");
+      accept.textContent = "Confirm";
+    }
+    closeConfirmation();
+    if (result) renderWireGuardStatus(result);
+    if (failure) {
+      showToast("WireGuard action failed: " + (failure && failure.message ? failure.message : String(failure)), "error");
+      await refreshWireGuardStatus();
+      return;
+    }
+    const messages = {
+      "wireguard-import": "WireGuard installed the provider tunnel service. Check its status and provider reachability before relying on it.",
+      "wireguard-connect": "WireGuard tunnel service started. Service state does not guarantee a successful handshake.",
+      "wireguard-disconnect": "WireGuard tunnel stopped; Windows is returning to its normal network routes.",
+      "wireguard-remove": "The app-managed WireGuard service and encrypted profile were removed."
+    };
+    showToast(messages[action] || "WireGuard action completed.", "success");
+  }
+
   async function confirmAction() {
     const action = state.pendingAction;
-    if (!action || !invoke) return closeConfirmation();
+    if (!action) return closeConfirmation();
+    if (action === "delete-profile") {
+      const deleted = deleteSelectedProfile();
+      closeConfirmation();
+      byId("profileLibrarySelect").focus();
+      if (!deleted) showToast("That saved profile is no longer available.", "warning");
+      return;
+    }
+    if (action.indexOf("wireguard-") === 0) return confirmWireGuardAction(action);
+    if (!invoke) return closeConfirmation();
     const isRestore = action === "restore";
     const isApplyLaunch = action === "apply-launch";
     const accept = byId("acceptConfirm");
@@ -1637,6 +2207,33 @@
       showToast("Roblox could not be launched: " + (error && error.message ? error.message : String(error)), "error");
     } finally {
       if (button) button.disabled = false;
+    }
+  }
+
+  async function rejoinSameServer() {
+    const button = byId("rejoinSameServer");
+    const placeId = normalizeRobloxPlaceId(byId("rejoinPlaceId").value);
+    const gameInstanceId = normalizeRobloxGameInstanceId(byId("rejoinGameInstanceId").value);
+    if (!placeId || !gameInstanceId) {
+      showToast("Enter a valid Place ID and server Job ID (UUID).", "warning");
+      updateRejoinButton();
+      return;
+    }
+    if (!invoke) {
+      showToast("Rejoining a server is available in the packaged Windows desktop app.", "warning");
+      return;
+    }
+    safeStorageSet(rejoinTargetKey, JSON.stringify({ placeId: placeId, gameInstanceId: gameInstanceId }));
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    try {
+      await invoke("rejoin_roblox_server", { placeId: placeId, gameInstanceId: gameInstanceId });
+      showToast("Roblox rejoin request sent for the supplied server. Roblox may reject it if that server is no longer available.", "success");
+    } catch (error) {
+      showToast("Could not request a server rejoin: " + (error && error.message ? error.message : String(error)), "error");
+    } finally {
+      button.removeAttribute("aria-busy");
+      updateRejoinButton();
     }
   }
 
@@ -1960,7 +2557,24 @@
     byId("refreshDevice").addEventListener("click", refreshDeviceInfo);
     byId("probeRobloxLatency").addEventListener("click", probeRobloxWebLatency);
     byId("scanSafetySystem").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
+    byId("securityRescanProcesses").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
+    byId("securityOpenWindowsSecurity").addEventListener("click", function () { openWindowsSettings("security"); });
+    byId("securityOpenProtection").addEventListener("click", function () { openWindowsSettings("security"); });
+    byId("wireguardImportButton").addEventListener("click", function () {
+      if (!this.disabled) byId("wireguardConfigFile").click();
+    });
+    byId("wireguardConfigFile").addEventListener("change", selectWireGuardConfig);
+    byId("wireguardConnectButton").addEventListener("click", function () { openConfirmation("wireguard-connect"); });
+    byId("wireguardDisconnectButton").addEventListener("click", function () { openConfirmation("wireguard-disconnect"); });
+    byId("wireguardRemoveButton").addEventListener("click", function () { openConfirmation("wireguard-remove"); });
+    byId("wireguardRefreshButton").addEventListener("click", refreshWireGuardStatus);
+    byId("wireguardDownloadButton").addEventListener("click", openWireGuardDownload);
     byId("launchRoblox").addEventListener("click", launchRoblox);
+    ["rejoinPlaceId", "rejoinGameInstanceId"].forEach(function (id) {
+      byId(id).addEventListener("input", updateRejoinButton);
+      byId(id).addEventListener("change", updateRejoinButton);
+    });
+    byId("rejoinSameServer").addEventListener("click", rejoinSameServer);
     byId("openLatestRelease").addEventListener("click", openLatestRelease);
     byId("openRobloxProfile").addEventListener("click", openRobloxProfile);
     byId("robloxUserId").addEventListener("input", updateRobloxProfileButton);
@@ -2019,11 +2633,24 @@
     ["vfxToggle", "allVersionsToggle"].forEach(function (id) {
       byId(id).addEventListener("change", updateProfileDisplay);
     });
+    byId("profileNameInput").addEventListener("input", updateSavedProfileControls);
+    byId("profileLibrarySelect").addEventListener("change", function () {
+      state.selectedSavedProfileId = this.value;
+      const selected = state.savedProfiles.find((item) => item.id === this.value);
+      if (selected) byId("profileNameInput").value = selected.name;
+      updateSavedProfileControls();
+    });
+    byId("saveNamedProfile").addEventListener("click", saveNamedProfile);
+    byId("loadSavedProfile").addEventListener("click", loadSelectedProfile);
+    byId("exportSavedProfile").addEventListener("click", exportSelectedProfile);
+    byId("deleteSavedProfile").addEventListener("click", function () { openConfirmation("delete-profile"); });
+    byId("importSavedProfileButton").addEventListener("click", function () { byId("importSavedProfileFile").click(); });
+    byId("importSavedProfileFile").addEventListener("change", function () { importSavedProfile(this.files && this.files[0]); });
     byId("saveProfile").addEventListener("click", function () {
       const profile = currentProfile();
       writeProfile(profile);
       downloadJson("marktis-optimizer-profile.json", { schemaVersion: 1, product: "Marktis Optimizer", profile: profile });
-      showToast("Profile saved locally and exported as JSON.", "success");
+      showToast("Current profile exported as JSON.", "success");
     });
     byId("restoreSettings").addEventListener("click", function () { openConfirmation("restore"); });
     byId("applySettings").addEventListener("click", function () { openConfirmation("apply"); });
@@ -2126,12 +2753,18 @@
     renderNotificationPreferences();
     renderNotificationCenter();
     const initialProfile = readProfile();
+    state.savedProfiles = readSavedProfiles();
+    renderSavedProfiles();
     const modeDefaultDistance = initialProfile.mode === "Balanced" ? 128 : (initialProfile.mode === "High quality" ? 256 : 64);
     state.geometryManuallyChanged = initialProfile.geometryDistance !== modeDefaultDistance;
     applyProfileToControls(initialProfile);
     applyAppearance(readAppearance());
     byId("robloxUserId").value = normalizeRobloxUserId(safeStorageGet(robloxUserIdKey) || "");
     updateRobloxProfileButton();
+    const rejoinTarget = readRejoinTarget();
+    byId("rejoinPlaceId").value = rejoinTarget.placeId;
+    byId("rejoinGameInstanceId").value = rejoinTarget.gameInstanceId;
+    updateRejoinButton();
     state.benchmarkJournal = readBenchmarkJournal();
     renderBenchmarkJournal();
     const allowlistTask = loadAllowlist();
@@ -2160,6 +2793,7 @@
       byId("scanSafetySystem").disabled = true;
       renderDeviceSnapshot(null, "Local hardware inventory is available only in the packaged Windows app.");
       renderSafetyScan(null, "Local process scanning is available only in the packaged Windows app.");
+      renderWireGuardStatus(null, "WireGuard integration is available only in the packaged Windows app.");
       renderSystemClientStatus();
       setBoot("Standalone desktop layout ready · no remote assets", 100);
       finishBoot();
@@ -2184,6 +2818,7 @@
       showStartupStorageNotice();
     });
     window.setInterval(refreshPlayerStatus, 10000);
+    window.setInterval(updatePlayerRuntime, 1000);
     window.setInterval(function () { scanKnownExecutorProcesses(true); }, 30000);
   }
 

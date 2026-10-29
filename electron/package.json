@@ -2,7 +2,7 @@
   "name": "marktisoptimizer-electron-client",
   "version": "4.0.0",
   "private": true,
-  "description": "Optional Electron Windows desktop build for Marktis Optimizer",
+  "description": "Optional Electron Windows desktop build with user-configured WireGuard profile support",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",

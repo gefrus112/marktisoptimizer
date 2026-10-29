@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main Marktis Optimizer client window. Custom Rust commands (detect_roblox, active_roblox_status, scan_known_executor_processes, open_windows_settings, apply_settings, restore_settings, app_info, get_allowlist, open_external, open_latest_release) are exposed via the invoke handler and are not gated by plugin permissions. No shell or filesystem plugins are enabled.",
+  "description": "Default capability for the main Marktis Optimizer client window. Custom Rust commands are exposed via the invoke handler and are not gated by plugin permissions, including safe local Roblox commands and the user-confirmed WireGuard VPN integration (profile data is protected locally; service operations require Windows administrator approval). No shell or filesystem plugins are enabled.",
   "windows": ["main"],
   "permissions": [
     "core:default"

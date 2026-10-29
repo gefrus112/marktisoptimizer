@@ -80,6 +80,16 @@ def check() -> None:
         "Geometry section": 'data-tab="geometry"',
         "Icons section": 'data-tab="icons"',
         "Allowlist section": 'data-tab="allowlist"',
+        "Windows Security settings tab": 'data-tab="security"',
+        "Defender handoff action": 'id="securityOpenWindowsSecurity"',
+        "local process-name rescan in Security": 'id="securityRescanProcesses"',
+        "WireGuard VPN settings tab": 'data-tab="vpn"',
+        "WireGuard profile import action": 'id="wireguardImportButton"',
+        "local WireGuard .conf selector": 'id="wireguardConfigFile"',
+        "WireGuard tunnel connection controls": 'id="wireguardConnectButton"',
+        "WireGuard disconnect action": 'id="wireguardDisconnectButton"',
+        "WireGuard profile removal action": 'id="wireguardRemoveButton"',
+        "official WireGuard download shortcut": 'id="wireguardDownloadButton"',
         "local System tab": 'data-tab="system"',
         "local Notifications tab": 'data-tab="notifications"',
         "in-app notification center": 'id="notificationDrawer"',
@@ -88,6 +98,9 @@ def check() -> None:
         "on-demand Roblox latency probe": 'id="probeRobloxLatency"',
         "Windows Graphics settings shortcut": 'id="openGraphicsSettings"',
         "safe rendering presets": 'data-preset="quality"',
+        "on-device named profile library": 'id="profileLibrarySelect"',
+        "save named profile action": 'id="saveNamedProfile"',
+        "profile JSON import control": 'id="importSavedProfileFile"',
         "anime theme gallery": 'id="animeThemeGrid"',
         "theme search": 'id="animeThemeSearch"',
         "actual FPS guidance": 'Performance Stats',
@@ -98,8 +111,13 @@ def check() -> None:
         "startup storage warning": 'id="storageNoticeOverlay"',
         "renderer preference control": 'id="rendererSelect"',
         "local safety scan": 'id="scanSafety"',
+        "Windows Security Defender handoff": 'id="openWindowsSecurity"',
+        "local scan limits and Defender guidance": 'id="safetyScanHelp"',
         "Roblox launcher": 'id="launchRoblox"',
         "latest app release link": 'id="openLatestRelease"',
+        "manual exact-server rejoin action": 'id="rejoinSameServer"',
+        "local Player-process observation timer": 'id="playerRuntimeWatch"',
+        "Player timer disclaimer": 'This is not a game-session timer.',
         "apply-and-launch confirmation action": 'id="applyLaunch"',
         "opt-in experimental FPS toggle": 'id="legacyFpsToggle"',
         "experimental FPS slider": 'id="fpsTarget"',
@@ -131,13 +149,48 @@ def check() -> None:
         "open_latest_release",
         "exit_app",
         "launch_roblox",
+        "rejoin_roblox_server",
+        "open_wireguard_download",
+        "wireguard_vpn_status",
+        "wireguard_vpn_import",
+        "wireguard_vpn_connect",
+        "wireguard_vpn_disconnect",
+        "wireguard_vpn_remove",
         "apply_settings",
         "restore_settings",
     )
     if any(command not in js for command in required_commands):
         raise SystemExit("Tauri desktop local commands are not wired to the UI.")
+    tauri_source = (RUST / "src-tauri" / "src" / "lib.rs").read_text(encoding="utf-8")
+    if "fn rejoin_roblox_server" not in tauri_source or "            rejoin_roblox_server," not in tauri_source:
+        raise SystemExit("The manual server-rejoin command must be registered in the Tauri bridge.")
+    vpn_source = (RUST / "src-tauri" / "src" / "vpn.rs").read_text(encoding="utf-8")
+    vpn_command_names = (
+        "wireguard_vpn_status",
+        "wireguard_vpn_import",
+        "wireguard_vpn_connect",
+        "wireguard_vpn_disconnect",
+        "wireguard_vpn_remove",
+    )
+    if "            open_wireguard_download," not in tauri_source or any(
+        f"pub fn {name}" not in vpn_source or f"vpn::{name}," not in tauri_source
+        for name in vpn_command_names
+    ):
+        raise SystemExit("WireGuard VPN commands must be registered in the Tauri bridge.")
     if "legacyFps: false" not in js or "Experimental legacy FPS target" not in html:
         raise SystemExit("The experimental legacy FPS request must remain explicitly opt-in by default.")
+    profile_library_markers = (
+        "const maxSavedProfiles = 12",
+        "const maxProfileImportBytes = 64 * 1024",
+        "function isValidImportedProfile(profile)",
+        "function loadSelectedProfile()",
+        "function exportSelectedProfile()",
+        "function deleteSelectedProfile()",
+    )
+    if any(marker not in js for marker in profile_library_markers):
+        raise SystemExit("The local profile library must retain its limits, import validation, and management actions.")
+    if "Potential malware/executor warning" not in js or "not a malware verdict" not in js:
+        raise SystemExit("Potential malware warnings must stay paired with a clear name-match disclaimer.")
     if any((FRONTEND / "assets" / name).exists() for name in ("nebula.css", "nebula.js", "desktop.js")):
         raise SystemExit("Old website UI assets remain in the generated Tauri bundle.")
     try:

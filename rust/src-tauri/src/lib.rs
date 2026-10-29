@@ -13,6 +13,7 @@ mod detect;
 mod device;
 mod safety;
 mod session;
+mod vpn;
 mod settings;
 
 use serde::Serialize;
@@ -53,6 +54,7 @@ pub struct AppSafety {
 
 const ALLOWLIST_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/fastflags-allowlist.json"));
 const LATEST_RELEASE_URL: &str = "https://github.com/gefrus112/marktisoptimizer/releases/latest";
+const WIREGUARD_DOWNLOAD_URL: &str = "https://www.wireguard.com/install/";
 
 fn flag_count() -> usize {
     serde_json::from_str::<serde_json::Value>(ALLOWLIST_JSON)
@@ -141,6 +143,13 @@ fn open_latest_release() -> Result<(), String> {
     open_external(LATEST_RELEASE_URL.to_string())
 }
 
+/// Open the official WireGuard for Windows install page; the app does not ship
+/// a provider account, VPN server, or bundled client binaries.
+#[tauri::command]
+fn open_wireguard_download() -> Result<(), String> {
+    open_external(WIREGUARD_DOWNLOAD_URL.to_string())
+}
+
 fn roblox_profile_url(user_id: &str) -> Result<String, String> {
     let id = user_id
         .trim()
@@ -159,10 +168,35 @@ fn open_roblox_profile(user_id: String) -> Result<(), String> {
     open_external(roblox_profile_url(&user_id)?)
 }
 
-/// Ask Windows Explorer to dispatch the fixed Roblox protocol URI to its
-/// registered handler. No user-supplied URL, shell command, or launch flags.
-#[tauri::command]
-fn launch_roblox() -> Result<(), String> {
+fn roblox_server_uri(place_id: &str, game_instance_id: &str) -> Result<String, String> {
+    let place_id = place_id
+        .trim()
+        .parse::<u64>()
+        .map_err(|_| "Enter a valid numeric Roblox Place ID.".to_string())?;
+    if place_id == 0 {
+        return Err("Enter a positive numeric Roblox Place ID.".to_string());
+    }
+    let game_instance_id = game_instance_id.trim();
+    let bytes = game_instance_id.as_bytes();
+    let valid_uuid = bytes.len() == 36
+        && bytes.iter().enumerate().all(|(index, byte)| {
+            if [8, 13, 18, 23].contains(&index) {
+                *byte == b'-'
+            } else {
+                byte.is_ascii_hexdigit()
+            }
+        });
+    if !valid_uuid {
+        return Err("Enter the exact server Job ID as a UUID.".to_string());
+    }
+    Ok(format!(
+        "roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}"
+    ))
+}
+
+/// Dispatch only a fixed Roblox URI or a URI assembled from validated numeric
+/// Place ID and UUID Job ID values. This never invokes a shell.
+fn dispatch_roblox_uri(uri: &str) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         let root = std::env::var_os("SystemRoot")
@@ -177,15 +211,30 @@ fn launch_roblox() -> Result<(), String> {
             return Err("Windows Explorer could not be found in the system folder.".to_string());
         }
         std::process::Command::new(explorer)
-            .arg("roblox://")
+            .arg(uri)
             .spawn()
             .map_err(|error| format!("Could not request Roblox launch: {error}"))?;
         Ok(())
     }
     #[cfg(not(target_os = "windows"))]
     {
+        let _ = uri;
         Err("Roblox launch is available in the Windows desktop app only.".to_string())
     }
+}
+
+/// Ask Windows Explorer to dispatch the standard Roblox protocol for a normal launch.
+#[tauri::command]
+fn launch_roblox() -> Result<(), String> {
+    dispatch_roblox_uri("roblox://")
+}
+
+/// Rejoin only a user-supplied Place ID and server Job ID. The app never reads
+/// the running game's session or server identifier.
+#[tauri::command(rename_all = "camelCase")]
+fn rejoin_roblox_server(place_id: String, game_instance_id: String) -> Result<(), String> {
+    let uri = roblox_server_uri(&place_id, &game_instance_id)?;
+    dispatch_roblox_uri(&uri)
 }
 
 pub fn run() {
@@ -196,14 +245,21 @@ pub fn run() {
             exit_app,
             open_external,
             open_latest_release,
+            open_wireguard_download,
             open_roblox_profile,
             launch_roblox,
+            rejoin_roblox_server,
             detect::detect_roblox,
             device::device_snapshot,
             device::storage_snapshot,
             device::probe_roblox_latency,
             safety::scan_known_executor_processes,
             safety::open_windows_settings,
+            vpn::wireguard_vpn_status,
+            vpn::wireguard_vpn_import,
+            vpn::wireguard_vpn_connect,
+            vpn::wireguard_vpn_disconnect,
+            vpn::wireguard_vpn_remove,
             session::active_roblox_status,
             settings::apply_settings,
             settings::restore_settings,
@@ -213,8 +269,8 @@ pub fn run() {
 }
 
 #[cfg(test)]
-mod profile_link_tests {
-    use super::roblox_profile_url;
+mod launcher_link_tests {
+    use super::{roblox_profile_url, roblox_server_uri};
 
     #[test]
     fn profile_link_is_built_from_a_positive_numeric_id_only() {
@@ -229,5 +285,18 @@ mod profile_link_tests {
         assert!(roblox_profile_url("0").is_err());
         assert!(roblox_profile_url("123/../settings").is_err());
         assert!(roblox_profile_url("18446744073709551616").is_err());
+    }
+
+    #[test]
+    fn server_rejoin_uri_accepts_only_a_place_id_and_uuid_job_id() {
+        let job_id = "d37c0e7b-4233-4b6f-8e3b-a53d8b64f60b";
+        assert_eq!(
+            roblox_server_uri(" 0001818 ", job_id).unwrap(),
+            format!("roblox://experiences/start?placeId=1818&gameInstanceId={job_id}")
+        );
+        assert!(roblox_server_uri("0", job_id).is_err());
+        assert!(roblox_server_uri("not-a-place-id", job_id).is_err());
+        assert!(roblox_server_uri("1818", "abc&launch=anything").is_err());
+        assert!(roblox_server_uri("1818", "00000000-0000-0000-0000-000000000000").is_ok());
     }
 }
