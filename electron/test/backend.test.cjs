@@ -214,6 +214,63 @@ test("Roblox launch dispatches a fixed roblox:// URI through system Explorer", a
   await assert.rejects(() => unsupported.invoke("launch_roblox"), /Windows desktop app\./);
 });
 
+test("Roblox profile shortcut opens only a validated numeric ID in the system browser", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  await backend.invoke("open_roblox_profile", { userId: "000123456" });
+  assert.equal(spawnCalls.length, 1);
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, ["https://www.roblox.com/users/123456/profile"]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+  await assert.rejects(() => backend.invoke("open_roblox_profile", { userId: "123/../settings" }), /valid positive numeric Roblox User ID/);
+  await assert.rejects(() => backend.invoke("open_roblox_profile", { userId: "18446744073709551616" }), /outside the supported numeric range/);
+  assert.equal(spawnCalls.length, 1);
+
+  const unsupported = createBackend({ platform: "linux", allowlist });
+  await assert.rejects(() => unsupported.invoke("open_roblox_profile", { userId: "123456" }), /only in the Windows desktop app/);
+});
+
+test("latest release shortcut opens only the fixed GitHub releases page", async () => {
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  await backend.invoke("open_latest_release", { url: "https://example.com/" });
+  assert.equal(spawnCalls.length, 1);
+  assert.equal(spawnCalls[0].executable, "C:\\Windows\\explorer.exe");
+  assert.deepEqual(spawnCalls[0].args, ["https://github.com/gefrus112/marktisoptimizer/releases/latest"]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+
+  const unsupported = createBackend({ platform: "linux", allowlist });
+  await assert.rejects(() => unsupported.invoke("open_latest_release"), /only in the Windows app/);
+});
+
 test("Windows Graphics settings shortcut opens a fixed allowlisted Settings URI", async () => {
   const spawnCalls = [];
   const child = new EventEmitter();
@@ -270,6 +327,43 @@ test("device snapshot returns read-only local hardware details", async () => {
   assert.equal(result.volumes[0].drive, "C:");
   assert.equal(result.safety.networkRequests, false);
   assert.equal(result.safety.dataUploaded, false);
+});
+
+test("startup storage snapshot reports fixed local drive capacity and free space only", async () => {
+  const expected = {
+    systemDrive: "C:",
+    volumes: [
+      { drive: "C:", label: "System", sizeBytes: 256000000000, freeBytes: 42000000000 },
+      { drive: "D:", label: "Data", sizeBytes: 1000000000000, freeBytes: 500000000000 }
+    ]
+  };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: "C:\\Windows", SystemDrive: "C:" },
+    allowlist,
+    fs: { statSync: () => ({ isFile: () => true }) },
+    execFile: async (executable, args, options) => {
+      assert.equal(executable, "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe");
+      assert.equal(args[0], "-NoLogo");
+      assert.match(args[4], /Win32_LogicalDisk/);
+      assert.equal(options.shell, false);
+      return { stdout: JSON.stringify(expected), stderr: "" };
+    }
+  });
+  const result = await backend.invoke("storage_snapshot");
+  assert.equal(result.available, true);
+  assert.equal(result.systemDrive, "C:");
+  assert.equal(result.volumes[0].freeBytes, 42000000000);
+  assert.equal(result.safety.readOnly, true);
+  assert.equal(result.safety.networkRequests, false);
+  assert.equal(result.safety.dataUploaded, false);
+});
+
+test("exit-app command delegates to the native shell", async () => {
+  let exitCount = 0;
+  const backend = createBackend({ platform: "win32", allowlist, exitApp: () => { exitCount += 1; } });
+  await backend.invoke("exit_app");
+  assert.equal(exitCount, 1);
 });
 
 test("on-demand Roblox web probe is labeled as non-game ping and sends no payload", async () => {

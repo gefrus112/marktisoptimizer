@@ -38,7 +38,9 @@ installer and SHA-256 file as a build artifact.
 ## Security and behavior
 
 - Electron uses context isolation, sandboxing, no Node integration in the
-  renderer, no remote navigation, and a narrow IPC command allowlist.
+  renderer, no remote navigation, and a narrow IPC command allowlist. Its
+  permission handlers allow only notification requests from the trusted local
+  UI; other browser permissions are denied.
 - The renderer blocks remote HTTP(S)/WebSocket content. The backend can make one
   fixed TCP handshake to `www.roblox.com:443` only after the user presses the
   latency button; it sends no HTTP/TLS payload and is a website connection-time
@@ -47,12 +49,32 @@ installer and SHA-256 file as a build artifact.
 - Anime desktop backgrounds are bundled locally; ten of the requested forty
   images are included so far, with theme selections saved on-device.
 - Local hardware inventory uses a fixed, read-only PowerShell/WMI query for the
-  device model, CPU, RAM, graphics adapters, and drives. Results stay in the app;
-  serial numbers are not collected or saved. The System page can open the fixed
-  Windows Advanced Graphics settings page, but does not change GPU preferences,
-  HAGS, or driver settings. Process checks inspect only exact
+  device model, CPU, RAM, graphics adapters, and drives. Results stay in the
+  app; serial numbers are not collected or saved. The System page can open the
+  fixed Windows Advanced Graphics settings page, but does not change GPU
+  preferences, HAGS, or driver settings. Process checks inspect only exact
   image-name fields for Xeno, Solara, JJSploit, and Delta; they do not retain
   PIDs or read paths, command lines, memory, or game data.
+- On startup, a read-only storage advisory shows free/used/total capacity for
+  fixed local drives. Drives under 10 GB free or 5% free are flagged; the user
+  can continue or exit. It never scans or deletes files.
+- The shared desktop UI includes a local notification center for Player-process
+  changes, known process-name matches, settings apply/restore, and low storage.
+  Notifications default off; preferences and history stay on-device. Optional
+  desktop toasts are requested only when the user clicks the permission control
+  and enables notifications. In-app alerts remain available if native Web
+  Notifications are blocked or unsupported.
+- The Main page's latest-version button opens the fixed official GitHub Releases
+  page. Users download and install updates manually; the app has no self-updater.
+- F5 Quick Status refreshes local Roblox installation and Player process status,
+  Windows-reported hardware/storage inventory, and the local process-name check.
+  It does not read the game/session, experience thumbnail/ID, server, player
+  count, exact session time, or account data. The before/after journal stores
+  only user-entered FPS and ping values read from Roblox `Shift+F5`; these
+  metrics are not measured or verified by the app.
+- The profile shortcut accepts a numeric Roblox User ID and opens the fixed
+  official profile URL in the system browser. It does not log in, access cookies,
+  fetch the profile, or scrape account data.
 - Settings writes use the canonical 18-key FastFlag allowlist by default in
   discovered Roblox `ClientAppSettings.json` files. An explicit, off-by-default
   experimental option separately requests the legacy

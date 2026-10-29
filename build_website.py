@@ -56,6 +56,7 @@ WEB_ROBOTS = WEB / "robots.txt"
 WEB_SITEMAP = WEB / "sitemap.xml"
 
 REPO = "https://github.com/gefrus112/marktisoptimizer"
+LATEST_RELEASE_PAGE = f"{REPO}/releases/latest"
 SITE_URL = "https://gefrus112.github.io/marktisoptimizer/"
 VERSION = "4.0.0"
 RELEASE_TAG_WINDOWS = "v3.0.0-windows"
@@ -68,6 +69,7 @@ RELEASE_BASE_WINDOWS = f"{REPO}/releases/download/{RELEASE_TAG_WINDOWS}"
 RELEASE_BASE_MAC = f"{REPO}/releases/download/{RELEASE_TAG_MAC}"
 RELEASE_BASE_RUST = f"{REPO}/releases/download/{RELEASE_TAG_RUST}"
 RUST_SETUP_EXE = "Marktis-Optimizer-Rust-Setup-x64.exe"
+LATEST_RELEASE_RUST_SETUP = f"{REPO}/releases/latest/download/{RUST_SETUP_EXE}"
 ELECTRON_WORKFLOW = f"{REPO}/actions/workflows/build-electron.yml"
 SOURCE_ZIP = "downloads/Roptimer-DotNet-Source.zip"
 
@@ -234,10 +236,12 @@ def replacements(catalog: dict, allowlist: dict) -> dict[str, str]:
         "__FEATURE_COUNT__": str(len(catalog.get("features", []))),
         "__VERSION__": VERSION,
         "__REPO__": html.escape(REPO, quote=True),
+        "__LATEST_RELEASE_PAGE__": html.escape(LATEST_RELEASE_PAGE, quote=True),
         "__RELEASE_PAGE_WINDOWS__": html.escape(RELEASE_PAGE_WINDOWS, quote=True),
         "__RELEASE_PAGE_MAC__": html.escape(RELEASE_PAGE_MAC, quote=True),
         "__RELEASE_PAGE_RUST__": html.escape(RELEASE_PAGE_RUST, quote=True),
         "__RELEASE_RUST_SETUP__": html.escape(f"{RELEASE_BASE_RUST}/{RUST_SETUP_EXE}", quote=True),
+        "__LATEST_RELEASE_RUST_SETUP__": html.escape(LATEST_RELEASE_RUST_SETUP, quote=True),
         "__ELECTRON_WORKFLOW__": html.escape(ELECTRON_WORKFLOW, quote=True),
         "__RELEASE_ZIP__": html.escape(f"{RELEASE_BASE_WINDOWS}/Roptimer-Windows-x64.zip", quote=True),
         "__RELEASE_EXE__": html.escape(f"{RELEASE_BASE_WINDOWS}/Roptimer.exe", quote=True),
@@ -408,10 +412,18 @@ def check() -> None:
     for token in (
         "id=\"fastflag-allowlist\"", "detectPanel", "allowlist-card", "al-improves", "Windows",
         "overview-grid", "overview-card-safe", "overview-card-flags", "overview-card-light",
+        'id="platformCompatibilityNotice"', 'id="platformCompatibilityMessage"',
+        "/releases/latest",
         'loading=\"lazy\"',
     ):
         if token not in web_html or token not in root_html:
             raise RuntimeError(f"Generated site is missing expected content: {token}")
+    if "function detectdeviceplatform()" not in runtime_js or "initplatformcompatibilitynotice()" not in runtime_js:
+        raise RuntimeError("Website must detect the device platform locally and show compatibility guidance")
+    if ".platform-notice" not in runtime_css or "#ff626b" not in runtime_css:
+        raise RuntimeError("Non-Windows compatibility notice must use the red warning style")
+    if "releases/latest/download/" not in LATEST_RELEASE_RUST_SETUP:
+        raise RuntimeError("The primary Windows download should follow the latest stable release")
     if allowlist.get("windowsOnly") is not True or allowlist.get("platform") != "windows":
         raise RuntimeError("Allowlist must be explicitly marked Windows-only")
 

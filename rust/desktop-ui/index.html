@@ -30,6 +30,7 @@
     <symbol id="i-memory" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6V3m5 3V3m5 3V3M7 18v3m5-3v3m5-3v3M7 10h3v4H7zM14 10h3v4h-3z"/></symbol>
     <symbol id="i-roblox" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
   </svg>
@@ -65,6 +66,7 @@
           <button class="subnav-item" type="button" data-tab="icons"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
           <button class="subnav-item" type="button" data-tab="allowlist"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
           <button class="subnav-item" type="button" data-tab="system"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
+          <button class="subnav-item" type="button" data-tab="notifications"><svg class="icon"><use href="#i-bell"/></svg><span>Notifications</span></button>
         </div>
       </nav>
 
@@ -81,7 +83,13 @@
     <main class="workspace">
       <header class="topbar">
         <div class="breadcrumb"><span>MARKTIS OPTIMIZER</span><span class="crumb-slash">/</span><strong id="breadcrumbTitle">Main</strong></div>
-        <div class="topbar-meta"><span class="local-indicator"><i></i> RUNNING LOCALLY</span><span class="topbar-separator"></span><span class="build-label" id="buildLabel">V4.0.0</span></div>
+        <div class="topbar-meta"><span class="local-indicator"><i></i> RUNNING LOCALLY</span><span class="topbar-separator"></span><button class="notification-trigger" id="toggleNotifications" type="button" aria-label="Open notifications" aria-expanded="false" aria-controls="notificationDrawer"><svg class="icon"><use href="#i-bell"/></svg><span class="notification-badge" id="notificationBadge" hidden>0</span></button><span class="topbar-separator"></span><span class="build-label" id="buildLabel">V4.0.0</span></div>
+        <section class="notification-drawer" id="notificationDrawer" role="region" aria-labelledby="notificationDrawerTitle" hidden>
+          <div class="notification-drawer-heading"><div><p class="panel-kicker">ON-DEVICE ACTIVITY</p><h2 id="notificationDrawerTitle">Notifications</h2><p id="notificationUnreadSummary">Your local updates will appear here.</p></div><button class="notification-close" id="closeNotifications" type="button" aria-label="Close notifications"><svg class="icon"><use href="#i-x"/></svg></button></div>
+          <div class="notification-drawer-actions"><button class="text-action" id="markNotificationsRead" type="button">Mark all read</button><button class="text-action" id="clearNotifications" type="button">Clear history</button></div>
+          <div class="notification-list" id="notificationList" aria-live="polite"><p class="notification-empty">No notifications yet.</p></div>
+          <p class="notification-drawer-note">Stored on this device. No game memory, account data, or telemetry.</p>
+        </section>
       </header>
 
       <div class="page-scroll" id="pageScroll">
@@ -90,10 +98,10 @@
             <div>
               <p class="eyebrow">DESKTOP CONTROL CENTER <span class="eyebrow-rule"></span> WINDOWS</p>
               <h1 id="mainTitle">Your client,<br><em>in your control.</em></h1>
-              <p class="heading-copy">A focused workspace for safe, local Roblox settings. No web dashboard required.</p>
+              <p class="heading-copy">A focused workspace for safe, local Roblox settings. Press F5 to refresh install, Player-process, hardware, and local safety status. Game and session details are never read.</p>
             </div>
             <div class="heading-actions">
-              <button class="button button-soft" id="quickRefresh" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh status</button>
+              <div class="refresh-status-wrap"><button class="button button-soft" id="quickRefresh" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh local status <kbd>F5</kbd></button><span class="refresh-status-time" id="quickRefreshTime" aria-live="polite">Ready</span></div>
               <button class="button button-primary" id="mainOpenSettings" type="button">Open settings<svg class="icon"><use href="#i-arrow"/></svg></button>
             </div>
           </div>
@@ -137,21 +145,70 @@
               <button class="text-action" id="editProfile" type="button"><svg class="icon"><use href="#i-settings"/></svg>Configure this profile</button>
             </article>
 
+            <article class="panel roblox-account-panel" aria-labelledby="robloxAccountTitle">
+              <div class="panel-topline"><span class="panel-index">04</span><span class="panel-kicker">ROBLOX PROFILE</span><span class="profile-mode">PUBLIC LINK</span></div>
+              <div class="roblox-account-heading"><span class="profile-orbit"><svg class="icon"><use href="#i-roblox"/></svg></span><div><p class="profile-kicker">OPEN OFFICIAL PROFILE</p><h2 id="robloxAccountTitle">Your Roblox profile</h2></div></div>
+              <p class="roblox-account-copy">Enter your numeric Roblox User ID. The official profile opens in your system browser; the app does not sign in, import, or scrape account data.</p>
+              <div class="roblox-profile-link-row">
+                <label class="visually-hidden" for="robloxUserId">Roblox User ID</label>
+                <input id="robloxUserId" class="text-control" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="e.g. 123456789" aria-describedby="robloxProfileNote" />
+                <button class="button button-soft" id="openRobloxProfile" type="button" disabled><svg class="icon"><use href="#i-arrow"/></svg>Open profile</button>
+              </div>
+              <p class="roblox-account-note" id="robloxProfileNote">Only the public numeric ID is saved locally. No login, cookies, game data, or private profile details are accessed.</p>
+            </article>
+
             <article class="safety-panel">
               <span class="safety-emblem"><svg class="icon"><use href="#i-shield"/></svg></span>
               <div class="safety-content"><p class="panel-kicker">BUILT AROUND REVERSIBILITY</p><h2>Your settings stay yours.</h2><p>Before a write, Marktis Optimizer creates a timestamped backup and preserves unrelated JSON keys. Canonical allowlist keys are the default; the legacy FPS request is a separate opt-in.</p></div>
               <div class="safety-checks"><span><svg class="icon"><use href="#i-check"/></svg>Local files only</span><span><svg class="icon"><use href="#i-check"/></svg>Restore available</span><span><svg class="icon"><use href="#i-check"/></svg>No game injection</span></div>
             </article>
           </div>
+          <section class="panel benchmark-panel" aria-labelledby="benchmarkTitle">
+            <div class="benchmark-heading-row">
+              <div class="benchmark-heading-copy">
+                <p class="panel-kicker">MANUAL BEFORE / AFTER JOURNAL · SAVED ON THIS DEVICE</p>
+                <h2 id="benchmarkTitle">Compare your own Roblox stats.</h2>
+                <p>In Roblox, press <kbd>Shift</kbd> + <kbd>F5</kbd> and enter the FPS and experience ping shown there. These values are user-reported; Marktis Optimizer never reads game memory or claims a live measurement.</p>
+              </div>
+              <span class="benchmark-source-badge"><span></span>USER-ENTERED</span>
+            </div>
+            <div class="benchmark-entry-grid">
+              <fieldset class="benchmark-entry">
+                <legend><span class="benchmark-step">01</span>Before changes</legend>
+                <div class="benchmark-input-row">
+                  <label for="benchmarkBeforeFps">FPS<input id="benchmarkBeforeFps" type="number" min="0" max="1000" step="1" inputmode="numeric" placeholder="e.g. 60" /></label>
+                  <label for="benchmarkBeforePing">Ping · ms<input id="benchmarkBeforePing" type="number" min="0" max="10000" step="1" inputmode="numeric" placeholder="e.g. 45" /></label>
+                </div>
+                <button class="button button-soft" id="saveBenchmarkBaseline" type="button">Save baseline</button>
+              </fieldset>
+              <fieldset class="benchmark-entry">
+                <legend><span class="benchmark-step">02</span>After changes</legend>
+                <div class="benchmark-input-row">
+                  <label for="benchmarkAfterFps">FPS<input id="benchmarkAfterFps" type="number" min="0" max="1000" step="1" inputmode="numeric" placeholder="e.g. 72" /></label>
+                  <label for="benchmarkAfterPing">Ping · ms<input id="benchmarkAfterPing" type="number" min="0" max="10000" step="1" inputmode="numeric" placeholder="e.g. 38" /></label>
+                </div>
+                <button class="button button-primary" id="saveBenchmarkAfter" type="button" disabled>Record comparison</button>
+              </fieldset>
+            </div>
+            <div class="benchmark-results" id="benchmarkResults" role="status" aria-live="polite">
+              <p class="benchmark-baseline-summary" id="benchmarkBaselineSummary">No baseline saved yet. Enter the values shown in Roblox Shift+F5, then save a baseline.</p>
+              <p class="benchmark-latest-summary" id="benchmarkLatestSummary">A comparison will show the change in your manually entered FPS and ping.</p>
+            </div>
+            <div class="benchmark-history-wrap">
+              <div class="benchmark-history-heading"><strong>Recent comparisons</strong><button class="text-action" id="clearBenchmarkJournal" type="button">Clear journal</button></div>
+              <div class="benchmark-history" id="benchmarkHistory"><p class="benchmark-history-empty">No comparisons recorded.</p></div>
+            </div>
+          </section>
           <section class="panel launcher-panel" aria-labelledby="launcherTitle">
             <div class="launcher-copy">
               <p class="panel-kicker">STANDARD ROBLOX LAUNCH · USER CONTROLLED</p>
               <h2 id="launcherTitle">Start with your settings.</h2>
-              <p>Launch the installed Roblox client through Windows’ normal <code>roblox://</code> protocol, or confirm your local profile and launch in one step.</p>
+              <p>Launch the installed Roblox client through Windows’ normal <code>roblox://</code> protocol, or confirm your local profile and launch in one step. Get the latest app installer from GitHub Releases and install updates manually.</p>
             </div>
             <div class="launcher-actions">
               <button class="button button-soft" id="launchRoblox" type="button">Launch Roblox</button>
               <button class="button button-primary" id="applyLaunch" type="button">Apply &amp; launch</button>
+              <button class="button button-soft" id="openLatestRelease" type="button"><svg class="icon"><use href="#i-arrow"/></svg>Get latest app version</button>
             </div>
           </section>
           <section class="panel safety-scan-panel" aria-labelledby="safetyScanTitle">
@@ -177,7 +234,7 @@
         <section class="view-section settings-view" id="settingsView" data-view-panel="settings" aria-labelledby="settingsTitle" hidden>
           <div class="page-heading settings-heading">
             <div><p class="eyebrow">LOCAL CONFIGURATION <span class="eyebrow-rule"></span> SAFE BY DEFAULT</p><h1 id="settingsTitle">Settings</h1><p class="heading-copy">Choose a profile and review the exact groups Marktis Optimizer is allowed to manage.</p></div>
-            <div class="settings-header-status"><span class="status-light"></span> Changes are staged locally</div>
+            <div class="settings-header-status"><span class="status-light"></span><span id="settingsHeaderStatusText">Changes are staged locally</span></div>
           </div>
 
           <div class="settings-tabs" role="tablist" aria-label="Settings sections">
@@ -186,6 +243,7 @@
             <button class="settings-tab" id="tabIcons" type="button" role="tab" data-tab="icons" aria-controls="paneIcons" aria-selected="false"><svg class="icon"><use href="#i-icons"/></svg><span>Icons</span></button>
             <button class="settings-tab" id="tabAllowlist" type="button" role="tab" data-tab="allowlist" aria-controls="paneAllowlist" aria-selected="false"><svg class="icon"><use href="#i-list"/></svg><span>Allowlist</span></button>
             <button class="settings-tab" id="tabSystem" type="button" role="tab" data-tab="system" aria-controls="paneSystem" aria-selected="false"><svg class="icon"><use href="#i-system"/></svg><span>System</span></button>
+            <button class="settings-tab" id="tabNotifications" type="button" role="tab" data-tab="notifications" aria-controls="paneNotifications" aria-selected="false"><svg class="icon"><use href="#i-bell"/></svg><span>Notifications</span></button>
           </div>
 
           <div class="settings-pane-stack">
@@ -366,15 +424,53 @@
                 </article>
               </div>
             </section>
+
+            <section class="settings-pane" id="paneNotifications" data-pane="notifications" role="tabpanel" aria-labelledby="tabNotifications" hidden>
+              <div class="pane-heading"><div><span class="pane-index">06 / NOTIFICATIONS</span><h2>Stay in the loop.</h2><p>Choose which local events can appear in Marktis Optimizer and, if your Windows WebView allows it, as desktop notifications.</p></div><span class="pane-icon"><svg class="icon"><use href="#i-bell"/></svg></span></div>
+              <div class="notification-settings-grid">
+                <article class="form-card notification-setup-card">
+                  <div class="notification-setup-top">
+                    <span class="notification-setup-icon"><svg class="icon"><use href="#i-bell"/></svg></span>
+                    <div class="notification-setup-copy"><p class="panel-kicker">OPTIONAL WINDOWS ALERTS</p><h3>Desktop notification permission</h3><p id="notificationPermissionDetail">Request permission only when you choose. The in-app notification center works even if desktop alerts are unavailable.</p></div>
+                    <span class="state-pill state-pending" id="notificationPermissionBadge">NOT REQUESTED</span>
+                  </div>
+                  <button class="button button-soft" id="requestNotifications" type="button">Request desktop permission</button>
+                  <p class="notification-permission-note">The app will never request permission on its own. Windows or the WebView may not support native toasts; local in-app alerts remain available.</p>
+                </article>
+                <article class="form-card notification-setup-card notification-preferences-card">
+                  <div class="notification-preferences-heading"><div><p class="panel-kicker">LOCAL ALERT CENTER</p><h3>Choose which local events to follow</h3><p>Events stay on this device. No Roblox game or account data is collected.</p></div><span class="notification-live-mark"><i></i>LOCAL</span></div>
+                  <label class="toggle-row notification-master-toggle" for="notificationEnabled"><span class="toggle-copy"><strong>Enable app notifications</strong><small>Show selected events in the bell menu and use desktop toasts when permission is granted.</small></span><span class="switch"><input id="notificationEnabled" type="checkbox" /><span></span></span></label>
+                  <div class="notification-event-list">
+                    <label class="toggle-row notification-event-row" for="notifyPlayerStatus"><span class="toggle-copy"><strong>Roblox Player opened or closed</strong><small>Uses only the RobloxPlayerBeta.exe process name; it does not detect a game session.</small></span><span class="switch"><input id="notifyPlayerStatus" type="checkbox" checked /><span></span></span></label>
+                    <label class="toggle-row notification-event-row" for="notifySafetyAlerts"><span class="toggle-copy"><strong>Known process-name match</strong><small>Reports exact Xeno, Solara, JJSploit, or Delta names. A match is not proof of malware.</small></span><span class="switch"><input id="notifySafetyAlerts" type="checkbox" checked /><span></span></span></label>
+                    <label class="toggle-row notification-event-row" for="notifySettingsChanges"><span class="toggle-copy"><strong>Settings applied or restored</strong><small>Confirms when local settings changes finish and backups are created.</small></span><span class="switch"><input id="notifySettingsChanges" type="checkbox" checked /><span></span></span></label>
+                    <label class="toggle-row notification-event-row" for="notifyLowStorage"><span class="toggle-copy"><strong>Low-storage advisory</strong><small>Alerts when a fixed local drive is under the startup-check threshold.</small></span><span class="switch"><input id="notifyLowStorage" type="checkbox" checked /><span></span></span></label>
+                  </div>
+                </article>
+              </div>
+              <div class="notification-safety-note"><svg class="icon"><use href="#i-shield"/></svg><p><strong>Private by design.</strong> These preferences save immediately and do not change Roblox settings. Notifications come from local app events; the app never reads game memory, collects your Roblox account, or sends notification data anywhere.</p></div>
+            </section>
           </div>
 
-          <footer class="settings-footer">
+          <footer class="settings-footer" id="settingsFooter">
             <label class="scope-toggle" for="allVersionsToggle"><span class="switch"><input id="allVersionsToggle" type="checkbox" checked /><span></span></span><span><strong>Apply to all detected versions</strong><small>Otherwise, use the first detected settings file.</small></span></label>
             <div class="footer-actions"><button class="button button-soft" id="saveProfile" type="button"><svg class="icon"><use href="#i-save"/></svg>Save profile</button><button class="button button-outline-warn" id="restoreSettings" type="button"><svg class="icon"><use href="#i-restore"/></svg>Restore managed</button><button class="button button-primary" id="applySettings" type="button"><svg class="icon"><use href="#i-check"/></svg>Apply settings</button></div>
           </footer>
         </section>
       </div>
     </main>
+  </div>
+
+  <div class="confirm-overlay storage-notice-overlay" id="storageNoticeOverlay" hidden>
+    <section class="confirm-dialog storage-notice-dialog" id="storageNoticeDialog" role="dialog" aria-modal="true" aria-labelledby="storageNoticeTitle" aria-describedby="storageNoticeText" tabindex="-1">
+      <span class="confirm-icon storage-notice-icon" id="storageNoticeIcon" aria-hidden="true"><svg class="icon"><use href="#i-memory"/></svg></span>
+      <p class="eyebrow">LOCAL STORAGE CHECK · WINDOWS</p>
+      <h2 id="storageNoticeTitle">Storage check</h2>
+      <p class="storage-notice-message" id="storageNoticeText">Checking fixed local drives…</p>
+      <div class="storage-volume-list" id="storageVolumeList" aria-label="Local drive storage"></div>
+      <p class="storage-notice-footnote">Read-only check of fixed local drive capacity and free space. A drive is flagged under 10 GB free or under 5% free. No personal files are opened, scanned, or deleted; this is only an advisory, not a requirement to run Marktis Optimizer.</p>
+      <div class="confirm-actions"><button class="button button-soft" id="exitAfterStorageCheck" type="button">Exit app</button><button class="button button-primary" id="continueAfterStorageCheck" type="button">Continue</button></div>
+    </section>
   </div>
 
   <div class="confirm-overlay" id="confirmOverlay" hidden>

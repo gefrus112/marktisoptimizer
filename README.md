@@ -8,11 +8,11 @@ missing). An optional Electron Windows build is available as a separate
 installer wizard.
 On **first launch it detects whether Roblox is installed** (read-only). The
 standalone desktop app has its own **Main** page and grouped **Settings** area
-for **Rendering**, **Geometry**, **Icons**, **Allowlist**, and **System**. The
-System tab displays read-only local hardware and Roblox client status. The
-website has a separate interface and does not bundle the desktop UI. A custom
-red tilted-square mark nods to classic Roblox-era iconography without using
-Roblox’s official application logo.
+for **Rendering**, **Geometry**, **Icons**, **Allowlist**, **System**, and
+**Notifications**. The System tab displays read-only local hardware and Roblox
+client status. The website has a separate interface and does not bundle the
+desktop UI. A custom red tilted-square mark nods to classic Roblox-era
+iconography without using Roblox’s official application logo.
 
 > **GitHub Pages is fixed and working.** The live site is served from the
 > generated root `index.html` (legacy `main /` source). The website uses a
@@ -42,9 +42,19 @@ Roblox’s official application logo.
 ## Quick start — Windows
 
 1. Download the recommended [Rust + Tauri setup wizard](https://github.com/gefrus112/marktisoptimizer/releases/tag/v4.0.0-windows-rust). The optional Electron setup is a separate build.
-2. On first open, the app checks the standard Roblox install folders **read-only**. Detection does not apply or change settings.
-3. Review a preset and the selected settings. Applying requires your confirmation and creates a timestamped local backup; unrelated JSON keys are preserved.
-4. Use **Restore** in the app to put managed settings back from the backup. For actual game FPS and experience ping, open Roblox Performance Stats with **Shift+F5**; the app does not read those live game values.
+2. On launch, a read-only storage prompt shows free, used, and total space for
+   fixed local drives. It flags drives below 10 GB free or 5% free; you can
+   continue or exit, and the app never deletes files. It also checks the
+   standard Roblox install folders **read-only**. Detection does not apply or
+   change settings.
+3. Review a preset and the selected settings. Applying requires your
+   confirmation and creates a timestamped local backup; unrelated JSON keys
+   are preserved.
+4. Use **Restore** in the app to put managed settings back from the backup.
+   For actual game FPS and experience ping, open Roblox Performance Stats with
+   **Shift+F5**; the app does not read those live game values. Record them
+   manually in the local before/after journal, and press **F5** to refresh only
+   local install, Player-process, hardware, and safety status.
 
 > Presets only adjust selected, allowlisted settings. They cannot guarantee higher FPS, eliminate stutter, or reduce game-server latency on every device.
 
@@ -71,22 +81,32 @@ captured from a running Windows executable—and example counts are shown.
 
 The app starts with its own loading screen, then opens **Main** plus grouped
 **Settings** sections for **Rendering**, **Geometry**, **Icons**, **Allowlist**,
-and **System**. Rendering includes Max performance, Balanced, and High quality
-presets plus adjustable graphics/texture quality and allowlisted renderer
-preferences. Max performance lowers selected detail but cannot guarantee lag-free
-play or increase hardware limits. Presets only stage local values; applying them
-still requires confirmation and creates a backup. The experimental legacy FPS target remains
-off by default and may be ignored by Roblox. The Icons page customizes only the
-app's local interface, not Roblox icons or game assets. Its theme gallery
-currently bundles 10 original anime illustrations with matching UI accent colors;
-the remaining 30 requested images are pending generation. Themes stay on-device.
-Profiles can be saved, applied, or restored.
+**System**, and **Notifications**. Rendering includes Max performance, Balanced,
+and High quality presets plus adjustable graphics/texture quality and
+allowlisted renderer preferences. Max performance lowers selected detail but
+cannot guarantee lag-free play or increase hardware limits. Presets only stage
+local values; applying them still requires confirmation and creates a backup.
+The experimental legacy FPS target remains off by default and may be ignored by
+Roblox. The Icons page customizes only the app's local interface, not Roblox
+icons or game assets. Its theme gallery currently bundles 10 original anime
+illustrations with matching UI accent colors; the remaining 30 requested images
+are pending generation. Themes stay on-device. Profiles can be saved, applied,
+or restored.
+
+The **Notifications** tab offers a local in-app activity center for Player
+process changes, known process-name matches, settings apply/restore, and low
+storage. Notifications default off; event preferences and up to 50 history
+items stay in local app storage. Desktop toasts are optional and are attempted
+only after the user explicitly requests OS/WebView permission. If native alerts
+are unsupported or denied, the in-app center remains available.
 
 The Main page also checks exact running process names `Xeno.exe`, `Solara.exe`,
 `JJSploit.exe`, and `Delta.exe` on-device at startup, every 30 seconds, and on
-request. Alerts remain in the app. This is **not antivirus**; it does not inspect
-paths, command lines, files, or memory, and it never kills processes or removes
-software. A name match is not proof of malware.
+request. A match can appear in the local notification center; an optional OS
+toast requires an explicit permission request and enabled notification settings.
+This is **not antivirus**; it does not inspect paths, command lines, files, or
+memory, and it never kills processes or removes software. A name match is not
+proof of malware.
 
 > **Current V4 scope:** the Main page detects installed Roblox versions and
 > local settings files. Its live status card checks only whether
@@ -98,6 +118,15 @@ software. A name match is not proof of malware.
 > Apply & launch action asks for confirmation and launches only after settings
 > are written successfully. The separate legacy Boost CLI also has an optional
 > `bootstrap --launch` command ([CLI guide](docs/CLI.md)).
+
+The Main page's **F5 Quick Status** refreshes only safe local install,
+Player-process, hardware, and local safety information. It never reads the game
+thumbnail/ID, server, player count, exact session duration, or account data; it
+cannot rejoin an exact server session. A manual before/after journal stores only
+FPS and experience-ping values that the user reads from Roblox `Shift+F5` and
+enters. The optional Roblox profile shortcut takes a numeric User ID and opens
+the fixed official public page in the system browser; no login, cookies, or
+profile scraping are used.
 
 The new **System** tab reads laptop/model, CPU, RAM, display adapters, physical
 drives and volume space from Windows using a read-only WMI query. It also shows
@@ -124,15 +153,19 @@ endpoint sees the normal network connection.
   page, and a Windows uninstaller. The installed app uses system WebView2; no
   batch file, .NET runtime, or Node runtime is required.
 - **Detects Roblox on first launch** by scanning standard Windows version
-  folders — read-only, with no process attach or memory reads. Separate Main-page
-  controls request a standard `roblox://` launch or confirm settings then launch.
+  folders — read-only, with no process attach or memory reads. Main-page controls
+  launch Roblox through the standard `roblox://` protocol or confirm settings
+  then launch. **Get latest app version** opens the official latest-release page;
+  users download and install updates manually (there is no self-updater).
 - Live status checks at startup and every 10 seconds whether
   `RobloxPlayerBeta.exe` appears in the Windows process list; no command line,
   game/session details, thumbnail, server ID, or address is read.
 - Main plus grouped Settings tabs for Rendering, Geometry, Icons, Allowlist,
-  and System. The System tab shows read-only hardware/drive details and official
-  Roblox Player/Studio folders. The desktop interface is independent from the
-  website and bundles no website CSS or JavaScript.
+  System, and Notifications. The System tab shows read-only hardware/drive
+  details and official Roblox Player/Studio folders. The Notifications tab keeps
+  event preferences and history on-device; native desktop alerts require an
+  explicit user permission request. The desktop interface is independent from
+  the website and bundles no website CSS or JavaScript.
 - Safe `apply_settings` / `restore_settings` Rust commands: canonical 18-key
   allowlist by default, timestamped backups, unrelated keys preserved. A
   separate legacy FPS request is opt-in, experimental, and may be ignored by
@@ -160,6 +193,10 @@ endpoint sees the normal network connection.
 - Three new overview cards make the local/reversible workflow, the Roblox
   allowlist, and the lightweight design easy to scan before opening a tab.
 - **Main tab = Client** (Windows-only). Then Allowlist, Downloads, Docs.
+- The homepage detects the browser platform locally and displays a red
+  compatibility notice on non-Windows devices; the page does not store or upload
+  the detected platform. The Windows installer follows the latest published GitHub release,
+  which users download and install manually.
 - The **allowlist** (Geometry / Rendering / User Interface) is server-rendered
   into the HTML with a "what it improves" note per flag, so it is visible even
   without JavaScript.

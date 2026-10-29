@@ -52,6 +52,7 @@ pub struct AppSafety {
 }
 
 const ALLOWLIST_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/fastflags-allowlist.json"));
+const LATEST_RELEASE_URL: &str = "https://github.com/gefrus112/marktisoptimizer/releases/latest";
 
 fn flag_count() -> usize {
     serde_json::from_str::<serde_json::Value>(ALLOWLIST_JSON)
@@ -102,6 +103,11 @@ fn get_allowlist() -> serde_json::Value {
     serde_json::from_str(ALLOWLIST_JSON).unwrap_or(serde_json::json!({ "categories": [] }))
 }
 
+#[tauri::command]
+fn exit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 /// Open an external link in the system browser. Only http(s) URLs are allowed;
 /// this never executes arbitrary commands or local paths.
 #[tauri::command]
@@ -126,6 +132,31 @@ fn open_external(url: String) -> Result<(), String> {
             .map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+/// Open the fixed latest release page in the system browser. Updates are
+/// downloaded and installed manually; the desktop app does not self-update.
+#[tauri::command]
+fn open_latest_release() -> Result<(), String> {
+    open_external(LATEST_RELEASE_URL.to_string())
+}
+
+fn roblox_profile_url(user_id: &str) -> Result<String, String> {
+    let id = user_id
+        .trim()
+        .parse::<u64>()
+        .map_err(|_| "Enter a valid numeric Roblox User ID.".to_string())?;
+    if id == 0 {
+        return Err("Enter a positive numeric Roblox User ID.".to_string());
+    }
+    Ok(format!("https://www.roblox.com/users/{id}/profile"))
+}
+
+/// Open the official public Roblox profile for a user-supplied numeric ID in
+/// the system browser. The app does not sign in, fetch, or scrape profile data.
+#[tauri::command(rename_all = "camelCase")]
+fn open_roblox_profile(user_id: String) -> Result<(), String> {
+    open_external(roblox_profile_url(&user_id)?)
 }
 
 /// Ask Windows Explorer to dispatch the fixed Roblox protocol URI to its
@@ -162,10 +193,14 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             app_info,
             get_allowlist,
+            exit_app,
             open_external,
+            open_latest_release,
+            open_roblox_profile,
             launch_roblox,
             detect::detect_roblox,
             device::device_snapshot,
+            device::storage_snapshot,
             device::probe_roblox_latency,
             safety::scan_known_executor_processes,
             safety::open_windows_settings,
@@ -175,4 +210,24 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running Marktis Optimizer application");
+}
+
+#[cfg(test)]
+mod profile_link_tests {
+    use super::roblox_profile_url;
+
+    #[test]
+    fn profile_link_is_built_from_a_positive_numeric_id_only() {
+        assert_eq!(
+            roblox_profile_url("123456789").unwrap(),
+            "https://www.roblox.com/users/123456789/profile"
+        );
+        assert_eq!(
+            roblox_profile_url(" 00042 ").unwrap(),
+            "https://www.roblox.com/users/42/profile"
+        );
+        assert!(roblox_profile_url("0").is_err());
+        assert!(roblox_profile_url("123/../settings").is_err());
+        assert!(roblox_profile_url("18446744073709551616").is_err());
+    }
 }

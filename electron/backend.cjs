@@ -10,6 +10,8 @@ const { promisify } = require("node:util");
 const execFileAsync = promisify(execFile);
 const LEGACY_FPS_FLAG = "DFIntTaskSchedulerTargetFps";
 const ROBLOX_URI = "roblox://";
+const LATEST_RELEASE_URL = "https://github.com/gefrus112/marktisoptimizer/releases/latest";
+const ROBLOX_PROFILE_HOST = "https://www.roblox.com/users/";
 const ROBLOX_PROBE_HOST = "www.roblox.com";
 const ROBLOX_PROBE_PORT = 443;
 const KNOWN_EXECUTORS = [
@@ -48,6 +50,23 @@ $volumes = @(Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3
   operatingSystem = [pscustomobject]@{ name = [string]$os.Caption; version = [string]$os.Version; architecture = [string]$os.OSArchitecture }
 } | ConvertTo-Json -Depth 6 -Compress
 `;
+const STORAGE_INFO_SCRIPT = String.raw`
+$ErrorActionPreference = 'Stop'
+$Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = $Utf8NoBom
+$volumes = @(Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3' | Where-Object { $_.Size -gt 0 } | ForEach-Object {
+  [pscustomobject]@{
+    drive = [string]$_.DeviceID
+    label = [string]$_.VolumeName
+    sizeBytes = [uint64]$_.Size
+    freeBytes = [uint64]$_.FreeSpace
+  }
+})
+[pscustomobject]@{
+  systemDrive = [string]$env:SystemDrive
+  volumes = $volumes
+} | ConvertTo-Json -Depth 4 -Compress
+`;
 const SETTINGS_URIS = Object.freeze({
   apps: "ms-settings:appsfeatures",
   security: "ms-settings:windowsdefender",
@@ -56,12 +75,16 @@ const SETTINGS_URIS = Object.freeze({
 const ALLOWED_COMMANDS = new Set([
   "app_info",
   "device_snapshot",
+  "storage_snapshot",
   "probe_roblox_latency",
   "get_allowlist",
   "detect_roblox",
   "active_roblox_status",
   "scan_known_executor_processes",
   "open_windows_settings",
+  "open_roblox_profile",
+  "open_latest_release",
+  "exit_app",
   "launch_roblox",
   "apply_settings",
   "restore_settings"
@@ -250,6 +273,7 @@ function createBackend(options = {}) {
   const spawnImpl = options.spawn || require("node:child_process").spawn;
   const fileSystem = options.fs || fs;
   const probeRobloxLatencyImpl = options.probeRobloxLatency || measureRobloxWebLatency;
+  const exitAppImpl = typeof options.exitApp === "function" ? options.exitApp : () => undefined;
 
   function isWindows() {
     return platform === "win32";
@@ -496,6 +520,68 @@ function createBackend(options = {}) {
     });
   }
 
+  async function openRobloxProfile(args) {
+    const rawUserId = args && typeof args.userId === "string" ? args.userId.trim() : "";
+    if (!/^\d{1,20}$/.test(rawUserId) || /^0+$/.test(rawUserId)) {
+      throw new Error("Enter a valid positive numeric Roblox User ID.");
+    }
+    const userId = rawUserId.replace(/^0+(?=\d)/, "");
+    if (userId.length === 20 && userId > "18446744073709551615") {
+      throw new Error("The Roblox User ID is outside the supported numeric range.");
+    }
+    if (!isWindows()) throw new Error("Opening a Roblox profile is available only in the Windows desktop app.");
+    const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
+    if (!root || !path.win32.isAbsolute(root)) throw new Error("Windows Explorer could not be found in the system directory.");
+    const explorer = path.win32.join(root, "explorer.exe");
+    try {
+      if (!fileSystem.statSync(explorer).isFile()) throw new Error("not a file");
+    } catch (_error) {
+      throw new Error("Windows Explorer could not be found in the system directory.");
+    }
+    const url = ROBLOX_PROFILE_HOST + userId + "/profile";
+    return new Promise((resolve, reject) => {
+      let child;
+      try {
+        // The hostname and path are fixed; only a validated numeric ID is interpolated.
+        child = spawnImpl(explorer, [url], { detached: true, windowsHide: true, stdio: "ignore", shell: false });
+      } catch (error) {
+        reject(new Error(`Could not open Roblox profile: ${error.message}`));
+        return;
+      }
+      child.once("error", (error) => reject(new Error(`Could not open Roblox profile: ${error.message}`)));
+      child.once("spawn", () => {
+        child.unref();
+        resolve();
+      });
+    });
+  }
+
+  async function openLatestRelease() {
+    if (!isWindows()) throw new Error("The Windows desktop release page can be opened only in the Windows app.");
+    const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
+    if (!root || !path.win32.isAbsolute(root)) throw new Error("Windows Explorer could not be found in the system directory.");
+    const explorer = path.win32.join(root, "explorer.exe");
+    try {
+      if (!fileSystem.statSync(explorer).isFile()) throw new Error("not a file");
+    } catch (_error) {
+      throw new Error("Windows Explorer could not be found in the system directory.");
+    }
+    return new Promise((resolve, reject) => {
+      let child;
+      try {
+        child = spawnImpl(explorer, [LATEST_RELEASE_URL], { detached: true, windowsHide: true, stdio: "ignore", shell: false });
+      } catch (error) {
+        reject(new Error(`Could not open the latest release page: ${error.message}`));
+        return;
+      }
+      child.once("error", (error) => reject(new Error(`Could not open the latest release page: ${error.message}`)));
+      child.once("spawn", () => {
+        child.unref();
+        resolve();
+      });
+    });
+  }
+
   async function launchRoblox() {
     if (!isWindows()) throw new Error("Roblox launch is available only in the Windows desktop app.");
     const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
@@ -564,6 +650,61 @@ function createBackend(options = {}) {
         supported: true,
         available: false,
         message: "Windows could not complete the local read-only hardware inventory.",
+        safety: { readOnly: true, networkRequests: false, dataUploaded: false }
+      };
+    }
+  }
+
+  async function storageSnapshot() {
+    if (!isWindows()) {
+      return {
+        supported: false,
+        available: false,
+        systemDrive: "",
+        volumes: [],
+        message: "The local storage check is available in the Windows desktop app.",
+        safety: { readOnly: true, networkRequests: false, dataUploaded: false }
+      };
+    }
+    const executable = systemPath("WindowsPowerShell\\v1.0\\powershell.exe");
+    if (!executable) {
+      return {
+        supported: true,
+        available: false,
+        systemDrive: env.SystemDrive || "C:",
+        volumes: [],
+        message: "Windows PowerShell is not available for the local storage check.",
+        safety: { readOnly: true, networkRequests: false, dataUploaded: false }
+      };
+    }
+    try {
+      const result = await execFileImpl(executable, ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", STORAGE_INFO_SCRIPT], {
+        windowsHide: true,
+        timeout: 8000,
+        maxBuffer: 256 * 1024,
+        encoding: "utf8",
+        shell: false
+      });
+      const raw = typeof result.stdout === "string" ? result.stdout.trim() : String(result.stdout || "").trim();
+      const snapshot = JSON.parse(raw);
+      if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot) || !Array.isArray(snapshot.volumes)) {
+        throw new Error("invalid storage information");
+      }
+      return {
+        supported: true,
+        available: true,
+        systemDrive: typeof snapshot.systemDrive === "string" ? snapshot.systemDrive : (env.SystemDrive || "C:"),
+        volumes: snapshot.volumes,
+        message: "Fixed local drive capacity and free space were read-only; no files were scanned or changed.",
+        safety: { readOnly: true, networkRequests: false, dataUploaded: false }
+      };
+    } catch (_error) {
+      return {
+        supported: true,
+        available: false,
+        systemDrive: env.SystemDrive || "C:",
+        volumes: [],
+        message: "Windows could not complete the local storage check.",
         safety: { readOnly: true, networkRequests: false, dataUploaded: false }
       };
     }
@@ -743,12 +884,16 @@ function createBackend(options = {}) {
     switch (command) {
       case "app_info": return appInfo();
       case "device_snapshot": return deviceSnapshot();
+      case "storage_snapshot": return storageSnapshot();
       case "probe_roblox_latency": return probeRobloxLatency();
       case "get_allowlist": return JSON.parse(JSON.stringify(allowlist));
       case "detect_roblox": return detectRoblox();
       case "active_roblox_status": return activeRobloxStatus();
       case "scan_known_executor_processes": return scanKnownExecutorProcesses();
       case "open_windows_settings": return openWindowsSettings(args);
+      case "open_roblox_profile": return openRobloxProfile(args);
+      case "open_latest_release": return openLatestRelease();
+      case "exit_app": return exitAppImpl();
       case "launch_roblox": return launchRoblox();
       case "apply_settings": return applySettings(args);
       case "restore_settings": return restoreSettings();
@@ -756,7 +901,7 @@ function createBackend(options = {}) {
     }
   }
 
-  return { invoke, appInfo, deviceSnapshot, probeRobloxLatency, detectRoblox, activeRobloxStatus, scanKnownExecutorProcesses, buildManaged };
+  return { invoke, appInfo, deviceSnapshot, storageSnapshot, probeRobloxLatency, detectRoblox, activeRobloxStatus, scanKnownExecutorProcesses, buildManaged };
 }
 
 function loadAllowlist(filePath) {
