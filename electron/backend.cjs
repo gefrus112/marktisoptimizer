@@ -191,6 +191,7 @@ const ALLOWED_COMMANDS = new Set([
   "probe_roblox_latency",
   "get_allowlist",
   "detect_roblox",
+  "open_settings_folder",
   "active_roblox_status",
   "scan_known_executor_processes",
   "open_windows_settings",
@@ -601,6 +602,44 @@ function createBackend(options = {}) {
       scannedAt: Math.floor(Date.now() / 1000),
       safety: { readOnly: true, processAttach: false, memoryReads: false, launchesRoblox: false }
     };
+  }
+
+  async function openSettingsFolder() {
+    if (!isWindows()) throw new Error("Opening a Roblox settings location is available only on Windows.");
+    const detection = detectRoblox();
+    const versions = Array.isArray(detection.versions) ? detection.versions : [];
+    const configuredVersion = versions.find((version) => version && version.hasSettings
+      && typeof version.settingsPath === "string" && path.win32.isAbsolute(version.settingsPath));
+    const installedVersion = configuredVersion || versions.find((version) => version && (version.hasPlayer || version.hasStudio)
+      && typeof version.path === "string" && path.win32.isAbsolute(version.path));
+    const target = configuredVersion
+      ? path.win32.dirname(configuredVersion.settingsPath)
+      : (installedVersion ? installedVersion.path : "");
+    if (!target || !fileSystem.existsSync(target)) {
+      throw new Error("No detected Roblox settings location is available. Install or open Roblox, then re-scan.");
+    }
+    const root = env.SystemRoot || env.SYSTEMROOT || env.windir || env.WINDIR;
+    if (!root || !path.win32.isAbsolute(root)) throw new Error("Windows Explorer could not be found in the system directory.");
+    const explorer = path.win32.join(root, "explorer.exe");
+    try {
+      if (!fileSystem.statSync(explorer).isFile()) throw new Error("not a file");
+    } catch (_error) {
+      throw new Error("Windows Explorer could not be found in the system directory.");
+    }
+    return new Promise((resolve, reject) => {
+      let child;
+      try {
+        child = spawnImpl(explorer, [target], { detached: true, windowsHide: true, stdio: "ignore", shell: false });
+      } catch (error) {
+        reject(new Error(`Could not open the detected Roblox settings location: ${error.message}`));
+        return;
+      }
+      child.once("error", (error) => reject(new Error(`Could not open the detected Roblox settings location: ${error.message}`)));
+      child.once("spawn", () => {
+        child.unref();
+        resolve(target);
+      });
+    });
   }
 
   function targetPaths(detection, allVersions) {
@@ -1410,6 +1449,7 @@ function createBackend(options = {}) {
       case "probe_roblox_latency": return probeRobloxLatency();
       case "get_allowlist": return JSON.parse(JSON.stringify(allowlist));
       case "detect_roblox": return detectRoblox();
+      case "open_settings_folder": return openSettingsFolder();
       case "active_roblox_status": return activeRobloxStatus();
       case "scan_known_executor_processes": return scanKnownExecutorProcesses();
       case "open_windows_settings": return openWindowsSettings(args);

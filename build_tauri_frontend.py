@@ -50,23 +50,23 @@ def rendered_html() -> str:
 
 
 def build() -> None:
-    for relative in (Path("index.html"), Path("assets/app.css"), Path("assets/app.js")):
+    for relative in (Path("index.html"), Path("assets/app.css"), Path("assets/app.js"), Path("assets/optimizer-hero.svg")):
         if not (SOURCE / relative).is_file():
             raise SystemExit(f"Desktop UI source is missing: {relative}")
     if FRONTEND.exists():
         shutil.rmtree(FRONTEND)
     (FRONTEND / "assets").mkdir(parents=True, exist_ok=True)
     (FRONTEND / "index.html").write_text(rendered_html(), encoding="utf-8")
-    for name in ("app.css", "app.js"):
+    for name in ("app.css", "app.js", "optimizer-hero.svg"):
         shutil.copy2(SOURCE / "assets" / name, FRONTEND / "assets" / name)
     theme_source = SOURCE / "assets" / "themes"
     if theme_source.is_dir():
         shutil.copytree(theme_source, FRONTEND / "assets" / "themes")
-    print("Built standalone Tauri desktop UI at rust/frontend (local theme assets only; website assets are not bundled).")
+    print("Built standalone Tauri desktop UI at rust/frontend (local app assets only; website assets are not bundled).")
 
 
 def check() -> None:
-    required = [FRONTEND / "index.html", FRONTEND / "assets" / "app.css", FRONTEND / "assets" / "app.js"]
+    required = [FRONTEND / "index.html", FRONTEND / "assets" / "app.css", FRONTEND / "assets" / "app.js", FRONTEND / "assets" / "optimizer-hero.svg"]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
         raise SystemExit("Tauri desktop frontend is missing files: " + ", ".join(missing))
@@ -107,6 +107,14 @@ def check() -> None:
         "F5 quick status": 'id="quickRefreshTime"',
         "manual before-and-after journal": 'id="saveBenchmarkAfter"',
         "manual Roblox FPS and ping inputs": 'id="benchmarkBeforeFps"',
+        "read-only Roblox Version Garden": 'id="versionGardenList"',
+        "staged Tuning Lab comparison": 'id="tuningDiffList"',
+        "manual Benchmark Storyboard": 'id="benchmarkFpsChart"',
+        "custom desktop icon set": 'id="i-cubes"',
+        "local control-deck illustration": 'src="assets/optimizer-hero.svg"',
+        "in-app Quick Action Tray": 'id="quickActionTray"',
+        "offline troubleshooting guide": 'id="offlineTroubleshooting"',
+        "safe open-settings-folder quick action": 'id="quickActionSettingsFolder"',
         "Roblox public profile shortcut": 'id="openRobloxProfile"',
         "startup storage warning": 'id="storageNoticeOverlay"',
         "renderer preference control": 'id="rendererSelect"',
@@ -150,6 +158,7 @@ def check() -> None:
         "open_roblox_profile",
         "open_latest_release",
         "exit_app",
+        "open_settings_folder",
         "launch_roblox",
         "rejoin_roblox_server",
         "open_community_discord",
@@ -165,13 +174,32 @@ def check() -> None:
     )
     if any(command not in js for command in required_commands):
         raise SystemExit("Tauri desktop local commands are not wired to the UI.")
+    required_ui_logic = (
+        "function renderVersionGarden",
+        "function renderTuningComparison",
+        "function renderBenchmarkStoryboard",
+        "function toggleQuickActionTray",
+        "function renderTroubleshootingGuide",
+    )
+    if any(symbol not in js for symbol in required_ui_logic):
+        raise SystemExit("The Version Garden, Tuning Lab, Benchmark Storyboard, Quick Action Tray, and offline guide must be wired in the desktop UI.")
     tauri_source = (RUST / "src-tauri" / "src" / "lib.rs").read_text(encoding="utf-8")
+    tauri_manifest = (RUST / "src-tauri" / "Cargo.toml").read_text(encoding="utf-8")
+    if "tray-icon" not in tauri_manifest or "TrayIconBuilder" not in tauri_source or "tray-action" not in tauri_source:
+        raise SystemExit("The Windows system tray menu and its local action bridge must be configured in Tauri.")
     if "fn rejoin_roblox_server" not in tauri_source or "            rejoin_roblox_server," not in tauri_source:
         raise SystemExit("The manual server-rejoin command must be registered in the Tauri bridge.")
+    settings_source = (RUST / "src-tauri" / "src" / "settings.rs").read_text(encoding="utf-8")
+    if "fn open_settings_folder" not in settings_source or "            settings::open_settings_folder," not in tauri_source:
+        raise SystemExit("The read-only settings-folder shortcut must be registered in the Tauri bridge.")
     if "fn open_community_discord" not in tauri_source or "            open_community_discord," not in tauri_source:
         raise SystemExit("The fixed Discord invite must be registered in the Tauri bridge.")
     if "fn open_youtube_channel" not in tauri_source or "            open_youtube_channel," not in tauri_source:
         raise SystemExit("The fixed YouTube channel link must be registered in the Tauri bridge.")
+    electron_main = (ROOT / "electron" / "main.cjs").read_text(encoding="utf-8")
+    electron_preload = (ROOT / "electron" / "preload.cjs").read_text(encoding="utf-8")
+    if "new Tray(APP_ICON)" not in electron_main or "Restore managed settings" not in electron_main or "roptimer:tray-action" not in electron_preload:
+        raise SystemExit("The Electron Windows tray must include local shortcuts and a confirmed restore event bridge.")
     vpn_source = (RUST / "src-tauri" / "src" / "vpn.rs").read_text(encoding="utf-8")
     vpn_command_names = (
         "wireguard_vpn_status",

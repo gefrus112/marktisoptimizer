@@ -261,7 +261,7 @@
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Guided x64 NSIS setup wizard for the primary Marktis Optimizer Rust + Tauri Windows client. It uses WebView2, has its own Main and grouped Settings UI (Rendering, Geometry, Icons, Allowlist, System), detects Roblox locally, manages canonical allowlisted settings by default, and shows read-only hardware details. It also offers a fixed roblox:// launcher, confirmed Apply & launch, safe rendering presets, and a separately opted-in experimental legacy FPS request. The Icons tab also offers local anime background themes that tint the app UI; actual game FPS and experience ping are not read."
+      "details": "Guided x64 NSIS setup wizard for the primary Marktis Optimizer Rust + Tauri Windows client. It uses WebView2, has a distinct Main and grouped Settings UI, detects Roblox locally, manages canonical allowlisted settings by default, and shows read-only hardware details. Main includes the read-only Version Garden and Tuning Lab, a manual-only Benchmark Storyboard, an in-app Quick Action Tray, and offline troubleshooting. It also offers fixed roblox:// launch, confirmed Apply & launch, safe rendering presets, and an opt-in experimental legacy FPS request. The Icons tab bundles local anime backgrounds; actual game FPS and experience ping are never read."
     },
     {
       "id": "roblox-detect-on-launch",
@@ -363,13 +363,58 @@
       "details": "The Tauri and Electron Main pages can ask Windows Explorer to dispatch the fixed roblox:// URI. Apply & launch requires confirmation and launches only after settings are successfully written. No shell command, arbitrary URL, game join, injection, or process manipulation is performed."
     },
     {
+      "id": "version-garden",
+      "name": "Read-only Roblox Version Garden",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The shared Tauri/Electron Main page lists detected standard Roblox version folders, Player/Studio presence, and whether ClientAppSettings.json exists, including its detected or expected local path. The view checks file presence only and does not read setting values or modify files."
+    },
+    {
+      "id": "tuning-lab-profile-comparison",
+      "name": "Tuning Lab side-by-side profile comparison",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "The desktop Tuning Lab compares two saved profiles or the current staged profile, highlights differing supported values, and lets the user stage a saved profile for review. Comparison makes no settings or profile writes; writing Roblox settings still requires the usual explicit Apply confirmation."
+    },
+    {
+      "id": "manual-benchmark-storyboard",
+      "name": "Manual Benchmark Storyboard",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Charts FPS and experience-ping comparisons entered by the user from Roblox Shift+F5. Values are stored in the existing local benchmark journal; the app does not read live game values, fabricate results, or guarantee improvements."
+    },
+    {
+      "id": "quick-action-tray",
+      "name": "Windows and in-app Quick Action Tray",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "Both Windows desktop shells expose a notification-area tray menu for opening Marktis, opening the detected local Roblox settings location, launching Roblox through roblox://, restoring managed settings after an explicit confirmation, or quitting. Closing the window hides it to the tray while the app remains running. The shared Main page also has an equivalent in-app quick-action drawer."
+    },
+    {
+      "id": "offline-troubleshooting-guide",
+      "name": "Offline desktop troubleshooting guide",
+      "status": "Implemented safely",
+      "implemented": true,
+      "safe": true,
+      "flag": null,
+      "details": "A bundled local decision guide covers Roblox detection, local settings not appearing to apply, manual FPS/ping readings, restoring managed settings, and WireGuard setup. It makes no network requests or automatic changes."
+    },
+    {
       "id": "electron-desktop-client",
       "name": "Optional Electron Windows desktop client",
       "status": "Implemented",
       "implemented": true,
       "safe": true,
       "flag": null,
-      "details": "Optional Electron Windows desktop build for Marktis Optimizer, using the same independent local desktop UI and narrow IPC bridge as Tauri. It includes read-only device inventory, safe rendering presets, on-device name-only process alerts, standard roblox:// launch, and the same reversible settings boundary. The optional website TCP probe runs only on request and is not game-server ping. The shared UI bundles the same local anime theme gallery and Max performance profile."
+      "details": "Optional Electron Windows desktop build for Marktis Optimizer, using the same distinct local desktop UI and narrow IPC bridge as Tauri. It includes read-only device inventory and Version Garden, safe rendering presets, the Tuning Lab, manual-only Benchmark Storyboard, in-app Quick Action Tray, offline troubleshooting, on-device name-only process alerts, standard roblox:// launch, and the same reversible settings boundary. The optional website TCP probe runs only on request and is not game-server ping. The shared UI bundles local anime themes and a Max performance profile."
     },
     {
       "id": "wireguard-provider-vpn",

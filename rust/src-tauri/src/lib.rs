@@ -253,6 +253,58 @@ fn rejoin_roblox_server(place_id: String, game_instance_id: String) -> Result<()
 
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(target_os = "windows")]
+            {
+                use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+                use tauri::tray::TrayIconBuilder;
+                use tauri::{Emitter, Manager};
+
+                let open = MenuItem::with_id(app, "open", "Open Marktis Optimizer", true, None::<&str>)?;
+                let settings = MenuItem::with_id(app, "settings", "Open Roblox settings location", true, None::<&str>)?;
+                let launch = MenuItem::with_id(app, "launch", "Launch Roblox normally", true, None::<&str>)?;
+                let restore = MenuItem::with_id(app, "restore", "Restore managed settings…", true, None::<&str>)?;
+                let separator = PredefinedMenuItem::separator(app)?;
+                let quit = MenuItem::with_id(app, "quit", "Quit Marktis Optimizer", true, None::<&str>)?;
+                let menu = Menu::with_items(app, &[&open, &settings, &launch, &restore, &separator, &quit])?;
+                let _tray = TrayIconBuilder::new()
+                    .icon(app.default_window_icon().expect("default app icon is configured").clone())
+                    .tooltip("Marktis Optimizer")
+                    .menu(&menu)
+                    .show_menu_on_left_click(true)
+                    .on_menu_event(|app, event| {
+                        let action = event.id.as_ref();
+                        match action {
+                            "open" => {
+                                if let Some(window) = app.get_webview_window("main") {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                }
+                            }
+                            "settings" | "launch" | "restore" => {
+                                if let Some(window) = app.get_webview_window("main") {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                    let _ = app.emit("tray-action", action.to_string());
+                                }
+                            }
+                            "quit" => app.exit(0),
+                            _ => {}
+                        }
+                    })
+                    .build(app)?;
+            }
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            #[cfg(target_os = "windows")]
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if window.label() == "main" {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             app_info,
             get_allowlist,
@@ -279,6 +331,7 @@ pub fn run() {
             session::active_roblox_status,
             settings::apply_settings,
             settings::restore_settings,
+            settings::open_settings_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Marktis Optimizer application");

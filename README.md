@@ -62,14 +62,16 @@ iconography without using Roblox’s official application logo.
 
 ## Windows x64 desktop app previews (V4)
 
-The Rust + Tauri and optional Electron builds use a **purpose-built desktop
-interface**, separate from the GitHub Pages website. They do not reuse the
-website UI, CSS, or scripts. These SVG/PNG previews are illustrative—not screenshots
-captured from a running Windows executable—and example counts are shown.
+The Rust + Tauri and optional Electron builds share a **purpose-built desktop
+interface**, separate from the GitHub Pages website. The refreshed Main screen
+uses an original local geometric illustration, a cool cyan control-deck palette,
+and custom inline SVG icons—no remote design assets. The SVG/PNG previews are
+illustrative, not captures from a running Windows executable; any shown status,
+settings values, or counts are UI examples, not live game measurements.
 
 ![Marktis Optimizer standalone Windows desktop startup screen](rust/desktop-ui/previews/roptimer-desktop-loading-preview.svg)
 
-![Marktis Optimizer standalone Windows desktop Main screen](rust/desktop-ui/previews/roptimer-desktop-main-preview.svg)
+![Refreshed Marktis Optimizer desktop Main screen preview shared by Electron and Tauri](rust/desktop-ui/previews/marktis-electron-main-preview.svg)
 
 ![Marktis Optimizer standalone Windows desktop System tab](rust/desktop-ui/previews/marktis-optimizer-system-preview.svg)
 
@@ -103,6 +105,18 @@ storage. Notifications default off; event preferences and up to 50 history
 items stay in local app storage. Desktop toasts are optional and are attempted
 only after the user explicitly requests OS/WebView permission. If native alerts
 are unsupported or denied, the in-app center remains available.
+
+The Main page includes a **Version Garden** showing each detected Roblox version
+folder, Player/Studio presence, and the detected or expected local
+`ClientAppSettings.json` path; the view checks file presence only. The **Tuning
+Lab** compares two saved profiles or the current staged profile and highlights
+value differences without writing settings. The **Benchmark Storyboard** charts
+only manually entered FPS/ping readings from Roblox `Shift+F5`. The **Quick Action Tray** in the app can open the detected local
+settings location, launch Roblox normally, refresh status, or start a confirmed
+restore. On Windows, both desktop shells also add a notification-area menu with
+those shortcuts plus Open and Quit; closing the window hides it while the app is
+running. The bundled **offline troubleshooting guide** covers detection,
+settings, manual readings, restore, and WireGuard setup without a network lookup.
 
 The Main page also checks exact running process names `Xeno.exe`, `Solara.exe`,
 `JJSploit.exe`, and `Delta.exe` on-device at startup, every 30 seconds, and on

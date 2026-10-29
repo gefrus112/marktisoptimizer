@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 280" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Local performance control illustration</title>
+  <desc id="desc">A glowing geometric core surrounded by precision lines, representing safe local settings control.</desc>
+  <defs>
+    <linearGradient id="core" x1="150" y1="64" x2="276" y2="205" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4CE3FF" stop-opacity=".95"/>
+      <stop offset=".48" stop-color="#81A9FF" stop-opacity=".78"/>
+      <stop offset="1" stop-color="#E2231A" stop-opacity=".8"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="100" y1="45" x2="320" y2="233" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#77EDFF"/>
+      <stop offset=".53" stop-color="#8AAEFF"/>
+      <stop offset="1" stop-color="#F47770"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="matrix(0 104 -153 0 210 141)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55DFFF" stop-opacity=".19"/>
+      <stop offset="1" stop-color="#55DFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="35" y="-25" width="350" height="330" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="glow" x="112" y="35" width="196" height="211" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blurred"/>
+      <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0.1 0 1 0 0 0.7 0 0 1 0 1 0 0 0 .48 0"/>
+    </filter>
+  </defs>
+  <ellipse cx="211" cy="142" rx="177" ry="120" fill="url(#halo)"/>
+  <ellipse cx="211" cy="141" rx="150" ry="57" transform="rotate(-24 211 141)" stroke="#68E2FF" stroke-opacity=".35" stroke-width="1.2"/>
+  <ellipse cx="211" cy="141" rx="130" ry="91" transform="rotate(39 211 141)" stroke="#8DAFFF" stroke-opacity=".23" stroke-width="1" stroke-dasharray="4 8"/>
+  <ellipse cx="211" cy="141" rx="103" ry="105" transform="rotate(77 211 141)" stroke="#F07970" stroke-opacity=".2" stroke-width="1"/>
+  <path d="M61 145h72m155 0h72M210 13v34m0 187v32" stroke="url(#edge)" stroke-opacity=".44" stroke-width="1" stroke-dasharray="3 6"/>
+  <g fill="#6DE5FF">
+    <circle cx="72" cy="112" r="2.5"/><circle cx="351" cy="183" r="2.5"/>
+    <circle cx="295" cy="47" r="2"/><circle cx="127" cy="219" r="2"/>
+  </g>
+  <g fill="#F1847A">
+    <circle cx="105" cy="190" r="2"/><circle cx="324" cy="91" r="2"/>
+  </g>
+  <path d="m211 58 67 38v77l-67 38-67-38V96l67-38Z" fill="#0C1722" fill-opacity=".82" stroke="url(#edge)" stroke-opacity=".72" stroke-width="1.5"/>
+  <path d="m211 58 67 38-67 39-67-39 67-38Z" fill="#172638" fill-opacity=".72" stroke="#8DEBFF" stroke-opacity=".57" stroke-width="1.1"/>
+  <path d="M144 96v77l67 38v-76l-67-39Z" fill="#0E1B28" fill-opacity=".72" stroke="#82B8FF" stroke-opacity=".48" stroke-width="1.1"/>
+  <path d="m211 135 67-39v77l-67 38v-76Z" fill="#101A28" fill-opacity=".67" stroke="#F08076" stroke-opacity=".4" stroke-width="1.1"/>
+  <path d="m211 72 54 31v62l-54 31-54-31v-62l54-31Z" stroke="#68E5FF" stroke-opacity=".3" stroke-width="1"/>
+  <g filter="url(#glow)" opacity=".62">
+    <path d="m211 82 39 22v44l-39 23-39-23v-44l39-22Z" stroke="url(#edge)" stroke-width="7"/>
+  </g>
+  <path d="m211 82 39 22v44l-39 23-39-23v-44l39-22Z" fill="#0D1823" stroke="url(#edge)" stroke-width="1.6"/>
+  <path d="M211 82v45m39-23-39 23-39-23m39 23v44" stroke="#9CEEFF" stroke-opacity=".78" stroke-width="1.4"/>
+  <path d="m197 111 14-8 14 8v17l-14 8-14-8v-17Z" fill="url(#core)" fill-opacity=".94"/>
+  <path d="M204 116h14m-14 6h14m-14 6h7" stroke="#06151D" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M70 76h40m-40 7h25m218 112h37m-37 7h24" stroke="#A3DDF0" stroke-opacity=".39" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="113" cy="83" r="3" fill="#6DE5FF" fill-opacity=".8"/>
+  <circle cx="310" cy="195" r="3" fill="#F1847A" fill-opacity=".8"/>
+</svg>

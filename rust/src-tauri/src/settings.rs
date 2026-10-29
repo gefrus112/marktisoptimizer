@@ -386,6 +386,54 @@ pub fn restore_settings() -> ApplyResult {
     }
 }
 
+/// Open the detected Roblox settings folder (or its containing version folder
+/// when no settings file exists yet). The destination comes only from the
+/// read-only standard-location scan; no caller-supplied path is accepted.
+#[tauri::command]
+pub fn open_settings_folder() -> Result<String, String> {
+    #[cfg(not(target_os = "windows"))]
+    {
+        return Err("Opening a Roblox settings location is available only on Windows.".to_string());
+    }
+    #[cfg(target_os = "windows")]
+    {
+        let detection = detect();
+        let settings_folder = detection
+            .versions
+            .iter()
+            .find(|version| version.has_settings)
+            .and_then(|version| version.settings_path.as_ref())
+            .and_then(|settings_path| Path::new(settings_path).parent())
+            .map(PathBuf::from);
+        let target = settings_folder.or_else(|| {
+            detection
+                .versions
+                .iter()
+                .find(|version| version.has_player || version.has_studio)
+                .map(|version| PathBuf::from(&version.path))
+        }).ok_or_else(|| "No Roblox version folder was detected. Install or open Roblox, then re-scan.".to_string())?;
+        if !target.is_dir() {
+            return Err("The detected Roblox settings folder is no longer available. Re-scan and try again.".to_string());
+        }
+        let system_root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("WINDIR"))
+            .ok_or_else(|| "Windows system folder could not be located.".to_string())?;
+        let system_root = PathBuf::from(system_root);
+        if !system_root.is_absolute() {
+            return Err("Windows system folder path is invalid.".to_string());
+        }
+        let explorer = system_root.join("explorer.exe");
+        if !explorer.is_file() {
+            return Err("Windows Explorer could not be found in the system folder.".to_string());
+        }
+        std::process::Command::new(explorer)
+            .arg(&target)
+            .spawn()
+            .map_err(|error| format!("Could not open the detected Roblox settings location: {}", error))?;
+        Ok(target.to_string_lossy().to_string())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{add_experimental_legacy_fps, allowlisted_keys, build_managed, Profile, LEGACY_FPS_FLAG};

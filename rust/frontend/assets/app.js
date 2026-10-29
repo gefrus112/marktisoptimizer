@@ -43,7 +43,7 @@
     vfx: true,
     allVersions: true
   };
-  const defaultAppearance = { accent: "mint", iconStyle: "outline", animeTheme: "none" };
+  const defaultAppearance = { accent: "cyan", iconStyle: "outline", animeTheme: "none" };
   const fallbackAllowlist = readEmbeddedAllowlist();
   let bootFinishScheduled = false;
   const bootStartedAt = Date.now();
@@ -391,10 +391,50 @@
     showToast(notificationCategoryTitle(key) + " alerts " + (enabled ? "enabled." : "muted."), "success");
   }
 
+  function toggleQuickActionTray() {
+    const tray = byId("quickActionTray");
+    const trigger = byId("toggleQuickActions");
+    if (!tray || !trigger) return;
+    const opening = tray.hidden;
+    if (opening) closeNotificationDrawer(false);
+    tray.hidden = !opening;
+    trigger.setAttribute("aria-expanded", opening ? "true" : "false");
+    if (opening) byId("quickActionMain").focus();
+    else trigger.focus();
+  }
+
+  function closeQuickActionTray(restoreFocus) {
+    const tray = byId("quickActionTray");
+    if (!tray || tray.hidden) return;
+    tray.hidden = true;
+    byId("toggleQuickActions").setAttribute("aria-expanded", "false");
+    if (restoreFocus !== false) byId("toggleQuickActions").focus();
+  }
+
+  function handleSystemTrayAction(action) {
+    if (action === "settings") openSettingsFolder();
+    else if (action === "launch") launchRoblox();
+    else if (action === "restore") openConfirmation("restore");
+  }
+
+  function listenForSystemTrayActions() {
+    const bridge = window.__TAURI__;
+    const eventApi = bridge && bridge.event;
+    if (!eventApi || typeof eventApi.listen !== "function") return;
+    try {
+      const registration = eventApi.listen("tray-action", function (event) {
+        const action = event && typeof event.payload === "string" ? event.payload : "";
+        handleSystemTrayAction(action);
+      });
+      if (registration && typeof registration.catch === "function") registration.catch(function () { /* Tray support is Windows-only. */ });
+    } catch (_error) { /* Browser previews and non-Windows shells have no tray event bridge. */ }
+  }
+
   function toggleNotificationDrawer() {
     const drawer = byId("notificationDrawer");
     const trigger = byId("toggleNotifications");
     const opening = drawer.hidden;
+    if (opening) closeQuickActionTray(false);
     drawer.hidden = !opening;
     trigger.setAttribute("aria-expanded", opening ? "true" : "false");
     if (opening) {
@@ -544,6 +584,61 @@
     return sign + formatBenchmarkNumber(Math.abs(difference)) + (unit ? " " + unit : "");
   }
 
+  function renderBenchmarkMetricChart(hostId, entries, metricKey) {
+    const host = byId(hostId);
+    if (!host) return;
+    host.replaceChildren();
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "benchmark-chart-empty";
+      empty.textContent = "Record a manual comparison to start this chart.";
+      host.appendChild(empty);
+      return;
+    }
+    const maximum = Math.max(1, ...entries.reduce(function (values, entry) {
+      values.push(entry.before[metricKey], entry.after[metricKey]);
+      return values;
+    }, []));
+    entries.forEach(function (entry) {
+      const before = Number(entry.before[metricKey]);
+      const after = Number(entry.after[metricKey]);
+      const group = document.createElement("div");
+      group.className = "benchmark-chart-group";
+      const date = new Date(entry.after.recordedAt);
+      const dateLabel = Number.isFinite(date.getTime())
+        ? date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+        : "Manual";
+      group.setAttribute("role", "img");
+      group.setAttribute("aria-label", dateLabel + ": before " + formatBenchmarkNumber(before) + ", after " + formatBenchmarkNumber(after));
+      const values = document.createElement("span");
+      values.className = "benchmark-chart-number";
+      values.textContent = formatBenchmarkNumber(before) + " → " + formatBenchmarkNumber(after);
+      const bars = document.createElement("div");
+      bars.className = "benchmark-chart-values";
+      bars.setAttribute("aria-hidden", "true");
+      [[before, "is-before"], [after, "is-after"]].forEach(function (reading) {
+        const bar = document.createElement("span");
+        bar.className = "benchmark-chart-bar " + reading[1];
+        bar.style.height = Math.max(3, Math.round((reading[0] / maximum) * 78)) + "px";
+        bar.title = formatBenchmarkNumber(reading[0]);
+        bars.appendChild(bar);
+      });
+      const label = document.createElement("span");
+      label.className = "benchmark-chart-label";
+      label.textContent = dateLabel;
+      group.append(values, bars, label);
+      host.appendChild(group);
+    });
+  }
+
+  function renderBenchmarkStoryboard() {
+    const entries = state.benchmarkJournal && Array.isArray(state.benchmarkJournal.history)
+      ? state.benchmarkJournal.history.slice(0, 6).reverse()
+      : [];
+    renderBenchmarkMetricChart("benchmarkFpsChart", entries, "fps");
+    renderBenchmarkMetricChart("benchmarkPingChart", entries, "ping");
+  }
+
   function renderBenchmarkJournal() {
     if (!state.benchmarkJournal) state.benchmarkJournal = readBenchmarkJournal();
     const journal = state.benchmarkJournal;
@@ -594,6 +689,7 @@
     }
     if (afterButton) afterButton.disabled = !journal.baseline;
     if (clearButton) clearButton.disabled = !journal.baseline && journal.history.length === 0;
+    renderBenchmarkStoryboard();
   }
 
   function readBenchmarkInputs(prefix) {
@@ -769,6 +865,126 @@
     select.value = state.selectedSavedProfileId;
     byId("profileLibraryStatus").textContent = state.savedProfiles.length + " of " + maxSavedProfiles + " profiles saved on this device";
     updateSavedProfileControls();
+    renderTuningLab();
+  }
+
+  function tuningProfileForSelection(selection) {
+    if (selection === "current") return { id: "current", name: "Current staged settings", profile: normalizeProfile(currentProfile()), isCurrent: true };
+    const id = String(selection || "").startsWith("saved:") ? String(selection).slice(6) : "";
+    const item = state.savedProfiles.find(function (entry) { return entry.id === id; });
+    return item ? { id: item.id, name: item.name, profile: normalizeProfile(item.profile), isCurrent: false } : null;
+  }
+
+  function renderTuningLab() {
+    const leftSelect = byId("tuningProfileA");
+    const rightSelect = byId("tuningProfileB");
+    if (!leftSelect || !rightSelect) return;
+    const oldLeft = leftSelect.value;
+    const oldRight = rightSelect.value;
+    [leftSelect, rightSelect].forEach(function (select) {
+      const options = [document.createElement("option")];
+      options[0].value = "current";
+      options[0].textContent = "Current staged settings";
+      state.savedProfiles.forEach(function (item) {
+        const option = document.createElement("option");
+        option.value = "saved:" + item.id;
+        option.textContent = item.name;
+        options.push(option);
+      });
+      select.replaceChildren.apply(select, options);
+    });
+    const valid = function (select, value) { return Array.from(select.options).some(function (option) { return option.value === value; }); };
+    leftSelect.value = valid(leftSelect, oldLeft) ? oldLeft : "current";
+    rightSelect.value = valid(rightSelect, oldRight) ? oldRight : (state.savedProfiles.length ? "saved:" + state.savedProfiles[0].id : "current");
+    renderTuningComparison();
+  }
+
+  function formatTuningValue(key, profile) {
+    const textureNames = ["Lowest", "Low", "Medium", "Highest"];
+    switch (key) {
+      case "mode": return profile.mode;
+      case "tier": return profile.tier + " / 21";
+      case "texture": return profile.texture + " / 3 · " + (textureNames[profile.texture] || "Custom");
+      case "renderer": return profile.renderer === "Auto" ? "System default" : profile.renderer;
+      case "fps": return profile.legacyFps ? profile.fps + " FPS · experimental request" : "Off";
+      case "geometryDistance": return profile.geometryDistance + " studs";
+      case "vfx": return profile.vfx ? "Reduced sky / voxelizer effects" : "Standard effects";
+      case "allVersions": return profile.allVersions ? "All detected versions" : "First detected settings file";
+      default: return "—";
+    }
+  }
+
+  function renderTuningComparison() {
+    const host = byId("tuningDiffList");
+    const summary = byId("tuningComparisonSummary");
+    const leftSelect = byId("tuningProfileA");
+    const rightSelect = byId("tuningProfileB");
+    const stageLeft = byId("stageTuningProfileA");
+    const stageRight = byId("stageTuningProfileB");
+    if (!host || !summary || !leftSelect || !rightSelect) return;
+    const left = tuningProfileForSelection(leftSelect.value);
+    const right = tuningProfileForSelection(rightSelect.value);
+    host.replaceChildren();
+    if (!left || !right) {
+      summary.textContent = "Choose two available profiles. Save or import named profiles in Settings · Rendering.";
+      if (stageLeft) stageLeft.disabled = true;
+      if (stageRight) stageRight.disabled = true;
+      return;
+    }
+    const fields = [
+      ["mode", "Optimization profile"],
+      ["tier", "Graphics quality"],
+      ["texture", "Texture quality"],
+      ["renderer", "Renderer"],
+      ["fps", "Experimental FPS request"],
+      ["geometryDistance", "Geometry LOD distance"],
+      ["vfx", "Optional effects"],
+      ["allVersions", "Target versions"]
+    ];
+    const header = document.createElement("div");
+    header.className = "tuning-diff-head";
+    ["Setting", left.name, right.name].forEach(function (text) {
+      const cell = document.createElement("span");
+      cell.textContent = text;
+      header.appendChild(cell);
+    });
+    host.appendChild(header);
+    let changed = 0;
+    fields.forEach(function (field) {
+      const leftValue = formatTuningValue(field[0], left.profile);
+      const rightValue = formatTuningValue(field[0], right.profile);
+      const differs = leftValue !== rightValue;
+      if (differs) changed += 1;
+      const row = document.createElement("div");
+      row.className = "tuning-diff-row" + (differs ? " is-changed" : "");
+      row.setAttribute("role", "listitem");
+      row.setAttribute("aria-label", field[1] + (differs ? ": differs" : ": matches"));
+      const label = document.createElement("span");
+      label.className = "tuning-diff-label";
+      label.textContent = field[1];
+      const leftCell = document.createElement("span");
+      leftCell.className = "tuning-diff-value";
+      leftCell.textContent = leftValue;
+      const rightCell = document.createElement("span");
+      rightCell.className = "tuning-diff-value";
+      rightCell.textContent = rightValue;
+      row.append(label, leftCell, rightCell);
+      host.appendChild(row);
+    });
+    summary.textContent = changed
+      ? changed + " of " + fields.length + " compared settings differ. Comparison is read-only; no profile or Roblox file was changed."
+      : "These profiles match across all " + fields.length + " compared settings. Comparison is read-only; no file was changed.";
+    if (stageLeft) stageLeft.disabled = left.isCurrent;
+    if (stageRight) stageRight.disabled = right.isCurrent;
+  }
+
+  function stageTuningProfile(selection) {
+    const selected = tuningProfileForSelection(selection);
+    if (!selected || selected.isCurrent) return;
+    state.geometryManuallyChanged = true;
+    applyProfileToControls(selected.profile);
+    byId("profileNameInput").value = selected.name;
+    showToast(selected.name + " staged in Settings. Review it and confirm Apply to write local settings.", "success");
   }
 
   function upsertSavedProfile(nameValue, profileValue) {
@@ -948,6 +1164,7 @@
     byId("systemFpsTarget").textContent = profile.legacyFps ? profile.fps + " FPS requested · not measured" : "Off";
     updatePresetButtons(profile);
     scheduleProfileSave();
+    renderTuningComparison();
   }
 
   const renderingPresets = {
@@ -1057,8 +1274,74 @@
     writeAppearance(appearance);
   }
 
+  function renderVersionGarden(result, error) {
+    const host = byId("versionGardenList");
+    const summary = byId("versionGardenSummary");
+    if (!host || !summary) return;
+    host.replaceChildren();
+    if (error || !result) {
+      summary.textContent = "Local map unavailable";
+      const empty = document.createElement("p");
+      empty.className = "version-garden-empty";
+      empty.textContent = error || "The packaged Windows app is required to scan Roblox version folders.";
+      host.appendChild(empty);
+      return;
+    }
+    const versions = Array.isArray(result.versions) ? result.versions : [];
+    const settingsCount = versions.filter(function (version) { return Boolean(version && version.hasSettings); }).length;
+    summary.textContent = versions.length + " version folder" + (versions.length === 1 ? "" : "s") + " · " + settingsCount + " settings file" + (settingsCount === 1 ? "" : "s") + " found";
+    if (!versions.length) {
+      const empty = document.createElement("p");
+      empty.className = "version-garden-empty";
+      empty.textContent = "No Roblox version folders were found in the standard Windows locations. Re-scan after installing or opening the Roblox desktop client.";
+      host.appendChild(empty);
+      return;
+    }
+    versions.forEach(function (version, index) {
+      if (!version || typeof version !== "object") return;
+      const card = document.createElement("article");
+      card.className = "version-garden-item";
+      const heading = document.createElement("div");
+      heading.className = "version-garden-item-head";
+      const number = document.createElement("span");
+      number.className = "version-garden-number";
+      number.textContent = String(index + 1).padStart(2, "0");
+      number.setAttribute("aria-hidden", "true");
+      const name = document.createElement("h3");
+      name.textContent = String(version.name || "Unnamed version folder");
+      heading.append(number, name);
+      card.appendChild(heading);
+      const chips = document.createElement("div");
+      chips.className = "version-garden-chips";
+      [["Player", Boolean(version.hasPlayer)], ["Studio", Boolean(version.hasStudio)], ["Settings JSON", Boolean(version.hasSettings)]].forEach(function (item) {
+        const chip = document.createElement("span");
+        chip.className = "version-garden-chip";
+        chip.dataset.found = item[1] ? "true" : "false";
+        chip.textContent = item[0] + " · " + (item[1] ? "FOUND" : "MISSING");
+        chips.appendChild(chip);
+      });
+      card.appendChild(chips);
+      const settings = document.createElement("p");
+      settings.className = "version-garden-settings";
+      settings.textContent = version.hasSettings ? "Settings file detected:" : "Expected settings file location (not found):";
+      const settingsPath = document.createElement("code");
+      settingsPath.className = "version-garden-path";
+      settingsPath.textContent = typeof version.settingsPath === "string" && version.settingsPath
+        ? version.settingsPath
+        : "Path unavailable from local scan.";
+      settings.appendChild(settingsPath);
+      card.appendChild(settings);
+      const versionPath = document.createElement("code");
+      versionPath.className = "version-garden-path";
+      versionPath.textContent = "Version folder: " + String(version.path || "Path unavailable");
+      card.appendChild(versionPath);
+      host.appendChild(card);
+    });
+  }
+
   function renderDetection(result, error) {
     state.detection = result || null;
+    renderVersionGarden(result, error);
     const badge = byId("installBadge");
     const title = byId("installTitle");
     const detail = byId("installDetail");
@@ -1090,6 +1373,87 @@
       detail.textContent = result.message || "Install the Roblox desktop client, then scan again.";
     }
     renderSystemClientStatus();
+  }
+
+  const troubleshootingGuides = {
+    "not-detected": {
+      title: "Roblox was not detected",
+      steps: [
+        "This scan checks standard Windows Roblox folders only. Install or open the Roblox desktop client once, then re-scan.",
+        "Use the Version Garden to review every discovered folder and its Player, Studio, and settings-file status.",
+        "If Roblox is installed in a nonstandard location, this read-only scanner may not find it; it does not search the whole drive."
+      ],
+      action: "rescan",
+      label: "Re-scan Roblox folders"
+    },
+    "settings-not-applying": {
+      title: "Settings do not seem to apply",
+      steps: [
+        "In Version Garden, check which detected ClientAppSettings.json paths exist. The map reports file presence, not whether Roblox honors a flag.",
+        "Open Settings · Rendering, review the staged allowlisted values, then choose Apply settings and confirm. A timestamped backup is created before a successful write.",
+        "Close and restart Roblox after applying. Roblox may ignore, replace, or change the behavior of a setting; no performance result is guaranteed."
+      ],
+      action: "rendering",
+      label: "Open Rendering settings"
+    },
+    "fps-ping": {
+      title: "FPS or experience ping did not change",
+      steps: [
+        "Use Roblox Shift+F5 and type the displayed FPS and experience ping into the manual journal; the app never reads live game values.",
+        "For a useful comparison, record both readings in the same experience and conditions. Network, server, device, and game changes can affect results.",
+        "The optional website TCP probe is not game-server ping. Settings do not guarantee higher FPS, lower ping, or a lag-free session."
+      ],
+      action: "benchmark",
+      label: "Open benchmark journal"
+    },
+    restore: {
+      title: "Restore managed settings",
+      steps: [
+        "Choose Restore managed settings in Settings. The app asks for confirmation before changing any local file.",
+        "Restore removes only keys Marktis manages and keeps unrelated JSON keys. A backup of the current file is created first.",
+        "Restart Roblox to let it read the restored file. Restore is available only when a usable local ClientSettings file is detected."
+      ],
+      action: "restore",
+      label: "Review restore confirmation"
+    },
+    wireguard: {
+      title: "WireGuard will not connect",
+      steps: [
+        "Confirm the official WireGuard for Windows client is installed and the .conf profile came from your VPN provider. Marktis does not provide a VPN server.",
+        "Connecting or disconnecting the tunnel requires Windows administrator approval. Check the provider’s endpoint, DNS, and AllowedIPs in its own support material.",
+        "A full-tunnel profile may route all traffic or trigger firewall behavior. Never share the profile’s private key; a VPN can increase ping."
+      ],
+      action: "vpn",
+      label: "Open WireGuard settings"
+    }
+  };
+
+  function renderTroubleshootingGuide() {
+    const select = byId("troubleshootingIssue");
+    const title = byId("troubleshootingAnswerTitle");
+    const steps = byId("troubleshootingSteps");
+    const action = byId("troubleshootingAction");
+    if (!select || !title || !steps || !action) return;
+    const guide = troubleshootingGuides[select.value] || troubleshootingGuides["not-detected"];
+    title.textContent = guide.title;
+    steps.replaceChildren();
+    guide.steps.forEach(function (text) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      steps.appendChild(item);
+    });
+    action.textContent = guide.label;
+    action.dataset.troubleshootingAction = guide.action;
+    action.disabled = !invoke && ["rescan", "restore"].includes(guide.action);
+  }
+
+  function runTroubleshootingAction() {
+    const action = byId("troubleshootingAction").dataset.troubleshootingAction;
+    if (action === "rescan") { detectRoblox(); return; }
+    if (action === "rendering") { setSettingsTab("rendering"); return; }
+    if (action === "benchmark") { byId("benchmarkTitle").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+    if (action === "restore") { openConfirmation("restore"); return; }
+    if (action === "vpn") setSettingsTab("vpn");
   }
 
   function formatPlayerObservationDuration(milliseconds) {
@@ -2220,6 +2584,29 @@
     return openCommunityLink("openYoutubeChannel", "open_youtube_channel", "YouTube channel");
   }
 
+  async function openSettingsFolder() {
+    const button = byId("quickActionSettingsFolder");
+    if (!invoke) {
+      showToast("Opening a Roblox settings location is available in the packaged Windows desktop app.", "warning");
+      return;
+    }
+    if (button) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+    }
+    try {
+      const openedPath = await invoke("open_settings_folder");
+      showToast("Opened the detected Roblox settings location." + (typeof openedPath === "string" ? " " + openedPath : ""), "success");
+    } catch (error) {
+      showToast("Could not open a Roblox settings location: " + (error && error.message ? error.message : String(error)), "warning");
+    } finally {
+      if (button) {
+        button.removeAttribute("aria-busy");
+        button.disabled = false;
+      }
+    }
+  }
+
   async function launchRoblox() {
     const button = byId("launchRoblox");
     if (!invoke) {
@@ -2560,6 +2947,13 @@
       });
     });
     byId("mainOpenSettings").addEventListener("click", function () { setView("settings"); });
+    byId("toggleQuickActions").addEventListener("click", toggleQuickActionTray);
+    byId("closeQuickActions").addEventListener("click", closeQuickActionTray);
+    byId("quickActionMain").addEventListener("click", function () { closeQuickActionTray(false); setView("main"); });
+    byId("quickActionSettingsFolder").addEventListener("click", function () { closeQuickActionTray(false); openSettingsFolder(); });
+    byId("quickActionLaunch").addEventListener("click", function () { closeQuickActionTray(false); launchRoblox(); });
+    byId("quickActionRestore").addEventListener("click", function () { closeQuickActionTray(false); openConfirmation("restore"); });
+    byId("quickActionRefresh").addEventListener("click", function () { closeQuickActionTray(false); quickRefresh(); });
     byId("toggleNotifications").addEventListener("click", toggleNotificationDrawer);
     byId("closeNotifications").addEventListener("click", closeNotificationDrawer);
     byId("markNotificationsRead").addEventListener("click", markAllNotificationsRead);
@@ -2572,7 +2966,9 @@
     byId("notifyLowStorage").addEventListener("change", function () { setNotificationEventEnabled("lowStorage", this.checked); });
     document.addEventListener("click", function (event) {
       const drawer = byId("notificationDrawer");
+      const quickTray = byId("quickActionTray");
       if (!drawer.hidden && !drawer.contains(event.target) && !byId("toggleNotifications").contains(event.target)) closeNotificationDrawer(false);
+      if (!quickTray.hidden && !quickTray.contains(event.target) && !byId("toggleQuickActions").contains(event.target)) closeQuickActionTray(false);
     });
     byId("editProfile").addEventListener("click", function () { setSettingsTab("rendering"); });
     document.querySelectorAll("[data-preset]").forEach(function (button) {
@@ -2625,6 +3021,9 @@
     byId("exitAfterStorageCheck").addEventListener("click", exitFromStorageNotice);
     byId("quickRefresh").addEventListener("click", quickRefresh);
     byId("scanAgain").addEventListener("click", detectRoblox);
+    byId("versionGardenRefresh").addEventListener("click", detectRoblox);
+    byId("troubleshootingIssue").addEventListener("change", renderTroubleshootingGuide);
+    byId("troubleshootingAction").addEventListener("click", runTroubleshootingAction);
     byId("refreshPlayer").addEventListener("click", refreshPlayerStatus);
     byId("scanSafety").addEventListener("click", function () { scanKnownExecutorProcesses(false); });
     byId("openInstalledApps").addEventListener("click", function () { openWindowsSettings("apps"); });
@@ -2669,6 +3068,12 @@
       if (selected) byId("profileNameInput").value = selected.name;
       updateSavedProfileControls();
     });
+    ["tuningProfileA", "tuningProfileB"].forEach(function (id) {
+      byId(id).addEventListener("change", renderTuningComparison);
+    });
+    byId("compareTuningProfiles").addEventListener("click", renderTuningComparison);
+    byId("stageTuningProfileA").addEventListener("click", function () { stageTuningProfile(byId("tuningProfileA").value); });
+    byId("stageTuningProfileB").addEventListener("click", function () { stageTuningProfile(byId("tuningProfileB").value); });
     byId("saveNamedProfile").addEventListener("click", saveNamedProfile);
     byId("loadSavedProfile").addEventListener("click", loadSelectedProfile);
     byId("exportSavedProfile").addEventListener("click", exportSelectedProfile);
@@ -2750,6 +3155,11 @@
         if (!byId("acceptConfirm").disabled) closeConfirmation();
         return;
       }
+      if (!byId("quickActionTray").hidden && event.key === "Escape") {
+        event.preventDefault();
+        closeQuickActionTray();
+        return;
+      }
       if (!byId("notificationDrawer").hidden && event.key === "Escape") {
         event.preventDefault();
         closeNotificationDrawer();
@@ -2766,6 +3176,7 @@
         byId("allowlistSearch").focus();
       }
     });
+    listenForSystemTrayActions();
   }
 
   async function loadAllowlist() {
@@ -2796,6 +3207,7 @@
     updateRejoinButton();
     state.benchmarkJournal = readBenchmarkJournal();
     renderBenchmarkJournal();
+    renderTroubleshootingGuide();
     const allowlistTask = loadAllowlist();
     if (!invoke) {
       await allowlistTask;
@@ -2810,6 +3222,8 @@
       byId("playerDetail").textContent = "The website does not inspect running processes.";
       byId("versionCount").textContent = "—";
       byId("settingsCount").textContent = "—";
+      renderVersionGarden(null, "The local Roblox install map is available in the packaged Windows desktop app.");
+      ["quickActionSettingsFolder", "quickActionLaunch", "quickActionRestore", "quickActionRefresh"].forEach(function (id) { byId(id).disabled = true; });
       byId("applySettings").disabled = true;
       byId("restoreSettings").disabled = true;
       byId("launchRoblox").disabled = true;

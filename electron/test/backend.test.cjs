@@ -186,6 +186,52 @@ test("opted-in FPS writes are backed up and removed by Restore", async () => {
   assert.equal(JSON.parse(files.get(settingsPath)).UserOwnedSetting, "keep");
 });
 
+test("quick action opens only the detected Roblox settings directory through Explorer", async () => {
+  const localAppData = String.raw`C:\Users\Tester\AppData\Local`;
+  const versionsRoot = path.win32.join(localAppData, "Roblox", "Versions");
+  const versionPath = path.win32.join(versionsRoot, "version-local-test");
+  const settingsDir = path.win32.join(versionPath, "ClientSettings");
+  const settingsPath = path.win32.join(settingsDir, "ClientAppSettings.json");
+  const playerPath = path.win32.join(versionPath, "RobloxPlayerBeta.exe");
+  const existing = new Set([settingsDir, settingsPath, playerPath]);
+  const memoryFs = {
+    constants: { X_OK: 1 },
+    readdirSync(root) {
+      if (root.toLowerCase() === versionsRoot.toLowerCase()) return [{ name: "version-local-test", isDirectory: () => true }];
+      return [];
+    },
+    existsSync(filePath) { return existing.has(filePath); },
+    statSync(filePath) {
+      assert.equal(filePath, String.raw`C:\Windows\explorer.exe`);
+      return { isFile: () => true };
+    }
+  };
+  const spawnCalls = [];
+  const child = new EventEmitter();
+  child.unref = () => { child.wasUnrefed = true; };
+  const backend = createBackend({
+    platform: "win32",
+    env: { SystemRoot: String.raw`C:\Windows`, LOCALAPPDATA: localAppData },
+    allowlist,
+    fs: memoryFs,
+    spawn(executable, args, options) {
+      spawnCalls.push({ executable, args, options });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  const openedPath = await backend.invoke("open_settings_folder");
+  assert.equal(openedPath, settingsDir);
+  assert.equal(spawnCalls[0].executable, String.raw`C:\Windows\explorer.exe`);
+  assert.deepEqual(spawnCalls[0].args, [settingsDir]);
+  assert.equal(spawnCalls[0].options.shell, false);
+  assert.equal(child.wasUnrefed, true);
+
+  const unsupported = createBackend({ platform: "linux", allowlist });
+  await assert.rejects(() => unsupported.invoke("open_settings_folder"), /only on Windows/);
+});
+
 test("Roblox launch dispatches a fixed roblox:// URI through system Explorer", async () => {
   const spawnCalls = [];
   const child = new EventEmitter();
