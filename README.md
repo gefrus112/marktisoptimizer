@@ -104,6 +104,18 @@ items stay in local app storage. Desktop toasts are optional and are attempted
 only after the user explicitly requests OS/WebView permission. If native alerts
 are unsupported or denied, the in-app center remains available.
 
+The Main page includes a **Version Garden** showing each detected Roblox version
+folder, Player/Studio presence, and the detected or expected local
+`ClientAppSettings.json` path; the view checks file presence only. The **Tuning
+Lab** compares two saved profiles or the current staged profile and highlights
+value differences without writing settings. The **Benchmark Storyboard** charts
+only manually entered FPS/ping readings from Roblox `Shift+F5`. The **Quick Action Tray** in the app can open the detected local
+settings location, launch Roblox normally, refresh status, or start a confirmed
+restore. On Windows, both desktop shells also add a notification-area menu with
+those shortcuts plus Open and Quit; closing the window hides it while the app is
+running. The bundled **offline troubleshooting guide** covers detection,
+settings, manual readings, restore, and WireGuard setup without a network lookup.
+
 The Main page also checks exact running process names `Xeno.exe`, `Solara.exe`,
 `JJSploit.exe`, and `Delta.exe` on-device at startup, every 30 seconds, and on
 request. A match can appear in the local notification center; an optional OS

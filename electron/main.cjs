@@ -2,7 +2,7 @@
 
 const path = require("node:path");
 const { fileURLToPath } = require("node:url");
-const { app, BrowserWindow, dialog, ipcMain, session } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, Menu, session, Tray } = require("electron");
 const { createBackend } = require("./backend.cjs");
 
 const APP_ID = "com.roptimer.electron";
@@ -27,6 +27,10 @@ const VPN_DATA_DIR = path.join(LOCAL_APP_DATA, "MarktisOptimizer");
 const backend = createBackend({ allowlistPath: ALLOWLIST_PATH, vpnDataDir: VPN_DATA_DIR, exitApp: () => app.quit() });
 
 app.setAppUserModelId(APP_ID);
+
+let mainWindow = null;
+let tray = null;
+let isQuitting = false;
 
 function isTrustedUiUrl(rawUrl) {
   try {
@@ -65,8 +69,17 @@ function createWindow() {
     if (!isTrustedUiUrl(targetUrl)) event.preventDefault();
   });
   window.webContents.on("will-attach-webview", (event) => event.preventDefault());
+  mainWindow = window;
   window.once("ready-to-show", () => window.show());
-  window.on("closed", () => { /* The shell owns no long-lived backend state. */ });
+  window.on("close", (event) => {
+    if (process.platform === "win32" && tray && !isQuitting) {
+      event.preventDefault();
+      window.hide();
+    }
+  });
+  window.on("closed", () => {
+    if (mainWindow === window) mainWindow = null;
+  });
   window.loadFile(UI_ENTRY).catch(async (error) => {
     await dialog.showMessageBox({
       type: "error",
@@ -77,6 +90,37 @@ function createWindow() {
     app.quit();
   });
   return window;
+}
+
+function focusMainWindow(action) {
+  let window = mainWindow;
+  if (!window || window.isDestroyed()) window = createWindow();
+  mainWindow = window;
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+  if (!action) return;
+  const dispatch = () => {
+    if (!window.isDestroyed()) window.webContents.send("roptimer:tray-action", action);
+  };
+  if (window.webContents.isLoading()) window.webContents.once("did-finish-load", dispatch);
+  else dispatch();
+}
+
+function createTray() {
+  if (process.platform !== "win32" || tray) return;
+  tray = new Tray(APP_ICON);
+  tray.setToolTip("Marktis Optimizer");
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: "Open Marktis Optimizer", click: () => focusMainWindow() },
+    { type: "separator" },
+    { label: "Open Roblox settings location", click: () => focusMainWindow("settings") },
+    { label: "Launch Roblox normally", click: () => focusMainWindow("launch") },
+    { label: "Restore managed settings…", click: () => focusMainWindow("restore") },
+    { type: "separator" },
+    { label: "Quit Marktis Optimizer", click: () => app.quit() }
+  ]));
+  tray.on("click", () => focusMainWindow());
 }
 
 ipcMain.handle("roptimer:invoke", async (event, command, args) => {
@@ -109,13 +153,23 @@ app.whenReady().then(() => {
     app.quit();
     return;
   }
+  createTray();
   createWindow();
 });
 
+app.on("before-quit", () => { isQuitting = true; });
+app.on("will-quit", () => {
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+});
+
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
+  if (process.platform !== "darwin" && !(process.platform === "win32" && tray && !isQuitting)) app.quit();
 });
 
 app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (mainWindow && !mainWindow.isDestroyed()) focusMainWindow();
+  else if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });

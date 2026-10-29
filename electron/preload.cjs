@@ -10,5 +10,15 @@ contextBridge.exposeInMainWorld("__TAURI__", {
     invoke(command, args) {
       return ipcRenderer.invoke("roptimer:invoke", command, args || {});
     }
+  },
+  event: {
+    listen(eventName, callback) {
+      if (eventName !== "tray-action" || typeof callback !== "function") {
+        return Promise.reject(new Error("Unsupported local desktop event listener."));
+      }
+      const listener = (_event, payload) => callback({ payload });
+      ipcRenderer.on("roptimer:tray-action", listener);
+      return Promise.resolve(() => ipcRenderer.removeListener("roptimer:tray-action", listener));
+    }
   }
 });

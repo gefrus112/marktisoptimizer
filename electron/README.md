@@ -89,6 +89,15 @@ installer and SHA-256 file as a build artifact.
   time, or account data. The before/after journal stores
   only user-entered FPS and ping values read from Roblox `Shift+F5`; these
   metrics are not measured or verified by the app.
+- The Main page includes a Version Garden that lists detected Player/Studio
+  folders, settings-file presence, and detected/expected paths without reading
+  JSON values. Tuning Lab compares saved/staged profiles without writing files.
+  The Benchmark Storyboard visualizes only the manual `Shift+F5` journal. The
+  offline troubleshooting guide is bundled and makes no network requests.
+- The Quick Action Tray is available in-app and in the Windows notification
+  area. Tray shortcuts open the app, open the detected settings location, launch
+  Roblox normally, or request a confirmed restore; choosing Quit exits the app.
+  Closing the window hides it to the tray while the process remains running.
 - The profile shortcut accepts a numeric Roblox User ID and opens the fixed
   official profile URL in the system browser. It does not log in, access cookies,
   fetch the profile, or scrape account data.

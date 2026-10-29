@@ -23,6 +23,16 @@ protocol and link to the latest GitHub release for manual app updates; there is
 no self-updater. An optional Electron shell is also available;
 see [`../electron/README.md`](../electron/README.md).
 
+Main also includes a **Version Garden** for read-only per-version Player/Studio
+and settings-file status, a **Tuning Lab** that compares profiles without writing
+settings, and a **Benchmark Storyboard** based only on the user's manually entered
+`Shift+F5` readings. The in-app **Quick Action Tray** opens the detected settings
+location, launches Roblox normally, refreshes local status, or starts the existing
+confirmed restore flow. The Windows notification-area menu also exposes those
+shortcuts plus Open and Quit; closing the app window hides it while the process
+continues. The bundled **offline troubleshooting guide** covers install
+detection, settings, manual benchmark readings, restore, and WireGuard.
+
 Built with [Tauri v2](https://tauri.app/) + Rust. The desktop UI is purpose-built
 under `desktop-ui/` and is separate from the GitHub Pages website. It has a
 Main page plus a grouped Settings area for Rendering, Geometry, Icons,
@@ -67,7 +77,7 @@ src-tauri/
     device.rs    read-only hardware inventory, startup fixed-drive check, and opt-in TCP probe
     session.rs   process-name-only Roblox Player status (Windows)
     safety.rs    local known-process name scan + fixed Windows Settings links
-    settings.rs  safe apply/restore, backups, and separate legacy-FPS opt-in
+    settings.rs  safe apply/restore, backups, folder opener, and legacy-FPS opt-in
     vpn.rs       provider-profile WireGuard integration, DPAPI storage, and tunnel-service commands
 frontend/        GENERATED from ../desktop-ui; do not edit
 ```
