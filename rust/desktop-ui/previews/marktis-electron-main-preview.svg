@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Marktis Optimizer desktop control-deck redesign preview</title>
+  <desc id="desc">Illustrative preview of the refreshed shared Electron and Tauri desktop Main screen, with a cool cyan interface, original geometric artwork, local status cards, and custom line icons.</desc>
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1440" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#0B1119"/><stop offset=".58" stop-color="#080C12"/><stop offset="1" stop-color="#0E141D"/></linearGradient>
+    <linearGradient id="sidebar" x1="0" y1="0" x2="236" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#0A1018"/><stop offset="1" stop-color="#070B11"/></linearGradient>
+    <linearGradient id="hero" x1="276" y1="102" x2="1399" y2="313" gradientUnits="userSpaceOnUse"><stop stop-color="#142435"/><stop offset=".56" stop-color="#111C2A"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#172331"/><stop offset="1" stop-color="#0F1721"/></linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8AF0FF"/><stop offset="1" stop-color="#45BFD9"/></linearGradient>
+    <linearGradient id="chip" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#76F0FF"/><stop offset=".55" stop-color="#8BAEFF"/><stop offset="1" stop-color="#ED6E66"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#43D9FA" stop-opacity=".22"/><stop offset="1" stop-color="#43D9FA" stop-opacity="0"/></radialGradient>
+    <filter id="softGlow" x="900" y="55" width="380" height="290" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="smallGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+    <symbol id="brand" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
+    <symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></symbol>
+    <symbol id="sliders" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
+    <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></symbol>
+    <symbol id="cube" viewBox="0 0 24 24"><path d="m12 2.8 9 4.8v9L12 21.2l-9-4.6v-9l9-4.8Z"/><path d="m3.4 7.8 8.6 4.6 8.6-4.6M12 12.4v8.4"/></symbol>
+    <symbol id="grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></symbol>
+    <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.2 1.2L6.5 5M3 12l1.2 1.2L6.5 11M3 18l1.2 1.2L6.5 17"/></symbol>
+    <symbol id="shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.5-8 10-4.6-1.5-8-4.9-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></symbol>
+    <symbol id="network" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></symbol>
+    <symbol id="monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
+    <symbol id="roblox" viewBox="0 0 24 24"><path d="M6.2 1.6 22.4 5.5 17.8 22.4 1.6 18.5 6.2 1.6ZM10.1 9.7 8.9 13.9 13.1 15.1 14.3 10.9 10.1 9.7Z" fill="currentColor" fill-rule="evenodd" stroke="none"/></symbol>
+    <symbol id="spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
+    <symbol id="refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a6.6 6.6 0 0 1 11.1-2L20 12M4 12l2.8 5a6.6 6.6 0 0 0 11.1-2"/></symbol>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+  </defs>
+  <rect width="1440" height="1000" fill="url(#page)"/>
+  <circle cx="1300" cy="64" r="250" fill="url(#glow)" opacity=".54"/>
+  <rect width="236" height="1000" fill="url(#sidebar)"/>
+  <path d="M235.5 0v1000M236 61.5h1204" stroke="#1E2B38"/>
+
+  <g font-family="Segoe UI, Inter, Arial, sans-serif">
+    <!-- Sidebar brand -->
+    <rect x="25" y="24" width="41" height="41" rx="13" fill="#221214" stroke="#8A2D29"/>
+    <g color="#F0443C"><use href="#brand" x="32" y="31" width="27" height="27"/></g>
+    <text x="79" y="42" fill="#F0F5F8" font-size="12" font-weight="800" letter-spacing="2">MARKTIS</text>
+    <text x="79" y="57" fill="#7F919E" font-size="8" font-weight="700" letter-spacing="1.5">OPTIMIZER · WINDOWS</text>
+    <path d="M18 82h199" stroke="#1D2A37"/>
+    <text x="29" y="110" fill="#6E8291" font-size="8" font-weight="800" letter-spacing="1.5">WORKSPACE</text>
+    <rect x="17" y="122" width="202" height="43" rx="10" fill="#122631" stroke="#245568"/>
+    <path d="M17 134v20" stroke="#58D9EB" stroke-width="2"/>
+    <g color="#64DFF0"><use href="#home" x="31" y="135" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="61" y="151" fill="#E8F4F7" font-size="12" font-weight="700">Main</text>
+    <circle cx="205" cy="143" r="3" fill="#64DFF0"/>
+    <rect x="17" y="172" width="202" height="43" rx="10" fill="#0C141D"/>
+    <g color="#899AA5"><use href="#sliders" x="31" y="185" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="61" y="198" fill="#AAB8C1" font-size="12" font-weight="650">Settings</text>
+    <path d="m194 189 5 5-5 5" fill="none" stroke="#748693" stroke-width="1.5"/>
+    <path d="M37 226v328" stroke="#2A3947"/>
+    <g fill="#8999A5" font-size="10" font-weight="560">
+      <text x="58" y="244">Rendering</text><text x="58" y="281">Geometry</text><text x="58" y="318">Icons</text><text x="58" y="355">Allowlist</text>
+      <text x="58" y="392">Security</text><text x="58" y="429">VPN</text><text x="58" y="466">System</text><text x="58" y="503">Notifications</text>
+    </g>
+    <g color="#657785" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#sun" x="32" y="230" width="15" height="15"/><use href="#cube" x="32" y="267" width="15" height="15"/><use href="#grid" x="32" y="304" width="15" height="15"/><use href="#list" x="32" y="341" width="15" height="15"/>
+      <use href="#shield" x="32" y="378" width="15" height="15"/><use href="#network" x="32" y="415" width="15" height="15"/><use href="#monitor" x="32" y="452" width="15" height="15"/><use href="#bell" x="32" y="489" width="15" height="15"/>
+    </g>
+    <rect x="17" y="802" width="202" height="66" rx="12" fill="#0D1B20" stroke="#26443F"/>
+    <rect x="29" y="817" width="34" height="34" rx="10" fill="#102A2B" stroke="#246368"/>
+    <g color="#6FE0CF"><use href="#shield" x="38" y="826" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="73" y="830" fill="#DCE9E5" font-size="9" font-weight="700">Local &amp; reversible</text>
+    <text x="73" y="846" fill="#83958F" font-size="7">No injection · No memory access</text>
+    <circle cx="31" cy="900" r="3" fill="#65DBCB"/>
+    <text x="42" y="903" fill="#758A91" font-size="8" font-weight="800" letter-spacing="1.2">DESKTOP MODE</text>
+    <text x="192" y="903" fill="#71838F" font-size="8" font-weight="700">V4</text>
+    <text x="26" y="934" fill="#687A85" font-size="7" letter-spacing=".5">CREDITS · <tspan fill="#BCC9CF" font-weight="700">jojnsevrr</tspan></text>
+    <text x="26" y="952" fill="#60CDDE" font-size="7" font-weight="700">Join Discord</text>
+    <text x="122" y="952" fill="#60CDDE" font-size="7" font-weight="700">YouTube @butterguff</text>
+
+    <!-- Top bar -->
+    <text x="273" y="37" fill="#708493" font-size="8" font-weight="800" letter-spacing="1.3">WORKSPACE</text>
+    <path d="M341 31h1v11h-1" stroke="#435363"/>
+    <text x="356" y="37" fill="#D5E1E8" font-size="9" font-weight="700" letter-spacing=".4">MAIN</text>
+    <circle cx="1035" cy="31" r="3" fill="#5EDECE"/>
+    <text x="1046" y="34" fill="#93A8B2" font-size="7" font-weight="800" letter-spacing="1">LOCAL MODE</text>
+    <path d="M1134 25v14" stroke="#32414D"/>
+    <text x="1148" y="34" fill="#AAB8C1" font-size="7" font-weight="800" letter-spacing="1">V4.0.0</text>
+    <rect x="1215" y="16" width="120" height="30" rx="8" fill="#111B25" stroke="#334556"/>
+    <g color="#8FA7B4"><use href="#spark" x="1226" y="24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1246" y="35" fill="#B5C3CC" font-size="8" font-weight="700">Quick Actions</text>
+    <rect x="1346" y="16" width="36" height="30" rx="8" fill="#111B25" stroke="#334556"/>
+    <g color="#8FA7B4"><use href="#bell" x="1356" y="23" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+
+    <!-- Main hero -->
+    <rect x="276" y="84" width="1124" height="222" rx="20" fill="url(#hero)" stroke="#315267"/>
+    <path d="M1000 84h350" stroke="url(#cyan)" stroke-width="1.3" opacity=".75"/>
+    <ellipse cx="1090" cy="190" rx="204" ry="163" fill="#41CFEF" opacity=".12" filter="url(#softGlow)"/>
+    <rect x="301" y="105" width="22" height="22" rx="7" fill="#14303A" stroke="#266477"/>
+    <g color="#74E9F4"><use href="#spark" x="306" y="110" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="332" y="120" fill="#70DBEB" font-size="8" font-weight="800" letter-spacing="1.3">DESKTOP CONTROL CENTER</text>
+    <path d="M497 116h28" stroke="#367383"/>
+    <text x="536" y="120" fill="#8397A5" font-size="8" font-weight="800" letter-spacing="1.3">WINDOWS</text>
+    <text x="301" y="170" fill="#F0F6FA" font-size="42" font-weight="650" letter-spacing="-2.2">Your client,</text>
+    <text x="301" y="215" fill="#67DBEC" font-size="42" font-weight="450" letter-spacing="-2.2">in your control.</text>
+    <text x="302" y="240" fill="#9AAEBC" font-size="10">A focused workspace for safe, local Roblox settings. Refresh install, Player-process,</text>
+    <text x="302" y="255" fill="#9AAEBC" font-size="10">hardware, and safety status—never game or session details.</text>
+    <rect x="301" y="268" width="132" height="20" rx="6" fill="#0A1820" stroke="#2A5D67"/>
+    <g color="#69DBD2"><use href="#shield" x="309" y="273" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="325" y="282" fill="#B1D6D5" font-size="6" font-weight="800" letter-spacing=".8">LOCAL &amp; REVERSIBLE</text>
+    <rect x="439" y="268" width="129" height="20" rx="6" fill="#0A1820" stroke="#2A5D67"/>
+    <g color="#7CCFE0"><use href="#network" x="447" y="273" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="463" y="282" fill="#AACBD5" font-size="6" font-weight="800" letter-spacing=".8">NO GAME TELEMETRY</text>
+    <!-- Geometric local-control core -->
+    <ellipse cx="1097" cy="188" rx="104" ry="42" transform="rotate(-24 1097 188)" fill="none" stroke="#71E4F5" stroke-opacity=".38"/>
+    <ellipse cx="1097" cy="188" rx="87" ry="64" transform="rotate(38 1097 188)" fill="none" stroke="#9EB8FF" stroke-opacity=".3" stroke-dasharray="4 7"/>
+    <ellipse cx="1097" cy="188" rx="69" ry="70" transform="rotate(77 1097 188)" fill="none" stroke="#F08076" stroke-opacity=".22"/>
+    <path d="M1000 188h44m106 0h46M1097 112v24m0 104v26" stroke="#70DFF1" stroke-opacity=".46" stroke-dasharray="3 5"/>
+    <path d="m1097 137 48 27v55l-48 27-48-27v-55l48-27Z" fill="#101D2B" stroke="#78E5F3" stroke-opacity=".72" stroke-width="1.4"/>
+    <path d="m1097 137 48 27-48 28-48-28 48-27Z" fill="#1A2B3C" stroke="#88EAFA" stroke-opacity=".58"/>
+    <path d="M1049 164v55l48 27v-54l-48-28Z" fill="#101B29" stroke="#7CAFFF" stroke-opacity=".48"/>
+    <path d="m1097 192 48-28v55l-48 27v-54Z" fill="#111B29" stroke="#F07E75" stroke-opacity=".42"/>
+    <path d="m1097 159 29 17v33l-29 17-29-17v-33l29-17Z" fill="#0D1722" stroke="url(#chip)" stroke-width="1.4"/>
+    <path d="M1097 159v34m29-17-29 17-29-17m29 17v33" stroke="#A3F0F8" stroke-opacity=".75"/>
+    <path d="m1087 180 10-6 10 6v12l-10 6-10-6v-12Z" fill="url(#chip)"/>
+    <path d="M1092 183h10m-10 4h10m-10 4h5" stroke="#091720" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="1009" cy="160" r="2.5" fill="#6EE5F5"/><circle cx="1184" cy="210" r="2.5" fill="#F08076"/>
+    <text x="1048" y="285" fill="#7E9AA8" font-size="6" font-weight="800" letter-spacing="1.5">LOCAL CONTROL CORE</text>
+    <!-- Hero controls -->
+    <rect x="1201" y="157" width="174" height="40" rx="9" fill="#172432" stroke="#3C5264"/>
+    <g color="#A6B9C2"><use href="#refresh" x="1213" y="169" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1235" y="181" fill="#D0DCE2" font-size="9" font-weight="700">Refresh local status</text>
+    <rect x="1331" y="167" width="30" height="18" rx="5" fill="#0F1922" stroke="#3A4A57"/>
+    <text x="1338" y="179" fill="#9EAFB9" font-size="7" font-weight="700">F5</text>
+    <text x="1320" y="209" fill="#738A97" font-size="7" text-anchor="end">Ready</text>
+    <rect x="1201" y="226" width="174" height="40" rx="9" fill="#59D5E5" stroke="#7DE8F2"/>
+    <text x="1236" y="250" fill="#08212A" font-size="9" font-weight="800">Open settings</text>
+    <g color="#08212A"><use href="#arrow" x="1342" y="238" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+
+    <!-- Installation status card -->
+    <rect x="276" y="324" width="552" height="224" rx="16" fill="url(#panel)" stroke="#2B3C4D"/>
+    <text x="299" y="350" fill="#64DCEB" font-size="8" font-family="Consolas, monospace" font-weight="800">01</text>
+    <text x="322" y="350" fill="#8094A2" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1.1">ROBLOX INSTALLATION</text>
+    <rect x="724" y="337" width="82" height="20" rx="10" fill="#1A2028" stroke="#3A4651"/>
+    <circle cx="737" cy="347" r="2.5" fill="#93A3AD"/><text x="746" y="350" fill="#A3B1BA" font-size="6" font-family="Consolas, monospace" font-weight="800" letter-spacing=".7">CHECKING</text>
+    <rect x="300" y="370" width="48" height="48" rx="14" fill="#102731" stroke="#285A68"/>
+    <g color="#67DDEF"><use href="#folder" x="312" y="382" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="362" y="390" fill="#E3EDF1" font-size="15" font-weight="650">Checking local folders</text>
+    <text x="362" y="410" fill="#90A0AA" font-size="9">Read-only scan of standard Roblox install locations.</text>
+    <path d="M300 433h504" stroke="#263542"/>
+    <text x="300" y="459" fill="#E5EEF2" font-size="14" font-family="Consolas, monospace" font-weight="700">—</text>
+    <text x="300" y="476" fill="#788B98" font-size="8">client folders</text>
+    <path d="M431 445v36" stroke="#2A3947"/>
+    <text x="451" y="459" fill="#E5EEF2" font-size="14" font-family="Consolas, monospace" font-weight="700">—</text>
+    <text x="451" y="476" fill="#788B98" font-size="8">settings files</text>
+    <path d="M577 445v36" stroke="#2A3947"/>
+    <text x="598" y="459" fill="#E5EEF2" font-size="14" font-family="Consolas, monospace" font-weight="700">18</text>
+    <text x="598" y="476" fill="#788B98" font-size="8">approved flags</text>
+    <g color="#67DDEF"><use href="#refresh" x="300" y="495" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="321" y="506" fill="#67DDEF" font-size="8" font-weight="700">Re-scan install folders</text>
+
+    <!-- Player process card -->
+    <rect x="843" y="324" width="557" height="224" rx="16" fill="url(#panel)" stroke="#2B3C4D"/>
+    <text x="866" y="350" fill="#64DCEB" font-size="8" font-family="Consolas, monospace" font-weight="800">02</text>
+    <text x="889" y="350" fill="#8094A2" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1.1">PLAYER PRESENCE</text>
+    <rect x="1296" y="337" width="82" height="20" rx="10" fill="#1A2028" stroke="#3A4651"/>
+    <circle cx="1309" cy="347" r="2.5" fill="#93A3AD"/><text x="1318" y="350" fill="#A3B1BA" font-size="6" font-family="Consolas, monospace" font-weight="800" letter-spacing=".7">CHECKING</text>
+    <rect x="867" y="370" width="48" height="48" rx="14" fill="#F3F5F7"/>
+    <g color="#111820"><use href="#roblox" x="879" y="382" width="24" height="24"/></g>
+    <text x="929" y="390" fill="#E3EDF1" font-size="15" font-weight="650">Checking Player process</text>
+    <text x="929" y="410" fill="#90A0AA" font-size="9">Windows-only process-name check.</text>
+    <rect x="867" y="430" width="267" height="31" rx="8" fill="#0C141C" stroke="#2B3B49"/>
+    <circle cx="880" cy="445" r="3" fill="#8BBcff"/><text x="892" y="448" fill="#CBD7DD" font-size="8" font-family="Consolas, monospace">RobloxPlayerBeta.exe</text>
+    <text x="1056" y="448" fill="#7F939D" font-size="6" font-family="Consolas, monospace" font-weight="800">NAME ONLY</text>
+    <text x="867" y="477" fill="#82939E" font-size="7">No game, server, account, command-line, or memory data is read.</text>
+    <rect x="867" y="488" width="510" height="42" rx="9" fill="#0D1A1F" stroke="#2A4145"/>
+    <text x="881" y="505" fill="#81959B" font-size="6" font-family="Consolas, monospace" font-weight="800" letter-spacing=".9">LOCAL PROCESS WATCH</text>
+    <text x="1319" y="505" fill="#91A6AC" font-size="6" font-family="Consolas, monospace" font-weight="800" text-anchor="end">STANDBY</text>
+    <text x="881" y="520" fill="#D2E3E5" font-size="12" font-family="Consolas, monospace" font-weight="700">00:00:00</text>
+    <text x="964" y="519" fill="#73868D" font-size="7">Not a game-session timer</text>
+
+    <!-- Profile preview card -->
+    <rect x="276" y="563" width="552" height="210" rx="16" fill="url(#panel)" stroke="#2B3C4D"/>
+    <text x="299" y="589" fill="#64DCEB" font-size="8" font-family="Consolas, monospace" font-weight="800">03</text>
+    <text x="322" y="589" fill="#8094A2" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1.1">CURRENT PROFILE</text>
+    <rect x="714" y="576" width="92" height="20" rx="10" fill="#10242B" stroke="#2A5D67"/>
+    <text x="726" y="589" fill="#6BDBE9" font-size="6" font-family="Consolas, monospace" font-weight="800" letter-spacing=".7">PERFORMANCE</text>
+    <text x="300" y="621" fill="#82939E" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1">LOCAL SETTINGS PREVIEW</text>
+    <text x="300" y="646" fill="#E4EDF1" font-size="17" font-weight="650">Reduce building lag</text>
+    <rect x="754" y="606" width="40" height="40" rx="13" fill="#102832" stroke="#2A5967"/>
+    <g color="#6FDFEF"><use href="#spark" x="764" y="616" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g font-size="7" font-family="Segoe UI, Arial, sans-serif">
+      <rect x="300" y="663" width="112" height="27" rx="7" fill="#0C141D" stroke="#293846"/><text x="310" y="680" fill="#8A9AA4">Graphics <tspan fill="#D2DEE4" font-family="Consolas, monospace" font-weight="700">21 / 21</tspan></text>
+      <rect x="420" y="663" width="100" height="27" rx="7" fill="#0C141D" stroke="#293846"/><text x="430" y="680" fill="#8A9AA4">Texture <tspan fill="#D2DEE4" font-family="Consolas, monospace" font-weight="700">0 / 3</tspan></text>
+      <rect x="528" y="663" width="104" height="27" rx="7" fill="#0C141D" stroke="#293846"/><text x="538" y="680" fill="#8A9AA4">Renderer <tspan fill="#D2DEE4" font-family="Consolas, monospace" font-weight="700">Auto</tspan></text>
+      <rect x="300" y="699" width="123" height="27" rx="7" fill="#0C141D" stroke="#293846"/><text x="310" y="716" fill="#8A9AA4">Geometry <tspan fill="#D2DEE4" font-family="Consolas, monospace" font-weight="700">64 studs</tspan></text>
+      <rect x="431" y="699" width="118" height="27" rx="7" fill="#0C141D" stroke="#293846"/><text x="441" y="716" fill="#8A9AA4">Legacy FPS <tspan fill="#D2DEE4" font-family="Consolas, monospace" font-weight="700">Off</tspan></text>
+    </g>
+    <g color="#64DCEB"><use href="#sliders" x="300" y="742" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="321" y="753" fill="#64DCEB" font-size="8" font-weight="700">Configure this profile</text>
+
+    <!-- Public profile card -->
+    <rect x="843" y="563" width="557" height="210" rx="16" fill="url(#panel)" stroke="#2B3C4D"/>
+    <text x="866" y="589" fill="#64DCEB" font-size="8" font-family="Consolas, monospace" font-weight="800">04</text>
+    <text x="889" y="589" fill="#8094A2" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1.1">ROBLOX PROFILE</text>
+    <rect x="1284" y="576" width="94" height="20" rx="10" fill="#161F27" stroke="#35434E"/>
+    <text x="1297" y="589" fill="#A1B0B8" font-size="6" font-family="Consolas, monospace" font-weight="800" letter-spacing=".6">PUBLIC LINK</text>
+    <rect x="867" y="606" width="40" height="40" rx="13" fill="#F3F5F7"/>
+    <g color="#111820"><use href="#roblox" x="877" y="616" width="20" height="20"/></g>
+    <text x="920" y="620" fill="#82939E" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing=".9">OPEN OFFICIAL PROFILE</text>
+    <text x="920" y="641" fill="#E4EDF1" font-size="15" font-weight="650">Your Roblox profile</text>
+    <text x="867" y="668" fill="#91A0AA" font-size="8">Enter your numeric Roblox User ID. The public profile opens in your system browser;</text>
+    <text x="867" y="682" fill="#91A0AA" font-size="8">the app does not sign in, import, or scrape account data.</text>
+    <rect x="867" y="695" width="310" height="33" rx="8" fill="#0B121A" stroke="#34434F"/>
+    <text x="881" y="716" fill="#687D8A" font-size="8">Optional numeric User ID</text>
+    <rect x="1187" y="695" width="130" height="33" rx="8" fill="#17222D" stroke="#3A4C59"/>
+    <g color="#9BAEB8"><use href="#arrow" x="1199" y="704" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1218" y="715" fill="#B9C7CF" font-size="8" font-weight="700">Open profile</text>
+    <text x="867" y="748" fill="#72858F" font-size="7">Only a public numeric ID is stored locally. No login or private data access.</text>
+
+    <!-- Reversibility and safety banner -->
+    <rect x="276" y="788" width="1124" height="156" rx="16" fill="#12212A" stroke="#2D5960"/>
+    <rect x="299" y="811" width="42" height="42" rx="13" fill="#15343A" stroke="#2B6872"/>
+    <g color="#77E6D9"><use href="#shield" x="309" y="821" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="359" y="824" fill="#66DCE8" font-size="7" font-family="Consolas, monospace" font-weight="800" letter-spacing="1.1">BUILT AROUND REVERSIBILITY</text>
+    <text x="359" y="849" fill="#E6F0F2" font-size="17" font-weight="650">Your settings stay yours.</text>
+    <text x="359" y="868" fill="#9AAEB7" font-size="8">Before a write, create a timestamped backup and preserve unrelated JSON keys.</text>
+    <text x="359" y="882" fill="#9AAEB7" font-size="8">Canonical allowlist keys are the default; legacy FPS is an optional request.</text>
+    <rect x="1039" y="816" width="129" height="25" rx="8" fill="#0E1B22" stroke="#2A4E54"/>
+    <g color="#71DED4"><use href="#check" x="1050" y="822" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1071" y="832" fill="#B7CACA" font-size="7" font-weight="700">Local files only</text>
+    <rect x="1177" y="816" width="111" height="25" rx="8" fill="#0E1B22" stroke="#2A4E54"/>
+    <g color="#71DED4"><use href="#check" x="1188" y="822" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1209" y="832" fill="#B7CACA" font-size="7" font-weight="700">Restore available</text>
+    <rect x="1039" y="851" width="129" height="25" rx="8" fill="#0E1B22" stroke="#2A4E54"/>
+    <g color="#71DED4"><use href="#check" x="1050" y="857" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1071" y="867" fill="#B7CACA" font-size="7" font-weight="700">No game injection</text>
+    <text x="1177" y="868" fill="#748C97" font-size="7">F5 refreshes local status</text>
+    <text x="300" y="922" fill="#748890" font-size="7" font-family="Consolas, monospace" letter-spacing=".5">DESIGN PREVIEW · SAMPLE STATUS ONLY · NO LIVE GAME METRICS</text>
+  </g>
+</svg>

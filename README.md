@@ -62,14 +62,16 @@ iconography without using Roblox’s official application logo.
 
 ## Windows x64 desktop app previews (V4)
 
-The Rust + Tauri and optional Electron builds use a **purpose-built desktop
-interface**, separate from the GitHub Pages website. They do not reuse the
-website UI, CSS, or scripts. These SVG/PNG previews are illustrative—not screenshots
-captured from a running Windows executable—and example counts are shown.
+The Rust + Tauri and optional Electron builds share a **purpose-built desktop
+interface**, separate from the GitHub Pages website. The refreshed Main screen
+uses an original local geometric illustration, a cool cyan control-deck palette,
+and custom inline SVG icons—no remote design assets. The SVG/PNG previews are
+illustrative, not captures from a running Windows executable; any shown status,
+settings values, or counts are UI examples, not live game measurements.
 
 ![Marktis Optimizer standalone Windows desktop startup screen](rust/desktop-ui/previews/roptimer-desktop-loading-preview.svg)
 
-![Marktis Optimizer standalone Windows desktop Main screen](rust/desktop-ui/previews/roptimer-desktop-main-preview.svg)
+![Refreshed Marktis Optimizer desktop Main screen preview shared by Electron and Tauri](rust/desktop-ui/previews/marktis-electron-main-preview.svg)
 
 ![Marktis Optimizer standalone Windows desktop System tab](rust/desktop-ui/previews/marktis-optimizer-system-preview.svg)
 

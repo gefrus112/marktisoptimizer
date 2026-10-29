@@ -50,23 +50,23 @@ def rendered_html() -> str:
 
 
 def build() -> None:
-    for relative in (Path("index.html"), Path("assets/app.css"), Path("assets/app.js")):
+    for relative in (Path("index.html"), Path("assets/app.css"), Path("assets/app.js"), Path("assets/optimizer-hero.svg")):
         if not (SOURCE / relative).is_file():
             raise SystemExit(f"Desktop UI source is missing: {relative}")
     if FRONTEND.exists():
         shutil.rmtree(FRONTEND)
     (FRONTEND / "assets").mkdir(parents=True, exist_ok=True)
     (FRONTEND / "index.html").write_text(rendered_html(), encoding="utf-8")
-    for name in ("app.css", "app.js"):
+    for name in ("app.css", "app.js", "optimizer-hero.svg"):
         shutil.copy2(SOURCE / "assets" / name, FRONTEND / "assets" / name)
     theme_source = SOURCE / "assets" / "themes"
     if theme_source.is_dir():
         shutil.copytree(theme_source, FRONTEND / "assets" / "themes")
-    print("Built standalone Tauri desktop UI at rust/frontend (local theme assets only; website assets are not bundled).")
+    print("Built standalone Tauri desktop UI at rust/frontend (local app assets only; website assets are not bundled).")
 
 
 def check() -> None:
-    required = [FRONTEND / "index.html", FRONTEND / "assets" / "app.css", FRONTEND / "assets" / "app.js"]
+    required = [FRONTEND / "index.html", FRONTEND / "assets" / "app.css", FRONTEND / "assets" / "app.js", FRONTEND / "assets" / "optimizer-hero.svg"]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
         raise SystemExit("Tauri desktop frontend is missing files: " + ", ".join(missing))
@@ -110,6 +110,8 @@ def check() -> None:
         "read-only Roblox Version Garden": 'id="versionGardenList"',
         "staged Tuning Lab comparison": 'id="tuningDiffList"',
         "manual Benchmark Storyboard": 'id="benchmarkFpsChart"',
+        "custom desktop icon set": 'id="i-cubes"',
+        "local control-deck illustration": 'src="assets/optimizer-hero.svg"',
         "in-app Quick Action Tray": 'id="quickActionTray"',
         "offline troubleshooting guide": 'id="offlineTroubleshooting"',
         "safe open-settings-folder quick action": 'id="quickActionSettingsFolder"',

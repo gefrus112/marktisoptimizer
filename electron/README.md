@@ -2,7 +2,9 @@
 
 Marktis Optimizer keeps its primary Rust + Tauri client. This optional Electron build is
 an alternative Windows shell for the same standalone desktop interface; it is
-not the website and it does not require a `.bat` launcher.
+not the website and it does not require a `.bat` launcher. The shared UI now
+uses a custom cyan control-deck design, locally bundled geometric artwork, and
+original SVG icons. See the updated desktop preview in the [root README](../README.md#windows-x64-desktop-app-previews-v4).
 
 ## Local development
 

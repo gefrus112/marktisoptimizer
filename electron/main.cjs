@@ -52,7 +52,7 @@ function createWindow() {
     show: false,
     center: true,
     icon: APP_ICON,
-    backgroundColor: "#030307",
+    backgroundColor: "#090d13",
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),

@@ -43,7 +43,7 @@
     vfx: true,
     allVersions: true
   };
-  const defaultAppearance = { accent: "mint", iconStyle: "outline", animeTheme: "none" };
+  const defaultAppearance = { accent: "cyan", iconStyle: "outline", animeTheme: "none" };
   const fallbackAllowlist = readEmbeddedAllowlist();
   let bootFinishScheduled = false;
   const bootStartedAt = Date.now();

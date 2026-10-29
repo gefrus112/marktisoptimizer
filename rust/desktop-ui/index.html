@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-accent="mint" data-icon-style="outline">
+<html lang="en" data-accent="cyan" data-icon-style="outline">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,6 +33,10 @@
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5L12 3Z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6L19 3Z"/></symbol>
     <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/><path d="M3.5 9h17"/></symbol>
+    <symbol id="i-cubes" viewBox="0 0 24 24"><path d="m12 2.7 6.1 3.5v7L12 16.7l-6.1-3.5v-7L12 2.7Z"/><path d="m5.9 6.2 6.1 3.6 6.1-3.6M12 9.8v6.9M3 12.2l2.9 1.7v4.2l3.7 2.1 3.1-1.8m8.3-6.2-2.9 1.7v4.2l-3.7 2.1-3.1-1.8M3 12.2l3.2-1.8m14.8 1.8-3.2-1.8"/></symbol>
+    <symbol id="i-tuning" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="10" cy="18" r="2.2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20V4m0 16h18"/><path d="m6 15 4-4 3 2 6-7"/><path d="M16 6h3v3"/></symbol>
+    <symbol id="i-lifebuoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="m5.6 5.6 4.1 4.1m4.6 4.6 4.1 4.1m0-12.8-4.1 4.1m-4.6 4.6-4.1 4.1"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
   </svg>
 
@@ -120,11 +124,13 @@
       <div class="page-scroll" id="pageScroll">
         <section class="view-section" id="mainView" data-view-panel="main" aria-labelledby="mainTitle">
           <div class="page-heading main-heading">
-            <div>
-              <p class="eyebrow">DESKTOP CONTROL CENTER <span class="eyebrow-rule"></span> WINDOWS</p>
+            <div class="main-heading-copy">
+              <p class="eyebrow"><span class="hero-eyebrow-icon"><svg class="icon"><use href="#i-spark"/></svg></span>DESKTOP CONTROL CENTER <span class="eyebrow-rule"></span> WINDOWS</p>
               <h1 id="mainTitle">Your client,<br><em>in your control.</em></h1>
               <p class="heading-copy">A focused workspace for safe, local Roblox settings. Press F5 to refresh install, Player-process, hardware, and local safety status. Game and session details are never read.</p>
+              <div class="main-assurance-row"><span><svg class="icon"><use href="#i-shield"/></svg>LOCAL &amp; REVERSIBLE</span><span><svg class="icon"><use href="#i-network"/></svg>NO GAME TELEMETRY</span></div>
             </div>
+            <div class="main-hero-art" aria-hidden="true"><img src="assets/optimizer-hero.svg" alt="" width="420" height="280" /><span>LOCAL CONTROL CORE</span></div>
             <div class="heading-actions">
               <div class="refresh-status-wrap"><button class="button button-soft" id="quickRefresh" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh local status <kbd>F5</kbd></button><span class="refresh-status-time" id="quickRefreshTime" aria-live="polite">Ready</span></div>
               <button class="button button-primary" id="mainOpenSettings" type="button">Open settings<svg class="icon"><use href="#i-arrow"/></svg></button>
@@ -195,14 +201,14 @@
           </div>
           <section class="panel version-garden-panel" aria-labelledby="versionGardenTitle">
             <div class="version-garden-heading">
-              <div><p class="panel-kicker">READ-ONLY LOCAL INSTALL MAP</p><h2 id="versionGardenTitle">Version Garden</h2><p>See which detected Roblox version folders contain Player, Studio, and a ClientAppSettings file. This view checks file presence only; it does not read your config values.</p></div>
+              <div class="section-heading-lockup"><span class="section-heading-icon garden-icon"><svg class="icon"><use href="#i-cubes"/></svg></span><div><p class="panel-kicker">READ-ONLY LOCAL INSTALL MAP</p><h2 id="versionGardenTitle">Version Garden</h2><p>See which detected Roblox version folders contain Player, Studio, and a ClientAppSettings file. This view checks file presence only; it does not read your config values.</p></div></div>
               <div class="version-garden-tools"><span id="versionGardenSummary" role="status" aria-live="polite">Waiting for the install scan</span><button class="text-action" id="versionGardenRefresh" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Refresh map</button></div>
             </div>
             <div class="version-garden-list" id="versionGardenList"><p class="version-garden-empty">The local version map will appear after Roblox is scanned.</p></div>
           </section>
           <section class="panel tuning-lab-panel" aria-labelledby="tuningLabTitle">
             <div class="tuning-lab-heading">
-              <div><p class="panel-kicker">PROFILE COMPARISON · NO SETTINGS WRITES</p><h2 id="tuningLabTitle">Tuning Lab</h2><p>Compare any two saved profiles—or compare your current staged settings—before choosing one. Differences are highlighted below.</p></div>
+              <div class="section-heading-lockup"><span class="section-heading-icon tuning-icon"><svg class="icon"><use href="#i-tuning"/></svg></span><div><p class="panel-kicker">PROFILE COMPARISON · NO SETTINGS WRITES</p><h2 id="tuningLabTitle">Tuning Lab</h2><p>Compare any two saved profiles—or compare your current staged settings—before choosing one. Differences are highlighted below.</p></div></div>
               <span class="tuning-lab-badge">LOCAL ONLY</span>
             </div>
             <div class="tuning-lab-selects">
@@ -221,9 +227,12 @@
           <section class="panel benchmark-panel" aria-labelledby="benchmarkTitle">
             <div class="benchmark-heading-row">
               <div class="benchmark-heading-copy">
-                <p class="panel-kicker">MANUAL BEFORE / AFTER JOURNAL · SAVED ON THIS DEVICE</p>
-                <h2 id="benchmarkTitle">Compare your own Roblox stats.</h2>
-                <p>In Roblox, press <kbd>Shift</kbd> + <kbd>F5</kbd> and enter the FPS and experience ping shown there. These values are user-reported; Marktis Optimizer never reads game memory or claims a live measurement.</p>
+                <span class="section-heading-icon benchmark-icon"><svg class="icon"><use href="#i-chart"/></svg></span>
+                <div class="benchmark-heading-text">
+                  <p class="panel-kicker">MANUAL BEFORE / AFTER JOURNAL · SAVED ON THIS DEVICE</p>
+                  <h2 id="benchmarkTitle">Compare your own Roblox stats.</h2>
+                  <p>In Roblox, press <kbd>Shift</kbd> + <kbd>F5</kbd> and enter the FPS and experience ping shown there. These values are user-reported; Marktis Optimizer never reads game memory or claims a live measurement.</p>
+                </div>
               </div>
               <span class="benchmark-source-badge"><span></span>USER-ENTERED</span>
             </div>
@@ -308,7 +317,7 @@
             <p class="safety-scan-note" id="safetyScanHelp">Automatic checks run at startup and every 30 seconds while the app is open. This local check matches only exact process names—not paths, command lines, files, or memory—and is not antivirus. A match is not proof of malware; the app never stops processes or removes software. For a real file-based malware scan, open Windows Security and choose Virus &amp; threat protection → Quick scan; Windows controls any remediation.</p>
           </section>
           <section class="panel offline-help-panel" id="offlineTroubleshooting" aria-labelledby="offlineHelpTitle">
-            <div class="offline-help-heading"><div><p class="panel-kicker">BUILT IN · WORKS WITHOUT A NETWORK</p><h2 id="offlineHelpTitle">Offline troubleshooting guide</h2><p>Choose what went wrong for a short, local checklist. No logs, game data, or account information are collected.</p></div><span class="offline-help-emblem"><svg class="icon"><use href="#i-list"/></svg></span></div>
+            <div class="offline-help-heading"><div class="section-heading-lockup"><span class="section-heading-icon help-icon"><svg class="icon"><use href="#i-lifebuoy"/></svg></span><div><p class="panel-kicker">BUILT IN · WORKS WITHOUT A NETWORK</p><h2 id="offlineHelpTitle">Offline troubleshooting guide</h2><p>Choose what went wrong for a short, local checklist. No logs, game data, or account information are collected.</p></div></div><span class="offline-help-badge"><svg class="icon"><use href="#i-check"/></svg>NO NETWORK NEEDED</span></div>
             <div class="offline-help-controls">
               <label for="troubleshootingIssue">What are you troubleshooting?<select class="select-control" id="troubleshootingIssue">
                 <option value="not-detected">Roblox was not detected</option>
